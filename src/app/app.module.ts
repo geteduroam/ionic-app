@@ -7,13 +7,15 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { WelcomePageModule } from '../pages/welcome/welcome.module';
 
 @NgModule({
   declarations: [
-    MyApp,
+    MyApp
   ],
   imports: [
     BrowserModule,
+    WelcomePageModule,
     IonicModule.forRoot(MyApp),
   ],
   bootstrap: [IonicApp],

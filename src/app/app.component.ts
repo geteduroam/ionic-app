@@ -2,12 +2,16 @@ import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
+import { WelcomePage } from '../pages/welcome/welcome';
+
 
 @Component({
   templateUrl: 'app.html'
 })
 
 export class MyApp {
+  rootPage = WelcomePage;
+
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
