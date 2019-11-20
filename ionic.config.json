@@ -1,5 +1,8 @@
 {
-  "name": "ed-geteduroam",
-  "integrations": {},
-  "type": "angular"
+  "name": "geteduroam",
+  "integrations": {
+    "cordova": {},
+    "capacitor": {}
+  },
+  "type": "ionic-angular"
 }
