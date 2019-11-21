@@ -1,8 +1,0 @@
-{
-  "name": "geteduroam",
-  "integrations": {
-    "cordova": {},
-    "capacitor": {}
-  },
-  "type": "ionic-angular"
-}
