@@ -1,20 +1,22 @@
-<!--
-  Generated template for the WelcomePage page.
 
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
-<ion-header>
-  <ion-navbar></ion-navbar>
-</ion-header>
+<ion-content margin padding>
+    <div class="base-content">
+        <!-- TODO: INCLUDE ICON  -->
 
-<ion-content padding>
-    <h2 margin text-center> Eduroam configuration </h2>
+        <h2 margin text-center> Eduroam configuration </h2>
 
-    <p text-center>Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?
+        <p text-center>Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
 
-        <button ion-button text-center align-items-center color="primary"> Re-configure </button>
+        <div class="content-button" text-center>
+            <button class="button-control" ion-button> Re-configure </button>
+        </div>
 
-        <p text-center color="primary">No, thanks</p>
+        <p text-center >No, thanks</p>
 
+        <p>To view others pages</p>
+        <button (click)="navigateTo('profile')" class="button-control" ion-button> Profile page </button>
+        <button (click)="navigateTo('institution')" class="button-control" ion-button> Institution page </button>
+        <button (click)="navigateTo('confirm')" class="button-control" ion-button> Confirm page  </button>
+        <button (click)="navigateTo('error')" class="button-control" ion-button> Error page  </button>
+    </div>
 </ion-content>
