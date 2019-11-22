@@ -1,9 +1,17 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { WelcomePage } from './welcome/welcome';
+import { ConfirmPage } from './confirm/confirm';
+import { ErrorsPage } from './errors/errors';
+import { InstitutionPage } from './institution/institution';
+import { ProfilePage } from './profile/profile';
 
 const Pages = [
-  WelcomePage
+  WelcomePage,
+  InstitutionPage,
+  ProfilePage,
+  ConfirmPage,
+  ErrorsPage
 ];
 
 @NgModule({
