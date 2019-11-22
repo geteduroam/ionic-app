@@ -33,14 +33,14 @@ $app-direction: ltr;
 // to match your app's branding. Ionic uses a Sass map of
 // colors so you can add, rename and remove colors as needed.
 // The "primary" color is the only required color in the map.
-$color-primary: #276FBF;
+
 $colors: (
   primary:    #276FBF,
   secondary:  #1A4D6D,
   tertiary:   #C0E0DE,
-  danger:     #F53D3D,
+  dark:       #404B52,
   light:      #F6F4F3,
-  dark:       #404B52
+  danger:     #F53D3D
 );
 
 
@@ -89,4 +89,11 @@ $colors: (
 @import "roboto";
 @import "noto-sans";
 
-// TODO: include guide-style, import fonts
+@font-face {
+  font-family: 'Franklin Gothic Demi';
+  src: url('../assets/fonts/Franklin Gothic Demi Regular.ttf');
+}
+@font-face {
+  font-family: 'Franklin Gothic Regular';
+  src: url('../assets/fonts/Franklin Gothic Regular.ttf');
+}
