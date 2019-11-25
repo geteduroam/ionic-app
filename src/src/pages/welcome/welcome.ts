@@ -37,7 +37,7 @@ export class WelcomePage {
       case 'catflow':
         await this.navCtrl.push(CatflowPage);
         break;
-      case 'oauth':
+      case 'auth':
         await this.navCtrl.push(AuthPage);
         break;
     }
