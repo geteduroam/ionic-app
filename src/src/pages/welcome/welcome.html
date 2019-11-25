@@ -1,11 +1,14 @@
 
-<ion-content margin padding>
-    <div class="base-content">
-        <!-- TODO: INCLUDE ICON  -->
+<ion-content margin padding text-center>
 
-        <h2 margin text-center> Eduroam configuration </h2>
+    <div class="base-content" text-center>
 
-        <p text-center>Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
+        <div class="header-content">
+            <img src="../../assets/icon/cog-outline.svg" />
+            <h1> Eduroam configuration </h1>
+        </div>
+
+        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
 
         <div class="content-button" text-center>
             <button class="button-control" ion-button> Re-configure </button>
@@ -13,10 +16,16 @@
 
         <p text-center >No, thanks</p>
 
+
+    </div>
+    <div class="other-views">
         <p>To view others pages</p>
         <button (click)="navigateTo('profile')" class="button-control" ion-button> Profile page </button>
         <button (click)="navigateTo('institution')" class="button-control" ion-button> Institution page </button>
         <button (click)="navigateTo('confirm')" class="button-control" ion-button> Confirm page  </button>
+        <button (click)="navigateTo('config')" class="button-control" ion-button> Config Wifi page  </button>
         <button (click)="navigateTo('error')" class="button-control" ion-button> Error page  </button>
+        <button (click)="navigateTo('catflow')" class="button-control" ion-button> CATFlow page  </button>
+        <button (click)="navigateTo('auth')" class="button-control" ion-button> oAuth page  </button>
     </div>
 </ion-content>
