@@ -1,6 +1,7 @@
 // Ionic Variables and Theming. For more info, please see:
 // http://ionicframework.com/docs/theming/
 
+
 // Font path is used to include ionicons,
 // roboto, and noto sans fonts
 $font-path: "../assets/fonts";
@@ -34,11 +35,12 @@ $app-direction: ltr;
 // The "primary" color is the only required color in the map.
 
 $colors: (
-  primary:    #488aff,
-  secondary:  #32db64,
-  danger:     #f53d3d,
-  light:      #f4f4f4,
-  dark:       #222
+  primary:    #276FBF,
+  secondary:  #1A4D6D,
+  tertiary:   #C0E0DE,
+  dark:       #404B52,
+  light:      #F6F4F3,
+  danger:     #F53D3D
 );
 
 
@@ -86,3 +88,12 @@ $colors: (
 
 @import "roboto";
 @import "noto-sans";
+
+@font-face {
+  font-family: 'Franklin Gothic Demi';
+  src: url('../assets/fonts/Franklin Gothic Demi Regular.ttf');
+}
+@font-face {
+  font-family: 'Franklin Gothic Regular';
+  src: url('../assets/fonts/Franklin Gothic Regular.ttf');
+}

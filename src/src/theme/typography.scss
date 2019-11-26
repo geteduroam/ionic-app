@@ -1,0 +1,25 @@
+@import "variables";
+
+h1 {
+  font-family: 'Franklin Gothic Demi', serif;
+  font-size: 16px;
+  color: $colors(primary);
+}
+
+h2 {
+  font-family: 'Franklin Gothic Demi', serif;
+  font-size: 12px;
+  color: $colors(secondary);
+}
+
+.copy {
+  font-family: 'Franklin Gothic Regular', sans-serif;
+  font-size: 16px;
+  color: $colors(secondary);
+}
+
+.notes {
+font-family: 'Franklin Gothic Regular', sans-serif;
+  font-size: 12px;
+  color: $colors(secondary);
+}
