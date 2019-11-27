@@ -1,5 +1,5 @@
 {
-  "name": "GetEduroam",
+  "name": "geteduroam",
   "baseref": "master",
   "tarignore": [
     ".sourcemaps",

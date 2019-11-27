@@ -1,6 +1,6 @@
 {
-  "name": "Eduroam",
-  "short_name": "Eduroam",
+  "name": "geteduroam",
+  "short_name": "geteduroam",
   "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",

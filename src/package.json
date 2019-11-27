@@ -48,7 +48,6 @@
     "ts-jest": "^24.1.0",
     "typescript": "~3.7.2"
   },
-  "description": "An Ionic project",
   "jest": {
     "moduleFileExtensions": [
       "js",
