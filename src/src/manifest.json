@@ -1,6 +1,6 @@
 {
-  "name": "Ionic",
-  "short_name": "Ionic",
+  "name": "geteduroam",
+  "short_name": "geteduroam",
   "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
@@ -9,6 +9,6 @@
     "sizes": "512x512",
     "type": "image/png"
   }],
-  "background_color": "#4e8ef7",
-  "theme_color": "#4e8ef7"
+  "background_color": "#f6f4f3",
+  "theme_color": "#f6f4f3"
 }

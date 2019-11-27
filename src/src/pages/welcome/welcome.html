@@ -1,7 +1,7 @@
 
-<ion-content text-center>
+<ion-content class="container" text-center>
 
-    <div class="base-content" text-center>
+    <div class="base-content">
 
         <div class="header-content">
             <img src="../../assets/icon/cog-outline.svg" />
@@ -10,14 +10,15 @@
 
         <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
 
-        <div class="content-button" text-center>
+        <div class="content-button">
             <button class="button-control" ion-button> Re-configure </button>
         </div>
 
         <p text-center >No, thanks</p>
 
-
     </div>
+
+    <!-- REMOVE THIS LINES -->
     <div class="other-views">
         <p>To view others pages</p>
         <button (click)="navigateTo('profile')" class="button-control" ion-button> Profile page </button>

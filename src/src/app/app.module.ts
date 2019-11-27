@@ -1,7 +1,8 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicApp, IonicModule, IonicErrorHandler, Platform } from 'ionic-angular';
 import { MyApp } from './app.component';
+import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
@@ -29,7 +30,9 @@ import { LetswifiProvider } from '../providers/letswifi/letswifi';
     SplashScreen,
     InAppBrowser,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    LetswifiProvider
+    LetswifiProvider,
+    ScreenOrientation
   ]
 })
-export class AppModule {}
+export class AppModule {
+}

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
+//TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 import { ProfilePage } from '../profile/profile';
 import { ErrorsPage } from '../errors/errors';
 import { ConfirmPage } from '../confirm/confirm';
@@ -17,6 +18,7 @@ export class WelcomePage {
   constructor(public navCtrl: NavController, public navParams: NavParams) {
   }
 
+  // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
   async navigateTo(page: string) {
     switch (page) {
       case 'profile':

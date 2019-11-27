@@ -11,8 +11,5 @@ export class ConfigPage {
   constructor(public navCtrl: NavController, public navParams: NavParams) {
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad ConfigPage');
-  }
 
 }
