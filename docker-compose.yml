@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+    app:
+        container_name: ionic-builder
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+#        user: ${CURRENT_UID}
+#        user: gradle
+        volumes:
+            -  ./src:/home/gradle/myApp
+            -  ~/.gradle:/home/gradle/.gradle
