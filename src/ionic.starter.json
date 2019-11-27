@@ -1,5 +1,5 @@
 {
-  "name": "Tabs Starter",
+  "name": "GetEduroam",
   "baseref": "master",
   "tarignore": [
     ".sourcemaps",
