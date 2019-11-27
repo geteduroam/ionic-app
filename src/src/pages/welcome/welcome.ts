@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
-
-/**
- * Generated class for the WelcomePage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import { NavController, NavParams } from 'ionic-angular';
+//TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
+import { ProfilePage } from '../profile/profile';
+import { ErrorsPage } from '../errors/errors';
+import { ConfirmPage } from '../confirm/confirm';
+import { InstitutionPage } from '../institution/institution';
+import { ConfigPage } from '../config/config';
+import { CatflowPage } from '../catflow/catflow';
+import { AuthPage } from '../auth/auth';
 
 @Component({
   selector: 'page-welcome',
@@ -17,8 +18,31 @@ export class WelcomePage {
   constructor(public navCtrl: NavController, public navParams: NavParams) {
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad WelcomePage');
+  // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
+  async navigateTo(page: string) {
+    switch (page) {
+      case 'profile':
+        await this.navCtrl.push(ProfilePage);
+        break;
+      case 'error':
+        await this.navCtrl.push(ErrorsPage);
+        break;
+      case 'confirm':
+        await this.navCtrl.push(ConfirmPage);
+        break;
+      case 'config':
+        await this.navCtrl.push(ConfigPage);
+        break;
+      case 'institution':
+        await this.navCtrl.push(InstitutionPage);
+        break;
+      case 'catflow':
+        await this.navCtrl.push(CatflowPage);
+        break;
+      case 'auth':
+        await this.navCtrl.push(AuthPage);
+        break;
+    }
   }
 
 }
