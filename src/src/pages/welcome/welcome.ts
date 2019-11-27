@@ -9,6 +9,9 @@ import { ConfigPage } from '../config/config';
 import { CatflowPage } from '../catflow/catflow';
 import { AuthPage } from '../auth/auth';
 
+declare var Capacitor
+const {GetEduroamPlugin} = Capacitor.Plugins;
+
 @Component({
   selector: 'page-welcome',
   templateUrl: 'welcome.html',
@@ -16,6 +19,10 @@ import { AuthPage } from '../auth/auth';
 export class WelcomePage {
 
   constructor(public navCtrl: NavController, public navParams: NavParams) {
+  }
+
+  async configure(){
+    await GetEduroamPlugin.test({ssid: "GT-Internet"})
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
