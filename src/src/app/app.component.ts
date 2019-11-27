@@ -8,10 +8,19 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 @Component({
   templateUrl: 'app.html'
 })
-
+/**
+ * @class MyApp
+ *
+ * @description Init class with rootPage Welcome
+ *
+ **/
 export class MyApp {
   rootPage = WelcomePage;
 
+  /**
+   * @constructor
+   *
+   */
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private screenOrientation: ScreenOrientation) {
 
     platform.ready().then(() => {
@@ -21,6 +30,7 @@ export class MyApp {
       this.screenOrientation.unlock();
       this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
     });
+
   }
 }
 
