@@ -10,7 +10,7 @@ import { CatflowPage } from '../catflow/catflow';
 import { AuthPage } from '../auth/auth';
 
 declare var Capacitor
-const {GetEduroamPlugin} = Capacitor.Plugins;
+const {WifiEapConfigurator} = Capacitor.Plugins;
 
 @Component({
   selector: 'page-welcome',
@@ -22,7 +22,7 @@ export class WelcomePage {
   }
 
   async configure(){
-    await GetEduroamPlugin.test({ssid: "GT-Internet"})
+    await WifiEapConfigurator.test({ssid: "GT-Internet"})
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
