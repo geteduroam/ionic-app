@@ -34,17 +34,17 @@ RUN apt-get update &&  \
     rm "node-v$NODE_VERSION-linux-x64.tar.gz" && \
     npm install -g ionic@"$IONIC_VERSION"
 
-#install apksigner and zipalignsud
-RUN apt-get install -y apksigner
-RUN apt-get install -y zipalign
-
 # Setup environment
 ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/tools:/opt/gradle/gradle-"$GRADLE_VERSION"/bin
 
+#Copy de sorce folder
+COPY src/ /home/gradle/myApp/
 
+#Copy de key from tools to sign the apk
 COPY tools/release-key.jks /release-key.jks
+
+#Copy the entrypoint from tools to let the docker work
 COPY tools/entrypoint.sh /entrypoint.sh
 
-#USER gradle
-
+#Run the entry point
 ENTRYPOINT ["/bin/bash","/entrypoint.sh"]
