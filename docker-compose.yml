@@ -5,9 +5,6 @@ services:
         build:
             context: .
             dockerfile: ./Dockerfile
-#        user: ${CURRENT_UID}
-#        user: gradle
         volumes:
-#            -  ./tools/apk:/home/gradle/myApp
             -  ./tools/apk:/home/gradle/final-apk
             -  ~/.gradle:/home/gradle/.gradle

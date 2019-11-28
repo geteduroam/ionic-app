@@ -10,7 +10,5 @@ fi
 
 cd ..
 echo "Running docker to generate and sign APK for android..."
-#CURRENT_UID=$(id -u):$(id -g) docker-compose up
 docker-compose up
 
-pwd

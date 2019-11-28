@@ -3,13 +3,18 @@
 ## HOW TO BUILD  ##
  
 - Automatic APK generation for Android
-    - Navigate to the folder called [tools](./tools)
+    - Navigate to the folder called [tools](tools)
     - Make sure that both __docker__ and __docker-compose__ are available in the machine.
-        - If needed, [install-docker.sh](./tools/install-docker.sh) will install both.
+        - If needed, [install-docker.sh](tools/install-docker.sh) will install both.
              ```
              ./install-docker.sh
              ```
-    - Execute [generate-apk.sh](./tools/generate-apk.sh) script.
+    - Generate the APK
+        - __Option 1:__ using make command of [Makefile](tools/Makefile):
+        ```
+        make generate-apk
+        ```
+        - __Option 2:__ Execute [generate-apk.sh](tools/generate-apk.sh) script.
         ```
         ./generate-apk.sh
         ```
@@ -28,8 +33,7 @@
        ```
     - Android
         - Android specific requirements
-            - Android-SDK
-            - Gradle
+            - [Android-SDK](https://developer.android.com/studio#downloads) with build-tools. $ANDROID_HOME might be required
         - Create android folder and config gradle
           ```
           npx cap add android
