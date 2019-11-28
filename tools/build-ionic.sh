@@ -9,8 +9,8 @@ if [ ! -d ~/.gradle ]; then
 fi
 
 cd ..
-echo "Building application..."
+echo "Running docker to generate and sign APK for android..."
 #CURRENT_UID=$(id -u):$(id -g) docker-compose up
 docker-compose up
 
-cd ./src/android/app/build/outputs/apk/debug/
+pwd
