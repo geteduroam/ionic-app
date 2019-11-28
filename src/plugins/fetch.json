@@ -1,0 +1,10 @@
+{
+  "cordova-plugin-screen-orientation": {
+    "source": {
+      "type": "registry",
+      "id": "cordova-plugin-screen-orientation@^3.0.2"
+    },
+    "is_top_level": true,
+    "variables": {}
+  }
+}
