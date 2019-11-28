@@ -8,5 +8,6 @@ services:
 #        user: ${CURRENT_UID}
 #        user: gradle
         volumes:
-            -  ./src:/home/gradle/myApp
+#            -  ./tools/apk:/home/gradle/myApp
+            -  ./tools/apk:/home/gradle/final-apk
             -  ~/.gradle:/home/gradle/.gradle
