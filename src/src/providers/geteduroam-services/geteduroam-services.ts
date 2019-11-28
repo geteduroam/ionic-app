@@ -3,10 +3,10 @@ import { Injectable } from '@angular/core';
 
 /**
  *  @class GeteduroamServices provider
- *
  */
 @Injectable()
 export class GeteduroamServices {
+
   private readonly url = "https://demo.eduroam.no/";
 
   constructor(public http: HttpClient) {
@@ -16,7 +16,7 @@ export class GeteduroamServices {
 
   /**
    * This method is to work wih the discovery method:
-   * @link{https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
    *
    */
   discovery() {
@@ -30,7 +30,7 @@ export class GeteduroamServices {
 
   /**
    * This method is to work with the oAuthEndpoint method:
-   * @link{https://github.com/Uninett/lets-wifi/blob/master/API.md#authorization-endpoint}
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#authorization-endpoint}
    *
    * @param data
    */
@@ -59,7 +59,7 @@ export class GeteduroamServices {
 
   /**
    * This method is to work with the token endpoint method:
-   * @link{https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}
    *
    * @param {string} code
    */
@@ -83,7 +83,7 @@ export class GeteduroamServices {
 
   /**
    * This method is to work with the generator endpoint method:
-   * @link{https://github.com/Uninett/lets-wifi/blob/master/API.md#generator-endpoint}
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#generator-endpoint}
    *
    * @param data
    */
@@ -97,5 +97,5 @@ export class GeteduroamServices {
       console.log('Method get generator: ', res);
 
     });
-    }
+  }
 }

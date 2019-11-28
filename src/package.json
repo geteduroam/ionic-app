@@ -9,7 +9,7 @@
     "build": "ionic-app-scripts build",
     "lint": "ionic-app-scripts lint",
     "test": "jest",
-    "doc": "compodoc -p tsconfig.json"
+    "doc": "compodoc -p tsconfig.json --theme vagrant"
   },
   "dependencies": {
     "@angular/animations": "5.2.11",

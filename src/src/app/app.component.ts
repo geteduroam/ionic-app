@@ -14,7 +14,7 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
  * @description Init class with rootPage Welcome
  *
  **/
-export class MyApp {
+export class GeteduroamApp {
   rootPage = WelcomePage;
 
   /**
