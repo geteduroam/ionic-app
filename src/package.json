@@ -8,7 +8,8 @@
     "clean": "ionic-app-scripts clean",
     "build": "ionic-app-scripts build",
     "lint": "ionic-app-scripts lint",
-    "test": "jest"
+    "test": "jest",
+    "doc": "compodoc -p tsconfig.json"
   },
   "dependencies": {
     "@angular/animations": "5.2.11",
@@ -42,6 +43,7 @@
     "zone.js": "0.9.1"
   },
   "devDependencies": {
+    "@compodoc/compodoc": "^1.1.11",
     "@ionic/app-scripts": "^3.2.4",
     "@types/jest": "^24.0.23",
     "jest": "^24.9.0",
