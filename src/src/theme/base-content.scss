@@ -1,15 +1,35 @@
 ion-content {
+  background-color: #f6f4f3 !important;
+
+  .bar-upped {
+    position: relative;
+    top: 16px;
+    height: 10px;
+    background-color: #276FBF;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+  }
 
   .base-content {
     margin: 2rem 0;
     box-shadow: 0 0 7px 1px rgba(0, 0, 0, 0.62);
+    background-color: white;
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+
+    .text-down {
+      color: #276FBF;
+      font-family: 'Franklin Gothic Demi', serif;
+      font-size: 12px;
+      margin-bottom: 40px;
+    }
   }
 
   .header-content {
 
     img {
-      width: 12px;
-      height: 12px;
+      width: 57px;
+      height: 65px;
     }
 
     h1 {
