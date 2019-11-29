@@ -8,6 +8,10 @@ import { ProfilePage } from './profile/profile';
 import { ConfigPage } from './config/config';
 import { AuthPage } from './auth/auth';
 import { CatflowPage } from './catflow/catflow';
+import { ConfigurationScreen } from "./configScreen/configScreen";
+import { WifiConfiguration} from "./wifiConfiguration/wifiConfiguration";
+import { WifiConfirmation} from "./wifiConfirmation/wifiConfirmation";
+
 
 const Pages = [
   WelcomePage,
@@ -17,7 +21,10 @@ const Pages = [
   ConfigPage,
   AuthPage,
   CatflowPage,
-  ErrorsPage
+  ErrorsPage,
+  ConfigurationScreen,
+  WifiConfiguration,
+  WifiConfirmation
 ];
 
 @NgModule({
