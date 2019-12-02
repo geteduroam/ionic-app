@@ -1,9 +1,15 @@
 ion-content {
   background-color: #f6f4f3 !important;
 
+  .logo {
+    position: relative;
+    top: 20px;
+    height: 40px;
+    width: 100px;
+  }
   .bar-upped {
     position: relative;
-    top: 16px;
+    top: 9%;
     height: 10px;
     background-color: #276FBF;
     border-top-left-radius: 14px;
@@ -11,6 +17,8 @@ ion-content {
   }
 
   .base-content {
+    position: relative;
+    top: 7%;
     margin: 2rem 0;
     box-shadow: 0 0 7px 1px rgba(0, 0, 0, 0.62);
     background-color: white;
@@ -39,6 +47,5 @@ ion-content {
     }
   }
 }
-
 
 
