@@ -1,0 +1,8 @@
+page-welcome {
+  background-color: #f6f4f3 !important;
+
+  .other-views {
+    width: auto;
+    margin: 0 auto;
+  }
+}
