@@ -11,7 +11,6 @@ export class GeteduroamServices {
 
   constructor(public http: HttpClient) {
 
-    this.discovery()
   }
 
   /**
@@ -19,13 +18,8 @@ export class GeteduroamServices {
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
    *
    */
-  discovery() {
-
-    this.http.get(`${this.url}/authorize.php`, { }).subscribe((res) => {
-      console.log('Method get from provider: ',res);
-      this.buildAuthUrl(res);
-    });
-
+  async discovery() {
+    return this.http.get(`http://discovery.geteduroam.no/discovery-v1.json`, { });
   }
 
   /**

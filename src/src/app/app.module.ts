@@ -10,6 +10,8 @@ import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { PagesModule } from '../pages/pages.module';
 import { GeteduroamServices } from '../providers/geteduroam-services/geteduroam-services';
+import {TestPageModule} from "../pages/test/test.module";
+import {HttpClientModule} from "@angular/common/http";
 
 @NgModule({
   declarations: [
@@ -17,8 +19,10 @@ import { GeteduroamServices } from '../providers/geteduroam-services/geteduroam-
   ],
   imports: [
     BrowserModule,
+      TestPageModule,
     PagesModule,
     IonicModule.forRoot(GeteduroamApp),
+    HttpClientModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -32,6 +36,9 @@ import { GeteduroamServices } from '../providers/geteduroam-services/geteduroam-
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     GeteduroamServices,
     ScreenOrientation
+  ],
+  exports:[
+    HttpClientModule
   ]
 })
 export class AppModule {
