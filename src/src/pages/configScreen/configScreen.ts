@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
-import {WifiConfiguration} from "../wifiConfiguration/wifiConfiguration";
+import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 //TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 
 
@@ -10,14 +10,20 @@ import {WifiConfiguration} from "../wifiConfiguration/wifiConfiguration";
 })
 export class ConfigurationScreen {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  profiles: any;
+  instances: any;
+
+  constructor(public navCtrl: NavController, public navParams: NavParams, private geteduroamServices: GeteduroamServices) {
+
   }
 
-  // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-  async navigateTo(page: string) {
-    if (page === 'wifiConfiguration') {
-      await this.navCtrl.push(WifiConfiguration);
-    }
-  }
+  async ionViewDidLoad() {
 
+    const response = await this.geteduroamServices.discovery();
+
+    this.instances = response.instances;
+
+    this.profiles = response.instances.profiles;
+    console.log('response', this.profiles);
+  }
 }

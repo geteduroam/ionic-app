@@ -8,19 +8,23 @@
             <h1> Eduroam configuration screen</h1>
         </div>
 
-        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
+        <ion-list *ngIf="!!instances && instances.length > 0">
+            <ion-item>
+                <ion-select interface="popover" multiple="false" placeholder="Select a Institution" >
+                    <ion-option *ngFor="let institution of instances" value="{{institution.id}}">{{institution.name}}</ion-option>
+                </ion-select>
+            </ion-item>
+        </ion-list>
 
-        <div class="content-button">
-            <button class="button-control" ion-button> Re-configure </button>
-        </div>
-
-        <p text-center >No, thanks</p>
+        <ion-list *ngIf="!!profiles && profiles.length > 0">
+            <ion-item>
+                <ion-select placeholder="Select a Profile" >
+                    <ion-option *ngFor="let profile of profiles" value="{{profile.id}}">{{profile.name}}</ion-option>
+                </ion-select>
+            </ion-item>
+        </ion-list>
 
     </div>
 
-    <!-- REMOVE THIS LINES -->
-    <div class="other-views">
-        <p>To view others pages</p>
-        <button (click)="navigateTo('wifiConfiguration')" class="button-control" ion-button> Wifi Configuration </button>
-    </div>
+
 </ion-content>
