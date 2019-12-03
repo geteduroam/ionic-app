@@ -4,27 +4,28 @@
     <div class="base-content">
 
         <div class="header-content">
-            <img src="../../assets/icon/cog-outline.svg" />
+            <img alt="setting" src="../../assets/icon/cog-outline.svg"/>
             <h1> Eduroam configuration screen</h1>
         </div>
 
-        <ion-list *ngIf="!!instances && instances.length > 0">
-            <ion-item>
-                <ion-select interface="popover" multiple="false" placeholder="Select a Institution" >
-                    <ion-option *ngFor="let institution of instances" value="{{institution.id}}">{{institution.name}}</ion-option>
-                </ion-select>
-            </ion-item>
+        <ion-label text-left>Institution</ion-label>
+        <ion-searchbar (ionClear)="toogleProfile()" (ionInput)="changeInstitution($event)" [(ngModel)]="stringSearch" animated placeholder="Select an Institution">
+        </ion-searchbar>
+
+        <ion-list *ngIf="show">
+            <ion-item (click)="selectInstitution($event.target)" *ngFor="let item of instances" ion-item>{{item.name}}</ion-item>
         </ion-list>
 
-        <ion-list *ngIf="!!profiles && profiles.length > 0">
+        <ion-list *ngIf="showProfile">
+            <ion-label text-left>Profile</ion-label>
             <ion-item>
-                <ion-select placeholder="Select a Profile" >
+                <ion-select (ionChange)="selectProfile($event)" [(ngModel)]="profiles.name" interface="popover" name="selectProfile" placeholder="Select a Profile">
                     <ion-option *ngFor="let profile of profiles" value="{{profile.id}}">{{profile.name}}</ion-option>
                 </ion-select>
             </ion-item>
         </ion-list>
 
+        <button (click)="navigateTo()" class="button-control" ion-button> Next </button>
+
     </div>
-
-
 </ion-content>

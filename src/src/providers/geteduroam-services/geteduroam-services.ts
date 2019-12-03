@@ -23,7 +23,7 @@ export class GeteduroamServices {
     const headers = {};
 
     const response = await this.http.get(url, params, headers);
-    console.log(response);
+
     return JSON.parse(response.data);
 
   }
