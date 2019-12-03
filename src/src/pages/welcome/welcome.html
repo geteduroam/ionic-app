@@ -1,21 +1,25 @@
 
-<script src="../../../../../ionic-agenda/src/pages/about/about.ts"></script>
-<ion-content class="container" text-center>
+<ion-content class="container" text-center >
+    <img class="logo" margin margin-top src="../../assets/imgs/logo.png">
 
-    <div class="base-content">
+    <div class="bar-upped" margin></div>
+    <div class="base-content" margin padding>
 
         <div class="header-content">
             <img alt="setting" src="../../assets/icon/cog-outline.svg"/>
             <h1> Eduroam configuration </h1>
         </div>
 
-        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
+        <p class="copy" margin padding>
+            Hi,It seems you have a Eduroam configured in your device.
+            Do you want to reconfigure it?
+        </p>
 
         <div class="content-button">
             <button (click)="navigateTo()" class="button-control" ion-button> Re-configure </button>
         </div>
 
-        <p text-center >No, thanks</p>
+        <p class="text-down" text-center >No, thanks</p>
 
     </div>
 </ion-content>
