@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, Platform } from 'ionic-angular';
-//TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 import {ConfigurationScreen} from "../configScreen/configScreen";
-
 @Component({
   selector: 'page-welcome',
   templateUrl: 'welcome.html',
@@ -10,6 +8,7 @@ import {ConfigurationScreen} from "../configScreen/configScreen";
 export class WelcomePage {
 
   constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams) {
+
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES

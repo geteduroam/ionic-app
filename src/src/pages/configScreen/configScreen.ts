@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { WifiConfiguration } from '../wifiConfiguration/wifiConfiguration';
-import { CatflowPage } from '../oauthflow/catflow';
+
 import { ProfilePage } from '../profile/profile';
+import { Oauthflow } from '../oauthflow/oauthflow';
 //TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 
 
@@ -50,8 +51,9 @@ export class ConfigurationScreen implements OnInit {
 
       if (res.name.toString() === this.stringSearch) {
         this.profiles = res.profiles;
-        this.showProfile = true;
-
+        if (this.profiles.length > 1) {
+          this.showProfile = true;
+        }
       }
     })
   };
@@ -64,7 +66,7 @@ export class ConfigurationScreen implements OnInit {
   }
 
   navigateTo(profile) {
-    !!profile.oauth ? this.navCtrl.push(CatflowPage) : this.navCtrl.push(ProfilePage, {profile});
+    !!profile.oauth ? this.navCtrl.push(ProfilePage, {profile}) : this.navCtrl.push(Oauthflow) ;
 
   }
 
