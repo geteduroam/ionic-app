@@ -8,10 +8,14 @@ import { ConfigurationScreen } from "./configScreen/configScreen";
 import { WifiConfiguration} from "./wifiConfiguration/wifiConfiguration";
 import { WifiConfirmation} from "./wifiConfirmation/wifiConfirmation";
 import { FormsModule } from '@angular/forms';
+import { ProfilePage } from './profile/profile';
+import { Oauthflow } from './oauthflow/oauthflow';
 
 const Pages = [
   WelcomePage,
   ErrorsPage,
+  ProfilePage,
+  Oauthflow,
   ConfigurationScreen,
   WifiConfiguration,
   WifiConfirmation

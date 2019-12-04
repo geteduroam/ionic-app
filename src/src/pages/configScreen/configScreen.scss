@@ -1,7 +1,14 @@
 page-config-screen {
+
   ion-label.label-conf {
     color: #1a4d6d;
     font-weight: bold;
     margin-left: 5%;
+  }
+
+  // * Ios style custom
+  .searchbar-input {
+    border: 0 !important;
+    box-shadow: none !important;
   }
 }

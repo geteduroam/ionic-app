@@ -30,7 +30,7 @@
         </ion-list>
 
         <div class="content-button">
-            <button (click)="navigateTo()" class="button-control" ion-button> Next </button>
+            <button (click)="navigateTo(profile)" [disabled]="!profile"  class="button-control" ion-button> Next </button>
         </div>
 
     </div>

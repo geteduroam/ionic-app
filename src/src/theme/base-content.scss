@@ -48,6 +48,15 @@ ion-content {
     }
   }
 
+  .content-button {
+    position: relative;
+    top: 30%;
+
+    button {
+      font-weight: bold;
+      width: 150px;
+    }
+  }
   //---------------------------
   // Searchbar custom style
   //---------------------------
@@ -58,14 +67,22 @@ ion-content {
       -moz-border-radius: 5px 5px 5px 5px !important;
       -webkit-border-radius: 5px 5px 5px 5px !important;
       border: 0.5px solid #787b7d !important;
-      --background: green;
+      --background: none;
+
       //---------------------------
       // Icon searchbar custom style
       //---------------------------
       div.searchbar-search-icon {
         background-size: 28px !important;
       }
+      // * Ios style custom
+      .searchbar-ios > .searchbar-input{
+        border: 0 !important;
+        box-shadow: none !important;
+      }
     }
+
+
   }
 }
 

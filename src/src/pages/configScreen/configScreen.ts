@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { WifiConfiguration } from '../wifiConfiguration/wifiConfiguration';
+import { CatflowPage } from '../oauthflow/catflow';
+import { ProfilePage } from '../profile/profile';
 //TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 
 
@@ -16,20 +18,28 @@ export class ConfigurationScreen implements OnInit {
   show = false;
   showProfile = false;
   stringSearch: string = '';
+  profile: any;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private geteduroamServices: GeteduroamServices) {
     //TODO: LOADING
-
   }
 
   toogleProfile() {
     this.stringSearch = '';
     this.showProfile = false;
     this.show = false;
+    this.profile = undefined;
   }
 
   selectProfile($event) {
-    console.log('select Profile', $event);
+    let idProfile = $event;
+
+    this.profiles.forEach((res: any) => {
+
+      if (res.id === idProfile.toString()) {
+        this.profile = res;
+      }
+    })
   }
 
   selectInstitution($event) {
@@ -47,20 +57,24 @@ export class ConfigurationScreen implements OnInit {
   };
 
   changeInstitution(event) {
-    console.log('changeInstitution', event)
     if (event.textContent === '') {
       this.show = false;
     }
     this.show = true;
   }
 
-  navigateTo() {
-    this.navCtrl.push(WifiConfiguration)
+  navigateTo(profile) {
+    !!profile.oauth ? this.navCtrl.push(CatflowPage) : this.navCtrl.push(ProfilePage, {profile});
+
   }
 
   async ngOnInit() {
     const response = await this.geteduroamServices.discovery();
     this.instances = response.instances;
     this.profiles = response.instances.profiles;
+
+    if (this.profiles.length === 1) {
+      this.profile = this.profiles;
+    }
   }
 }
