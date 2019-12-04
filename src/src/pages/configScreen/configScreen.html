@@ -1,31 +1,37 @@
 
 <ion-content class="container" text-center>
+    <img alt="icon-setting" class="logo" margin margin-top src="../../assets/imgs/logo.png">
 
-    <div class="base-content">
+    <div class="bar-upped" margin></div>
+    <div class="base-content" margin padding>
 
         <div class="header-content">
             <img alt="setting" src="../../assets/icon/cog-outline.svg"/>
-            <h1> Eduroam configuration screen</h1>
+            <h1> Eduroam configuration </h1>
         </div>
 
-        <ion-label text-left>Institution</ion-label>
-        <ion-searchbar (ionClear)="toogleProfile()" (ionInput)="changeInstitution($event)" [(ngModel)]="stringSearch" animated placeholder="Select an Institution">
+        <ion-label class="label-conf" no-margin text-left>Institution</ion-label>
+        <ion-searchbar (ionClear)="toogleProfile()" (ionInput)="changeInstitution($event)" [(ngModel)]="stringSearch"
+                       animated class="searchbar-input" placeholder="Select an Institution">
         </ion-searchbar>
 
         <ion-list *ngIf="show">
-            <ion-item (click)="selectInstitution($event.target)" *ngFor="let item of instances" ion-item>{{item.name}}</ion-item>
+            <ion-item  (click)="selectInstitution($event.target)" *ngFor="let item of instances" ion-item>{{item.name}}</ion-item>
         </ion-list>
 
-        <ion-list *ngIf="showProfile">
-            <ion-label text-left>Profile</ion-label>
+        <ion-list *ngIf="showProfile && profiles.length > 1">
+            <ion-label class="label-conf" no-margin text-left>Profile</ion-label>
             <ion-item>
-                <ion-select (ionChange)="selectProfile($event)" [(ngModel)]="profiles.name" interface="popover" name="selectProfile" placeholder="Select a Profile">
+                <ion-select (ionChange)="selectProfile($event)" [(ngModel)]="profiles.name" interface="popover"
+                            name="selectProfile" placeholder="Select a Profile">
                     <ion-option *ngFor="let profile of profiles" value="{{profile.id}}">{{profile.name}}</ion-option>
                 </ion-select>
             </ion-item>
         </ion-list>
 
-        <button (click)="navigateTo()" class="button-control" ion-button> Next </button>
+        <div class="content-button">
+            <button (click)="navigateTo()" class="button-control" ion-button> Next </button>
+        </div>
 
     </div>
 </ion-content>

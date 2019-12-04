@@ -19,6 +19,7 @@ ion-content {
   .base-content {
     position: relative;
     top: 7%;
+    height: 70%;
     margin: 2rem 0;
     box-shadow: 0 0 7px 1px rgba(0, 0, 0, 0.62);
     background-color: white;
@@ -44,6 +45,26 @@ ion-content {
       color: #276FBF;
       font-family: 'Franklin Gothic Demi', serif;
       font-size: 16px;
+    }
+  }
+
+  //---------------------------
+  // Searchbar custom style
+  //---------------------------
+  ion-searchbar {
+    input {
+      box-shadow: none !important;
+      border-radius: 5px 5px 5px 5px !important;
+      -moz-border-radius: 5px 5px 5px 5px !important;
+      -webkit-border-radius: 5px 5px 5px 5px !important;
+      border: 0.5px solid #787b7d !important;
+      --background: green;
+      //---------------------------
+      // Icon searchbar custom style
+      //---------------------------
+      div.searchbar-search-icon {
+        background-size: 28px !important;
+      }
     }
   }
 }

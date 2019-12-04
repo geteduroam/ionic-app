@@ -1,8 +1,7 @@
-page-welcome {
-  background-color: #f6f4f3 !important;
-
-  .other-views {
-    width: auto;
-    margin: 0 auto;
+page-config-screen {
+  ion-label.label-conf {
+    color: #1a4d6d;
+    font-weight: bold;
+    margin-left: 5%;
   }
 }

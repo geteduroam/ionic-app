@@ -6,7 +6,7 @@ import { WifiConfiguration } from '../wifiConfiguration/wifiConfiguration';
 
 
 @Component({
-  selector: 'page-welcome',
+  selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
 export class ConfigurationScreen implements OnInit {
