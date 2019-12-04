@@ -20,6 +20,8 @@ export class ConfigurationScreen implements OnInit {
   showProfile = false;
   stringSearch: string = '';
   profile: any;
+  recommend = false;
+  recommendName = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private geteduroamServices: GeteduroamServices) {
     //TODO: LOADING
@@ -30,11 +32,13 @@ export class ConfigurationScreen implements OnInit {
     this.showProfile = false;
     this.show = false;
     this.profile = undefined;
+    this.recommend = false;
+    this.recommendName = '';
   }
 
   selectProfile($event) {
     let idProfile = $event;
-
+    console.log(idProfile);
     this.profiles.forEach((res: any) => {
 
       if (res.id === idProfile.toString()) {
@@ -50,14 +54,34 @@ export class ConfigurationScreen implements OnInit {
     this.instances.forEach((res: any) => {
 
       if (res.name.toString() === this.stringSearch) {
+
         this.profiles = res.profiles;
+
         if (this.profiles.length > 1) {
+          this.recommendProfile(this.profiles);
           this.showProfile = true;
+
+        } else if (this.profiles.length === 1) {
+
+          this.profile = this.profiles;
         }
       }
     })
   };
 
+  recommendProfile(profile) {
+
+    profile.forEach(res => {
+
+      if (!!res.default) {
+        this.recommend = true;
+        this.profile = res;
+        this.recommendName = res.name;
+        this.selectProfile(this.profile.id);
+      }
+    });
+
+  }
   changeInstitution(event) {
     if (event.textContent === '') {
       this.show = false;
@@ -75,8 +99,5 @@ export class ConfigurationScreen implements OnInit {
     this.instances = response.instances;
     this.profiles = response.instances.profiles;
 
-    if (this.profiles.length === 1) {
-      this.profile = this.profiles;
-    }
   }
 }
