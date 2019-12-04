@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, Platform } from 'ionic-angular';
 //TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 import {ConfigurationScreen} from "../configScreen/configScreen";
 
@@ -9,7 +9,7 @@ import {ConfigurationScreen} from "../configScreen/configScreen";
 })
 export class WelcomePage {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams) {
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
@@ -17,4 +17,7 @@ export class WelcomePage {
       await this.navCtrl.push(ConfigurationScreen);
   }
 
+  exitApp() {
+    this.platform.exitApp();
+  }
 }

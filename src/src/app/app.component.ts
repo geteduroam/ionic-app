@@ -30,7 +30,6 @@ export class GeteduroamApp {
       this.screenOrientation.unlock();
       this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
     });
-
   }
 }
 
