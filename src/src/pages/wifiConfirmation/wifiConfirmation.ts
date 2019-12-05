@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
-//TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-import {WelcomePage} from "../welcome/welcome";
+import { NavController, NavParams, Platform } from 'ionic-angular';
+
 
 @Component({
   selector: 'page-wifi-confirm',
@@ -9,12 +8,12 @@ import {WelcomePage} from "../welcome/welcome";
 })
 export class WifiConfirmation {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private platform: Platform) {
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-  async navigateTo() {
-      await this.navCtrl.push(WelcomePage);
+  exitApp() {
+      this.platform.exitApp();
   }
 
 }

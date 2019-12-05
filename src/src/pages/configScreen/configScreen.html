@@ -11,7 +11,7 @@
         </div>
 
         <ion-label class="label-conf" no-margin text-left>Institution</ion-label>
-        <ion-searchbar (ionClear)="toogleProfile()" (ionInput)="changeInstitution($event)" [(ngModel)]="stringSearch"
+        <ion-searchbar (ionClear)="toogleProfile()" (ionInput)="changeInstitution($event)" [(ngModel)]="nameInstitution"
                        animated class="searchbar-input" placeholder="Select an Institution">
         </ion-searchbar>
 
@@ -20,16 +20,16 @@
         </ion-list>
 
         <ion-label *ngIf="showProfile" class="label-conf" no-margin padding-top text-left >Profile</ion-label>
-        <!-- TODO: Fix error to select Profile -->
-        <ion-select (ionChange)="selectProfile($event)" *ngIf="showProfile" [(ngModel)]="profiles.name"
-                    class="select-profile" name="selectProfile" placeholder="Select a Profile" text-left>
-            <ion-option *ngFor="let profile of profiles" value="{{profile.id}}">{{profile.name}}</ion-option>
-        </ion-select>
-
-        <p *ngIf="recommend">{{stringSearch.split(' ')[0]}} recommends to use {{recommendName}}</p>
+        <ion-item *ngIf="showProfile" no-border no-margin no-padding>
+            <ion-select (ionChange)="selectProfile($event)"  [(ngModel)]="profiles.name" [selectedText]="selectedProfile"
+                        class="select-profile" name="selectProfile" placeholder="Select a Profile" text-left>
+                <ion-option *ngFor="let profile of profiles" value="{{profile.id}}">{{profile.name}}</ion-option>
+            </ion-select>
+        </ion-item>
+        <p *ngIf="recommend">{{nameInstitution}} recommends to use {{recommendName}}</p>
 
         <div class="content-button" margin padding>
-            <button (click)="navigateTo(profile)" [disabled]="!profile"  class="button-control" ion-button> Next </button>
+            <button (click)="navigateTo(profile)" [disabled]="!profile"  class="button-control" ion-button text-capitalize> Next </button>
         </div>
 
     </div>

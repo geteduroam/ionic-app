@@ -41,7 +41,11 @@ page-config-screen {
 
     }
   }
+  ion-item .item-inner {
+    padding-right: 0 !important;
+    border-bottom: 0 !important;
 
+  }
   //---------------------------
   // ion-select custom style
   //---------------------------

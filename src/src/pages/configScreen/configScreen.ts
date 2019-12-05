@@ -18,48 +18,63 @@ export class ConfigurationScreen implements OnInit {
   instances: any;
   show = false;
   showProfile = false;
-  stringSearch: string = '';
+  nameInstitution: string = '';
   profile: any;
   recommend = false;
   recommendName = '';
+  selectedProfile = '';
+  profileName= '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private geteduroamServices: GeteduroamServices) {
     //TODO: LOADING
   }
 
   toogleProfile() {
-    this.stringSearch = '';
+    this.nameInstitution = '';
     this.showProfile = false;
     this.show = false;
     this.profile = undefined;
     this.recommend = false;
     this.recommendName = '';
+    this.selectedProfile = '';
+
   }
 
   selectProfile($event) {
     let idProfile = $event;
-    console.log(idProfile);
+
     this.profiles.forEach((res: any) => {
 
       if (res.id === idProfile.toString()) {
+        this.selectedProfile = res.name;
         this.profile = res;
       }
-    })
+    });
+    this.recommendProfile(this.profile)
   }
 
   selectInstitution($event) {
-    this.stringSearch = $event.textContent;
+    this.nameInstitution = $event.textContent;
     this.show = false;
 
     this.instances.forEach((res: any) => {
 
-      if (res.name.toString() === this.stringSearch) {
+      if (res.name.toString() === this.nameInstitution) {
 
         this.profiles = res.profiles;
 
         if (this.profiles.length > 1) {
-          this.recommendProfile(this.profiles);
           this.showProfile = true;
+
+          this.profiles.forEach(res => {
+
+            if (!!res.default) {
+              this.recommend = true;
+              this.profile = res;
+              this.recommendName = res.name;
+              this.selectProfile(this.profile.id);
+            }
+          });
 
         } else if (this.profiles.length === 1) {
 
@@ -70,19 +85,21 @@ export class ConfigurationScreen implements OnInit {
   };
 
   recommendProfile(profile) {
+    console.log('profile', profile);
 
-    profile.forEach(res => {
-
-      if (!!res.default) {
+      if (!!profile.default) {
         this.recommend = true;
-        this.profile = res;
-        this.recommendName = res.name;
+        this.profile = profile;
+        this.selectedProfile = profile.name;
+        this.recommendName = profile.name;
         this.selectProfile(this.profile.id);
       }
-    });
+
 
   }
+
   changeInstitution(event) {
+    this.toogleProfile();
     if (event.textContent === '') {
       this.show = false;
     }
