@@ -30,7 +30,7 @@ export class ConfigurationScreen implements OnInit {
   }
 
   toogleProfile() {
-    this.nameInstitution = '';
+    this.selectedProfile = '';
     this.showProfile = false;
     this.show = false;
     this.profile = undefined;
