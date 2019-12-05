@@ -36,7 +36,6 @@ export class ConfigurationScreen implements OnInit {
     this.profile = undefined;
     this.recommend = false;
     this.recommendName = '';
-    this.selectedProfile = '';
 
   }
 
@@ -107,7 +106,7 @@ export class ConfigurationScreen implements OnInit {
   }
 
   navigateTo(profile) {
-    !!profile.oauth ? this.navCtrl.push(ProfilePage, {profile}) : this.navCtrl.push(Oauthflow) ;
+    !!profile.oauth ? this.navCtrl.push(Oauthflow) : this.navCtrl.push(ProfilePage, {profile});
 
   }
 
