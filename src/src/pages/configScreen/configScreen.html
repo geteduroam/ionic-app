@@ -14,19 +14,9 @@
         <ion-searchbar (ionFocus)="getAllItems()" (ionClear)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
                        animated class="searchbar-input" placeholder="Select an Institution">
         </ion-searchbar>
-
         <ion-list *ngIf="!!filteredInstances && filteredInstances.length > 0 && !!showInstanceItems">
             <ion-item  (click)="selectInstitution(institution)" *ngFor="let institution of filteredInstances" ion-item>{{institution.name}}</ion-item>
         </ion-list>
-
-
-<!--        <ion-virtual-scroll *ngIf="!!filteredInstances && filteredInstances.length > 0 && !!showInstanceItems" [items]="filteredInstances">-->
-<!--            <ion-item  (click)="selectInstitution(institutionAux)" *virtualItem="let institutionAux" ion-item>{{institutionAux.name}}</ion-item>-->
-<!--        </ion-virtual-scroll>-->
-
-<!--        <ion-virtual-scroll *ngIf="!!filteredInstances && filteredInstances.length > 0 && !!showInstanceItems" [attr.itemscope]="filteredInstances">-->
-<!--            <ion-item (click)="selectInstitution(institutionAux)" *virtualItem="let institutionAux" ion-item>{{institutionAux.name}}</ion-item>-->
-<!--        </ion-virtual-scroll>-->
 
         <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" no-margin padding-top text-left >Profile</ion-label>
         <ion-item *ngIf="!!profiles && profiles.length > 1" no-border no-margin no-padding>
