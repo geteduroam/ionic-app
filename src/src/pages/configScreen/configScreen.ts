@@ -1,109 +1,113 @@
-import { Component, OnInit } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import {Component, OnInit} from '@angular/core';
+import {NavController, NavParams} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
-import { WifiConfiguration } from '../wifiConfiguration/wifiConfiguration';
-
 import { ProfilePage } from '../profile/profile';
 import { Oauthflow } from '../oauthflow/oauthflow';
+
 //TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 
-
 @Component({
-  selector: 'page-config-screen',
+  selector: 'page-welcome',
   templateUrl: 'configScreen.html',
 })
 export class ConfigurationScreen implements OnInit {
-
   profiles: any;
+  filteredProfiles: any;
   instances: any;
-  show = false;
-  showProfile = false;
-  nameInstitution: string = '';
+  filteredInstances: any;
+
+  instance: any;
+  instanceName : any = '';
   profile: any;
-  recommend = false;
-  recommendName = '';
-  selectedProfile = '';
-  profileName= '';
+  defaultProfile: any;
+  profileName: any = '';
+  selectedProfileId: any;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private geteduroamServices: GeteduroamServices) {
-    //TODO: LOADING
+  showInstanceItems: boolean = false;
+
+  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices) {
   }
 
-  toogleProfile() {
-    this.selectedProfile = '';
-    this.showProfile = false;
-    this.show = false;
-    this.profile = undefined;
-    this.recommend = false;
-    this.recommendName = '';
+  //TODO remove parameter isInstance as it is no longer needed (no filtering by profile)
+  getItems(ev: any) {
+    const val = ev.target.value;
 
-  }
-
-  selectProfile($event) {
-    let idProfile = $event;
-
-    this.profiles.forEach((res: any) => {
-
-      if (res.id === idProfile.toString()) {
-        this.selectedProfile = res.name;
-        this.profile = res;
-      }
-    });
-    this.recommendProfile(this.profile)
-  }
-
-  selectInstitution($event) {
-    this.nameInstitution = $event.textContent;
-    this.show = false;
-
-    this.instances.forEach((res: any) => {
-
-      if (res.name.toString() === this.nameInstitution) {
-
-        this.profiles = res.profiles;
-
-        if (this.profiles.length > 1) {
-          this.showProfile = true;
-
-          this.profiles.forEach(res => {
-
-            if (!!res.default) {
-              this.recommend = true;
-              this.profile = res;
-              this.recommendName = res.name;
-              this.selectProfile(this.profile.id);
-            }
-          });
-
-        } else if (this.profiles.length === 1) {
-
-          this.profile = this.profiles;
-        }
-      }
-    })
-  };
-
-  recommendProfile(profile) {
-    console.log('profile', profile);
-
-      if (!!profile.default) {
-        this.recommend = true;
-        this.profile = profile;
-        this.selectedProfile = profile.name;
-        this.recommendName = profile.name;
-        this.selectProfile(this.profile.id);
-      }
-
-
-  }
-
-  changeInstitution(event) {
-    this.toogleProfile();
-    if (event.textContent === '') {
-      this.show = false;
+    // if the value is an empty string don't filter the items
+    if (val && val.trim() != '') {
+      this.filteredInstances = this.instances.filter((item:any) => {
+        this.showInstanceItems= true;
+        return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
+      })
+    } else { //val is empty
+      this.clearInstance();
     }
-    this.show = true;
   }
+
+  getAllItems(){
+    this.filteredInstances = this.instances;
+    this.showInstanceItems= true;
+  }
+
+  clearProfile(){
+    this.profile = '';
+    this.profileName = '';
+    this.selectedProfileId = '';
+  }
+
+  clearInstance(){
+    this.showInstanceItems= false;
+    this.instance = '';
+    this.instanceName = '';
+    this.filteredProfiles = '';
+    this.defaultProfile = '';
+    this.profiles = '';
+    this.clearProfile();
+    this.getAllItems();
+  }
+
+  selectInstitution(institution: any){
+    this.instance = institution;
+    this.instanceName = institution.name;
+    this.showInstanceItems = false;
+    this.initializeProfiles(institution);
+    this.checkProfiles();
+  }
+
+  selectProfile(){
+    let selectedProfile = this.profiles.filter((item:any) => {
+      return (item.id == this.selectedProfileId);
+    });
+    this.profile = selectedProfile[0];
+    this.profileName = this.profile.name;
+    console.log('selected profile', this.profileName);
+  }
+
+
+  initializeProfiles(institution: any) {
+    this.profiles = institution.profiles;
+  }
+
+  checkProfiles(){
+    if(this.profiles.length === 1){
+      this.profile = this.profiles[0];
+      this.profileName = this.profile.name;
+      this.selectedProfileId = this.profile.id;
+      this.defaultProfile = '';
+    } else {
+      let filteredProfiles = this.profiles.filter((item:any) => {
+        return (item.default == true);
+      });
+      this.defaultProfile = filteredProfiles[0];
+      if(!!this.defaultProfile){
+        this.profile = this.defaultProfile;
+        this.profileName = this.profile.name;
+        this.selectedProfileId = this.profile.id;
+      }
+    }
+    console.log('selected profile', this.profileName);
+  }
+
+
 
   navigateTo(profile) {
     !!profile.oauth ? this.navCtrl.push(Oauthflow) : this.navCtrl.push(ProfilePage, {profile});
@@ -111,9 +115,9 @@ export class ConfigurationScreen implements OnInit {
   }
 
   async ngOnInit() {
-    const response = await this.geteduroamServices.discovery();
+    const response = await this.getEduroamServices.discovery();
     this.instances = response.instances;
-    this.profiles = response.instances.profiles;
+    //this.profiles = response.instances.profiles;
 
   }
 }
