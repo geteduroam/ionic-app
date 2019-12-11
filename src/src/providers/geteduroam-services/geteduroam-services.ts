@@ -12,7 +12,7 @@ export class GeteduroamServices {
   }
 
   /**
-   * This method is to work wih the discovery method:
+   * This discovery method retrieves all institutions and their profiles from a [json]{@link https://discovery.geteduroam.no/discovery-v1.json}:
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
    *
    */
