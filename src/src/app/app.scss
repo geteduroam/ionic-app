@@ -1,3 +1,9 @@
 ion-app {
 
+  //---------------------------
+  // iOS content custom style
+  //---------------------------
+  ion-content.content-ios .ion-page .content {
+    width: 100%;
+  }
 }
