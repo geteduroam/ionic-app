@@ -5,7 +5,7 @@ import { ProfilePage } from '../profile/profile';
 import { Oauthflow } from '../oauthflow/oauthflow';
 
 @Component({
-  selector: 'page-welcome',
+  selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
 export class ConfigurationScreen implements OnInit {
