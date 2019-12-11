@@ -1,8 +1,10 @@
 page-config-screen {
-
+  //---------------------------
+  // ion-label custom style
+  //---------------------------
   ion-label.label-conf {
     color: #1a4d6d;
-    margin-bottom: 7px;
+    margin-bottom: 5px;
     margin-left: 5%;
     font-family: Helvetica, sans-serif;
     font-size: 12px;
@@ -10,23 +12,23 @@ page-config-screen {
   }
 
   //---------------------------
-  // ion-searchbar  custom style
+  // Searchbar custom style
   //---------------------------
   ion-searchbar {
     background: none !important;
     padding-bottom: 0 !important;
+    border: 1px solid #CAD0D6 !important;
+    border-radius: 4px;
+    margin-left: 7px;
+    width: 96% !important;
+
 
     .searchbar-input-container {
-      opacity: 0.2;
-      border: 1px solid #404B52;
       border-radius: 4px;
-      height: 47px;
 
-      .searchbar-input {
-        padding-left: 50px !important;
-        font-size: 20px;
-        padding-top: 10px;
-        margin-bottom: 0 !important;
+      input.searchbar-input {
+        box-shadow: none !important;
+        padding-left: 45px !important;
       }
 
       //---------------------------
@@ -37,31 +39,60 @@ page-config-screen {
         margin-left: 0 !important;
         height: 34px;
         width: 37px;
+        color: #276fbf !important;
+        position: absolute;
+        top: 8px !important;
+        left: 10px !important;
       }
+    }
 
+
+    .searchbar-active {
+      margin-top: 15px;
+    }
+
+    //---------------------------
+    // iOS searchbar custom style
+    //---------------------------
+    .searchbar-ios {
+      width: 100% !important;
+      margin-left: 12px !important;
+
+      .searchbar-input {
+        padding: 12px 0 0 50px !important;
+      }
     }
   }
-  ion-item .item-inner {
-    padding-right: 0 !important;
-    border-bottom: 0 !important;
 
-  }
   //---------------------------
   // ion-select custom style
   //---------------------------
   ion-select {
-    min-width: 94%;
+    min-width: 95%;
     height: 100%;
-    margin-left: 8px !important;
-    opacity: 0.2;
-    border: 1px solid #404B52 !important;
+    margin-left: 7px !important;
+    border: 1px solid #CAD0D6 !important;
     border-radius: 4px;
+
   }
 
-  ion-list ion-item {
-    .item-profile {
-      border: 0 !important;
-      padding-left: 8px !important;
-    }
+}
+//---------------------------
+// ion-item custom style
+//---------------------------
+ion-item.item-profile {
+  width: 100%;
+
+  div.item-inner {
+    padding: 0 !important;
+    border-bottom: 0 !important;
   }
+}
+
+//---------------------------------
+// Show all elements in searchable
+//---------------------------------
+ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
+  contain: unset !important;
+  overflow: unset !important;
 }

@@ -92,24 +92,6 @@ ion-content {
     }
   }
 
-  //---------------------------
-  // Searchbar custom style
-  //---------------------------
-  ion-searchbar {
-    width: 100% !important;
-    height: 100% !important;
-
-    input .searchbar-input {
-      opacity: 0.2;
-      border: 1px solid #404B52 !important;
-      border-radius: 4px !important;
-      box-shadow: none !important;
-      -moz-border-radius: 4px !important;
-      -webkit-border-radius: 4px !important;
-
-    }
-  }
-
   ////---------------------------
   //// Button disabled style
   ////---------------------------
@@ -122,6 +104,10 @@ ion-content {
   //  letter-spacing: 0;
   //  text-align: center;
   //}
+
+  .nav-decor {
+    display: none !important;
+  }
 }
 
 
