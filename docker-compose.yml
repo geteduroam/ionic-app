@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+    app:
+        container_name: ionic-builder
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        volumes:
+            -  ./tools/apk:/home/gradle/final-apk
+            -  ~/.gradle:/home/gradle/.gradle

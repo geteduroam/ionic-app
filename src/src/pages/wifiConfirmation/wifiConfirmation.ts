@@ -1,20 +1,22 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 //TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-import {ConfigurationScreen} from "../configScreen/configScreen";
+import {WelcomePage} from "../welcome/welcome";
 
 @Component({
   selector: 'page-welcome',
-  templateUrl: 'welcome.html',
+  templateUrl: 'wifiConfirmation.html',
 })
-export class WelcomePage {
+export class WifiConfirmation {
 
   constructor(public navCtrl: NavController, public navParams: NavParams) {
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-  async navigateTo() {
-      await this.navCtrl.push(ConfigurationScreen);
+  async navigateTo(page: string) {
+    if (page === 'welcome') {
+      await this.navCtrl.push(WelcomePage);
+    }
   }
 
 }
