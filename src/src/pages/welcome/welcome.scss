@@ -1,5 +1,7 @@
 page-welcome {
-  background-color: #f6f4f3 !important;
+  ion-content {
+    --overflow: hidden;
+  }
 
   .other-views {
     width: auto;

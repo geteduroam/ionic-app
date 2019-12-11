@@ -1,26 +1,20 @@
 
-<ion-content class="container" text-center>
+<ion-content class="container" text-center >
+    <img alt="logo" class="logo" margin margin-top src="../../assets/imgs/logo.png">
 
-    <div class="base-content">
+    <div class="ios bar-upped" margin></div>
+    <div class="base-content" margin-bottom margin-end margin-left margin-right padding>
 
         <div class="header-content">
-            <img src="../../assets/icon/cog-outline.svg" />
-            <h1> Eduroam wifi configuration</h1>
+            <img alt="setting" src="../../assets/icon/cog-outline.svg"/>
+            <h1> Eduroam configuration </h1>
         </div>
 
-        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
 
         <div class="content-button">
-            <button class="button-control" ion-button> Re-configure </button>
+            <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Next </button>
         </div>
 
-        <p text-center >No, thanks</p>
-
-    </div>
-
-    <!-- REMOVE THIS LINES -->
-    <div class="other-views">
-        <p>To view others pages</p>
-        <button (click)="navigateTo('wifiConfirmation')" class="button-control" ion-button> Wifi Confirmation </button>
     </div>
 </ion-content>
+

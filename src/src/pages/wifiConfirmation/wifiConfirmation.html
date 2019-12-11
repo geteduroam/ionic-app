@@ -1,26 +1,23 @@
 
-<ion-content class="container" text-center>
+<ion-content class="container" text-center >
+    <img class="logo" margin margin-top src="../../assets/imgs/logo.png">
 
-    <div class="base-content">
+    <div class="ios bar-upped" margin></div>
+    <div class="base-content" margin-bottom margin-end margin-left margin-right padding>
 
-        <div class="header-content">
-            <img src="../../assets/icon/cog-outline.svg" />
-            <h1> Eduroam wifi confirmation</h1>
+        <div class="header-content" margin>
+            <img alt="setting" src="../../assets/icon/ios_thumbs_up.png" margin/>
+            <h1> Enjoy using your Wifi!</h1>
+            <p class="copy" margin padding>
+                Your eduroam wifi is now configured. Enjoy and thanks for using eduroam.
+            </p>
         </div>
 
-        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
 
-        <div class="content-button">
-            <button class="button-control" ion-button> Re-configure </button>
+        <div class="content-button" margin padding>
+            <button (click)="exitApp()" class="button-control" ion-button text-capitalize> Great </button>
         </div>
 
-        <p text-center >No, thanks</p>
-
-    </div>
-
-    <!-- REMOVE THIS LINES -->
-    <div class="other-views">
-        <p>To view others pages</p>
-        <button (click)="navigateTo('welcome')" class="button-control" ion-button> Welcome Screen </button>
     </div>
 </ion-content>
+

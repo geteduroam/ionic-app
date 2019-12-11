@@ -8,10 +8,19 @@ import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 @Component({
   templateUrl: 'app.html'
 })
-
-export class MyApp {
+/**
+ * @class MyApp
+ *
+ * @description Init class with rootPage Welcome
+ *
+ **/
+export class GeteduroamApp {
   rootPage = WelcomePage;
 
+  /**
+   * @constructor
+   *
+   */
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private screenOrientation: ScreenOrientation) {
 
     platform.ready().then(() => {
