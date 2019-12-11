@@ -159,7 +159,7 @@ export class ConfigurationScreen implements OnInit {
   /**
    * Method which checks the profiles in case there is a default one or if there is only one profile.
    * This method updates the properties [profile]{@link #profile}, [profileName]{@link #profileName},
-   * [selectedProfileId]]{@link #selectedProfileId} and [defaultProfile]{@link #defaultProfile},
+   * [selectedProfileId]{@link #selectedProfileId} and [defaultProfile]{@link #defaultProfile},
    */
   checkProfiles(){
     if(this.profiles.length === 1){
