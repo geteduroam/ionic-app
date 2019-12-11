@@ -7,7 +7,7 @@ import { Oauthflow } from '../oauthflow/oauthflow';
 //TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
 
 @Component({
-  selector: 'page-welcome',
+  selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
 export class ConfigurationScreen implements OnInit {
