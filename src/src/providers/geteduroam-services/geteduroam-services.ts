@@ -1,6 +1,7 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 
+
 /**
  *  @class GeteduroamServices provider
  */
@@ -27,6 +28,26 @@ export class GeteduroamServices {
     return JSON.parse(response.data);
 
   }
+
+    /**
+     * This gets an eapcongig file form an url which receives as parameter
+     * @param the url in which the eapconfig xml file is available
+     * @return the parsed xml
+     */
+    async getEapconfig(url: string) {
+
+        const params = {};
+        const headers = {};
+
+
+        const response = await this.http.get(url, params, headers);
+
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(response.data, 'text/xml');
+
+        return xml;
+
+    }
 
   /**
    * This method is to work with the oAuthEndpoint method:
