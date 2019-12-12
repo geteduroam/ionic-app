@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {NavController, NavParams} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
-import { Oauthflow } from '../oauthflow/oauthflow';
+import { OauthFlow } from '../oauthFlow/oauthFlow';
 
 @Component({
   selector: 'page-config-screen',
@@ -182,11 +182,11 @@ export class ConfigurationScreen implements OnInit {
 
   /**
    * Method which navigates to the following view.
-   * If the selected profile is oauth, navigates to [Oauthflow]{Oauthflow}.
+   * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   navigateTo(profile) {
-    !!profile.oauth ? this.navCtrl.push(Oauthflow) : this.navCtrl.push(ProfilePage, {profile});
+    !!profile.oauth ? this.navCtrl.push(OauthFlow) : this.navCtrl.push(ProfilePage, {profile});
 
   }
 
