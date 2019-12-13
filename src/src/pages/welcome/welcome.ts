@@ -21,6 +21,26 @@ export class WelcomePage {
   constructor(public navCtrl: NavController, public navParams: NavParams) {
   }
 
+
+  /*
+      ejemplo iOS:
+        ssid: "eduroam",
+        username: "username@universidad.es",
+        password: "contraseña",
+        eap: puede ser: 
+          13 => TLS,
+          21 => TTLS,
+          25 => PEAP
+        servername: "server@de.certificados.es",
+        auth: puede ser 
+          1 => CHAP, 
+          2 => EAP, 
+          3 => MSCHAP, 
+          4 => MSCHAPv2,
+          5 => PAP
+        caCertificate: "el certificado en base64"
+  */
+ 
   async configure() {
     // await WifiEapConfigurator.configureAP({ssid: "eduroam", username: "iagtprof@alu.upo.es", password: "4cHK6kbj", eap: 21, servername: "radius.upo.es", auth: 5, caCertificate: ""})
     await WifiEapConfigurator.configureAP({ssid: "eduroam", username: "emergya@ad.eduroam.no", password: "crocodille", eap: 25, servername: "eduroam.uninett.no", auth: 4, caCertificate: ""})
