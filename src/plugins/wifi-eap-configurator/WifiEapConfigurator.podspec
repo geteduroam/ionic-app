@@ -5,9 +5,9 @@
     s.summary = 'Wifi EAP Configurator'
     s.license = 'MIT'
     s.homepage = 'http://localhost/'
-    s.author = ''
+    s.author = 'Christopher Genao'
     s.source = { :git => 'http://localhost/', :tag => s.version.to_s }
-    s.source_files = 'ios/Plugin/**/*.{swift,h,m,c,cc,mm,cpp}'
     s.ios.deployment_target  = '11.0'
     s.dependency 'Capacitor'
+    s.source_files = 'ios/Plugin/**/*.{swift,h,m,c,cc,mm,cpp}'
   end
