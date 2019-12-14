@@ -1,4 +1,6 @@
 ion-content {
+  
+  height: 100%;
   background-color: #f6f4f3 !important;
 
   .container {
@@ -24,14 +26,17 @@ ion-content {
 
   .base-content {
     background: #FFFFFF;
-    box-shadow: 0 0 4px 4px rgba(20,20,20,0.04);
+    box-shadow: 0 0 4px 4px rgba(20, 20, 20, 0.04);
     border-radius: 4px;
     position: relative;
-    height: calc(80% - 30px);
+    height: calc(90% - 70px);
+    width: 100%;
     margin-top: 0;
     border-top: none;
 
     .header-content {
+
+      height: calc(20% - 10px);
 
       img {
         width: 57px;
@@ -47,66 +52,89 @@ ion-content {
       }
     }
 
-    .content {
-      position: absolute;
-      top: calc(40% - 30px);
+    .content-info {
+      height: calc(50% - 20px);
 
-      .copy {
-        font-family: Helvetica, sans-serif;
-        font-size: 16px;
-        color: #404B52;
-        letter-spacing: 0;
-        text-align: center;
+      .info-text {
+        height: 100%;
+        padding-top: 25%;
+
+        .copy {
+          font-family: Helvetica, sans-serif;
+          font-size: 16px;
+          color: #404B52;
+          letter-spacing: 0.9px;
+          text-align: center;
+        }
       }
     }
-  }
 
-  .content-button {
-    position: relative;
-    top: 30%;
+    .content-form {
+      height: calc(60% - 30px);
 
-    button {
-      width: 147px;
-      height: 45px;
-      font-family: Helvetica, sans-serif;
-      font-size: 16px;
-      color: #FFFFFF;
-      letter-spacing: 0;
-      text-align: center;
-    }
-  }
-  .text-bottom {
+      .first {
+        height: 45%;
+      }
 
-    .text-down {
-      font-family: Helvetica, sans-serif;
-      font-size: 16px;
-      color: #276FBF;
-      letter-spacing: 0;
-      text-align: center;
-      margin-bottom: 40px;
+      .second {
+        height: 45%;
+      }
     }
 
-    button {
-      font-weight: bold;
-      width: 150px;
+    .footer-info {
+      height: calc(30% - 10px);
+
+      .content-button {
+        position: relative;
+        height: 30%;
+
+        button {
+          width: 147px;
+          height: 45px;
+          font-family: Helvetica, sans-serif;
+          font-size: 16px;
+          color: #FFFFFF;
+          letter-spacing: 0;
+          text-align: center;
+        }
+      }
+
+      .text-bottom {
+
+        .text-down {
+          font-family: Helvetica, sans-serif;
+          font-size: 16px;
+          color: #276FBF;
+          letter-spacing: 0;
+          text-align: center;
+          margin-bottom: 40px;
+        }
+
+        button {
+          font-weight: bold;
+          width: 150px;
+        }
+      }
     }
-  }
 
-  ////---------------------------
-  //// Button disabled style
-  ////---------------------------
-  //button.button-disabled {
-  //  opacity: 0.2;
-  //  background: #404B52 !important;
-  //  border-radius: 4px !important;
-  //  font-size: 16px !important;
-  //  color: #FFFFFF !important;
-  //  letter-spacing: 0;
-  //  text-align: center;
-  //}
+    .footer-form {
+      height: calc(20% - 10px);
 
-  .nav-decor {
-    display: none !important;
+      .content-button {
+        position: relative;
+        height: 30%;
+
+        button {
+          width: 147px;
+          height: 45px;
+          font-family: Helvetica, sans-serif;
+          font-size: 16px;
+          color: #FFFFFF;
+          letter-spacing: 0;
+          text-align: center;
+        }
+      }
+    }
   }
 }
 
