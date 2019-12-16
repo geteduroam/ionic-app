@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, Platform } from 'ionic-angular';
+import { ConfigurationScreen } from '../configScreen/configScreen';
 
 @Component({
   selector: 'page-errors',
@@ -7,11 +8,14 @@ import { NavController, NavParams } from 'ionic-angular';
 })
 export class ErrorsPage {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams) {
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad ErrorsPage');
+  async navigateTo() {
+    await this.navCtrl.push(ConfigurationScreen);
   }
 
+  exitApp() {
+    this.platform.exitApp();
+  }
 }

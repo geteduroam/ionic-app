@@ -1,14 +1,24 @@
+<div class="header-content" margin-top padding-top>
+    <img alt="setting" src="../../assets/icon/alert-outline.svg" />
+    <h1>Error</h1>
+</div>
+<div class="content-info" text-center>
 
-<ion-header>
+    <div class="info-text" no-margin>
 
-  <ion-navbar>
-    <ion-title>errors</ion-title>
-  </ion-navbar>
+        <p class="copy" margin padding>
+            Sorry, this profile cannot be handle by this app. To have further information, please click here:
+        </p>
+    </div>
+</div>
+<div class="footer-info" text-center>
 
-</ion-header>
+    <div class="content-button">
+        <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Know more </button>
+    </div>
 
+    <div (click)="exitApp()" class="text-bottom" margin-top>
+        <p class="text-down" padding-top text-center >Close</p>
+    </div>
+</div>
 
-<ion-content padding>
-
-    <p>Error page</p>
-</ion-content>
