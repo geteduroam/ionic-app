@@ -63,7 +63,7 @@ So there's a couple of values that comes into this function, which are explained
 |eap|`Number`|❌|21|
 |servername |`String`|❌|radius.upo.es|
 |auth|`Number`|❌|5|
-|caCertificate|`String`|✅|julillo_betico@upo.es|
+|caCertificate|`String`|✅|Certificate Base64|
 
 ### Variables Values
 
