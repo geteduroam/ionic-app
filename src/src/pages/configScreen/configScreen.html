@@ -4,11 +4,10 @@
     <h1>eduroam configuration</h1>
 </div>
 
-<div class="content-form" margin-top text-center>
+<div class="content-form" margin-top padding-top text-center>
+    <ion-label class="label-conf" no-margin padding-top text-left>Institution</ion-label>
 
-    <div class="first" padding-top>
-
-        <ion-label class="label-conf" no-margin padding-bottom text-left>Institution</ion-label>
+    <div class="row" padding-top>
 
         <ion-searchbar (ionClear)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
                        animated class="searchbar-input" no-padding placeholder="Select an Institution">
@@ -19,7 +18,7 @@
         </ion-list>
     </div>
 
-    <div class="second" margin-top>
+    <div class="row" margin-top>
 
         <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" margin-left text-left >Profile</ion-label>
 
@@ -31,12 +30,12 @@
             </ion-select>
         </ion-item>
 
-        <p *ngIf="!!defaultProfile && defaultProfile.name">{{instanceName}} recommends to use {{defaultProfile.name}}</p>
+        <p *ngIf="!!defaultProfile && defaultProfile.name" margin-left>{{instanceName}} recommends to use {{defaultProfile.name}}</p>
     </div>
 </div>
 <div class="footer-form">
 
-    <div class="content-button" margin>
-        <button (click)="navigateTo(profile)" [disabled]="!profile"  class="button-control" ion-button text-capitalize> Next </button>
+    <div class="content-button" margin *ngIf="showButton">
+        <button (click)="navigateTo(profile)" [disabled]="!profile" class="button-control" ion-button text-capitalize> Next </button>
     </div>
 </div>

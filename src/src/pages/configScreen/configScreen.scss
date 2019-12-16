@@ -5,7 +5,6 @@ page-config-screen {
   //---------------------------
   ion-label.label-conf {
     color: #1a4d6d;
-    margin-bottom: 5px;
     margin-left: 5%;
     font-family: Helvetica, sans-serif;
     font-size: 12px;
@@ -22,7 +21,7 @@ page-config-screen {
     border-radius: 4px;
     margin-left: 7px;
     width: 96% !important;
-
+    height: 45px;
 
     .searchbar-input-container {
       border-radius: 4px;
@@ -45,10 +44,6 @@ page-config-screen {
         top: 8px !important;
         left: 10px !important;
       }
-    }
-
-    .searchbar-active {
-      margin-top: 15px;
     }
   }
 
@@ -87,6 +82,17 @@ ion-item.item-profile {
   div.item-inner {
     padding: 0 !important;
     border-bottom: 0 !important;
+  }
+}
+//---------------------------------
+// ion-list custom style
+//---------------------------------
+ion-list {
+  width: 100%;
+  margin-top: 1px !important;
+
+  ion-item {
+    background-color: unset;
   }
 }
 

@@ -1,5 +1,5 @@
 ion-content {
-  
+
   height: 100%;
   background-color: #f6f4f3 !important;
 
@@ -30,13 +30,12 @@ ion-content {
     border-radius: 4px;
     position: relative;
     height: calc(90% - 70px);
-    width: 100%;
     margin-top: 0;
     border-top: none;
 
     .header-content {
 
-      height: calc(20% - 10px);
+      height: 22%;
 
       img {
         width: 57px;
@@ -57,7 +56,7 @@ ion-content {
 
       .info-text {
         height: 100%;
-        padding-top: 25%;
+        padding-top: 10%;
 
         .copy {
           font-family: Helvetica, sans-serif;
@@ -72,12 +71,8 @@ ion-content {
     .content-form {
       height: calc(60% - 30px);
 
-      .first {
-        height: 45%;
-      }
-
-      .second {
-        height: 45%;
+      .row {
+        height: calc(35% - 10px)
       }
     }
 
@@ -137,5 +132,7 @@ ion-content {
     }
   }
 }
-
+.nav-decor {
+  display: none !important;
+}
 
