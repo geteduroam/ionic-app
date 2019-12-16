@@ -2,15 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
+import {isArray, isObject} from "ionic-angular/util/util";
+import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
+import {not} from "rxjs/internal-compatibility";
+
+
 
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html',
 })
 export class ProfilePage implements OnInit{
+
   profile: any;
 
+  eapConfig: any;
+
+  authenticationMethods: AuthenticationMethod[];
+
   constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices) {
+
     this.profile = this.navParams.get('profile');
     console.log(this.getEapconfigEndpoint());
   }
@@ -25,38 +36,60 @@ export class ProfilePage implements OnInit{
 
   async ngOnInit() {
 
-    const response = await this.getEduroamServices.getEapconfig(this.profile.eapconfig_endpoint);
+    let response = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
 
-    console.log('====================================================');
-    console.log(response);
+    this.eapConfig = response;
 
-    //let configXML = this.xml2json.xmlToJson(response);
+    this.validateEapconfig();
 
-    //console.log(configXML);
-
-    // let xhr = new XMLHttpRequest();
-    //
-    // xhr.open('GET', this.profile.eapconfig_endpoint);
-    //
-    // xhr.send();
-    //
-    // xhr.onload = function() {
-    //   if (xhr.status != 200) { // HTTP error?
-    //     // handle error
-    //     alert( 'Error: ' + xhr.status);
-    //     return;
-    //   }
-    //
-    //   // get the response from xhr.response
-    // };
-    //
-    // xhr.onprogress = function(event) {
-    //   alert(`Loaded ${event.loaded} of ${event.total}`);
-    // };
-    //
-    // xhr.onerror = function() {
-    //   console.log('Error: '+xhr.status+'-'+xhr.statusText);
-    // };
+    /*console.log(this.authenticationMethods);*/
 
   }
+
+  /**
+   * Method to validate the eapconfig file and obtain its elements.
+   * Updates the property [authenticationMethod]{@link #authenticationMethod}
+   */
+  validateEapconfig(){
+    let keys = ['EAPIdentityProviderList', 'EAPIdentityProvider', 'AuthenticationMethods', 'AuthenticationMethod'];
+
+    let jsonAux = this.eapConfig;
+
+    for(let key of keys){
+
+      if(isArray(jsonAux)){
+        if(jsonAux[0].hasOwnProperty(key)){
+          jsonAux = jsonAux[0][key];
+        } else {
+          console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
+        }
+      } else if (isObject(jsonAux)){
+        if(jsonAux.hasOwnProperty(key)){
+          jsonAux = jsonAux[key];
+        } else {
+          console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
+        }
+      } else{
+        console.error('Invalid eapconfig file', jsonAux);
+      }
+    }
+
+    //console.log(jsonAux);
+
+    for (let i in jsonAux){
+      if(!!jsonAux[i]){
+        console.log(jsonAux[i]);
+        let authenticationMethodAux = new AuthenticationMethod();
+        authenticationMethodAux.fillEntity(jsonAux[i]);
+        console.log('Type for the '+i+' authentication method',authenticationMethodAux);
+      }
+
+      /*let authenticationMethodAux = new AuthenticationMethod();
+      authenticationMethodAux.fillEntity(jsonAux[i]);
+      this.authenticationMethods[i] = authenticationMethodAux;
+      console.log(authenticationMethodAux.eapMethod.type);*/
+    }
+
+  }
+
 }

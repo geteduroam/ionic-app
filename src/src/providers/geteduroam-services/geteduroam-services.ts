@@ -1,5 +1,7 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
+import xml2js from 'xml2js';
+import fs from 'fs';
 
 
 /**
@@ -34,18 +36,20 @@ export class GeteduroamServices {
      * @param the url in which the eapconfig xml file is available
      * @return the parsed xml
      */
-    async getEapconfig(url: string) {
+    async getEapConfig(url: string) {
 
         const params = {};
         const headers = {};
 
-
         const response = await this.http.get(url, params, headers);
 
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(response.data, 'text/xml');
+        let jsonResult = '';
 
-        return xml;
+        xml2js.parseString(response.data, function (err, result) {
+            jsonResult = result;
+        });
+
+        return jsonResult;
 
     }
 
