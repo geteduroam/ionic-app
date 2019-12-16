@@ -6,15 +6,32 @@ import {BaseJson} from "./baseJson";
 
 
 export class AuthenticationMethod extends BaseJson {
+    /**
+     * The [EapMethod] {@link ./eapMethod.html}
+     */
     eapMethod : EapMethod;
+    /**
+     * The [ServerSideCredential] {@link ./serverSideCredential.html}
+     */
     serverSideCredential : ServerSideCredential;
+    /**
+     * The [ClientSideCredential] {@link ./clientSideCredential.html}
+     */
     clientSideCredential : ClientSideCredential;
+    /**
+     * The [InnerAuthenticationMethod] {@link ./innerAuthenticationMethod.html}
+     */
     innerAuthenticationMethod: InnerAuthenticationMethod;
 
     constructor() {
         super();
     }
 
+    /**
+     * Method which fills the authentication method by filling every property
+     * This method updates the properties [eapMethod]{@link #eapMethod}, [serverSideCredential]{@link #serverSideCredential}, [clientSideCredential]{@link #clientSideCredential} and [innerAuthenticationMethod]{@link #innerAuthenticationMethod}
+     * @param {any} jsonAux json from which to retrieve the info.
+     */
     fillEntity(jsonAux: any){
 
         this.eapMethod = new EapMethod();
@@ -22,9 +39,9 @@ export class AuthenticationMethod extends BaseJson {
         this.clientSideCredential = new ClientSideCredential();
         this.innerAuthenticationMethod = new InnerAuthenticationMethod();
 
-        this.assignComplexProperty(this.eapMethod, 'eapMethod', jsonAux, 'EAPMethod');
-        this.assignComplexProperty(this.serverSideCredential, 'serverSideCredential', jsonAux, 'ServerSideCredential');
-        this.assignComplexProperty(this.clientSideCredential, 'clientSideCredential', jsonAux, 'ClientSideCredential');
-        this.assignComplexProperty(this.innerAuthenticationMethod, 'innerAuthenticationMethod', jsonAux, 'InnerAuthenticationMethod');
+        this.assignComplexProperty(this.eapMethod, 'eapMethod', jsonAux, 'EAPMethod', true);
+        this.assignComplexProperty(this.serverSideCredential, 'serverSideCredential', jsonAux, 'ServerSideCredential', true);
+        this.assignComplexProperty(this.clientSideCredential, 'clientSideCredential', jsonAux, 'ClientSideCredential', true);
+        this.assignComplexProperty(this.innerAuthenticationMethod, 'innerAuthenticationMethod', jsonAux, 'InnerAuthenticationMethod', false);
     }
 }
