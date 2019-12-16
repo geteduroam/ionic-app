@@ -40,29 +40,32 @@ import static android.support.v4.content.PermissionChecker.checkSelfPermission;
 public class WifiEapConfigurator extends Plugin {
 
     List<ScanResult> results = null;
-    ScanResult res = null;
 
     @PluginMethod()
     public void test(PluginCall call) {
         String ssid = null;
+        boolean res = true;
         if (call.getString("ssid") != "" && call.getString("ssid") != null) {
             ssid = call.getString("ssid");
         } else {
             call.reject("Missing the wifi's ssid");
+            res = false;
         }
 
         String username = null;
         if (call.getString("username") != "" && call.getString("username") != null) {
             username = call.getString("username");
         } else {
-            call.reject("Missing Username");
+            call.reject("Missing username");
+            res = false;
         }
 
         String password = null;
         if (call.getString("password") != "" && call.getString("password") != null) {
             password = call.getString("password");
         } else {
-            call.reject("Missing Password");
+            call.reject("Missing password");
+            res = false;
         }
 
         String servername = null;
@@ -70,10 +73,11 @@ public class WifiEapConfigurator extends Plugin {
             servername = call.getString("servername");
         } else {
             call.reject("Missing servername");
+            res = false;
         }
 
         String caCertificate = null;
-        if (call.getString("caCertificate") != "" && call.getString("caCertificate") != null) {
+        if (call.getString("caCertificate") != null && call.getString("caCertificate") != "") {
             caCertificate = call.getString("caCertificate");
         }
 
@@ -83,37 +87,57 @@ public class WifiEapConfigurator extends Plugin {
             eap = call.getInt("eap");
         } else {
             call.reject("Missing eap type");
+            res = false;
         }
 
         Integer auth = null;
-        if (call.getInt("auth") != null && call.getInt("auth") != 26) { //26
+        if (call.getInt("auth") != null) {
             auth = call.getInt("auth");
         } else {
             call.reject("Missing auth type");
+            res = false;
         }
 
 
         getPermission();
 
-        checkEnabledWifi(call);
+        if(res){
+            res = checkEnabledWifi(call);
+        }
 
-        getWifiBySSID(call, ssid);
+        if(res){
+            res = getWifiBySSID(call, ssid);
+        }
 
-        configPEAP(ssid, username, password, servername, caCertificate, eap, auth);
-
+        if(res){
+            configPEAP(ssid, username, password, servername, caCertificate, eap, auth, call);
+        }
 
     }
 
-    void checkEnabledWifi(PluginCall call) {
+    boolean checkEnabledWifi(PluginCall call) {
+        boolean res = true;
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if (wifi.isWifiEnabled() == false) {
             call.reject("Wifi disabled");
+            res = false;
         }
+        return res;
     }
 
-    void getWifiBySSID(PluginCall call, String ssid) {
+    private boolean getWifiBySSID(PluginCall call, String ssid) {
+        boolean res = true;
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
+        for(WifiConfiguration conf: configuredNetworks){
+            if(conf.SSID.toLowerCase().contains(ssid.toLowerCase())){
+                call.reject("Network already associated");
+                res = false;
+                break;
+            }
+        }
+
         LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false;
 
@@ -130,14 +154,17 @@ public class WifiEapConfigurator extends Plugin {
             Log.i("bien","res "+(res!=null?res.toString():"nulo"));*/
         } catch (Exception ex) {
             call.reject("Location error");
+            res = false;
         }
 
         if (!gps_enabled) {
             call.reject("Location disabled");
+            res = false;
         }
+        return res;
     }
 
-    Integer getEapMethod(Integer eap){
+    private Integer getEapMethod(Integer eap, PluginCall call){
         Integer res = null;
         switch (eap){
             case 13:
@@ -150,13 +177,34 @@ public class WifiEapConfigurator extends Plugin {
                 res = WifiEnterpriseConfig.Eap.PEAP;
                 break;
             default:
+                call.reject("Invalid eap");
                 res = 0;
                 break;
         }
         return res;
     }
 
-    void configPEAP(String ssid, String username, String password, String servername, String caCertificate, Integer eap, Integer auth) {
+    private Integer getAuthMethod(Integer auth, PluginCall call){
+        Integer res = null;
+        switch (auth){
+            case 3:
+                res = WifiEnterpriseConfig.Phase2.MSCHAP;
+                break;
+            case 4:
+                res = WifiEnterpriseConfig.Phase2.MSCHAPV2;
+                break;
+            case 5:
+                res = WifiEnterpriseConfig.Phase2.PAP;
+                break;
+            default:
+                call.reject("Invalid auth");
+                res = 0;
+                break;
+        }
+        return res;
+    }
+
+    void configPEAP(String ssid, String username, String password, String servername, String caCertificate, Integer eap, Integer auth, PluginCall call) {
         WifiConfiguration config = new WifiConfiguration();
 
         config.SSID = "\""+ssid+"\"";
@@ -187,13 +235,11 @@ public class WifiEapConfigurator extends Plugin {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
         enterpriseConfig.setIdentity(username);
         enterpriseConfig.setPassword(password);
-        enterpriseConfig.setDomainSuffixMatch(servername);
-        Integer eapMethod = getEapMethod(eap);
+        //enterpriseConfig.setDomainSuffixMatch(servername);
+        Integer eapMethod = getEapMethod(eap,call);
         enterpriseConfig.setEapMethod(eapMethod);
-        enterpriseConfig.setPhase2Method(auth);
-
-        //enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TTLS);
-        //enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.PAP);
+        Integer authMethod = getAuthMethod(auth,call);
+        enterpriseConfig.setPhase2Method(authMethod);
 
         config.enterpriseConfig = enterpriseConfig;
 
@@ -219,6 +265,7 @@ public class WifiEapConfigurator extends Plugin {
         if (checkSelfPermission(getContext(), Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 123);
         }
+
         if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, 123);
         }
