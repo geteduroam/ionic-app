@@ -12,10 +12,6 @@ public class WifiEapConfigurator: CAPPlugin {
     
     func getAuthType(authType : Int) -> NEHotspotEAPSettings.TTLSInnerAuthenticationType? {
         switch authType {
-        case 1:
-            return .eapttlsInnerAuthenticationCHAP
-        case 2:
-            return .eapttlsInnerAuthenticationEAP
         case 3:
             return .eapttlsInnerAuthenticationMSCHAP
         case 4:
