@@ -1,27 +1,26 @@
 
-<ion-content class="container" scrollDownOnLoad text-center>
-    <img alt="icon" class="logo" margin margin-top src="../../assets/imgs/logo.png">
+<div class="header-content" margin-top padding-top>
+    <img alt="setting" src="../../assets/icon/cog-outline.svg" />
+    <h1>eduroam configuration</h1>
+</div>
 
-    <div class="bar-upped" margin></div>
-    <div class="base-content" margin-bottom margin-end margin-left margin-right padding>
+<div class="content-info" text-center>
 
-        <div class="header-content">
-            <img alt="setting" src="../../assets/icon/cog-outline.svg"/>
-            <h1> eduroam configuration </h1>
-        </div>
+    <div class="info-text" no-margin>
 
         <p class="copy" margin padding>
-            Hi,It seems you have a eduroam configured in your device.
+            Hi, It seems you have an eduroam configured in your device.
             Do you want to reconfigure it?
         </p>
-
-        <div class="content-button" margin padding>
-            <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Re-configure </button>
-        </div>
-
-        <div (click)="exitApp()" class="text-bottom" margin padding-bottom>
-            <p class="text-down" text-center >No, thanks</p>
-        </div>
-
     </div>
-</ion-content>
+</div>
+<div class="footer-info" text-center>
+
+    <div class="content-button">
+        <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Re-configure </button>
+    </div>
+
+    <div (click)="exitApp()" class="text-bottom" margin-top>
+        <p class="text-down" padding-top text-center >No, thanks</p>
+    </div>
+</div>

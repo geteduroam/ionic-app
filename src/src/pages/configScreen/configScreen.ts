@@ -60,6 +60,11 @@ export class ConfigurationScreen implements OnInit {
   showInstanceItems: boolean = false;
 
   /**
+   * Property to show button
+   */
+  showButton: boolean = true;
+
+  /**
    * Constructor
    * */
   constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices) {
@@ -75,6 +80,7 @@ export class ConfigurationScreen implements OnInit {
     const val = ev.target.value;
 
     if (val && val.trim() != '') {
+      this.showButton = false;
       this.filteredInstances = this.instances.filter((item:any) => {
         this.showInstanceItems= true;
         return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
@@ -116,6 +122,7 @@ export class ConfigurationScreen implements OnInit {
     this.instanceName = '';
     this.defaultProfile = '';
     this.profiles = '';
+    this.showButton = false;
     this.clearProfile();
     this.getAllItems();
   }
@@ -127,9 +134,10 @@ export class ConfigurationScreen implements OnInit {
    * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
    * @param {any} institution the selected institution.
    */
-  selectInstitution(institution: any){
+  selectInstitution(institution: any) {
     this.instance = institution;
     this.instanceName = institution.name;
+    this.showButton = true;
     this.showInstanceItems = false;
     this.initializeProfiles(institution);
     this.checkProfiles();
@@ -198,4 +206,5 @@ export class ConfigurationScreen implements OnInit {
     const response = await this.getEduroamServices.discovery();
     this.instances = response.instances;
   }
+
 }

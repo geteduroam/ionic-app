@@ -1,34 +1,41 @@
 
-<ion-content class="container" fullscreen text-center>
-    <img alt="icon-setting" class="logo" margin margin-top src="../../assets/imgs/logo.png">
+<div class="header-content" margin-top padding-top>
+    <img alt="setting" src="../../assets/icon/cog-outline.svg" />
+    <h1>eduroam configuration</h1>
+</div>
 
-    <div class="bar-upped" margin></div>
-    <div class="base-content" margin-bottom margin-end margin-left margin-right padding>
+<div class="content-form" margin-top padding-top text-center>
+    <ion-label class="label-conf" no-margin padding-top text-left>Institution</ion-label>
 
-        <div class="header-content">
-            <img alt="setting" src="../../assets/icon/cog-outline.svg"/>
-            <h1> eduroam configuration </h1>
-        </div>
+    <div class="row" padding-top>
 
-        <ion-label class="label-conf" no-margin text-left>Institution</ion-label>
-        <ion-searchbar (ionFocus)="getAllItems()" (ionClear)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
-                       animated class="searchbar-input" placeholder="Select an Institution">
+        <ion-searchbar (ionClear)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
+                       animated class="searchbar-input" no-padding placeholder="Select an Institution">
         </ion-searchbar>
+
         <ion-list *ngIf="!!filteredInstances && filteredInstances.length > 0 && !!showInstanceItems">
             <ion-item  (click)="selectInstitution(institution)" *ngFor="let institution of filteredInstances" ion-item>{{institution.name}}</ion-item>
         </ion-list>
+    </div>
 
-        <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" no-margin padding-top text-left >Profile</ion-label>
-        <ion-item *ngIf="!!profiles && profiles.length > 1" no-border no-margin no-padding>
-            <ion-select (ionChange)="selectProfile()"  [(ngModel)]="selectedProfileId" [selectedText]="profileName" placeholder="Select a profile..."
-                        class="select-profile" name="selectProfile" text-left>
+    <div class="row" margin-top>
+
+        <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" margin-left text-left >Profile</ion-label>
+
+        <ion-item *ngIf="!!profiles && profiles.length > 1" class="item-profile" no-margin no-padding>
+
+            <ion-select (ionChange)="selectProfile()"  *ngIf="!!profiles && profiles.length > 1"  [(ngModel)]="selectedProfileId" [selectedText]="profileName" class="select-profile"
+                        name="selectProfile" placeholder="Select a profile..." text-left>
                 <ion-option *ngFor="let profileAux of profiles" [value]="profileAux.id">{{profileAux.name}}</ion-option>
             </ion-select>
         </ion-item>
-        <p *ngIf="!!defaultProfile && defaultProfile.name">{{instanceName}} recommends to use {{defaultProfile.name}}</p>
-        <div class="content-button" margin padding>
-            <button (click)="navigateTo(profile)" [disabled]="!profile"  class="button-control" ion-button text-capitalize> Next </button>
-        </div>
 
+        <p *ngIf="!!defaultProfile && defaultProfile.name" margin-left>{{instanceName}} recommends to use {{defaultProfile.name}}</p>
     </div>
-</ion-content>
+</div>
+<div class="footer-form">
+
+    <div class="content-button" margin *ngIf="showButton">
+        <button (click)="navigateTo(profile)" [disabled]="!profile" class="button-control" ion-button text-capitalize> Next </button>
+    </div>
+</div>
