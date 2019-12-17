@@ -1,6 +1,6 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicApp, IonicModule, IonicErrorHandler, NavController, ModalController } from 'ionic-angular';
 import { GeteduroamApp } from './app.component';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 
@@ -11,6 +11,7 @@ import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { PagesModule } from '../pages/pages.module';
 import { GeteduroamServices } from '../providers/geteduroam-services/geteduroam-services';
 import { HTTP } from '@ionic-native/http/ngx';
+import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,7 @@ import { HTTP } from '@ionic-native/http/ngx';
     SplashScreen,
     InAppBrowser,
     HTTP,
-    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    {provide: ErrorHandler, useClass: ErrorHandlerProvider},
     GeteduroamServices,
     ScreenOrientation
   ],

@@ -2,6 +2,8 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import fs from 'fs';
+import {ErrorHandlerProvider} from "../error-handler/error-handler";
+import * as JSONdata from "../../../resources/fake-data/fake-data.json"
 
 
 /**
@@ -10,7 +12,7 @@ import fs from 'fs';
 @Injectable()
 export class GeteduroamServices {
 
-  constructor(private http: HTTP) {
+  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider) {
 
   }
 
@@ -21,14 +23,30 @@ export class GeteduroamServices {
    */
    async discovery() {
 
-    const url = 'https://discovery.geteduroam.no/discovery-v1.json';
-    const params = {};
-    const headers = {};
+    // const url = 'https://discovery.geteduroam.no/discovery-v1.json';
 
-    const response = await this.http.get(url, params, headers);
+      //TODO replace the fake data json for the real one before go to PRO environment
+      //   const url = 'https://drive.google.com/file/d/1HbtpkGoB7Yc_rhnITYgXWJ8-gLzeMgoR/view?usp=sharing';
 
-    return JSON.parse(response.data);
 
+
+
+        const url = '../../../resources/fake-data/fake-data.ts';
+        const params = {};
+        const headers = {};
+
+        try {
+            // const response = await this.http.get(url, params, headers);
+            console.log(JSONdata);
+            return JSONdata;
+            // return JSON.parse(response);
+
+            // return JSON.parse(FAKE_DATA.toString());
+
+        } catch (e) {
+            console.log(e);
+            await this.errorHandler.handleError(e.error);
+        }
   }
 
     /**

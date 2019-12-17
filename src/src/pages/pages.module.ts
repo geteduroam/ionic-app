@@ -10,6 +10,7 @@ import { WifiConfirmation} from "./wifiConfirmation/wifiConfirmation";
 import { FormsModule } from '@angular/forms';
 import { ProfilePage } from './profile/profile';
 import { OauthFlow } from './oauthFlow/oauthFlow';
+import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 
 const Pages = [
   WelcomePage,
@@ -29,7 +30,8 @@ const Pages = [
     IonicPageModule.forChild(Pages),
   ],
   providers: [
-    FormsModule
+    FormsModule,
+    ErrorHandlerProvider
   ]
 })
 export class PagesModule {}
