@@ -98,6 +98,7 @@ export class ConfigurationScreen implements OnInit {
   getAllItems(){
     this.filteredInstances = this.instances;
     this.showInstanceItems= true;
+    this.showButton = false;
   }
 
   /**

@@ -9,7 +9,7 @@
 
     <div class="row" padding-top>
 
-        <ion-searchbar (ionClear)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
+        <ion-searchbar (ionFocus)="getAllItems()" (ionClear)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
                        animated class="searchbar-input" no-padding placeholder="Select an Institution">
         </ion-searchbar>
 
