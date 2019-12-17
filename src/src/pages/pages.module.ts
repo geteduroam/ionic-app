@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
+import { IonicPageModule, NavController } from 'ionic-angular';
 import { WelcomePage } from './welcome/welcome';
 
 import { ErrorsPage } from './errors/errors';
@@ -10,6 +10,7 @@ import { WifiConfirmation} from "./wifiConfirmation/wifiConfirmation";
 import { FormsModule } from '@angular/forms';
 import { ProfilePage } from './profile/profile';
 import { Oauthflow } from './oauthflow/oauthflow';
+import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 
 const Pages = [
   WelcomePage,
@@ -29,7 +30,8 @@ const Pages = [
     IonicPageModule.forChild(Pages),
   ],
   providers: [
-    FormsModule
+    FormsModule,
+    ErrorHandlerProvider
   ]
 })
 export class PagesModule {}
