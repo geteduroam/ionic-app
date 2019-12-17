@@ -8,7 +8,13 @@ import { ConfigurationScreen } from '../configScreen/configScreen';
 })
 export class ErrorsPage {
 
+  text: string;
   constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams) {
+    if (!!this.navParams.get('error')) {
+      this.text = this.navParams.get('error');
+    } else {
+      this.text = 'Sorry, this profile cannot be handle by this app. To have further information, please click here:'
+    }
   }
 
   async navigateTo() {
