@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, Platform } from 'ionic-angular';
-import {ConfigurationScreen} from "../configScreen/configScreen";
+import { ErrorsPage } from '../errors/errors';
 
 @Component({
   selector: 'page-welcome',
@@ -14,7 +14,7 @@ export class WelcomePage  {
   }
 
   async navigateTo() {
-      await this.navCtrl.push(ConfigurationScreen);
+      await this.navCtrl.push(ErrorsPage);
   }
 
   exitApp() {
