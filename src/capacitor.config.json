@@ -15,5 +15,18 @@
       "SplashScreen": "true",
       "SplashScreenDelay": "3000"
     }
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffffff",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "FIT_CENTER",
+      "androidSpinnerStyle": "large",
+      "iosSpinnerStyle": "large",
+      "spinnerColor": "#4269b5",
+      "showSpinner": true
+    }
   }
 }

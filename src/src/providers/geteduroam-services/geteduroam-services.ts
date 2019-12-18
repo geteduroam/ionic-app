@@ -1,7 +1,6 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
-import fs from 'fs';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
 import * as JSONdata from "../../../resources/fake-data/fake-data.json"
 
@@ -27,9 +26,6 @@ export class GeteduroamServices {
 
       //TODO replace the fake data json for the real one before go to PRO environment
       //   const url = 'https://drive.google.com/file/d/1HbtpkGoB7Yc_rhnITYgXWJ8-gLzeMgoR/view?usp=sharing';
-
-
-
 
         const url = '../../../resources/fake-data/fake-data.ts';
         const params = {};

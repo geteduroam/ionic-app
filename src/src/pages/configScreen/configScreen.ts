@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {NavController, NavParams} from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
+import { LoadingProvider } from '../../providers/loading/loading';
 
 @Component({
   selector: 'page-config-screen',
@@ -67,7 +68,11 @@ export class ConfigurationScreen implements OnInit {
   /**
    * Constructor
    * */
-  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices,
+              public loading: LoadingProvider) {
+    this.loading.initLoading();
+
+
   }
 
   /**
