@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { NavParams, Platform, ViewController } from 'ionic-angular';
-import { ConfigurationScreen } from '../configScreen/configScreen';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { NavController, NavParams, Platform, ViewController } from 'ionic-angular';
+import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
+
 
 @Component({
   selector: 'page-errors',
@@ -10,9 +11,9 @@ export class ErrorsPage {
 
   text: string;
   link: string;
-  showButton: boolean = false;
+  public showButton: boolean = false;
 
-  constructor(private platform: Platform, public navParams: NavParams, public viewCtrl: ViewController) {
+  constructor(private platform: Platform, public navParams: NavParams, public viewCtrl: ViewController, public navCtrl: NavController) {
 
     if (!!this.navParams.get('link')) {
 
@@ -20,7 +21,7 @@ export class ErrorsPage {
       this.text = 'Sorry, this profile cannot be handle by this app. To have further information, please click here:';
       this.showButton = true;
 
-    }else if (!!this.navParams.get('error')) {
+    } else if (!!this.navParams.get('error')) {
 
       this.text = this.navParams.get('error');
       this.showButton = false;
@@ -34,6 +35,7 @@ export class ErrorsPage {
   exitApp() {
     if (!this.showButton) {
       this.viewCtrl.dismiss().then(res => console.log(res));
+
     } else {
       this.platform.exitApp();
     }
