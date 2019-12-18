@@ -82,7 +82,7 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         Integer eap = null;
-        if (call.getInt("eap") != null &&  (call.getInt("eap") == 13 || call.getInt("eap") == 21
+        if (call.getInt("eap") != null && (call.getInt("eap") == 13 || call.getInt("eap") == 21
                 || call.getInt("eap") == 25)) {//13 21 25
             eap = call.getInt("eap");
         } else {
@@ -101,15 +101,15 @@ public class WifiEapConfigurator extends Plugin {
 
         getPermission();
 
-        if(res){
+        if (res) {
             res = checkEnabledWifi(call);
         }
 
-        if(res){
+        if (res) {
             res = getWifiBySSID(call, ssid);
         }
 
-        if(res){
+        if (res) {
             configPEAP(ssid, username, password, servername, caCertificate, eap, auth, call);
         }
 
@@ -130,8 +130,8 @@ public class WifiEapConfigurator extends Plugin {
         boolean res = true;
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
-        for(WifiConfiguration conf: configuredNetworks){
-            if(conf.SSID.toLowerCase().contains(ssid.toLowerCase())){
+        for (WifiConfiguration conf : configuredNetworks) {
+            if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
                 call.reject("Network already associated");
                 res = false;
                 break;
@@ -139,23 +139,17 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-        boolean gps_enabled = false;
+        boolean gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-        try {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-           /* results = wifi.getScanResults();
-            Log.i("bien",results.toString());
-            for (ScanResult s : results) {
-                if(s.SSID.toLowerCase().contains(ssid.toLowerCase())){
-                    res = s;
-                    break;
-                }
+       /* results = wifi.getScanResults();
+        Log.i("bien",results.toString());
+        for (ScanResult s : results) {
+            if(s.SSID.toLowerCase().contains(ssid.toLowerCase())){
+                res = s;
+                break;
             }
-            Log.i("bien","res "+(res!=null?res.toString():"nulo"));*/
-        } catch (Exception ex) {
-            call.reject("Location error");
-            res = false;
         }
+        Log.i("bien","res "+(res!=null?res.toString():"nulo"));*/
 
         if (!gps_enabled) {
             call.reject("Location disabled");
@@ -164,9 +158,9 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-    private Integer getEapMethod(Integer eap, PluginCall call){
+    private Integer getEapMethod(Integer eap, PluginCall call) {
         Integer res = null;
-        switch (eap){
+        switch (eap) {
             case 13:
                 res = WifiEnterpriseConfig.Eap.TLS;
                 break;
@@ -184,9 +178,9 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-    private Integer getAuthMethod(Integer auth, PluginCall call){
+    private Integer getAuthMethod(Integer auth, PluginCall call) {
         Integer res = null;
-        switch (auth){
+        switch (auth) {
             case 3:
                 res = WifiEnterpriseConfig.Phase2.MSCHAP;
                 break;
@@ -207,27 +201,10 @@ public class WifiEapConfigurator extends Plugin {
     void configPEAP(String ssid, String username, String password, String servername, String caCertificate, Integer eap, Integer auth, PluginCall call) {
         WifiConfiguration config = new WifiConfiguration();
 
-        config.SSID = "\""+ssid+"\"";
+        config.SSID = "\"" + ssid + "\"";
         config.priority = 1;
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
-       /* CertificateFactory certFactory = null;
-        X509Certificate caCert = null;
 
-
-        if(caCertificate!= null && caCertificate!=""){
-            byte[] bytes = Base64.decode(caCertificate, Base64.NO_WRAP);
-            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-
-            try {
-                certFactory = CertificateFactory.getInstance("X.509");
-                caCert = (X509Certificate) certFactory.generateCertificate(b);
-                enterpriseConfig.setCaCertificate(caCert);
-
-            } catch (CertificateException e) {
-                e.printStackTrace();
-                Log.e("error", e.getMessage());
-            }
-        }*/
 
         config.status = WifiConfiguration.Status.ENABLED;
 
@@ -235,11 +212,28 @@ public class WifiEapConfigurator extends Plugin {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
         enterpriseConfig.setIdentity(username);
         enterpriseConfig.setPassword(password);
-        //enterpriseConfig.setDomainSuffixMatch(servername);
-        Integer eapMethod = getEapMethod(eap,call);
+        enterpriseConfig.setDomainSuffixMatch(servername);
+        Integer eapMethod = getEapMethod(eap, call);
         enterpriseConfig.setEapMethod(eapMethod);
-        Integer authMethod = getAuthMethod(auth,call);
+        Integer authMethod = getAuthMethod(auth, call);
         enterpriseConfig.setPhase2Method(authMethod);
+
+        CertificateFactory certFactory = null;
+        X509Certificate caCert = null;
+        if (caCertificate != null && caCertificate != "") {
+            byte[] bytes = Base64.decode(caCertificate, Base64.NO_WRAP);
+            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+
+            try {
+                certFactory = CertificateFactory.getInstance("X.509");
+                caCert = (X509Certificate) certFactory.generateCertificate(b);
+
+                enterpriseConfig.setCaCertificate(caCert);
+            } catch (CertificateException e) {
+                e.printStackTrace();
+                Log.e("error", e.getMessage());
+            }
+        }
 
         config.enterpriseConfig = enterpriseConfig;
 
