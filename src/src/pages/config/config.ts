@@ -35,7 +35,8 @@ export class ConfigPage {
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController) {
     this.instances = this.navParams.get('instances');
-
+    this.instanceName = this.navParams.get('instanceName');
+    this.filterInstances(this.instanceName);
   }
 
   /**
@@ -59,10 +60,23 @@ export class ConfigPage {
   getItems(ev: any) {
     const val = ev.target.value;
 
-    if (val && val.trim() != '') {
+    this.filterInstances(val);
+
+    // if (val && val.trim() != '') {
+    //
+    //   this.filteredInstances = this.instances.filter((item:any) => {
+    //     return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
+    //   })
+    // } else {
+    //   this.clearInstance();
+    // }
+  }
+
+  filterInstances(stringAux: string){
+    if (stringAux && stringAux.trim() != '') {
 
       this.filteredInstances = this.instances.filter((item:any) => {
-        return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
+        return (item.name.toLowerCase().indexOf(stringAux.toLowerCase()) > -1);
       })
     } else {
       this.clearInstance();

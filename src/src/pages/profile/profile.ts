@@ -5,14 +5,17 @@ import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam
 import {isArray, isObject} from "ionic-angular/util/util";
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import {LoadingProvider} from "../../providers/loading/loading";
 
 
 
 @Component({
   selector: 'page-profile',
-  templateUrl: 'profile.html',
+  templateUrl: 'profile.html'
 })
 export class ProfilePage implements OnInit{
+
+  showAll: boolean = false;
 
   /**
    * The profile which is received as a navigation parameter
@@ -29,9 +32,11 @@ export class ProfilePage implements OnInit{
    */
   authenticationMethods: AuthenticationMethod[];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider) {
-    this.profile = this.navParams.get('profile');
-    console.log(this.getEapconfigEndpoint());
+  constructor(public navCtrl: NavController, public navParams: NavParams,
+              private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
+              public loading: LoadingProvider) {
+
+    // console.log(this.getEapconfigEndpoint());
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
@@ -55,16 +60,23 @@ export class ProfilePage implements OnInit{
    */
   async ngOnInit() {
 
+    this.loading.createAndPresent();
+
+    this.profile = this.navParams.get('profile');
+
     this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
 
     let validEap: boolean = await this.validateEapconfig();
 
     if(validEap){
+      this.showAll = true;
       console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
-      await this.navCtrl.pop();
       await this.errorHandler.handleError('Invalid eapconfig file', false);
+      await this.navCtrl.pop();
     }
+    this.loading.dismiss();
+
   }
 
   /**

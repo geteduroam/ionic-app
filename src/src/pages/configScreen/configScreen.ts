@@ -4,7 +4,6 @@ import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
 import { LoadingProvider } from '../../providers/loading/loading';
-import { ErrorsPage } from '../errors/errors';
 import { ConfigPage } from '../config/config';
 
 @Component({
@@ -12,6 +11,10 @@ import { ConfigPage } from '../config/config';
   templateUrl: 'configScreen.html',
 })
 export class ConfigurationScreen implements OnInit {
+
+  showAll: boolean = false;
+
+
   /**
    * Set of available profiles
    */
@@ -72,8 +75,6 @@ export class ConfigurationScreen implements OnInit {
    * */
   constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices,
               public loading: LoadingProvider, public modalCtrl: ModalController) {
-    this.loading.initLoading();
-
 
   }
 
@@ -99,7 +100,7 @@ export class ConfigurationScreen implements OnInit {
 
   async showModal() {
 
-      let searchModal = this.modalCtrl.create(ConfigPage, {instances: this.instances});
+      let searchModal = this.modalCtrl.create(ConfigPage, {instances: this.instances, instanceName: this.instanceName});
 
     searchModal.onDidDismiss((data) => {
         console.log('Data: ', data);
@@ -231,8 +232,11 @@ export class ConfigurationScreen implements OnInit {
    * This method updates the property [instances]{@link #instances} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
    */
   async ngOnInit() {
+    this.loading.createAndPresent();
     const response = await this.getEduroamServices.discovery();
     this.instances = response.instances;
+    this.loading.dismiss();
+    this.showAll = true;
   }
 
 }

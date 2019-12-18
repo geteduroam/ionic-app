@@ -1,16 +1,19 @@
-<div class="header-content" margin-top padding-top>
-    <img alt="setting" src="../../assets/icon/cog-outline.svg" />
-    <h1>eduroam configuration</h1>
-</div>
+<div *ngIf="showAll">
+    <div class="header-content" margin-top padding-top>
+        <img alt="setting" src="../../assets/icon/cog-outline.svg" />
+        <h1>eduroam configuration</h1>
+    </div>
 
-<div class="content" text-center>
-    <p class="copy" margin padding>
-       PROFILE {{profile.name}}
-    </p>
+    <div class="content" text-center>
+        <p class="copy" margin padding>
+            PROFILE {{profile.name}}
+        </p>
 
-    <div class="content-button">
-        <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Next </button>
+        <div class="content-button">
+            <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Next </button>
+        </div>
     </div>
 </div>
+
 
 
