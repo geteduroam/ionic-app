@@ -45,7 +45,7 @@ export class GeteduroamServices {
 
         } catch (e) {
             console.log(e);
-            await this.errorHandler.handleError(e.error);
+            await this.errorHandler.handleError(e.error,false);
         }
   }
 

@@ -32,7 +32,7 @@ export class AuthenticationMethod extends BaseJson {
      * This method updates the properties [eapMethod]{@link #eapMethod}, [serverSideCredential]{@link #serverSideCredential}, [clientSideCredential]{@link #clientSideCredential} and [innerAuthenticationMethod]{@link #innerAuthenticationMethod}
      * @param {any} jsonAux json from which to retrieve the info.
      */
-    fillEntity(jsonAux: any){
+    async fillEntity(jsonAux: any){
 
         this.eapMethod = new EapMethod();
         this.serverSideCredential = new ServerSideCredential();

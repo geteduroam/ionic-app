@@ -4,6 +4,7 @@ import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import {isArray, isObject} from "ionic-angular/util/util";
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
+import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 
 
 
@@ -28,7 +29,7 @@ export class ProfilePage implements OnInit{
    */
   authenticationMethods: AuthenticationMethod[];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider) {
     this.profile = this.navParams.get('profile');
     console.log(this.getEapconfigEndpoint());
   }
@@ -54,60 +55,76 @@ export class ProfilePage implements OnInit{
    */
   async ngOnInit() {
 
-    let response = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
+    this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
 
-    this.eapConfig = response;
+    let validEap: boolean = await this.validateEapconfig();
 
-    this.validateEapconfig();
-
-    console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
-
+    if(validEap){
+      console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
+    } else {
+      await this.navCtrl.pop();
+      await this.errorHandler.handleError('Invalid eapconfig file', false);
+    }
   }
 
   /**
    * Method to validate the eapconfig file and obtain its elements.
    * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
    */
-  validateEapconfig(){
+  async validateEapconfig(): Promise <boolean>{
     let keys = ['EAPIdentityProviderList', 'EAPIdentityProvider', 'AuthenticationMethods', 'AuthenticationMethod'];
 
     let jsonAux = this.eapConfig;
 
-    for(let key of keys){
+    if(!!jsonAux){
+      for(let key of keys){
 
-      if(isArray(jsonAux)){
-        if(jsonAux[0].hasOwnProperty(key)){
-          jsonAux = jsonAux[0][key];
-        } else {
-          console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
+        if(isArray(jsonAux)){
+          if(jsonAux[0].hasOwnProperty(key)){
+            jsonAux = jsonAux[0][key];
+          } else {
+            console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
+            return false;
+          }
+        } else if (isObject(jsonAux)){
+          if(jsonAux.hasOwnProperty(key)){
+            jsonAux = jsonAux[key];
+          } else {
+            console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
+            return false;
+          }
+        } else{
+          console.error('Invalid eapconfig file', jsonAux);
+          return false;
         }
-      } else if (isObject(jsonAux)){
-        if(jsonAux.hasOwnProperty(key)){
-          jsonAux = jsonAux[key];
-        } else {
-          console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
-        }
-      } else{
-        console.error('Invalid eapconfig file', jsonAux);
       }
+
+      this.authenticationMethods = [];
+
+      for (let i in jsonAux){
+        if(!!jsonAux[i]){
+          let authenticationMethodAux = new AuthenticationMethod();
+          try {
+            await authenticationMethodAux.fillEntity(jsonAux[i]);
+          } catch (e) {
+            return false;
+          }
+          this.authenticationMethods.push(authenticationMethodAux);
+        }
+      }
+
+    } else {
+      return false;
     }
 
-    this.authenticationMethods = [];
-
-    for (let i in jsonAux){
-      if(!!jsonAux[i]){
-        let authenticationMethodAux = new AuthenticationMethod();
-        authenticationMethodAux.fillEntity(jsonAux[i]);
-        this.authenticationMethods.push(authenticationMethodAux);
-      }
-    }
+    return true;
   }
 
   /**
    * Method to get the first valid authentication method form an eap config file.
    * @return {AuthenticationMethod} the first valid authentication method
    */
-  private getFirstValidAuthenticationMethod(){
+  private async getFirstValidAuthenticationMethod(){
     for (let authenticationMethod of this.authenticationMethods){
       console.log(authenticationMethod.eapMethod.type);
       console.log(['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()));
@@ -117,6 +134,7 @@ export class ProfilePage implements OnInit{
     }
     //TODO redirect to error vew when available
     console.error('No valid authentication method available from the eapconfig file');
+    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, 'http://google.com');
     return null;
   }
 

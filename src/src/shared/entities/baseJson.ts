@@ -1,5 +1,5 @@
 import {isArray, isObject} from "ionic-angular/util/util";
-import {EapMethod} from "./eapMethod";
+import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 
 export abstract class BaseJson {
 
@@ -59,7 +59,7 @@ export abstract class BaseJson {
      * @param {string} keyName the key to find in the json
      * @param {boolean} mandatory whether or not the property is mandatory
      */
-    protected assignComplexProperty<T extends BaseJson>(property: T, propertyName: string, propertyValue: any, keyName: string, mandatory: boolean) {
+    protected async assignComplexProperty<T extends BaseJson>(property: T, propertyName: string, propertyValue: any, keyName: string, mandatory: boolean) {
         if (isArray(propertyValue)) {
             if (propertyValue[0].hasOwnProperty(keyName)) {
                 try {

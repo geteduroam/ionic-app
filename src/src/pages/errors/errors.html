@@ -18,7 +18,7 @@
                 </p>
             </div>
         </div>
-        <div *ngIf="showButton" class="footer-info" text-center>
+        <div *ngIf="isFinal" class="footer-info" text-center>
 
             <div class="content-button">
                 <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Know more </button>
@@ -28,7 +28,7 @@
                 <p class="text-down" padding-top text-center >Close</p>
             </div>
         </div>
-        <div *ngIf="!showButton" class="footer-info" text-center>
+        <div *ngIf="!isFinal" class="footer-info" text-center>
 
             <div class="content-button">
                 <button (click)="exitApp()" class="button-control" ion-button text-capitalize> Back </button>
