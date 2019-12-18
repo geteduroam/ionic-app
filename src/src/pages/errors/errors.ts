@@ -32,9 +32,9 @@ export class ErrorsPage {
     //TODO: navigate to link
   }
 
-  exitApp() {
+  async exitApp() {
     if (!this.showButton) {
-      this.viewCtrl.dismiss().then(res => console.log(res));
+      await this.viewCtrl.dismiss();
 
     } else {
       this.platform.exitApp();
