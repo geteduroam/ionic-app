@@ -1,9 +1,11 @@
 import {Component, OnInit} from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { ModalController, NavController, NavParams } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
 import { LoadingProvider } from '../../providers/loading/loading';
+import { ErrorsPage } from '../errors/errors';
+import { ConfigPage } from '../config/config';
 
 @Component({
   selector: 'page-config-screen',
@@ -69,18 +71,18 @@ export class ConfigurationScreen implements OnInit {
    * Constructor
    * */
   constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices,
-              public loading: LoadingProvider) {
+              public loading: LoadingProvider, public modalCtrl: ModalController) {
     this.loading.initLoading();
 
 
   }
 
-  /**
+/*  /!**
    * Method which filters the institutions by the string introduced in the search-bar.
    * The filter is not case sensitive.
    * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
    * @param {any} ev event triggered.
-   */
+   *!/
   getItems(ev: any) {
     const val = ev.target.value;
 
@@ -93,18 +95,37 @@ export class ConfigurationScreen implements OnInit {
     } else { //val is empty
       this.clearInstance();
     }
-  }
+  }*/
 
-  /**
-   * Method which gets all the institutions.
-   * Used after cleaning or first click on the search-bar.
-   * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
-   */
-  getAllItems(){
-    this.filteredInstances = this.instances;
-    this.showInstanceItems= true;
-    this.showButton = false;
+  async showModal() {
+
+      let searchModal = this.modalCtrl.create(ConfigPage, {instances: this.instances});
+
+    searchModal.onDidDismiss((data) => {
+        console.log('Data: ', data);
+        if (data !== undefined) {
+          this.instance = data;
+          this.instanceName = data.name;
+
+          this.initializeProfiles(this.instance);
+
+        }
+
+      });
+
+      return await searchModal.present();
+
   }
+  // /**
+  //  * Method which gets all the institutions.
+  //  * Used after cleaning or first click on the search-bar.
+  //  * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
+  //  */
+  // getAllItems(){
+  //   this.filteredInstances = this.instances;
+  //   this.showInstanceItems= true;
+  //   this.showButton = false;
+  // }
 
   /**
    * Method which clears the profile after selecting a new institution or clear the selected one.
@@ -116,12 +137,12 @@ export class ConfigurationScreen implements OnInit {
     this.selectedProfileId = '';
   }
 
-  /**
+/*  /!**
    * Method which clears the instance after pressing X in the search-bar.
    * This method updates the properties [showInstanceItems]{@link #showInstanceItems}, [instance]{@link #instance},
    * [instanceName]{@link #instanceName}, [defaultProfile]{@link #defaultProfile} and [profiles]{@link #profiles}.
    * This method also calls the methods [clearProfile()]{@link #clearProfile} and [getAllItems()]{@link #getAllItems}
-   */
+   *!/
   clearInstance(){
     this.showInstanceItems= false;
     this.instance = '';
@@ -131,23 +152,23 @@ export class ConfigurationScreen implements OnInit {
     this.showButton = false;
     this.clearProfile();
     this.getAllItems();
-  }
+  }*/
 
-  /**
-   * Method which manages the selection of a new institution.
-   * This method updates the properties [instance]{@link #instance}, [instanceName]{@link #instanceName}
-   * and [showInstanceItems]{@link #showInstanceItems}.
-   * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
-   * @param {any} institution the selected institution.
-   */
-  selectInstitution(institution: any) {
-    this.instance = institution;
-    this.instanceName = institution.name;
-    this.showButton = true;
-    this.showInstanceItems = false;
-    this.initializeProfiles(institution);
-    this.checkProfiles();
-  }
+  // /**
+  //  * Method which manages the selection of a new institution.
+  //  * This method updates the properties [instance]{@link #instance}, [instanceName]{@link #instanceName}
+  //  * and [showInstanceItems]{@link #showInstanceItems}.
+  //  * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
+  //  * @param {any} institution the selected institution.
+  //  */
+  // selectInstitution(institution: any) {
+  //   this.instance = institution;
+  //   this.instanceName = institution.name;
+  //   this.showButton = true;
+  //   this.showInstanceItems = false;
+  //   this.initializeProfiles(institution);
+  //   this.checkProfiles();
+  // }
 
   /**
    * Method which manages the selection of a new profile for the already selected institution.
@@ -168,6 +189,7 @@ export class ConfigurationScreen implements OnInit {
    */
   initializeProfiles(institution: any) {
     this.profiles = institution.profiles;
+    this.checkProfiles();
   }
 
   /**

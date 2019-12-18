@@ -9,13 +9,9 @@
 
     <div class="row" padding-top>
 
-        <ion-searchbar (ionFocus)="getAllItems()" (ionClear)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
-                       animated class="searchbar-input" no-padding placeholder="Select an Institution">
-        </ion-searchbar>
+        <ion-searchbar (click)="showModal()" [(ngModel)]="instanceName" animated class="searchbar-input" no-padding placeholder="Select an Institution">
 
-        <ion-list *ngIf="!!filteredInstances && filteredInstances.length > 0 && !!showInstanceItems">
-            <ion-item  (click)="selectInstitution(institution)" *ngFor="let institution of filteredInstances" ion-item>{{institution.name}}</ion-item>
-        </ion-list>
+        </ion-searchbar>
     </div>
 
     <div class="row" margin-top>
@@ -25,12 +21,10 @@
         <ion-item *ngIf="!!profiles && profiles.length > 1" class="item-profile" no-margin no-padding>
 
             <ion-select (ionChange)="selectProfile()"  *ngIf="!!profiles && profiles.length > 1"  [(ngModel)]="selectedProfileId" [selectedText]="profileName" class="select-profile"
-                        name="selectProfile" placeholder="Select a profile..." text-left>
+                        name="selectProfile" placeholder="Select a profile..." text-left >
                 <ion-option *ngFor="let profileAux of profiles" [value]="profileAux.id">{{profileAux.name}}</ion-option>
             </ion-select>
         </ion-item>
-
-<!--        <p *ngIf="!!defaultProfile && defaultProfile.name" margin-left>{{instanceName}} recommends to use {{defaultProfile.name}}</p>-->
     </div>
 </div>
 <div class="footer-form">

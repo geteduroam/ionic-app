@@ -1,12 +1,10 @@
-<ion-header>
-
-  <ion-navbar>
-    <ion-title>config</ion-title>
-  </ion-navbar>
-
+<ion-header translucent>
+    <ion-toolbar>
+        <ion-searchbar (ionFocus)="getAllItems()" (ionInput)="getItems($event)" [(ngModel)]="instanceName" placeholder="Select an Institution"></ion-searchbar>
+    </ion-toolbar>
 </ion-header>
-
-
-<ion-content padding>
-
+<ion-content fullscreen>
+    <ion-list *ngFor="let institution of filteredInstances">
+        <ion-item (click)="selectInstitution(institution)">{{institution.name}}</ion-item>
+    </ion-list>
 </ion-content>
