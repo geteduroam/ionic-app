@@ -3,13 +3,10 @@ import Capacitor
 import NetworkExtension
 import SystemConfiguration.CaptiveNetwork
 import UIKit
-import Security
-
 
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
 
-    
     func getAuthType(authType : Int) -> NEHotspotEAPSettings.TTLSInnerAuthenticationType? {
         switch authType {
         case 3:
@@ -24,7 +21,34 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @available(iOS 12.0, *)
-    @objc func configureAP(_ call: CAPPluginCall) {
+    @objc func connectAP(_ call: CAPPluginCall){
+        guard let ssid = call.getString("ssid") else {
+            return call.reject("You must provide a SSID.")
+        }
+        
+        guard let config = call.get("config", NEHotspotConfiguration.self) else {
+            return call.reject("You must provide a configuration")
+        }
+        
+        NEHotspotConfigurationManager.shared.apply(config) { (error) in
+            if let error = error {
+                call.reject(error.localizedDescription)
+            } else {
+                if self.currentSSIDs().first == ssid {
+                    call.success([
+                        "message": "The user has been logged into the network successfully.",
+                        "ssid": ssid,
+                    ])
+                } else {
+                    call.reject("Unable to connect to " + ssid + ". Please try again later.")
+                }
+            }
+        }
+        
+    }
+    
+    @available(iOS 12.0, *)
+    @objc func configureAP(_ call: CAPPluginCall) -> Any? {
         
         guard let ssid = call.getString("ssid") else {
            return call.reject("You must provide a SSID.")
@@ -50,17 +74,6 @@ public class WifiEapConfigurator: CAPPlugin {
             return call.reject("You must provide a authentication type.")
         }
         
-        guard let certificate = call.getString("caCertificate") else {
-            return call.reject("You must provide a authentication certificate.")
-         }
-        
-        /*
-          13 = EAP-TLS
-          21 = EAP-TTLS
-          25 = EAP-PEAP
-          43 = EAP-FAST
-        */
-        
         let eapSettings = NEHotspotEAPSettings()
         eapSettings.isTLSClientCertificateRequired = true
         eapSettings.supportedEAPTypes = [eapType]
@@ -68,37 +81,72 @@ public class WifiEapConfigurator: CAPPlugin {
         eapSettings.trustedServerNames = [server]
         eapSettings.username = username
         eapSettings.password = password
-              
-        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
-        config.joinOnce = false
-        config.lifeTimeInDays = 1
         
-//        let mainbun = Bundle.main.path(forResource: "cppm-eval", ofType: "cer")
-//        let mainbun = Bundle.main.path(forResource: "RADIUS.US.ES", ofType: "cer")
-//        let dataCert: NSData = NSData(contentsOfFile: mainbun!)!
-//        var turntocert: SecCertificate = SecCertificateCreateWithData(kCFAllocatorDefault, dataCert as CFData)!
-//
-//
-//        eapSettings.setTrustedServerCertificates([turntocert])
-  
-        
-        
-        let mainbun = Bundle.main.path(forResource: "RADIUS.US.ES", ofType: "cer")
-
-        
-        NEHotspotConfigurationManager.shared.apply(config) { (error) in
-            if let error = error {
-                call.reject(error.localizedDescription)
-            } else {
-                if self.currentSSIDs().first == ssid {
-                    call.success([
-                        "message": "The user has been logged into the network successfully.",
-                        "ssid": ssid,
-                    ])
-                } else {
-                    call.reject("Unable to connect to " + ssid + ". Please try again later.")
+        if call.getString("caCertificate") != nil {
+            
+            if let certificate = call.getString("caCertificate") {
+                if addCertificate(certName: "Certificate " + server, certificate: certificate)
+                {
+                    
+                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                   kSecAttrLabel as String: "Certificate " + server,
+                                                   kSecReturnRef as String: kCFBooleanTrue]
+                    var item: CFTypeRef?
+                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                    guard status == errSecSuccess else { return false }
+                    let savedCert = item as! SecCertificate
+                    
+                    eapSettings.setTrustedServerCertificates([savedCert])
                 }
             }
+        }
+        
+        
+        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+        
+        return config
+    }
+    
+    func addCertificate(certName: String, certificate: String) -> Bool {
+        let certBase64 = certificate
+        
+        let data = Data(base64Encoded: certBase64)!
+                
+        let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData)!
+        
+        let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+        kSecValueRef as String: certRef,
+//        kSecAttrAccessGroup as String: "$(AppIdentifierPrefix)$(TeamIdentifierPrefix)com.apple.networkextensionsharing",
+        kSecAttrLabel as String: certName]
+        
+        let status = SecItemAdd(addquery as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            if status == errSecDuplicateItem {
+                
+                let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                kSecAttrLabel as String: certName,
+//                kSecAttrAccessGroup as String: "$(AppIdentifierPrefix)$(TeamIdentifierPrefix)com.apple.networkextensionsharing",
+                kSecReturnRef as String: kCFBooleanTrue]
+                
+                var item: CFTypeRef?
+                let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                
+                let statusDelete = SecItemDelete(getquery as CFDictionary)
+                
+                guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                
+                return addCertificate(certName: certName, certificate: certificate)
+                
+            }
+            
+            return false
+        }
+        
+        if status == errSecSuccess {
+            return true
+        }
+        else {
+            return false
         }
     }
     
