@@ -11,14 +11,14 @@ import { FormsModule } from '@angular/forms';
 import { ProfilePage } from './profile/profile';
 import { OauthFlow } from './oauthFlow/oauthFlow';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
-import { ConfigPage } from './config/config';
+import { InstitutionSearch } from './institutionSearch/institutionSearch';
 
 const Pages = [
   WelcomePage,
   ErrorsPage,
   ProfilePage,
   OauthFlow,
-  ConfigPage,
+  InstitutionSearch,
   ConfigurationScreen,
   WifiConfiguration,
   WifiConfirmation

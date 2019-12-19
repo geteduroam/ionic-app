@@ -4,7 +4,7 @@ import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
 import { LoadingProvider } from '../../providers/loading/loading';
-import { ConfigPage } from '../config/config';
+import { InstitutionSearch } from '../institutionSearch/institutionSearch';
 
 @Component({
   selector: 'page-config-screen',
@@ -78,29 +78,9 @@ export class ConfigurationScreen implements OnInit {
 
   }
 
-/*  /!**
-   * Method which filters the institutions by the string introduced in the search-bar.
-   * The filter is not case sensitive.
-   * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
-   * @param {any} ev event triggered.
-   *!/
-  getItems(ev: any) {
-    const val = ev.target.value;
-
-    if (val && val.trim() != '') {
-      this.showButton = false;
-      this.filteredInstances = this.instances.filter((item:any) => {
-        this.showInstanceItems= true;
-        return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
-      })
-    } else { //val is empty
-      this.clearInstance();
-    }
-  }*/
-
   async showModal() {
 
-      let searchModal = this.modalCtrl.create(ConfigPage, {instances: this.instances, instanceName: this.instanceName});
+      let searchModal = this.modalCtrl.create(InstitutionSearch, {instances: this.instances, instanceName: this.instanceName});
 
     searchModal.onDidDismiss((data) => {
         console.log('Data: ', data);
@@ -117,16 +97,6 @@ export class ConfigurationScreen implements OnInit {
       return await searchModal.present();
 
   }
-  // /**
-  //  * Method which gets all the institutions.
-  //  * Used after cleaning or first click on the search-bar.
-  //  * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
-  //  */
-  // getAllItems(){
-  //   this.filteredInstances = this.instances;
-  //   this.showInstanceItems= true;
-  //   this.showButton = false;
-  // }
 
   /**
    * Method which clears the profile after selecting a new institution or clear the selected one.
@@ -137,39 +107,6 @@ export class ConfigurationScreen implements OnInit {
     this.profileName = '';
     this.selectedProfileId = '';
   }
-
-/*  /!**
-   * Method which clears the instance after pressing X in the search-bar.
-   * This method updates the properties [showInstanceItems]{@link #showInstanceItems}, [instance]{@link #instance},
-   * [instanceName]{@link #instanceName}, [defaultProfile]{@link #defaultProfile} and [profiles]{@link #profiles}.
-   * This method also calls the methods [clearProfile()]{@link #clearProfile} and [getAllItems()]{@link #getAllItems}
-   *!/
-  clearInstance(){
-    this.showInstanceItems= false;
-    this.instance = '';
-    this.instanceName = '';
-    this.defaultProfile = '';
-    this.profiles = '';
-    this.showButton = false;
-    this.clearProfile();
-    this.getAllItems();
-  }*/
-
-  // /**
-  //  * Method which manages the selection of a new institution.
-  //  * This method updates the properties [instance]{@link #instance}, [instanceName]{@link #instanceName}
-  //  * and [showInstanceItems]{@link #showInstanceItems}.
-  //  * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
-  //  * @param {any} institution the selected institution.
-  //  */
-  // selectInstitution(institution: any) {
-  //   this.instance = institution;
-  //   this.instanceName = institution.name;
-  //   this.showButton = true;
-  //   this.showInstanceItems = false;
-  //   this.initializeProfiles(institution);
-  //   this.checkProfiles();
-  // }
 
   /**
    * Method which manages the selection of a new profile for the already selected institution.

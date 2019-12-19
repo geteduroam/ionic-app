@@ -96,10 +96,20 @@ ion-list {
   }
 }
 
+////---------------------------------
+//// Show all elements in searchable
+////---------------------------------
+//ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
+//  contain: unset !important;
+//  overflow: unset !important;
+//}
+
 //---------------------------------
-// Show all elements in searchable
+// Ion-select options style custom
 //---------------------------------
-ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
-  contain: unset !important;
-  overflow: unset !important;
+.default-profile {
+  font-weight: bold;
+}
+.default-profile .alert-wrapper {
+  font-weight: bold !important;
 }

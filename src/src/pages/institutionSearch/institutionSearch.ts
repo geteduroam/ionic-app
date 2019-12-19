@@ -3,10 +3,10 @@ import { NavController, NavParams, ViewController } from 'ionic-angular';
 
 
 @Component({
-  selector: 'page-config',
-  templateUrl: 'config.html',
+  selector: 'page-institution-search',
+  templateUrl: 'institutionSearch.html',
 })
-export class ConfigPage {
+export class InstitutionSearch {
   instances: any;
   /**
    * Set of institutions filtered by what is written in the search-bar
@@ -62,14 +62,6 @@ export class ConfigPage {
 
     this.filterInstances(val);
 
-    // if (val && val.trim() != '') {
-    //
-    //   this.filteredInstances = this.instances.filter((item:any) => {
-    //     return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
-    //   })
-    // } else {
-    //   this.clearInstance();
-    // }
   }
 
   filterInstances(stringAux: string){

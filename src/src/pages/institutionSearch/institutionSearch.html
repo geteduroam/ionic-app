@@ -1,10 +1,10 @@
-<ion-header translucent>
+<ion-header transparent>
     <ion-toolbar>
         <ion-searchbar (ionInput)="getItems($event)" (ionCancel)="clearInstance()" [(ngModel)]="instanceName" placeholder="Select an Institution"></ion-searchbar>
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
-    <ion-list *ngFor="let institution of filteredInstances">
+    <ion-list *ngFor="let institution of filteredInstances" no-margin>
         <ion-item (click)="selectInstitution(institution)">{{institution.name}}</ion-item>
     </ion-list>
 </ion-content>

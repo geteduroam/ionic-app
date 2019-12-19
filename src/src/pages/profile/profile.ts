@@ -28,7 +28,7 @@ export class ProfilePage implements OnInit{
   eapConfig: any;
 
   /**
-   * The authentication methods obtained from the eap config file
+   * The authentication methods obtained from the eap institutionSearch file
    */
   authenticationMethods: AuthenticationMethod[];
 
@@ -45,8 +45,8 @@ export class ProfilePage implements OnInit{
   }
 
   /**
-   * Method which returns the eap config endpoint
-   * @return {any} eapconfig_endpoint the eap config endpoint
+   * Method which returns the eap institutionSearch endpoint
+   * @return {any} eapconfig_endpoint the eap institutionSearch endpoint
    */
   getEapconfigEndpoint(){
     return this.profile.eapconfig_endpoint;
@@ -133,7 +133,7 @@ export class ProfilePage implements OnInit{
   }
 
   /**
-   * Method to get the first valid authentication method form an eap config file.
+   * Method to get the first valid authentication method form an eap institutionSearch file.
    * @return {AuthenticationMethod} the first valid authentication method
    */
   private async getFirstValidAuthenticationMethod(){
