@@ -17,6 +17,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -42,7 +43,7 @@ public class WifiEapConfigurator extends Plugin {
     List<ScanResult> results = null;
 
     @PluginMethod()
-    public void test(PluginCall call) {
+    public void configAP(PluginCall call) {
         String ssid = null;
         boolean res = true;
         if (call.getString("ssid") != "" && call.getString("ssid") != null) {
@@ -98,7 +99,6 @@ public class WifiEapConfigurator extends Plugin {
             res = false;
         }
 
-
         getPermission();
 
         if (res) {
@@ -110,8 +110,57 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         if (res) {
-            configPEAP(ssid, username, password, servername, caCertificate, eap, auth, call);
+            connectAP(ssid, username, password, servername, caCertificate, eap, auth, call);
         }
+    }
+
+    void connectAP(String ssid, String username, String password, String servername, String caCertificate, Integer eap, Integer auth, PluginCall call) {
+        WifiConfiguration config = new WifiConfiguration();
+
+        config.SSID = "\"" + ssid + "\"";
+        config.priority = 1;
+        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+
+        config.status = WifiConfiguration.Status.ENABLED;
+
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+        enterpriseConfig.setIdentity(username);
+        enterpriseConfig.setPassword(password);
+        enterpriseConfig.setAnonymousIdentity("anonymous@uninett.no");
+        enterpriseConfig.setDomainSuffixMatch(servername);
+        Integer eapMethod = getEapMethod(eap, call);
+        enterpriseConfig.setEapMethod(eapMethod);
+        Integer authMethod = getAuthMethod(auth, call);
+        enterpriseConfig.setPhase2Method(authMethod);
+
+
+
+        CertificateFactory certFactory = null;
+        X509Certificate caCert = null;
+        if (caCertificate != null && caCertificate != "") {
+            byte[] bytes = Base64.decode(caCertificate, Base64.NO_WRAP);
+            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+
+            try {
+                certFactory = CertificateFactory.getInstance("X.509");
+                caCert = (X509Certificate) certFactory.generateCertificate(b);
+
+                enterpriseConfig.setCaCertificate(caCert);
+            } catch (CertificateException e) {
+                e.printStackTrace();
+                Log.e("error", e.getMessage());
+            }
+        }
+
+        config.enterpriseConfig = enterpriseConfig;
+
+        WifiManager myWifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        int id = myWifiManager.addNetwork(config);
+        myWifiManager.disconnect();
+        myWifiManager.enableNetwork(id, true);
+        myWifiManager.reconnect();
 
     }
 
@@ -198,53 +247,6 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-    void configPEAP(String ssid, String username, String password, String servername, String caCertificate, Integer eap, Integer auth, PluginCall call) {
-        WifiConfiguration config = new WifiConfiguration();
-
-        config.SSID = "\"" + ssid + "\"";
-        config.priority = 1;
-        WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
-
-
-        config.status = WifiConfiguration.Status.ENABLED;
-
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-        enterpriseConfig.setIdentity(username);
-        enterpriseConfig.setPassword(password);
-        enterpriseConfig.setDomainSuffixMatch(servername);
-        Integer eapMethod = getEapMethod(eap, call);
-        enterpriseConfig.setEapMethod(eapMethod);
-        Integer authMethod = getAuthMethod(auth, call);
-        enterpriseConfig.setPhase2Method(authMethod);
-
-        CertificateFactory certFactory = null;
-        X509Certificate caCert = null;
-        if (caCertificate != null && caCertificate != "") {
-            byte[] bytes = Base64.decode(caCertificate, Base64.NO_WRAP);
-            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-
-            try {
-                certFactory = CertificateFactory.getInstance("X.509");
-                caCert = (X509Certificate) certFactory.generateCertificate(b);
-
-                enterpriseConfig.setCaCertificate(caCert);
-            } catch (CertificateException e) {
-                e.printStackTrace();
-                Log.e("error", e.getMessage());
-            }
-        }
-
-        config.enterpriseConfig = enterpriseConfig;
-
-        WifiManager myWifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-        int id = myWifiManager.addNetwork(config);
-        myWifiManager.disconnect();
-        myWifiManager.enableNetwork(id, true);
-        myWifiManager.reconnect();
-
-    }
 
     void getPermission() {
 
