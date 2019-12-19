@@ -14,7 +14,6 @@ export class ConfigurationScreen implements OnInit {
 
   showAll: boolean = false;
 
-
   /**
    * Set of available profiles
    */
@@ -172,8 +171,8 @@ export class ConfigurationScreen implements OnInit {
     this.loading.createAndPresent();
     const response = await this.getEduroamServices.discovery();
     this.instances = response.instances;
-    this.loading.dismiss();
     this.showAll = true;
+    this.loading.dismiss();
   }
 
 }

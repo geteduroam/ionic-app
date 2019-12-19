@@ -68,7 +68,7 @@ export class ProfilePage implements OnInit{
 
     let validEap: boolean = await this.validateEapconfig();
 
-    if(validEap){
+    if (validEap) {
       this.showAll = true;
       console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
