@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ModalController, NavController, NavParams } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
@@ -69,6 +69,7 @@ export class ConfigurationScreen implements OnInit {
    */
   showButton: boolean = true;
 
+
   /**
    * Constructor
    * */
@@ -79,10 +80,13 @@ export class ConfigurationScreen implements OnInit {
 
   async showModal() {
 
-      let searchModal = this.modalCtrl.create(InstitutionSearch, {instances: this.instances, instanceName: this.instanceName});
+    let searchModal = this.modalCtrl.create(InstitutionSearch, {
+      instances: this.instances,
+      instanceName: this.instanceName}
+      );
 
     searchModal.onDidDismiss((data) => {
-        console.log('Data: ', data);
+
         if (data !== undefined) {
           this.instance = data;
           this.instanceName = data.name;
@@ -171,8 +175,8 @@ export class ConfigurationScreen implements OnInit {
     this.loading.createAndPresent();
     const response = await this.getEduroamServices.discovery();
     this.instances = response.instances;
-    this.showAll = true;
     this.loading.dismiss();
+    this.showAll = true;
   }
 
 }

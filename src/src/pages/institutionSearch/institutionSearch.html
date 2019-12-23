@@ -1,6 +1,7 @@
 <ion-header transparent>
     <ion-toolbar>
-        <ion-searchbar (ionInput)="getItems($event)" (ionCancel)="clearInstance()" [(ngModel)]="instanceName" placeholder="Select an Institution"></ion-searchbar>
+        <ion-searchbar #searchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)"
+                       [(ngModel)]="instanceName" placeholder="Select an institution..."></ion-searchbar>
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>

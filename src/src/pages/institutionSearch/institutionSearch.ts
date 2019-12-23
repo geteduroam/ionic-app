@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
-import { NavController, NavParams, ViewController } from 'ionic-angular';
-
+import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { NavController, NavParams, Searchbar, ViewController } from 'ionic-angular';
+import { Plugins } from '@capacitor/core';
+const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-institution-search',
   templateUrl: 'institutionSearch.html',
 })
-export class InstitutionSearch {
+export class InstitutionSearch implements OnDestroy {
   instances: any;
   /**
    * Set of institutions filtered by what is written in the search-bar
@@ -33,7 +34,11 @@ export class InstitutionSearch {
    */
   profile: any;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController) {
+  @ViewChild('searchBar') searchBar: Searchbar;
+
+  constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController,
+              ) {
+
     this.instances = this.navParams.get('instances');
     this.instanceName = this.navParams.get('instanceName');
     this.filterInstances(this.instanceName);
@@ -48,6 +53,7 @@ export class InstitutionSearch {
    */
   async selectInstitution(institution: any) {
     this.instances = institution;
+
     await this.viewCtrl.dismiss(institution);
   }
 
@@ -94,6 +100,7 @@ export class InstitutionSearch {
     this.clearProfile();
     this.getAllItems();
   }
+
   /**
    * Method which clears the profile after selecting a new institution or clear the selected one.
    * This method updates the properties [profile]{@link #profile}, [profileName]{@link #profileName} and [selectedProfileId]{@link #selectedProfileId}
@@ -104,4 +111,14 @@ export class InstitutionSearch {
     this.selectedProfileId = '';
   }
 
+  ionViewDidEnter() {
+
+    setTimeout(() => {
+      this.searchBar.setFocus()
+    }, 10);
+  }
+
+  ngOnDestroy() {
+    Keyboard.hide();
+  }
 }

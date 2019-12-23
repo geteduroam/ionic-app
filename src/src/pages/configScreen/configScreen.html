@@ -9,7 +9,8 @@
 
         <div class="row" padding-top>
 
-            <ion-searchbar (click)="showModal()" [(ngModel)]="instanceName" animated class="searchbar-input" no-padding placeholder="Select an Institution">
+            <ion-searchbar (click)="showModal()" [(ngModel)]="instanceName" cancelButtonText
+                           class="searchbar-input" no-padding placeholder="Select an institution">
 
             </ion-searchbar>
         </div>
@@ -20,8 +21,12 @@
 
             <ion-item *ngIf="!!profiles && profiles.length > 1" class="item-profile" no-margin no-padding>
 
-                <ion-select (ionChange)="selectProfile()"  *ngIf="!!profiles && profiles.length > 1" [(ngModel)]="selectedProfileId" [ngClass]="profile === defaultProfile ? 'default-profile': ''" [selectedText]="profileName" class="select-profile"
-                            name="selectProfile" placeholder="Select a profile..." text-left >
+                <ion-select (ionChange)="selectProfile()"  *ngIf="!!profiles && profiles.length > 1"
+                            [(ngModel)]="selectedProfileId"
+                            [ngClass]="profile === defaultProfile ? 'default-profile': ''"
+                            [selectedText]="profileName" class="select-profile" name="selectProfile"
+                            placeholder="Select a profile..." text-left >
+
                     <ion-option *ngFor="let profileAux of profiles" [class.default-profile]="profileAux === defaultProfile" [value]="profileAux.id" >{{profileAux.name}}</ion-option>
                 </ion-select>
             </ion-item>
