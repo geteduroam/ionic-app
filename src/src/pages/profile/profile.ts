@@ -150,4 +150,9 @@ export class ProfilePage implements OnInit{
     return null;
   }
 
+  ionViewDidLeave() {
+    this.loading.createAndPresent();
+    this.showAll = false;
+    this.loading.dismiss();
+  }
 }

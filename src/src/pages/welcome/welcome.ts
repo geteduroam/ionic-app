@@ -16,7 +16,7 @@ export class WelcomePage  {
   }
 
   async navigateTo() {
-    await this.navCtrl.setRoot(ConfigurationScreen);
+    await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
   }
 
   exitApp() {

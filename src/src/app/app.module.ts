@@ -1,6 +1,6 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicApp, IonicModule, PageTransition } from 'ionic-angular';
+import { IonicApp, IonicModule, PageTransition, Transition } from 'ionic-angular';
 import { GeteduroamApp } from './app.component';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 
@@ -21,10 +21,7 @@ import { LoadingProvider } from '../providers/loading/loading';
   imports: [
     BrowserModule,
     PagesModule,
-    IonicModule.forRoot(GeteduroamApp, {
-      animated: true,
-      navAnimation: 'fade-in'
-    })
+    IonicModule.forRoot(GeteduroamApp)
   ],
   bootstrap: [IonicApp],
   entryComponents: [

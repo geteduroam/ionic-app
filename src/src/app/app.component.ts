@@ -1,9 +1,10 @@
-import { Platform } from 'ionic-angular';
+import { Config, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
+import { Transition } from '../providers/transition/Transition';
 
 @Component({
   templateUrl: 'app.html'
@@ -21,9 +22,11 @@ export class GeteduroamApp {
    * @constructor
    *
    */
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private screenOrientation: ScreenOrientation) {
+  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
+              private screenOrientation: ScreenOrientation, config: Config) {
 
     platform.ready().then(() => {
+      config.setTransition('transition', Transition);
       statusBar.styleDefault();
       splashScreen.hide();
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation

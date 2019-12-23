@@ -163,7 +163,7 @@ export class ConfigurationScreen implements OnInit {
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   navigateTo(profile) {
-    !!profile.oauth ? this.navCtrl.push(OauthFlow) : this.navCtrl.push(ProfilePage, {profile});
+    !!profile.oauth ? this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) : this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
 
   }
 
@@ -178,5 +178,10 @@ export class ConfigurationScreen implements OnInit {
     this.loading.dismiss();
     this.showAll = true;
   }
-
+  ionViewDidEnter() {
+    this.showAll = true;
+  }
+  ionViewDidLeave() {
+    this.showAll = false;
+  }
 }
