@@ -43,7 +43,7 @@ public class WifiEapConfigurator extends Plugin {
     List<ScanResult> results = null;
 
     @PluginMethod()
-    public void configAP(PluginCall call) {
+    public void configureAP(PluginCall call) {
         String ssid = null;
         boolean res = true;
         if (call.getString("ssid") != "" && call.getString("ssid") != null) {
@@ -77,6 +77,11 @@ public class WifiEapConfigurator extends Plugin {
             res = false;
         }
 
+        String anonymousIdentity = null;
+        if (call.getString("anonymous") != null && call.getString("anonymous") != "") {
+            anonymousIdentity = call.getString("anonymous");
+        }
+
         String caCertificate = null;
         if (call.getString("caCertificate") != null && call.getString("caCertificate") != "") {
             caCertificate = call.getString("caCertificate");
@@ -99,22 +104,21 @@ public class WifiEapConfigurator extends Plugin {
             res = false;
         }
 
-        getPermission();
-
         if (res) {
             res = checkEnabledWifi(call);
         }
 
         if (res) {
-            res = getWifiBySSID(call, ssid);
+            res = getNetworkAssociated(call, ssid);
         }
 
         if (res) {
-            connectAP(ssid, username, password, servername, caCertificate, eap, auth, call);
+            connectAP(ssid, username, password, servername, caCertificate, eap, auth, anonymousIdentity, call);
         }
     }
 
-    void connectAP(String ssid, String username, String password, String servername, String caCertificate, Integer eap, Integer auth, PluginCall call) {
+    void connectAP(String ssid, String username, String password, String servername, String caCertificate,
+                   Integer eap, Integer auth, String anonymousIdentity, PluginCall call) {
         WifiConfiguration config = new WifiConfiguration();
 
         config.SSID = "\"" + ssid + "\"";
@@ -127,14 +131,14 @@ public class WifiEapConfigurator extends Plugin {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
         enterpriseConfig.setIdentity(username);
         enterpriseConfig.setPassword(password);
-        enterpriseConfig.setAnonymousIdentity("anonymous@uninett.no");
+        if(anonymousIdentity!=null && anonymousIdentity!=""){
+            enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
+        }
         enterpriseConfig.setDomainSuffixMatch(servername);
         Integer eapMethod = getEapMethod(eap, call);
         enterpriseConfig.setEapMethod(eapMethod);
         Integer authMethod = getAuthMethod(auth, call);
         enterpriseConfig.setPhase2Method(authMethod);
-
-
 
         CertificateFactory certFactory = null;
         X509Certificate caCert = null;
@@ -175,8 +179,17 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-    private boolean getWifiBySSID(PluginCall call, String ssid) {
+    private boolean getNetworkAssociated(PluginCall call, String ssid) {
         boolean res = true;
+
+        LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!gps_enabled) {
+            call.reject("Location disabled");
+            res = false;
+        }
+
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
@@ -187,23 +200,6 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
-        LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-        boolean gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-       /* results = wifi.getScanResults();
-        Log.i("bien",results.toString());
-        for (ScanResult s : results) {
-            if(s.SSID.toLowerCase().contains(ssid.toLowerCase())){
-                res = s;
-                break;
-            }
-        }
-        Log.i("bien","res "+(res!=null?res.toString():"nulo"));*/
-
-        if (!gps_enabled) {
-            call.reject("Location disabled");
-            res = false;
-        }
         return res;
     }
 
@@ -247,23 +243,4 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-
-    void getPermission() {
-
-        if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
-        }
-
-        if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_WIFI_STATE}, 123);
-        }
-
-        if (checkSelfPermission(getContext(), Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 123);
-        }
-
-        if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, 123);
-        }
-    }
 }
