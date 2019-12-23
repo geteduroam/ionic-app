@@ -19,17 +19,68 @@ public class WifiEapConfigurator: CAPPlugin {
             return nil
         }
     }
-    
+        
     @available(iOS 12.0, *)
-    @objc func connectAP(_ call: CAPPluginCall){
+    @objc func configureAP(_ call: CAPPluginCall) {
+                
         guard let ssid = call.getString("ssid") else {
-            return call.reject("You must provide a SSID.")
+           return call.reject("You must provide a SSID.")
         }
-        
-        guard let config = call.get("config", NEHotspotConfiguration.self) else {
-            return call.reject("You must provide a configuration")
+
+        guard let username = call.getString("username") else {
+            return call.reject("You must provide an username.")
         }
-        
+
+        guard let password = call.getString("password") else {
+            return call.reject("You must provide a password.")
+        }
+
+        guard let eapType = call.get("eap", NSNumber.self) else {
+            return call.reject("You must provide an EAP Type.")
+        }
+
+        guard let server = call.getString("servername") else {
+            return call.reject("You must provide a servername.")
+        }
+
+        guard let authType = call.getInt("auth") else {
+            return call.reject("You must provide a authentication type.")
+        }
+
+        let eapSettings = NEHotspotEAPSettings()
+        eapSettings.isTLSClientCertificateRequired = true
+        eapSettings.supportedEAPTypes = [eapType]
+        eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType)!
+        eapSettings.trustedServerNames = [server]
+        eapSettings.username = username
+        eapSettings.password = password
+
+        if let anonymous = call.getString("anonymous") {
+            eapSettings.outerIdentity = anonymous
+        }
+
+        if call.getString("caCertificate") != nil {
+
+            if let certificate = call.getString("caCertificate") {
+                if addCertificate(certName: "Certificate " + server, certificate: certificate)
+                {
+
+                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                   kSecAttrLabel as String: "Certificate " + server,
+                                                   kSecReturnRef as String: kCFBooleanTrue]
+                    var item: CFTypeRef?
+                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                    guard status == errSecSuccess else { return }
+                    let savedCert = item as! SecCertificate
+
+                    eapSettings.setTrustedServerCertificates([savedCert])
+                }
+            }
+        }
+
+
+        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+       
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 call.reject(error.localizedDescription)
@@ -44,67 +95,54 @@ public class WifiEapConfigurator: CAPPlugin {
                 }
             }
         }
+    }
+    
+    @objc func checkAssociated(_ call: CAPPluginCall) {
+        
+        guard let ssidToCheck = call.getString("ssid") else {
+            return call.reject("You must provide a SSID.")
+        }
+        
+        var iterator = false
+        
+        NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
+            for ssid in ssids {
+                if ssidToCheck == ssid {
+                    iterator = true
+                }
+            }
+            
+            call.success([
+                "ssid": ssidToCheck,
+                "associated": iterator
+            ])
+        }
         
     }
     
-    @available(iOS 12.0, *)
-    @objc func configureAP(_ call: CAPPluginCall) -> Any? {
+    @objc func removeConfig(_ call: CAPPluginCall) {
         
-        guard let ssid = call.getString("ssid") else {
-           return call.reject("You must provide a SSID.")
+        guard let ssidToCheck = call.getString("ssid") else {
+            return call.reject("You must provide a SSID.")
         }
         
-        guard let username = call.getString("username") else {
-            return call.reject("You must provide an username.")
-        }
+        NEHotspotConfigurationManager.shared.removeConfiguration(forSSID: ssidToCheck)
         
-        guard let password = call.getString("password") else {
-            return call.reject("You must provide a password.")
-        }
+        var removed = false
         
-        guard let eapType = call.get("eap", NSNumber.self) else {
-            return call.reject("You must provide an EAP Type.")
-        }
-        
-        guard let server = call.getString("servername") else {
-            return call.reject("You must provide a servername.")
-        }
-        
-        guard let authType = call.getInt("auth") else {
-            return call.reject("You must provide a authentication type.")
-        }
-        
-        let eapSettings = NEHotspotEAPSettings()
-        eapSettings.isTLSClientCertificateRequired = true
-        eapSettings.supportedEAPTypes = [eapType]
-        eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType)!
-        eapSettings.trustedServerNames = [server]
-        eapSettings.username = username
-        eapSettings.password = password
-        
-        if call.getString("caCertificate") != nil {
-            
-            if let certificate = call.getString("caCertificate") {
-                if addCertificate(certName: "Certificate " + server, certificate: certificate)
-                {
-                    
-                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                   kSecAttrLabel as String: "Certificate " + server,
-                                                   kSecReturnRef as String: kCFBooleanTrue]
-                    var item: CFTypeRef?
-                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                    guard status == errSecSuccess else { return false }
-                    let savedCert = item as! SecCertificate
-                    
-                    eapSettings.setTrustedServerCertificates([savedCert])
+        NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
+            for ssid in ssids {
+                if ssidToCheck != ssid {
+                    removed = true
                 }
             }
+            
+            call.success([
+                "ssid": ssidToCheck,
+                "removed": removed
+            ])
         }
-        
-        
-        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
-        
-        return config
+
     }
     
     func addCertificate(certName: String, certificate: String) -> Bool {
@@ -149,6 +187,7 @@ public class WifiEapConfigurator: CAPPlugin {
             return false
         }
     }
+    
     
     func currentSSIDs() -> [String] {
         guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
