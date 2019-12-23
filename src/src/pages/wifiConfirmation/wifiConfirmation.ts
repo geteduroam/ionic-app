@@ -1,26 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavController, NavParams, Platform } from 'ionic-angular';
-import { LoadingProvider } from '../../providers/loading/loading';
 
 
 @Component({
   selector: 'page-wifi-confirm',
   templateUrl: 'wifiConfirmation.html',
 })
-export class WifiConfirmation implements OnInit {
-  showAll: boolean = false;
+export class WifiConfirmation {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private platform: Platform,
-              public loading: LoadingProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private platform: Platform) {
   }
-  async ngOnInit() {
 
-    this.loading.createAndPresent();
-    this.showAll = true;
-    this.loading.dismiss();
-
-
-  }
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
   exitApp() {
       this.platform.exitApp();

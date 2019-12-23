@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform } from 'ionic-angular';
+import { ModalController, NavController, NavParams, Platform } from 'ionic-angular';
 import { ConfigurationScreen } from '../configScreen/configScreen';
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
-import { LoadingProvider } from '../../providers/loading/loading';
 
 
 @Component({
@@ -12,13 +11,12 @@ import { LoadingProvider } from '../../providers/loading/loading';
 
 export class WelcomePage  {
 
-  constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams,
-              private error: ErrorHandlerProvider, public loading: LoadingProvider) {
+  constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams, private error: ErrorHandlerProvider) {
 
   }
 
   async navigateTo() {
-    await this.navCtrl.push(ConfigurationScreen,{});
+    await this.navCtrl.setRoot(ConfigurationScreen);
   }
 
   exitApp() {

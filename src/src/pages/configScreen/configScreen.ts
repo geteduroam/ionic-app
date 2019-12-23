@@ -1,12 +1,10 @@
-import {Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { ModalController, NavController, NavParams } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { InstitutionSearch } from '../institutionSearch/institutionSearch';
-import { Plugins } from '@capacitor/core';
-const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-config-screen',
@@ -80,14 +78,11 @@ export class ConfigurationScreen implements OnInit {
   }
 
   async showModal() {
-    await Keyboard.hide();
 
-    let searchModal = this.modalCtrl.create(InstitutionSearch, {
-      instances: this.instances,
-      instanceName: this.instanceName
-    });
+      let searchModal = this.modalCtrl.create(InstitutionSearch, {instances: this.instances, instanceName: this.instanceName});
 
     searchModal.onDidDismiss((data) => {
+        console.log('Data: ', data);
         if (data !== undefined) {
           this.instance = data;
           this.instanceName = data.name;
@@ -95,6 +90,7 @@ export class ConfigurationScreen implements OnInit {
           this.initializeProfiles(this.instance);
 
         }
+
       });
 
       return await searchModal.present();
@@ -163,13 +159,7 @@ export class ConfigurationScreen implements OnInit {
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   navigateTo(profile) {
-    !!profile.oauth ? this.navCtrl.push(OauthFlow,{}, {
-      animate: true,
-      animation: 'md-transition',
-    }) : this.navCtrl.push(ProfilePage, {profile}, {
-      animate: true,
-      animation: 'md-transition',
-    });
+    !!profile.oauth ? this.navCtrl.push(OauthFlow) : this.navCtrl.push(ProfilePage, {profile});
 
   }
 
@@ -181,10 +171,8 @@ export class ConfigurationScreen implements OnInit {
     this.loading.createAndPresent();
     const response = await this.getEduroamServices.discovery();
     this.instances = response.instances;
-
-    this.loading.dismiss();
     this.showAll = true;
-
+    this.loading.dismiss();
   }
 
 }
