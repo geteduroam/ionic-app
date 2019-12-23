@@ -8,7 +8,6 @@ import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler"
 import {LoadingProvider} from "../../providers/loading/loading";
 
 
-
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
@@ -41,7 +40,10 @@ export class ProfilePage implements OnInit{
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
   async navigateTo() {
-    await this.navCtrl.push(WifiConfirmation);
+    await this.navCtrl.push(WifiConfirmation,{}, {
+      animate: true,
+      animation: 'md-transition',
+    });
   }
 
   /**

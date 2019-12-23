@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, ViewController } from 'ionic-angular';
-
+import { Plugins } from '@capacitor/core';
+const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-institution-search',
@@ -104,4 +105,7 @@ export class InstitutionSearch {
     this.selectedProfileId = '';
   }
 
+  async ionViewWillLeave() {
+   await Keyboard.hide();
+  }
 }

@@ -21,7 +21,9 @@ import { LoadingProvider } from '../providers/loading/loading';
   imports: [
     BrowserModule,
     PagesModule,
-    IonicModule.forRoot(GeteduroamApp)
+    IonicModule.forRoot(GeteduroamApp, {
+      pageTransition: 'md-transition'
+    })
   ],
   bootstrap: [IonicApp],
   entryComponents: [
