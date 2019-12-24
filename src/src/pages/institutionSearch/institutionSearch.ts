@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { NavController, NavParams, Searchbar, ViewController } from 'ionic-angular';
 import { Plugins } from '@capacitor/core';
 const { Keyboard } = Plugins;
@@ -7,7 +7,7 @@ const { Keyboard } = Plugins;
   selector: 'page-institution-search',
   templateUrl: 'institutionSearch.html',
 })
-export class InstitutionSearch implements OnDestroy {
+export class InstitutionSearch {
   instances: any;
   /**
    * Set of institutions filtered by what is written in the search-bar
@@ -36,8 +36,7 @@ export class InstitutionSearch implements OnDestroy {
 
   @ViewChild('searchBar') searchBar: Searchbar;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController,
-              ) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController) {
 
     this.instances = this.navParams.get('instances');
     this.instanceName = this.navParams.get('instanceName');
@@ -53,8 +52,10 @@ export class InstitutionSearch implements OnDestroy {
    */
   async selectInstitution(institution: any) {
     this.instances = institution;
+    Keyboard.hide().then(async ()=>{
+      await this.viewCtrl.dismiss(institution);
+    });
 
-    await this.viewCtrl.dismiss(institution);
   }
 
   /**
@@ -116,9 +117,5 @@ export class InstitutionSearch implements OnDestroy {
     setTimeout(() => {
       this.searchBar.setFocus()
     }, 10);
-  }
-
-  ngOnDestroy() {
-    Keyboard.hide();
   }
 }

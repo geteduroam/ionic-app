@@ -36,12 +36,12 @@ export class ProfilePage implements OnInit{
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               public loading: LoadingProvider) {
 
-    // console.log(this.getEapconfigEndpoint());
+    console.log(this.getEapconfigEndpoint());
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
   async navigateTo() {
-    await this.navCtrl.push(WifiConfirmation);
+    await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
   }
 
   /**
@@ -70,6 +70,7 @@ export class ProfilePage implements OnInit{
 
     if (validEap) {
       this.showAll = true;
+      this.getFirstValidAuthenticationMethod();
       console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);

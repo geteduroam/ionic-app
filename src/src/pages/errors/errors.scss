@@ -1,5 +1,13 @@
 page-errors {
+
   .info-text {
     height: calc(70% - 20px);
+  }
+
+  .content-info {
+    p .copy {
+      overflow: hidden;
+      height: calc(80% - 30px);
+    }
   }
 }
