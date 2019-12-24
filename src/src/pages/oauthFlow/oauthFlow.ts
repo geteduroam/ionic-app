@@ -17,9 +17,8 @@ export class OauthFlow implements OnInit {
 
     this.loading.createAndPresent();
 
-
+    this.showAll = true;
     this.loading.dismiss();
-
   }
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
   async navigateTo() {

@@ -78,6 +78,9 @@ export class ConfigurationScreen implements OnInit {
 
   }
 
+  /**
+   * Method executes when the search bar is tapped.
+   * */
   async showModal() {
 
     let searchModal = this.modalCtrl.create(InstitutionSearch, {
@@ -94,7 +97,6 @@ export class ConfigurationScreen implements OnInit {
           this.initializeProfiles(this.instance);
 
         }
-
       });
 
       return await searchModal.present();
@@ -178,9 +180,16 @@ export class ConfigurationScreen implements OnInit {
     this.loading.dismiss();
     this.showAll = true;
   }
+
+  /**
+   * Method executed when the class did enter, usually when swipe back from the next page
+   */
   ionViewDidEnter() {
     this.showAll = true;
   }
+  /**
+   * Method executed when the class leave view to the next page
+   */
   ionViewDidLeave() {
     this.showAll = false;
   }
