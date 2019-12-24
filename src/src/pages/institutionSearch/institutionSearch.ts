@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, NavParams, Searchbar, ViewController } from 'ionic-angular';
+import { NavController, NavParams, Platform, Searchbar, ViewController } from 'ionic-angular';
 import { Plugins } from '@capacitor/core';
 const { Keyboard } = Plugins;
 
@@ -33,11 +33,14 @@ export class InstitutionSearch {
    * Selected profile
    */
   profile: any;
+  ios: boolean = false;
+  android: boolean = false;
 
   @ViewChild('searchBar') searchBar: Searchbar;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController) {
-
+  constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController,
+              private platform: Platform) {
+    this.platform.is('android') ? this.android = true : this.ios = true;
     this.instances = this.navParams.get('instances');
     this.instanceName = this.navParams.get('instanceName');
     this.filterInstances(this.instanceName);
