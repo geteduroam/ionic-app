@@ -27,7 +27,7 @@
                             [selectedText]="profileName" class="select-profile" name="selectProfile"
                             placeholder="Select a profile..." text-left >
 
-                    <ion-option *ngFor="let profileAux of profiles" [class.default-profile]="profileAux === defaultProfile" [value]="profileAux.id" >{{profileAux.name}}</ion-option>
+                    <ion-option *ngFor="let profileAux of profiles" [value]="profileAux.id" [className]="!!profileAux.default ? 'default-profile':'normal'">{{profileAux.name}}</ion-option>
                 </ion-select>
             </ion-item>
         </div>
