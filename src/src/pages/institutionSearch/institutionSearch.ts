@@ -33,17 +33,16 @@ export class InstitutionSearch {
    * Selected profile
    */
   profile: any;
+  /**
+   * Platform ios
+   */
   ios: boolean = false;
-  android: boolean = false;
 
   @ViewChild('searchBar') searchBar: Searchbar;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController,
               private platform: Platform) {
-    this.platform.is('android') ? this.android = true : this.ios = true;
-    this.instances = this.navParams.get('instances');
-    this.instanceName = this.navParams.get('instanceName');
-    this.filterInstances(this.instanceName);
+
   }
 
   /**
@@ -116,6 +115,10 @@ export class InstitutionSearch {
   }
 
   ionViewDidEnter() {
+    this.platform.is('ios') ? this.ios = true : this.ios = false;
+    this.instances = this.navParams.get('instances');
+    this.instanceName = this.navParams.get('instanceName');
+    this.filterInstances(this.instanceName);
 
     setTimeout(() => {
       this.searchBar.setFocus()

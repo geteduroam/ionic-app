@@ -5,9 +5,9 @@
                        [showCancelButton]="true" (ionCancel)="dismiss()" cancelButtonText="Done"></ion-searchbar>
     </ion-toolbar>
 
-    <ion-toolbar *ngIf="android">
-        <ion-searchbar #searchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)" [(ngModel)]="instanceName"
-                        class="searchbar-android" placeholder="Select an institution..."></ion-searchbar>
+    <ion-toolbar *ngIf="!ios">
+        <ion-searchbar #searchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)"
+                       [(ngModel)]="instanceName" placeholder="Select an institution..."></ion-searchbar>
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
