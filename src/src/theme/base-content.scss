@@ -65,6 +65,11 @@ ion-content {
           letter-spacing: 0.9px;
           text-align: center;
         }
+
+        .message {
+          overflow: hidden;
+          height: calc(80% - 30px);
+        }
       }
     }
 

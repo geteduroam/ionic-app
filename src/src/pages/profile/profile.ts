@@ -151,9 +151,16 @@ export class ProfilePage implements OnInit{
     return null;
   }
 
+  /**
+   * Method executed when the class did enter, usually when swipe back from the next page
+   */
+  ionViewDidEnter() {
+    this.showAll = true;
+  }
+  /**
+   * Method executed when the class leave view to the next page
+   */
   ionViewDidLeave() {
-    this.loading.createAndPresent();
     this.showAll = false;
-    this.loading.dismiss();
   }
 }

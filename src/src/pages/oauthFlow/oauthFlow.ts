@@ -22,6 +22,13 @@ export class OauthFlow implements OnInit {
   }
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
   async navigateTo() {
-    await this.navCtrl.push(WifiConfirmation);
+    this.showAll = false;
+    await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+  }
+  /**
+   * Method executed when the class did enter, usually when swipe back from the next page
+   */
+  ionViewDidEnter() {
+    this.showAll = true;
   }
 }

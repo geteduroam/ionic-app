@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { NavController, NavParams, Platform, ViewController } from 'ionic-angular';
-import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 
 
 @Component({
@@ -39,5 +38,9 @@ export class ErrorsPage {
       this.platform.exitApp();
     }
 
+  }
+
+  async closeModal() {
+    await this.viewCtrl.dismiss();
   }
 }

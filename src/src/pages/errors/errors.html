@@ -13,7 +13,7 @@
 
             <div class="info-text" no-margin>
 
-                <p class="copy" margin padding>
+                <p class="copy message" margin padding>
                     {{text}}
                 </p>
             </div>
@@ -31,7 +31,7 @@
         <div *ngIf="!isFinal" class="footer-info" text-center>
 
             <div class="content-button">
-                <button (click)="exitApp()" class="button-control" ion-button text-capitalize> Back </button>
+                <button (click)="closeModal()" class="button-control" ion-button text-capitalize> Back </button>
             </div>
         </div>
 
