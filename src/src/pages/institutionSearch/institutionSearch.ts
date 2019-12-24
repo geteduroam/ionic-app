@@ -118,4 +118,8 @@ export class InstitutionSearch {
       this.searchBar.setFocus()
     }, 10);
   }
+
+  async dismiss() {
+    await this.viewCtrl.dismiss();
+  }
 }
