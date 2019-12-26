@@ -165,6 +165,7 @@ export class ConfigurationScreen implements OnInit {
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   navigateTo(profile) {
+    this.showAll = false;
     !!profile.oauth ? this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) : this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
 
   }
@@ -178,7 +179,6 @@ export class ConfigurationScreen implements OnInit {
     const response = await this.getEduroamServices.discovery();
     this.instances = response.instances;
     this.loading.dismiss();
-    this.showAll = true;
   }
 
   /**
@@ -186,11 +186,5 @@ export class ConfigurationScreen implements OnInit {
    */
   ionViewDidEnter() {
     this.showAll = true;
-  }
-  /**
-   * Method executed when the class leave view to the next page
-   */
-  ionViewDidLeave() {
-    this.showAll = false;
   }
 }

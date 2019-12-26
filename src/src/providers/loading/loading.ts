@@ -13,7 +13,7 @@ export class LoadingProvider {
     this.loadingAttribute = this.loadingCtrl.create({
       spinner: 'circles',
       showBackdrop: false,
-      duration: 5000
+      duration: 1500
     });
   }
 
@@ -29,20 +29,5 @@ export class LoadingProvider {
   dismiss(){
     this.loadingAttribute.dismiss();
   }
-
-
-
-  // initLoading() {
-  //   let loading = this.loadingCtrl.create({
-  //     spinner: 'circles',
-  //     dismissOnPageChange: true
-  //   });
-  //
-  //   loading.present();
-  //
-  //   setTimeout(() => {
-  //     loading.dismiss();
-  //   }, 5000);
-  // }
 
 }

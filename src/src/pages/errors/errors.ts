@@ -26,9 +26,6 @@ export class ErrorsPage {
     }
   }
 
-  async navigateTo() {
-    //TODO: navigate to link
-  }
 
   async exitApp() {
     if (!this.isFinal) {
