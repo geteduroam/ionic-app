@@ -54,9 +54,10 @@ export class InstitutionSearch {
    */
   async selectInstitution(institution: any) {
     this.instances = institution;
-    Keyboard.hide().then(async ()=>{
-      await this.viewCtrl.dismiss(institution);
-    });
+
+    Keyboard.addListener('keyboardDidHide', () => {
+      this.viewCtrl.dismiss(institution);
+    })
 
   }
 
@@ -115,7 +116,7 @@ export class InstitutionSearch {
   }
 
   ionViewDidEnter() {
-    this.platform.is('ios') ? this.ios = true : this.ios = false;
+    this.platform.is('ios') ? this.ios = true : this.ios = false ;
     this.instances = this.navParams.get('instances');
     this.instanceName = this.navParams.get('instanceName');
     this.filterInstances(this.instanceName);
