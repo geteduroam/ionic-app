@@ -12,8 +12,8 @@ export class LoadingProvider {
   create(){
     this.loadingAttribute = this.loadingCtrl.create({
       spinner: 'circles',
-      showBackdrop: false,
-      duration: 1500
+      showBackdrop: true,
+      duration: 5000
     });
   }
 

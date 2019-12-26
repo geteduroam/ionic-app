@@ -41,6 +41,7 @@ export class ProfilePage implements OnInit{
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
   async navigateTo() {
+    this.showAll = false;
     await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
   }
 
@@ -59,25 +60,21 @@ export class ProfilePage implements OnInit{
    * The method obtains the first valid authentication method by calling [getFirstValidAuthenticationMethod()]{#getFirstValidAuthenticationMethod}
    */
   async ngOnInit() {
-
     this.loading.createAndPresent();
-
     this.profile = this.navParams.get('profile');
-
+    console.log(this.profile);
     this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
-
     let validEap: boolean = await this.validateEapconfig();
 
     if (validEap) {
-      this.showAll = true;
       this.getFirstValidAuthenticationMethod();
       console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);
-      await this.navCtrl.pop();
+      // await this.navCtrl.pop();
     }
     this.loading.dismiss();
-
+    this.showAll = true;
   }
 
   /**

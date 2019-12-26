@@ -6,16 +6,20 @@ export class Transition extends PageTransition {
   init() {
     super.init();
     const that = this;
-    console.log('eso cabesa:', that);
+
     const enteringView = that.enteringView.pageRef();
     const leavingView = that.leavingView.pageRef();
 
+    const enteringViewElAnimation = new Animation(that.plt, enteringView.nativeElement);
     const leavingViewElAnimation = new Animation(that.plt, leavingView.nativeElement);
+
+    enteringViewElAnimation.afterStyles({filter: 'blur(50px)' }).beforeStyles({opacity: 1})
+    .afterClearStyles(['filter']).beforeClearStyles(['opacity']);
+    that.add(enteringViewElAnimation);
 
     leavingViewElAnimation
     .beforeStyles({ filter: 'blur(5px)' })
     .afterClearStyles(['filter']);
-    console.log('transition: ',leavingViewElAnimation)
     that.add(leavingViewElAnimation);
   }
 

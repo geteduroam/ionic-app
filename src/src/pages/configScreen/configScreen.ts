@@ -10,7 +10,7 @@ import { InstitutionSearch } from '../institutionSearch/institutionSearch';
   selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
-export class ConfigurationScreen implements OnInit {
+export class ConfigurationScreen {
 
   showAll: boolean = false;
 
@@ -165,8 +165,11 @@ export class ConfigurationScreen implements OnInit {
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   navigateTo(profile) {
+
     this.showAll = false;
-    !!profile.oauth ? this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) : this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
+    !!profile.oauth ?
+      this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
+      this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
 
   }
 
@@ -174,17 +177,11 @@ export class ConfigurationScreen implements OnInit {
    * Method executed when the class is initialized.
    * This method updates the property [instances]{@link #instances} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
    */
-  async ngOnInit() {
+  async ionViewDidEnter() {
     this.loading.createAndPresent();
     const response = await this.getEduroamServices.discovery();
-    this.instances = response.instances;
     this.loading.dismiss();
-  }
-
-  /**
-   * Method executed when the class did enter, usually when swipe back from the next page
-   */
-  ionViewDidEnter() {
+    this.instances = response.instances;
     this.showAll = true;
   }
 }
