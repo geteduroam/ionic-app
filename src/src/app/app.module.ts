@@ -13,6 +13,7 @@ import { GeteduroamServices } from '../providers/geteduroam-services/geteduroam-
 import { HTTP } from '@ionic-native/http/ngx';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { LoadingProvider } from '../providers/loading/loading';
+import { NetworkInterface } from '@ionic-native/network-interface/ngx'
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { LoadingProvider } from '../providers/loading/loading';
     {provide: ErrorHandler, useClass: ErrorHandlerProvider},
     GeteduroamServices,
     ScreenOrientation,
-    LoadingProvider
+    LoadingProvider,
+    NetworkInterface
   ],
   exports:[]
 })
