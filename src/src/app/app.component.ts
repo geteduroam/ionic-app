@@ -22,13 +22,12 @@ export class GeteduroamApp {
    * @constructor
    *
    */
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen,
-              private screenOrientation: ScreenOrientation, config: Config) {
+  constructor(platform: Platform, splashScreen: SplashScreen, config: Config,
+              private screenOrientation: ScreenOrientation) {
 
     platform.ready().then(() => {
+      // Transition provider, to navigate between pages
       config.setTransition('transition', Transition);
-      statusBar.styleDefault();
-      splashScreen.hide();
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
