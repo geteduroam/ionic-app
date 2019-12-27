@@ -5,7 +5,10 @@ import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/Transition';
+import { Plugins } from '@capacitor/core';
+import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 
+const { Network } = Plugins;
 @Component({
   templateUrl: 'app.html'
 })
@@ -23,9 +26,20 @@ export class GeteduroamApp {
    *
    */
   constructor(platform: Platform, splashScreen: SplashScreen, config: Config,
-              private screenOrientation: ScreenOrientation) {
+              private screenOrientation: ScreenOrientation, private errorHandler: ErrorHandlerProvider) {
 
     platform.ready().then(() => {
+
+      // Listener to get status connection
+      Network.addListener('networkStatusChange', async (status) => {
+
+        let connect = await Network.getStatus();
+
+        if (!connect.connected) {
+          await this.errorHandler.handleError('Disconnect', true);
+        }
+      });
+
       // Transition provider, to navigate between pages
       config.setTransition('transition', Transition);
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
