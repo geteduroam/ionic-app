@@ -4,12 +4,23 @@
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "www",
-  "cordova": {},
+  "cordova": {
+    "preferences": {
+      "ScrollEnabled": "false",
+      "android-minSdkVersion": "19",
+      "BackupWebStorage": "none",
+      "FadeSplashScreenDuration": "300",
+      "SplashShowOnlyFirstTime": "true",
+      "SplashScreen": "true",
+      "SplashScreenDelay": "3000"
+    }
+  },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 3000,
       "launchAutoHide": true,
-      "androidSplashResourceName": "Splash",
+      "backgroundColor": "#ffffffff",
+      "androidSplashResourceName": "splash",
       "androidScaleType": "FIT_CENTER",
       "androidSpinnerStyle": "large",
       "iosSpinnerStyle": "large",
