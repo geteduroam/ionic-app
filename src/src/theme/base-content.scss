@@ -79,6 +79,17 @@ ion-content {
       .row {
         height: calc(35% - 10px)
       }
+
+      //---------------------------
+      // ion-label custom style
+      //---------------------------
+      ion-label.label-conf {
+        color: #1a4d6d;
+        margin-left: 5%;
+        font-family: Helvetica, sans-serif;
+        font-size: 12px;
+        letter-spacing: 0;
+      }
     }
 
     .footer-info {

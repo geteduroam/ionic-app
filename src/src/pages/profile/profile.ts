@@ -36,7 +36,7 @@ export class ProfilePage implements OnInit{
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               public loading: LoadingProvider) {
 
-    console.log(this.getEapconfigEndpoint());
+
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
@@ -63,6 +63,7 @@ export class ProfilePage implements OnInit{
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
     console.log(this.profile);
+  /*
     this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
     let validEap: boolean = await this.validateEapconfig();
 
@@ -73,6 +74,8 @@ export class ProfilePage implements OnInit{
       await this.errorHandler.handleError('Invalid eapconfig file', false);
       // await this.navCtrl.pop();
     }
+
+   */
     this.loading.dismiss();
     this.showAll = true;
   }

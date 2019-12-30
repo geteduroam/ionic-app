@@ -1,16 +1,29 @@
 <div *ngIf="showAll">
     <div class="header-content" margin-top padding-top>
-        <img alt="setting" src="../../assets/icon/cog-outline.svg" />
-        <h1>eduroam configuration</h1>
+        <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
+        <h1>Provide information</h1>
     </div>
 
-    <div class="content" text-center>
+    <div class="content-form" text-center>
+
+        <div class="content-profile" padding-top >
+            <ion-label class="label-conf" text-left> Username </ion-label>
+            <ion-input class="input-profile" margin-left placeholder="name@example.com" type="text"></ion-input>
+        </div>
+        <div class="content-profile" margin-top>
+            <ion-label class="label-conf" text-left> Password </ion-label>
+            <ion-input class="input-profile" margin-left type="password"></ion-input>
+        </div>
+
         <p class="copy" margin padding>
             PROFILE {{profile.name}}
         </p>
 
-        <div class="content-button">
-            <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Next </button>
+    </div>
+    <div class="footer-form">
+
+        <div class="content-button" margin>
+            <button (click)="navigateTo()" [disabled]="!profile" class="button-control" ion-button text-capitalize> Next </button>
         </div>
     </div>
 </div>

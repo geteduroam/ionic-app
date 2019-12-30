@@ -167,7 +167,7 @@ export class ConfigurationScreen {
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   navigateTo(profile) {
-
+    console.log('profile: ', profile);
     this.showAll = false;
     !!profile.oauth ?
       this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
