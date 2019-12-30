@@ -1,4 +1,4 @@
-import { Config, Platform, ToastController } from 'ionic-angular';
+import { Config, Platform } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
@@ -56,6 +56,7 @@ export class GeteduroamApp {
   }
 
   async alertConnection(text: string) {
+
     await Toast.show({
       text: text,
       duration: 'long'
