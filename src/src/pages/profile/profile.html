@@ -5,25 +5,25 @@
     </div>
 
     <div class="content-form" text-center>
-
-        <div class="content-profile" padding-top >
+     <form (ngSubmit)="checkForm()">
+        <div  class="content-profile" padding-top >
             <ion-label class="label-conf" text-left> Username </ion-label>
-            <ion-input class="input-profile" margin-left placeholder="name@example.com" type="email"></ion-input>
+            <ion-input [(ngModel)]="model.name" class="input-profile" margin-left name="profile" placeholder="name@example.com" type="email"></ion-input>
         </div>
         <div class="content-profile" margin-top>
             <ion-label class="label-conf" text-left> Password </ion-label>
-            <ion-input class="input-profile" margin-left type="password"></ion-input>
+            <ion-input   [(ngModel)]="model.pass" class="input-profile" margin-left name="pass"  type="password"></ion-input>
         </div>
 
         <p class="copy" margin padding>
             PROFILE {{profile.name}}
         </p>
-
+     </form>
     </div>
     <div class="footer-form">
 
         <div class="content-button" margin>
-            <button (click)="navigateTo()" [disabled]="!profile" class="button-control" ion-button text-capitalize> Next </button>
+            <button (click)="navigateTo()" [disabled]="!profile" class="button-control" ion-button text-capitalize type="submit"> Next </button>
         </div>
     </div>
 </div>
