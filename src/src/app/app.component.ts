@@ -30,6 +30,7 @@ export class GeteduroamApp {
               private networkInterface: NetworkInterface) {
 
     platform.ready().then(() => {
+      splashScreen.hide();
       this.checkConnection();
 
       // Transition provider, to navigate between pages

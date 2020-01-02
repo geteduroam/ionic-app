@@ -8,7 +8,7 @@ import { ErrorHandlerProvider } from '../../providers/error-handler/error-handle
 import { LoadingProvider } from '../../providers/loading/loading';
 import { FilesystemDirectory, FilesystemEncoding, Plugins } from '@capacitor/core';
 
-const { Filesystem } = Plugins;
+const { Filesystem, Toast } = Plugins;
 
 
 @Component({
@@ -45,13 +45,21 @@ export class ProfilePage implements OnInit{
 
   }
 
-  // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-  async navigateTo() {
-    this.showAll = false;
-    await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+
+  async checkForm() {
+    const validForm: boolean = this.checkValidation();
+    console.log('this form data: ',this.model);
+
+    if (validForm) {
+      this.showAll = false;
+      await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+    }
   }
-  checkForm() {
-    console.log(this.model);
+
+  checkValidation() {
+    // TODO: SHOW MESSAGE ERROR TO VALIDATION
+    let regExpEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return regExpEmail.test(String(this.model.name).toLowerCase());
   }
 
   /**
@@ -83,7 +91,6 @@ export class ProfilePage implements OnInit{
       console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);
-      // await this.navCtrl.pop();
     }
 
     this.loading.dismiss();
@@ -133,9 +140,11 @@ export class ProfilePage implements OnInit{
         directory: FilesystemDirectory.Documents,
       });
 
-      console.log("Success save file in " + uri.uri);
-      //uri.uri -> file:///var/mobile/Containers/Data/Application/
-      //  A7CE396B-9C54-4F7D-96EF-9004E5AE885A/Documents/certs/eap-cert.eap-config
+      await Toast.show({
+        text: "Success save file in " + uri.uri,
+        duration: 'long'
+      });
+
 
     } catch(e) {
 
@@ -149,15 +158,20 @@ export class ProfilePage implements OnInit{
    * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
    */
   async validateEapconfig(): Promise <boolean>{
-    let keys = ['EAPIdentityProviderList', 'EAPIdentityProvider', 'AuthenticationMethods', 'AuthenticationMethod'];
+    let keys = [
+      'EAPIdentityProviderList',
+      'EAPIdentityProvider',
+      'AuthenticationMethods',
+      'AuthenticationMethod'
+    ];
 
     let jsonAux = this.eapConfig;
 
-    if(!!jsonAux){
-      for(let key of keys){
+    if (!!jsonAux){
+      for (let key of keys){
 
-        if(isArray(jsonAux)){
-          if(jsonAux[0].hasOwnProperty(key)){
+        if (isArray(jsonAux)){
+          if (jsonAux[0].hasOwnProperty(key)){
             jsonAux = jsonAux[0][key];
           } else {
             console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);

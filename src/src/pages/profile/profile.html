@@ -12,7 +12,7 @@
         </div>
         <div class="content-profile" margin-top>
             <ion-label class="label-conf" text-left> Password </ion-label>
-            <ion-input   [(ngModel)]="model.pass" class="input-profile" margin-left name="pass"  type="password"></ion-input>
+            <ion-input [(ngModel)]="model.pass" class="input-profile" margin-left name="pass"  type="password"></ion-input>
         </div>
 
         <p class="copy" margin padding>
@@ -21,10 +21,11 @@
      </form>
     </div>
     <div class="footer-form">
-
+        <form (ngSubmit)="checkForm()">
         <div class="content-button" margin>
-            <button (click)="navigateTo()" [disabled]="!profile" class="button-control" ion-button text-capitalize type="submit"> Next </button>
+            <button [disabled]="!profile" class="button-control" ion-button text-capitalize type="submit"> Next </button>
         </div>
+        </form>
     </div>
 </div>
 

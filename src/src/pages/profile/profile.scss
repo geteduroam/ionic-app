@@ -16,4 +16,8 @@ ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
 }
 ion-content .scroll-content {
   padding-bottom: unset !important;
+
+  .base-content {
+    overflow: hidden;
+  }
 }
