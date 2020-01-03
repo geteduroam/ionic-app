@@ -7,6 +7,7 @@ import { AuthenticationMethod } from '../../shared/entities/authenticationMethod
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { FilesystemDirectory, FilesystemEncoding, Plugins } from '@capacitor/core';
+import { infoProviders } from '../../shared/entities/infoProviders';
 
 const { Filesystem, Toast } = Plugins;
 
@@ -36,6 +37,7 @@ export class ProfilePage implements OnInit{
 
   model = {name: '', pass: ''};
 
+  providerInfo: infoProviders[];
 
   constructor(public navCtrl: NavController, public navParams: NavParams,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
@@ -52,7 +54,16 @@ export class ProfilePage implements OnInit{
 
     if (validForm) {
       this.showAll = false;
-      await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+
+      if (this.providerInfo[0].providerLogo) {
+        await this.navCtrl.push(WifiConfirmation, {
+          logo: this.providerInfo[0].providerLogo[0]
+        }, {animation: 'transition'});
+
+      } else {
+        await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+
+      }
     }
   }
 
@@ -71,6 +82,7 @@ export class ProfilePage implements OnInit{
     return this.profile.eapconfig_endpoint;
   }
 
+  // TODO: REFACTOR THIS CODE
   /**
    * Method executed when the class is initialized.
    * This method updates the property [eapConfig]{@link #eapConfig} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
@@ -86,7 +98,7 @@ export class ProfilePage implements OnInit{
     let validEap: boolean = await this.validateEapconfig();
 
     if (validEap) {
-      await this.storageFile(this.eapConfig);
+      //   await this.storageFile(this.eapConfig);
       this.getFirstValidAuthenticationMethod();
       console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
@@ -97,6 +109,7 @@ export class ProfilePage implements OnInit{
     this.showAll = true;
   }
 
+  // TODO: PROVIDER STORAGE FILES
   async storageFile(file) {
 
     const fileCert = JSON.stringify(file);
@@ -153,6 +166,7 @@ export class ProfilePage implements OnInit{
 
   };
 
+  // TODO: CREATE PROVIDER TO VALIDATE - CERTIFICATES
   /**
    * Method to validate the eapconfig file and obtain its elements.
    * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
@@ -167,9 +181,11 @@ export class ProfilePage implements OnInit{
 
     let jsonAux = this.eapConfig;
 
+    //--------
+    // EAP-CONFIG
+    //--------
     if (!!jsonAux){
       for (let key of keys){
-
         if (isArray(jsonAux)){
           if (jsonAux[0].hasOwnProperty(key)){
             jsonAux = jsonAux[0][key];
@@ -177,22 +193,40 @@ export class ProfilePage implements OnInit{
             console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
             return false;
           }
-        } else if (isObject(jsonAux)){
-          if(jsonAux.hasOwnProperty(key)){
+        } else if (isObject(jsonAux)) {
+          if (jsonAux.hasOwnProperty(key)) {
             jsonAux = jsonAux[key];
           } else {
             console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
             return false;
           }
-        } else{
+          //--------
+          // Provider Info
+          //--------
+          if (key === 'EAPIdentityProvider') {
+            this.providerInfo = [];
+            let providersAux = new infoProviders();
+
+            if (!!jsonAux[0] !== undefined && !!jsonAux[0].ProviderInfo) {
+              await providersAux.fillEntity(jsonAux[0].ProviderInfo[0]);
+
+              this.providerInfo.push(providersAux);
+            }
+          }
+
+        } else {
           console.error('Invalid eapconfig file', jsonAux);
           return false;
         }
       }
 
+      //--------
+      // AUTHENTICATION METHODS
+      //--------
       this.authenticationMethods = [];
 
       for (let i in jsonAux){
+        console.log('AuthenticationMethod: ', jsonAux[i]);
         if(!!jsonAux[i]){
           let authenticationMethodAux = new AuthenticationMethod();
           try {
@@ -203,6 +237,7 @@ export class ProfilePage implements OnInit{
           this.authenticationMethods.push(authenticationMethodAux);
         }
       }
+      //--------
 
     } else {
       return false;

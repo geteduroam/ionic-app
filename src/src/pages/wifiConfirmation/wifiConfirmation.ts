@@ -10,6 +10,7 @@ import { LoadingProvider } from '../../providers/loading/loading';
 export class WifiConfirmation implements OnInit {
 
   showAll: boolean = false;
+  logo: any;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private platform: Platform,
               public loading: LoadingProvider,) {
@@ -17,6 +18,16 @@ export class WifiConfirmation implements OnInit {
 
   async ngOnInit(){
     this.loading.createAndPresent();
+
+    // TODO: EXIST LOGO ?
+    this.logo = this.navParams.get('logo');
+
+    if (!!this.logo) {
+      const image = atob(this.logo._);
+      const info = this.logo.$;
+      console.log(image);
+    }
+
 
     this.loading.dismiss();
     this.showAll = true;

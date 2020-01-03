@@ -1,5 +1,4 @@
 import {isArray, isObject} from "ionic-angular/util/util";
-import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 
 export abstract class BaseJson {
 
