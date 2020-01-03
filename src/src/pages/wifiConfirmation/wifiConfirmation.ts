@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { NavController, NavParams, Platform } from 'ionic-angular';
 import { LoadingProvider } from '../../providers/loading/loading';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 
 @Component({
@@ -10,23 +11,40 @@ import { LoadingProvider } from '../../providers/loading/loading';
 export class WifiConfirmation implements OnInit {
 
   showAll: boolean = false;
-  logo: any;
+
+  logoProvider: any;
+  logo: boolean = false;
+
+  converted_image: SafeResourceUrl;
+
+  @ViewChild('imgLogo') imgLogo: ElementRef;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private platform: Platform,
-              public loading: LoadingProvider,) {
+              public loading: LoadingProvider, private sanitizer: DomSanitizer) {
   }
 
+  ionViewWillEnter() {
+    // TODO: EXIST LOGO ?
+    this.logoProvider = this.navParams.get('logo');
+
+    if (!!this.logoProvider) {
+      this.logo = true;
+      let imageData = this.logoProvider._;
+      let mimeType = this.logoProvider.$.mime;
+      let encoding = this.logoProvider.$.encoding;
+
+      const data = `data:${mimeType};${encoding},${imageData}`;
+
+      this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
+      console.log('Nodo imagen Logo:', this.imgLogo);
+    } else {
+      // Image default
+      this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl("../../assets/icon/ios_thumbs_up.png");
+    }
+
+  }
   async ngOnInit(){
     this.loading.createAndPresent();
-
-    // TODO: EXIST LOGO ?
-    this.logo = this.navParams.get('logo');
-
-    if (!!this.logo) {
-      const image = atob(this.logo._);
-      const info = this.logo.$;
-      console.log(image);
-    }
 
 
     this.loading.dismiss();
