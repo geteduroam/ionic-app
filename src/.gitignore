@@ -32,3 +32,6 @@ npm-debug.log*
 /android
 /ios
 /plugins/wifi-eap-configurator/node_modules
+/plugins/wifi-eap-configurator/android/.gradle
+/plugins/wifi-eap-configurator/android/.idea
+/plugins/wifi-eap-configurator/android/local.properties

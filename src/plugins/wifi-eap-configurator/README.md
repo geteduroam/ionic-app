@@ -83,4 +83,8 @@ auth is the variable that determines which TTLS Auth Type we are doing, it can g
 
 - 3 <= For MSCHAP connections
 - 4 <= For MSCHAPv2 connections
+<<<<<<< HEAD
 - 5 <= For PAP connections
+=======
+- 5 <= For PAP connections
+>>>>>>> ba05179ebd6e2317c9ff69589f8b66c2a402acb3
