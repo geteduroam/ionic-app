@@ -43,7 +43,6 @@ export class StoringProvider {
   async storeFile(fileCert) {
     this.createFolder();
     this.writeFile(fileCert);
-    this.readFile(fileCert);
     this.appendFile(fileCert);
     this.getUri();
   }
