@@ -6,8 +6,9 @@ import { isArray, isObject } from 'ionic-angular/util/util';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 import { LoadingProvider } from '../../providers/loading/loading';
-import { FilesystemDirectory, FilesystemEncoding, Plugins } from '@capacitor/core';
+import { Plugins } from '@capacitor/core';
 import { infoProviders } from '../../shared/entities/infoProviders';
+import { StoringProvider } from '../../providers/storing/storing';
 
 const { Filesystem, Toast } = Plugins;
 
@@ -35,13 +36,14 @@ export class ProfilePage implements OnInit{
    */
   authenticationMethods: AuthenticationMethod[];
 
+  // TODO: CREATE CHECK FORM
   model = {name: '', pass: ''};
 
   providerInfo: infoProviders[];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams,
+  constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              public loading: LoadingProvider) {
+              private store: StoringProvider) {
 
     console.log(this.getEapconfigEndpoint);
 
@@ -98,7 +100,7 @@ export class ProfilePage implements OnInit{
     let validEap: boolean = await this.validateEapconfig();
 
     if (validEap) {
-      //   await this.storageFile(this.eapConfig);
+      await this.storageFile(this.eapConfig);
       this.getFirstValidAuthenticationMethod();
       console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
@@ -109,61 +111,16 @@ export class ProfilePage implements OnInit{
     this.showAll = true;
   }
 
-  // TODO: PROVIDER STORAGE FILES
+
   async storageFile(file) {
-
-    const fileCert = JSON.stringify(file);
-    console.log('This is a cert: ', fileCert);
-
     try {
-      await Filesystem.mkdir({
-        createIntermediateDirectories: true,
-        path: 'certs',
-        directory: FilesystemDirectory.Documents,
-        recursive: true
-      });
-
-      await Filesystem.writeFile({
-        path: 'certs/eap-cert.eap-config',
-        data: fileCert,
-        directory: FilesystemDirectory.Documents,
-        encoding: FilesystemEncoding.UTF8
-      });
-
-      await Filesystem.readFile({
-        path: 'certs/eap-cert.eap-config',
-        directory: FilesystemDirectory.Documents,
-        encoding: FilesystemEncoding.UTF8
-      });
-
-      await Filesystem.readdir({
-        path: 'certs',
-        directory: FilesystemDirectory.Documents
-      });
-
-      await Filesystem.appendFile({
-        path: 'certs/eap-cert.eap-config',
-        data: fileCert,
-        directory: FilesystemDirectory.Documents,
-        encoding: FilesystemEncoding.UTF8
-      });
-
-      let uri = await Filesystem.getUri({
-        path: 'certs/eap-cert.eap-config',
-        directory: FilesystemDirectory.Documents,
-      });
-
-      await Toast.show({
-        text: "Success save file in " + uri.uri,
-        duration: 'long'
-      });
-
+      const fileCert = JSON.stringify(file);
+      await this.store.readFile(fileCert)
 
     } catch(e) {
+      await this.errorHandler.handleError('Unable to write file', false);
 
-      console.error('Unable to write file', e);
     }
-
   };
 
   // TODO: CREATE PROVIDER TO VALIDATE - CERTIFICATES
@@ -258,8 +215,7 @@ export class ProfilePage implements OnInit{
         return authenticationMethod;
       }
     }
-    //TODO redirect to error vew when available
-    console.error('No valid authentication method available from the eapconfig file');
+
     await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, 'http://google.com');
     return null;
   }

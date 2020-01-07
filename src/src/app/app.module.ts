@@ -14,6 +14,7 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { LoadingProvider } from '../providers/loading/loading';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx'
+import { StoringProvider } from '../providers/storing/storing';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { NetworkInterface } from '@ionic-native/network-interface/ngx'
     GeteduroamServices,
     ScreenOrientation,
     LoadingProvider,
-    NetworkInterface
+    NetworkInterface,
+    StoringProvider
   ],
   exports:[]
 })
