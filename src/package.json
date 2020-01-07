@@ -43,6 +43,7 @@
     "ionicons": "3.0.0",
     "rxjs": "6.5.3",
     "rxjs-compat": "^6.5.3",
+    "wifi-eap-configurator": "file:plugins/wifi-eap-configurator",
     "zone.js": "0.9.1"
   },
   "devDependencies": {
