@@ -12,7 +12,7 @@ import { ProfilePage } from './profile/profile';
 import { OauthFlow } from './oauthFlow/oauthFlow';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { InstitutionSearch } from './institutionSearch/institutionSearch';
-import { NetworkServiceProvider } from '../providers/network-service/network-service';
+import {ValidatorProvider} from "../providers/validator/validator";
 
 const Pages = [
   WelcomePage,
@@ -35,7 +35,7 @@ const Pages = [
   providers: [
     FormsModule,
     ErrorHandlerProvider,
-    NetworkServiceProvider
+    ValidatorProvider
   ]
 })
 export class PagesModule {}

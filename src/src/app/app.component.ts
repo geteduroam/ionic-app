@@ -3,7 +3,7 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
-import { Transition } from '../providers/transition/Transition';
+import { Transition } from '../providers/transition/transition';
 import { Plugins } from '@capacitor/core';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
 
