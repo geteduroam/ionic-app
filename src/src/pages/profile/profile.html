@@ -1,4 +1,4 @@
-<div *ngIf="showAll">
+<div *ngIf="showAll" class="container-profile">
     <div class="header-content" margin-top padding-top>
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
         <h1>Provide information</h1>
@@ -8,16 +8,12 @@
      <form (ngSubmit)="checkForm()">
         <div  class="content-profile" padding-top >
             <ion-label class="label-conf" text-left> Username </ion-label>
-            <ion-input [(ngModel)]="model.name" class="input-profile" margin-left name="profile" placeholder="name@example.com" type="email"></ion-input>
+            <input [(ngModel)]="model.name" class="input-profile" name="profile" placeholder="name@example.com" type="email" padding-left/>
         </div>
         <div class="content-profile" margin-top>
             <ion-label class="label-conf" text-left> Password </ion-label>
-            <ion-input [(ngModel)]="model.pass" class="input-profile" margin-left name="pass"  type="password"></ion-input>
+            <input [(ngModel)]="model.pass" class="input-profile" name="pass" type="password" padding-left/>
         </div>
-
-        <p class="copy" margin padding>
-            PROFILE {{profile.name}}
-        </p>
      </form>
     </div>
     <div class="footer-form">

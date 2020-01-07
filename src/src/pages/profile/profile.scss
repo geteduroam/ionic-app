@@ -1,9 +1,15 @@
 page-profile {
+  .container-profile {
+    background: #FFFFFF;
+  }
+
  .input-profile {
    border-radius: 4px;
-   margin-left: 16px !important;
+   margin-left: 14px !important;
    border: 1px solid #CAD0D6 !important;
    width: calc(100% - 30px);
+   margin-right: 12px;
+   height: 40px;
  }
 }
 ////---------------------------------
@@ -13,11 +19,4 @@ ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
   contain: unset !important;
   overflow: unset !important;
 
-}
-ion-content .scroll-content {
-  padding-bottom: unset !important;
-
-  .base-content {
-    overflow: hidden;
-  }
 }
