@@ -39,12 +39,13 @@ export class GeteduroamApp {
       this.screenOrientation.unlock();
       this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
 
-     // this.getLocation();
+
       // Plugin wifiEAPConfigurator
       this.wifiConfigurator().then().catch((e) => {console.log(e)});
 
       // Listener to get status connection, apply when change status network
-      this.checkConnection()
+      this.checkConnection();
+
       Network.addListener('networkStatusChange', async () => {
         await this.checkConnection();
 
