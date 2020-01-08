@@ -35,7 +35,7 @@ export class ProfilePage implements OnInit{
   // TODO: CREATE CHECK FORM
   model = {name: '', pass: ''};
 
-  providerInfo: infoProviders[];
+  providerInfo: ProviderInfo;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
@@ -47,15 +47,17 @@ export class ProfilePage implements OnInit{
 
 
   async checkForm() {
-    const validForm: boolean = this.checkValidation();
+    let validForm: boolean;
+    validForm = this.validator.validateEmail(this.model.name);
     console.log('this form data: ',this.model);
+    console.log('validForm: ', validForm);
 
     if (validForm) {
       this.showAll = false;
 
-      if (this.providerInfo[0].providerLogo) {
+      if (this.providerInfo.providerLogo) {
         await this.navCtrl.push(WifiConfirmation, {
-          logo: this.providerInfo[0].providerLogo[0]
+          logo: this.providerInfo.providerLogo
         }, {animation: 'transition'});
 
       } else {
