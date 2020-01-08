@@ -36,7 +36,7 @@ export class WifiConfirmation implements OnInit {
       const data = `data:${mimeType};${encoding},${imageData}`;
 
       this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
-      console.log('Nodo imagen Logo:', this.imgLogo);
+
     } else {
       // Image default
       this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl("../../assets/icon/ios_thumbs_up.png");
