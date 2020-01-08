@@ -9,7 +9,6 @@ export class ProviderLocation extends BaseJson {
     super();
   }
 
-  // TODO: create model and fillEntity ProviderInfo
   fillEntity(jsonAux: any) {
     this.longitude = jsonAux.Longitude;
     this.latitude = jsonAux.Latitude;

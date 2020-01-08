@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
-import { isArray, isObject } from 'ionic-angular/util/util';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 import { LoadingProvider } from '../../providers/loading/loading';
-import { infoProviders } from '../../shared/entities/infoProviders';
+import { ProviderInfo } from '../../shared/entities/providerInfo';
 import { StoringProvider } from '../../providers/storing/storing';
+import { ValidatorProvider } from '../../providers/validator/validator';
+
 
 @Component({
   selector: 'page-profile',
@@ -37,25 +38,21 @@ export class ProfilePage implements OnInit{
 
   providerInfo: ProviderInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
+  constructor(public navCtrl: NavController, public navParams: NavParams, private validator: ValidatorProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              private store: StoringProvider) {
-
-    console.log(this.getEapconfigEndpoint);
-
-  }
-
+              public loading: LoadingProvider, private store: StoringProvider) {  }
 
   async checkForm() {
-    let validForm: boolean;
-    validForm = this.validator.validateEmail(this.model.name);
-    console.log('this form data: ',this.model);
-    console.log('validForm: ', validForm);
+
+    let validForm = this.validator.validateEmail(this.model.name);
 
     if (validForm) {
       this.showAll = false;
 
+      console.log('providerInfo: ',this.providerInfo);
+
       if (this.providerInfo.providerLogo) {
+
         await this.navCtrl.push(WifiConfirmation, {
           logo: this.providerInfo.providerLogo
         }, {animation: 'transition'});
@@ -67,12 +64,6 @@ export class ProfilePage implements OnInit{
     }
   }
 
-  checkValidation() {
-    // TODO: SHOW MESSAGE ERROR TO VALIDATION
-    let regExpEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return regExpEmail.test(String(this.model.name).toLowerCase());
-  }
-
   /**
    * Method which returns the eap institutionSearch endpoint
    * @return {any} eapconfig_endpoint the eap institutionSearch endpoint
@@ -82,7 +73,7 @@ export class ProfilePage implements OnInit{
     return this.profile.eapconfig_endpoint;
   }
 
-  // TODO: REFACTOR THIS CODE
+
   /**
    * Method executed when the class is initialized.
    * This method updates the property [eapConfig]{@link #eapConfig} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
@@ -92,15 +83,18 @@ export class ProfilePage implements OnInit{
   async ngOnInit() {
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
-    console.log(this.profile);
 
     this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
-    let validEap: boolean = await this.validateEapconfig();
+
+    this.authenticationMethods = [];
+    this.providerInfo = new ProviderInfo();
+    let validEap = await this.validator.validateEapconfig(this.eapConfig, this.authenticationMethods, this.providerInfo);
 
     if (validEap) {
+      this.showAll = true;
       await this.storageFile(this.eapConfig);
       this.getFirstValidAuthenticationMethod();
-      console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
+
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);
     }
@@ -121,86 +115,6 @@ export class ProfilePage implements OnInit{
     }
   };
 
-  // TODO: CREATE PROVIDER TO VALIDATE - CERTIFICATES
-  /**
-   * Method to validate the eapconfig file and obtain its elements.
-   * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
-   */
-  async validateEapconfig(): Promise <boolean>{
-    let keys = [
-      'EAPIdentityProviderList',
-      'EAPIdentityProvider',
-      'AuthenticationMethods',
-      'AuthenticationMethod'
-    ];
-
-    let jsonAux = this.eapConfig;
-
-    //--------
-    // EAP-CONFIG
-    //--------
-    if (!!jsonAux){
-      for (let key of keys){
-        if (isArray(jsonAux)){
-          if (jsonAux[0].hasOwnProperty(key)){
-            jsonAux = jsonAux[0][key];
-          } else {
-            console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
-            return false;
-          }
-        } else if (isObject(jsonAux)) {
-          if (jsonAux.hasOwnProperty(key)) {
-            jsonAux = jsonAux[key];
-          } else {
-            console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
-            return false;
-          }
-          //--------
-          // Provider Info
-          //--------
-          if (key === 'EAPIdentityProvider') {
-            this.providerInfo = [];
-            let providersAux = new infoProviders();
-
-            if (!!jsonAux[0] !== undefined && !!jsonAux[0].ProviderInfo) {
-              await providersAux.fillEntity(jsonAux[0].ProviderInfo[0]);
-
-              this.providerInfo.push(providersAux);
-            }
-          }
-
-        } else {
-          console.error('Invalid eapconfig file', jsonAux);
-          return false;
-        }
-      }
-
-      //--------
-      // AUTHENTICATION METHODS
-      //--------
-      this.authenticationMethods = [];
-
-      for (let i in jsonAux){
-        console.log('AuthenticationMethod: ', jsonAux[i]);
-        if(!!jsonAux[i]){
-          let authenticationMethodAux = new AuthenticationMethod();
-          try {
-            await authenticationMethodAux.fillEntity(jsonAux[i]);
-          } catch (e) {
-            return false;
-          }
-          this.authenticationMethods.push(authenticationMethodAux);
-        }
-      }
-      //--------
-
-    } else {
-      return false;
-    }
-    console.log('authentication: ',this.authenticationMethods);
-    return true;
-  }
-
   /**
    * Method to get the first valid authentication method form an eap institutionSearch file.
    * @return {AuthenticationMethod} the first valid authentication method
@@ -214,6 +128,7 @@ export class ProfilePage implements OnInit{
       }
     }
 
+    // TODO: helpDesk web/email address INAPPBROWSER / MAIL TO
     await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, 'http://google.com');
     return null;
   }
