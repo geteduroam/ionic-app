@@ -182,13 +182,13 @@ public class WifiEapConfigurator extends Plugin {
     private boolean getNetworkAssociated(PluginCall call, String ssid) {
         boolean res = true;
 
-        LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        /*LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
         if (!gps_enabled) {
             call.reject("Location disabled");
             res = false;
-        }
+        }*/
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
