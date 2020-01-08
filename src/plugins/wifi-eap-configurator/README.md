@@ -33,3 +33,58 @@
 ```Android
 add(WifiEapConfigurator.class)
 ```
+
+## HOW TO USE ##
+
+each time you want to use the configurator you will have to do a few steps, configurating first the whole implementation, as follows:
+
+1. Import capacitor plugin
+
+```TypeScript
+declare var Capacitor
+const { WifiEapConfigurator } = Capacitor.Plugins
+```
+2. With ``WifiEapConfigurator`` will bring a function called ``.configureAP()`` which has the following parameters: 
+```TypeScript
+WifiEapConfigurator.configureAP({ssid: String, username: String, password: String, eap: Number, servername: String, auth: Number, caCertificate: String})
+```
+3. And that's it! You should be using the library already!
+
+## Variables
+
+### Function Values:
+So there's a couple of values that comes into this function, which are explained below:
+
+| Variable|Type|Optional|Example|
+|:---: |:---: |:---: |:---: |
+|ssid|`String`|❌|eduroam|
+|username|`String`|❌|Email Address  |
+|password|`String`|❌|Password|
+|eap|`Number`|❌|21|
+|servername |`String`|❌|radius.upo.es|
+|auth|`Number`|❌|5|
+|caCertificate|`String`|✅|Certificate Base64|
+
+### Variables Values
+
+There's 2 variables in specific that requires specific values for specific results and these are `eap` and `auth` explained below:
+
+### eap
+
+EAP is the variable that determines which EAP connection we are doing, it can go from:
+
+- 13 <= For EAP-TLS connections
+- 21 <= For EAP-TTLS connections
+- 25 <= For EAP-PEAP connections
+
+### auth
+
+auth is the variable that determines which TTLS Auth Type we are doing, it can go from:
+
+- 3 <= For MSCHAP connections
+- 4 <= For MSCHAPv2 connections
+<<<<<<< HEAD
+- 5 <= For PAP connections
+=======
+- 5 <= For PAP connections
+>>>>>>> ba05179ebd6e2317c9ff69589f8b66c2a402acb3

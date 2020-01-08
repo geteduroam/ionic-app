@@ -95,11 +95,19 @@ export class StoringProvider {
    * This method create the folder 'certs' to save it certificates
    */
   async createFolder() {
-    return await Filesystem.mkdir({
+    await Filesystem.mkdir({
       createIntermediateDirectories: true,
       path: 'certs',
       directory: FilesystemDirectory.Documents,
       recursive: true
+    });
+    this.readDir();
+  }
+
+  async readDir() {
+    await Filesystem.readdir({
+      path: 'certs',
+      directory: FilesystemDirectory.Documents
     });
   }
 

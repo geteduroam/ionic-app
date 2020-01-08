@@ -6,12 +6,8 @@ import { isArray, isObject } from 'ionic-angular/util/util';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 import { LoadingProvider } from '../../providers/loading/loading';
-import { Plugins } from '@capacitor/core';
 import { infoProviders } from '../../shared/entities/infoProviders';
 import { StoringProvider } from '../../providers/storing/storing';
-
-const { Filesystem, Toast } = Plugins;
-
 
 @Component({
   selector: 'page-profile',
