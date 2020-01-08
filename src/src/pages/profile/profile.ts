@@ -2,17 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
-import { isArray, isObject } from 'ionic-angular/util/util';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 import { LoadingProvider } from '../../providers/loading/loading';
-import { Plugins } from '@capacitor/core';
 import { ProviderInfo } from '../../shared/entities/providerInfo';
 import { StoringProvider } from '../../providers/storing/storing';
 import {ValidatorProvider} from "../../providers/validator/validator";
 
 
-const { Filesystem, Toast } = Plugins;
 
 
 @Component({
@@ -52,10 +49,7 @@ export class ProfilePage implements OnInit{
 
 
   async checkForm() {
-    let validForm: boolean;
-    validForm = this.validator.validateEmail(this.model.name);
-    console.log('this form data: ',this.model);
-    console.log('validForm: ', validForm);
+    const validForm: boolean = this.validator.validateEmail(this.model.name);
 
     if (validForm) {
       this.showAll = false;
@@ -70,7 +64,7 @@ export class ProfilePage implements OnInit{
 
       }
     } else{
-      console.log('the email is not valid');
+      console.error('The e-mail address is not valid');
     }
   }
 
@@ -93,21 +87,15 @@ export class ProfilePage implements OnInit{
   async ngOnInit() {
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
-    console.log(this.profile);
+
 
     this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
-    // let validEap: boolean = await this.validateEapconfig();
-    let validEap: boolean;
     this.authenticationMethods = [];
     this.providerInfo = new ProviderInfo();
-    validEap = await this.validator.validateEapconfig(this.eapConfig, this.authenticationMethods, this.providerInfo);
-    console.log('this.authenticationMethods: '+this.authenticationMethods);
-    console.log('this.providerInfo: '+this.providerInfo);
-    console.log('value of validEap: '+validEap);
+    const validEap:boolean = await this.validator.validateEapconfig(this.eapConfig, this.authenticationMethods, this.providerInfo);
     if (validEap) {
       //   await this.storageFile(this.eapConfig);
       this.getFirstValidAuthenticationMethod();
-      console.log('Fist valid authentication method', this.getFirstValidAuthenticationMethod());
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);
     }
@@ -134,14 +122,12 @@ export class ProfilePage implements OnInit{
    */
   private async getFirstValidAuthenticationMethod(){
     for (let authenticationMethod of this.authenticationMethods){
-      console.log(authenticationMethod.eapMethod.type);
-      console.log(['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()));
       if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
         return authenticationMethod;
       }
     }
 
-    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, 'http://google.com');
+    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, 'http://cfierro.com');
     return null;
   }
 

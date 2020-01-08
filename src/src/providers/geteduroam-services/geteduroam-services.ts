@@ -2,7 +2,7 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
-import * as JSONdata from "../../../resources/fake-data/fake-data.json"
+// import * as JSONdata from "../../../resources/fake-data/fake-data.json"
 
 
 /**
@@ -26,16 +26,17 @@ export class GeteduroamServices {
 
       //TODO replace the fake data json for the real one before go to PRO environment
       //   const url = 'https://drive.google.com/file/d/1HbtpkGoB7Yc_rhnITYgXWJ8-gLzeMgoR/view?usp=sharing';
+      const url = 'https://drive.google.com/a/emergya.com/uc?authuser=0&id=1HbtpkGoB7Yc_rhnITYgXWJ8-gLzeMgoR&export=download';
 
-        const url = '../../../resources/fake-data/fake-data.ts';
+        // const url = '../../../resources/fake-data/fake-data.ts';
         const params = {};
         const headers = {};
 
         try {
-            // const response = await this.http.get(url, params, headers);
-            console.log(JSONdata);
-            return JSONdata;
-            // return JSON.parse(response);
+            const response = await this.http.get(url, params, headers);
+            // console.log(JSONdata);
+            // return JSONdata;
+            return JSON.parse(response);
 
             // return JSON.parse(FAKE_DATA.toString());
 
@@ -47,13 +48,15 @@ export class GeteduroamServices {
 
     /**
      * This gets an eapcongig file form an url which receives as parameter
-     * @param the url in which the eapconfig xml file is available
+     * @param url in which the eapconfig xml file is available
      * @return the parsed xml
      */
     async getEapConfig(url: string) {
 
         const params = {};
         const headers = {};
+
+        console.log('url', url);
 
         const response = await this.http.get(url, params, headers);
 
@@ -63,6 +66,7 @@ export class GeteduroamServices {
             jsonResult = result;
         });
 
+        console.log('jsonResult:',jsonResult);
         return jsonResult;
 
     }
