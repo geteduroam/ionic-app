@@ -9,6 +9,11 @@ import { ProviderInfo } from '../../shared/entities/providerInfo';
 import { StoringProvider } from '../../providers/storing/storing';
 import {ValidatorProvider} from "../../providers/validator/validator";
 
+// TODO: CREATE PROVIDER TO EXTERNAL BROWSER
+import {Plugins} from "@capacitor/core";
+import { ProfileModel } from '../../shared/models/profile-model';
+const {Browser} = Plugins;
+
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
@@ -21,20 +26,19 @@ export class ProfilePage implements OnInit{
   /**
    * The profile which is received as a navigation parameter
    */
-  profile: any;
-
-  /**
-   * The eapConfig retrieved from the profile
-   */
-  eapConfig: any;
+  profile: ProfileModel;
 
   /**
    * The authentication methods obtained from the eap institutionSearch file
    */
   authenticationMethods: AuthenticationMethod[];
 
+  termsOfUse: boolean = false;
+
+  termsUrl: string = '';
+
   // TODO: CREATE MODEL TO FORM
-  model = {name: '', pass: ''};
+  model = { name: '', pass: '', terms: true };
 
   providerInfo: ProviderInfo;
 
@@ -47,6 +51,7 @@ export class ProfilePage implements OnInit{
 
   async checkForm() {
     const validForm: boolean = this.validator.validateEmail(this.model.name);
+    console.log('checkForm: ', this.model);
 
     if (validForm) {
       this.showAll = false;
@@ -70,8 +75,7 @@ export class ProfilePage implements OnInit{
    * Method which returns the eap institutionSearch endpoint
    * @return {any} eapconfig_endpoint the eap institutionSearch endpoint
    */
-  getEapconfigEndpoint(){
-
+  getEapconfigEndpoint() {
     return this.profile.eapconfig_endpoint;
   }
 
@@ -86,15 +90,18 @@ export class ProfilePage implements OnInit{
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
 
-    this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
+    const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
+
     this.authenticationMethods = [];
     this.providerInfo = new ProviderInfo();
 
-    const validEap:boolean = await this.validator.validateEapconfig(this.eapConfig, this.authenticationMethods, this.providerInfo);
-    console.log('ProviderInfo: ', this.providerInfo);
+    const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
+
     if (validEap) {
-      await this.storageFile(this.eapConfig);
+      await this.storageFile(eapConfig);
       this.getFirstValidAuthenticationMethod();
+      this.createTerms();
+
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);
     }
@@ -103,6 +110,25 @@ export class ProfilePage implements OnInit{
     this.showAll = true;
   }
 
+  async seeTermsUrl() {
+    if (this.termsUrl !== '') {
+      await Browser.open({'url': this.termsUrl});
+    }
+
+  }
+
+  protected createTerms() {
+    if (this.providerInfo.termsOfUse !== '') {
+
+      this.termsOfUse = true;
+      // Include checkbox on view
+      const terms = this.providerInfo.termsOfUse.toString();
+      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
+        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
+
+      console.log('matches: ', this.termsUrl)
+    }
+  }
 
   async storageFile(file) {
     try {
