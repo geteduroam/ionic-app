@@ -65,19 +65,19 @@
 					"id" : "cat_666",
 					"name" : "No valid Type",
 					"default" : true,
-					"eapconfig_endpoint" : "https://drive.google.com/file/d/1UI4G3nGWfHOovX15MEfhlz2LPudDsYO0/view?usp=sharing",
+					"eapconfig_endpoint" : "https://drive.google.com/a/emergya.com/uc?authuser=0&id=1UI4G3nGWfHOovX15MEfhlz2LPudDsYO0&export=download",
 					"oauth" : false
 				},
 				{
 					"id" : "cat_999",
 					"name" : "Wrong EAP: no method",
-					"eapconfig_endpoint" : "https://drive.google.com/file/d/1Lqhpez6-jnpn8olyhnINHzmFz8Otuj09/view?usp=sharing",
+					"eapconfig_endpoint" : "https://drive.google.com/a/emergya.com/uc?authuser=0&id=1Lqhpez6-jnpn8olyhnINHzmFz8Otuj09/view?usp=sharing&export=download",
 					"oauth" : false
 				},
 				{
 					"id" : "cat_888",
 					"name" : "Wrong EAP: no identity provider",
-					"eapconfig_endpoint" : "https://drive.google.com/file/d/1mJhiwsQyC5hl9bB7DIrJmgcU8xJCXruj/view?usp=sharing",
+					"eapconfig_endpoint" : "https://drive.google.com/a/emergya.com/uc?authuser=0&id=1mJhiwsQyC5hl9bB7DIrJmgcU8xJCXruj/view?usp=sharing&export=download",
 					"oauth" : false
 				}
 			]

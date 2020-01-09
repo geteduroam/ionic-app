@@ -20,8 +20,12 @@
         </div>
         <div *ngIf="isFinal" class="footer-info" text-center>
 
-            <div class="content-button">
-                <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Know more </button>
+            <div *ngIf="!isLinkEmail()" class="content-button">
+                <button (click)="clickKnowMore()" class="button-control" ion-button text-capitalize> Know more </button>
+            </div>
+
+            <div *ngIf="isLinkEmail()" class="content-button">
+                <a class="button-control" href="{{getEmail()}}" ion-button text-capitalize> Send e-mail </a>
             </div>
 
             <div (click)="exitApp()" class="text-bottom" margin-top>

@@ -38,6 +38,7 @@ export class ValidatorProvider extends Validators {
             for (let key of keys){
                 if (isArray(jsonAux)){
                     if (jsonAux[0].hasOwnProperty(key)){
+                        console.log('adding the array key', key, jsonAux[0][key]);
                         jsonAux = jsonAux[0][key];
                     } else {
                         console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
@@ -45,6 +46,7 @@ export class ValidatorProvider extends Validators {
                     }
                 } else if (isObject(jsonAux)) {
                     if (jsonAux.hasOwnProperty(key)) {
+                        console.log('adding the object key', key, jsonAux[key]);
                         jsonAux = jsonAux[key];
                     } else {
                         console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
@@ -87,6 +89,7 @@ export class ValidatorProvider extends Validators {
             //--------
 
         } else {
+            console.error('wrong json', jsonAux);
             return false;
         }
         console.log('authentication: ', authenticationMethods);

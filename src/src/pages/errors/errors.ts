@@ -1,5 +1,8 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { NavController, NavParams, Platform, ViewController } from 'ionic-angular';
+import { Component } from '@angular/core';
+import {NavController, NavParams, Platform, ViewController} from "ionic-angular";
+import {Plugins} from "@capacitor/core";
+import {ValidatorProvider} from "../../providers/validator/validator";
+const {Browser} = Plugins;
 
 
 @Component({
@@ -12,7 +15,8 @@ export class ErrorsPage {
   link: string;
   public isFinal: boolean = false;
 
-  constructor(private platform: Platform, public navParams: NavParams, public viewCtrl: ViewController, public navCtrl: NavController) {
+
+  constructor(private platform: Platform, public navParams: NavParams, public viewCtrl: ViewController, public navCtrl: NavController, private validator: ValidatorProvider) {
 
     if (!!this.navParams.get('isFinal')) {
 
@@ -24,6 +28,7 @@ export class ErrorsPage {
       this.text = this.navParams.get('error');
       this.isFinal = false;
     }
+
   }
 
 
@@ -39,5 +44,24 @@ export class ErrorsPage {
 
   async closeModal() {
     await this.viewCtrl.dismiss();
+  }
+
+  async clickKnowMore() {
+    if(!!this.link){
+      await Browser.open({'url': this.link});
+    }
+
+  }
+
+  getEmail(): string {
+    if(!!this.link && this.isLinkEmail()){
+      return 'mailto:'+this.link+'Subject=Error';
+    } else {
+      return '';
+    }
+  }
+
+  isLinkEmail(): boolean {
+    return this.validator.validateEmail(this.link);
   }
 }

@@ -7,7 +7,9 @@ import { ErrorHandlerProvider } from '../../providers/error-handler/error-handle
 import { LoadingProvider } from '../../providers/loading/loading';
 import { ProviderInfo } from '../../shared/entities/providerInfo';
 import { StoringProvider } from '../../providers/storing/storing';
-import { ValidatorProvider } from '../../providers/validator/validator';
+import {ValidatorProvider} from "../../providers/validator/validator";
+
+
 
 
 @Component({
@@ -33,26 +35,26 @@ export class ProfilePage implements OnInit{
    */
   authenticationMethods: AuthenticationMethod[];
 
-  // TODO: CREATE CHECK FORM
   model = {name: '', pass: ''};
 
   providerInfo: ProviderInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private validator: ValidatorProvider,
+  constructor(public navCtrl: NavController, public navParams: NavParams,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              public loading: LoadingProvider, private store: StoringProvider) {  }
+              public loading: LoadingProvider,private validator: ValidatorProvider, private store: StoringProvider) {
+
+    console.log(this.getEapconfigEndpoint);
+
+  }
+
 
   async checkForm() {
-
-    let validForm = this.validator.validateEmail(this.model.name);
+    const validForm: boolean = this.validator.validateEmail(this.model.name);
 
     if (validForm) {
       this.showAll = false;
 
-      console.log('providerInfo: ',this.providerInfo);
-
       if (this.providerInfo.providerLogo) {
-
         await this.navCtrl.push(WifiConfirmation, {
           logo: this.providerInfo.providerLogo
         }, {animation: 'transition'});
@@ -61,6 +63,8 @@ export class ProfilePage implements OnInit{
         await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
 
       }
+    } else{
+      console.error('The e-mail address is not valid');
     }
   }
 
@@ -73,7 +77,7 @@ export class ProfilePage implements OnInit{
     return this.profile.eapconfig_endpoint;
   }
 
-
+  // TODO: REFACTOR THIS CODE
   /**
    * Method executed when the class is initialized.
    * This method updates the property [eapConfig]{@link #eapConfig} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
@@ -84,17 +88,14 @@ export class ProfilePage implements OnInit{
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
 
-    this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
 
+    this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
     this.authenticationMethods = [];
     this.providerInfo = new ProviderInfo();
-    let validEap = await this.validator.validateEapconfig(this.eapConfig, this.authenticationMethods, this.providerInfo);
-
+    const validEap:boolean = await this.validator.validateEapconfig(this.eapConfig, this.authenticationMethods, this.providerInfo);
     if (validEap) {
-      this.showAll = true;
-      await this.storageFile(this.eapConfig);
+      //   await this.storageFile(this.eapConfig);
       this.getFirstValidAuthenticationMethod();
-
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);
     }
@@ -121,15 +122,19 @@ export class ProfilePage implements OnInit{
    */
   private async getFirstValidAuthenticationMethod(){
     for (let authenticationMethod of this.authenticationMethods){
-      console.log(authenticationMethod.eapMethod.type);
-      console.log(['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()));
       if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
         return authenticationMethod;
       }
     }
-
-    // TODO: helpDesk web/email address INAPPBROWSER / MAIL TO
-    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, 'http://google.com');
+    let url;
+    if(!!this.providerInfo.helpdesk.webAddress){
+      url = this.providerInfo.helpdesk.webAddress;
+    } else if(!!this.providerInfo.helpdesk.emailAddress){
+      url = this.providerInfo.helpdesk.emailAddress;
+    } else {
+      url = '';
+    }
+    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, url);
     return null;
   }
 

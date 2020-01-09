@@ -10,8 +10,8 @@ export class ProviderLocation extends BaseJson {
   }
 
   fillEntity(jsonAux: any) {
-    this.longitude = jsonAux.Longitude;
-    this.latitude = jsonAux.Latitude;
+    this.longitude = this.getSingleProperty(jsonAux, 'Longitude', true);
+    this.latitude = this.getSingleProperty(jsonAux, 'Latitude', true);
   }
 
 

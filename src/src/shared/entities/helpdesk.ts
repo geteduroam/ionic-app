@@ -12,9 +12,9 @@ export class Helpdesk extends BaseJson {
 
   // TODO: create model and fillEntity ProviderInfo
   fillEntity(jsonAux: any) {
-    this.emailAddress = jsonAux.EmailAddress;
-    this.phone = jsonAux.Phone;
-    this.webAddress = jsonAux.WebAddress;
+    this.emailAddress = this.getSingleProperty(jsonAux, 'EmailAddress', false);
+    this.phone = this.getSingleProperty(jsonAux, 'Phone', false);
+    this.webAddress = this.getSingleProperty(jsonAux, 'WebAddress', false);
   }
 
 

@@ -17,22 +17,17 @@ export class ProviderInfo extends BaseJson {
 
   // TODO: create model and fillEntity ProviderInfo
   async fillEntity(jsonAux: any) {
-    try {
-      this.providerLocation = new ProviderLocation();
-      this.helpdesk = new Helpdesk();
 
-      this.assignComplexProperty(this.providerLocation, 'providerLocation', jsonAux, 'ProviderLocation', true);
-      this.assignComplexProperty(this.helpdesk, 'helpdesk', jsonAux, 'Helpdesk', true);
-      this.displayName = this.getSingleProperty(jsonAux, 'DisplayName', true);
-      this.description = this.getSingleProperty(jsonAux, 'Description', true);
-      this.providerLogo = this.getSingleProperty(jsonAux, 'ProviderLogo', true);
-      this.termsOfUse = this.getSingleProperty(jsonAux, 'TermsOfUse', true);
+    this.providerLocation = new ProviderLocation();
+    this.helpdesk = new Helpdesk();
 
+    this.assignComplexProperty(this.providerLocation, 'providerLocation', jsonAux, 'ProviderLocation', true);
+    this.assignComplexProperty(this.helpdesk, 'helpdesk', jsonAux, 'Helpdesk', true);
 
-    } catch (e) {
-      console.log('Error fillEntity providerInfo: ', e)
-    }
-
+    this.displayName = this.getSingleProperty(jsonAux, 'DisplayName', true);
+    this.description = this.getSingleProperty(jsonAux, 'Description', false);
+    this.providerLogo = this.getSingleProperty(jsonAux, 'ProviderLogo', false);
+    this.termsOfUse = this.getSingleProperty(jsonAux, 'TermsOfUse', false);
 
 
   }
