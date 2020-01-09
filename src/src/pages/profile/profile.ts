@@ -126,8 +126,15 @@ export class ProfilePage implements OnInit{
         return authenticationMethod;
       }
     }
-
-    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, 'http://cfierro.com');
+    let url;
+    if(!!this.providerInfo.helpdesk.webAddress){
+      url = this.providerInfo.helpdesk.webAddress;
+    } else if(!!this.providerInfo.helpdesk.emailAddress){
+      url = this.providerInfo.helpdesk.emailAddress;
+    } else {
+      url = '';
+    }
+    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, url);
     return null;
   }
 
