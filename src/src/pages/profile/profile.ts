@@ -9,13 +9,11 @@ import { ProviderInfo } from '../../shared/entities/providerInfo';
 import { StoringProvider } from '../../providers/storing/storing';
 import {ValidatorProvider} from "../../providers/validator/validator";
 
-
-
-
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
 })
+
 export class ProfilePage implements OnInit{
 
   showAll: boolean = false;
@@ -35,15 +33,14 @@ export class ProfilePage implements OnInit{
    */
   authenticationMethods: AuthenticationMethod[];
 
+  // TODO: CREATE MODEL TO FORM
   model = {name: '', pass: ''};
 
   providerInfo: ProviderInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams,
+  constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              public loading: LoadingProvider,private validator: ValidatorProvider, private store: StoringProvider) {
-
-    console.log(this.getEapconfigEndpoint);
+              private validator: ValidatorProvider, private store: StoringProvider) {
 
   }
 
@@ -55,9 +52,10 @@ export class ProfilePage implements OnInit{
       this.showAll = false;
 
       if (this.providerInfo.providerLogo) {
+
         await this.navCtrl.push(WifiConfirmation, {
           logo: this.providerInfo.providerLogo
-        }, {animation: 'transition'});
+        }, { animation: 'transition' });
 
       } else {
         await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
@@ -88,13 +86,14 @@ export class ProfilePage implements OnInit{
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
 
-
     this.eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
     this.authenticationMethods = [];
     this.providerInfo = new ProviderInfo();
+
     const validEap:boolean = await this.validator.validateEapconfig(this.eapConfig, this.authenticationMethods, this.providerInfo);
+    console.log('ProviderInfo: ', this.providerInfo);
     if (validEap) {
-      //   await this.storageFile(this.eapConfig);
+      await this.storageFile(this.eapConfig);
       this.getFirstValidAuthenticationMethod();
     } else {
       await this.errorHandler.handleError('Invalid eapconfig file', false);
@@ -121,19 +120,16 @@ export class ProfilePage implements OnInit{
    * @return {AuthenticationMethod} the first valid authentication method
    */
   private async getFirstValidAuthenticationMethod(){
+
     for (let authenticationMethod of this.authenticationMethods){
       if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
         return authenticationMethod;
       }
     }
-    let url;
-    if(!!this.providerInfo.helpdesk.webAddress){
-      url = this.providerInfo.helpdesk.webAddress;
-    } else if(!!this.providerInfo.helpdesk.emailAddress){
-      url = this.providerInfo.helpdesk.emailAddress;
-    } else {
-      url = '';
-    }
+
+    let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
+      !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
+
     await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, url);
     return null;
   }
