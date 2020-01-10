@@ -1,5 +1,5 @@
 {
-  "appId": "es.test.geteduroam",
+  "appId": "com.emergya.geteduroam",
   "appName": "geteduroam",
   "bundledWebRuntime": false,
   "npmClient": "npm",
