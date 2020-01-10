@@ -4,10 +4,10 @@ import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/transition';
-import { Plugins } from '@capacitor/core';
+import {AppUrlOpen, Plugins} from '@capacitor/core';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
 
-const { Toast, Network } = Plugins;
+const { Toast, Network, App } = Plugins;
 
 @Component({
   templateUrl: 'app.html'
@@ -29,7 +29,7 @@ export class GeteduroamApp {
               private screenOrientation: ScreenOrientation,
               private networkInterface: NetworkInterface) {
 
-    platform.ready().then(() => {
+    platform.ready().then(async () => {
       splashScreen.hide();
       this.checkConnection();
 
@@ -38,7 +38,7 @@ export class GeteduroamApp {
 
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
-      this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
+      await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
 
       // Listener to get status connection, apply when change status network
       Network.addListener('networkStatusChange', async (status) => {
@@ -53,6 +53,11 @@ export class GeteduroamApp {
 
       });
 
+      App.addListener('appUrlOpen', (urlOpen: AppUrlOpen) => {
+        console.log('App URL Open', urlOpen);
+        this.navigate(urlOpen.url);
+      });
+      this.getLaunchUrl();
     });
   }
 
@@ -76,6 +81,22 @@ export class GeteduroamApp {
 
   private async statusConnection() {
     return await Network.getStatus()
+  }
+
+  async getLaunchUrl() {
+    const urlOpen = await Plugins.App.getLaunchUrl();
+    if(!urlOpen || !urlOpen.url) return;
+    console.log('Launch URL', urlOpen);
+    this.navigate(urlOpen.url);
+  }
+
+  navigate(uri: string) {
+    // THIS MUST EQUAL THE 'custom_url_scheme' from your Android intent:
+    console.log('uri.startsWith(\'com.emergya.geteduroam:/\')', uri.startsWith('com.emergya.geteduroam:/'));
+    if (!uri.startsWith('com.emergya.geteduroam:/')) return;
+    // Strip off the custom scheme:
+    uri = uri.substring(24);
+    console.log('esto es uri de navigate: ', uri)
   }
 }
 
