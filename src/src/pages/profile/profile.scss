@@ -28,6 +28,13 @@ page-profile {
   .bottom-button {
     margin: 30px;
   }
+  .error-msg {
+    font-size: 11px;
+    color: $color-danger;
+  }
+  .error-validation {
+    border: solid 1px red !important;
+  }
 
 }
 

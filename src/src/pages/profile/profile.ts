@@ -12,6 +12,7 @@ import {ValidatorProvider} from "../../providers/validator/validator";
 // TODO: CREATE PROVIDER TO EXTERNAL BROWSER
 import {Plugins} from "@capacitor/core";
 import { ProfileModel } from '../../shared/models/profile-model';
+import { ProvideModel } from '../../shared/models/provide-model';
 const {Browser} = Plugins;
 
 @Component({
@@ -29,18 +30,22 @@ export class ProfilePage implements OnInit{
   profile: ProfileModel;
 
   /**
+   * The provide which is received from form
+   */
+  provide: ProvideModel = new ProvideModel();
+
+  /**
    * The authentication methods obtained from the eap institutionSearch file
    */
   authenticationMethods: AuthenticationMethod[];
+
+  providerInfo: ProviderInfo;
 
   termsOfUse: boolean = false;
 
   termsUrl: string = '';
 
-  // TODO: CREATE MODEL TO FORM
-  model = { name: '', pass: '', terms: true };
-
-  providerInfo: ProviderInfo;
+  errorPass: boolean = false;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
@@ -48,12 +53,27 @@ export class ProfilePage implements OnInit{
 
   }
 
+  /**
+   * Method to validate form.
+   * @return {boolean}
+   */
+  validateForm(): boolean {
+    const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
 
+    return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
+  }
+
+  validEmail(email: string) {
+      return this.validator.validateEmail(email)
+  }
+
+  /**
+   * Method to check form and navigate.
+   */
   async checkForm() {
-    const validForm: boolean = this.validator.validateEmail(this.model.name);
-    console.log('checkForm: ', this.model);
+    console.log('checkForm: ', this.provide);
 
-    if (validForm) {
+    if (!!this.validateForm()) {
       this.showAll = false;
 
       if (this.providerInfo.providerLogo) {
@@ -110,26 +130,9 @@ export class ProfilePage implements OnInit{
     this.showAll = true;
   }
 
-  async seeTermsUrl() {
-    if (this.termsUrl !== '') {
-      await Browser.open({'url': this.termsUrl});
-    }
-
-  }
-
-  protected createTerms() {
-    if (this.providerInfo.termsOfUse !== '') {
-
-      this.termsOfUse = true;
-      // Include checkbox on view
-      const terms = this.providerInfo.termsOfUse.toString();
-      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
-        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
-
-      console.log('matches: ', this.termsUrl)
-    }
-  }
-
+  /**
+   * Method to store eap-config files.
+   */
   async storageFile(file) {
     try {
       const fileCert = JSON.stringify(file);
@@ -140,6 +143,22 @@ export class ProfilePage implements OnInit{
 
     }
   };
+
+  /**
+   * Method to activate terms of use on view.
+   */
+  protected createTerms() {
+    if (this.providerInfo.termsOfUse !== '') {
+      // Activate checkbox on view
+      this.termsOfUse = true;
+
+      const terms = this.providerInfo.termsOfUse.toString();
+      // Get the web address within the terms of use
+      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
+        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
+
+    }
+  }
 
   /**
    * Method to get the first valid authentication method form an eap institutionSearch file.

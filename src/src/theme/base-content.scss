@@ -143,12 +143,21 @@ ion-content {
           color: #FFFFFF;
           letter-spacing: 0;
           text-align: center;
+
+        }
+        .disabled-button {
+          opacity: .4;
+          pointer-events: none;
         }
       }
     }
   }
+
 }
-.nav-decor {
-  display: none !important;
-}
+
+
+
+  .nav-decor {
+    display: none !important;
+  }
 

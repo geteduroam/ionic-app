@@ -1,29 +1,43 @@
 <div *ngIf="showAll" class="container-profile">
     <div class="header-content" margin-top padding-top>
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
-        <h1>Provide information</h1>
+        <h1> Provide information </h1>
     </div>
 
     <div class="content-form" text-center>
      <form (ngSubmit)="checkForm()">
+
         <div  class="content-profile" padding-top >
             <ion-label class="label-conf" text-left> Username </ion-label>
-            <input [(ngModel)]="model.name" class="input-profile" name="profile" placeholder="name@example.com" type="email" padding-left/>
+
+            <input [(ngModel)]="provide.email"
+                   [ngClass]="provide.email !== '' && provide.email.length > 6 &&
+                        !validEmail(provide.email) ? 'error-validation' : ''" class="input-profile"
+                   name="email" padding-left placeholder="name@example.com" type="email"/>
+
+            <p *ngIf="provide.email !== '' && provide.email.length > 6 && !validEmail(provide.email)" class="error-msg">
+                The email account is incorrect </p>
         </div>
+
         <div class="content-profile" margin-top>
             <ion-label class="label-conf" text-left> Password </ion-label>
-            <input [(ngModel)]="model.pass" class="input-profile" name="pass" type="password" padding-left/>
+            <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
+                   name="pass" padding-left type="password"/>
+
+            <p *ngIf="errorPass" class="error-msg"> Password is incorrect </p>
         </div>
         <div *ngIf="termsOfUse" class="content-terms" ion-row>
-            <ion-checkbox [(ngModel)]="model.terms" col-1 color="primary" name="terms" no-margin no-padding slot="start"></ion-checkbox>
+            <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
             <ion-label col-6 no-padding text-left>Accept <a class="terms" href="{{termsUrl}}"> terms of use </a></ion-label>
         </div>
      </form>
+
     </div>
+
     <div class="footer-form">
         <form (ngSubmit)="checkForm()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [disabled]="!profile" class="button-control" ion-button text-capitalize type="submit"> Next </button>
+                <button [ngClass]="!validateForm() ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit"> Next </button>
             </div>
         </form>
     </div>
