@@ -78,6 +78,7 @@ export class GeteduroamApp {
     uri = uri.substring(19);
     console.log('esto es uri de navigate: ', uri)
   }
+
   async wifiConfigurator() {
 
     await WifiEapConfigurator.configureAP({

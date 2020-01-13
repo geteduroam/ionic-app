@@ -74,23 +74,28 @@ export class ProfilePage implements OnInit{
     console.log('checkForm: ', this.provide);
 
     if (!!this.validateForm()) {
-      this.showAll = false;
+      const checkRequest = this.getEduroamServices.connectProfile({}, {}, {});
 
-      if (this.providerInfo.providerLogo) {
-
-        await this.navCtrl.push(WifiConfirmation, {
-          logo: this.providerInfo.providerLogo
-        }, { animation: 'transition' });
-
-      } else {
-        await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
-
+      if (!!checkRequest) {
+        this.navigateTo();
       }
     } else{
       console.error('The e-mail address is not valid');
     }
   }
 
+  // TODO: REFACTOR THIS LINES
+  async navigateTo() {
+    this.showAll = false;
+    if (this.providerInfo.providerLogo) {
+      await this.navCtrl.push(WifiConfirmation, {
+        logo: this.providerInfo.providerLogo
+      }, { animation: 'transition' });
+
+    } else {
+      await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+    }
+  }
   /**
    * Method which returns the eap institutionSearch endpoint
    * @return {any} eapconfig_endpoint the eap institutionSearch endpoint
@@ -166,7 +171,7 @@ export class ProfilePage implements OnInit{
    */
   private async getFirstValidAuthenticationMethod(){
 
-    for (let authenticationMethod of this.authenticationMethods){
+    for (let authenticationMethod of this.authenticationMethods) {
       if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
         return authenticationMethod;
       }
