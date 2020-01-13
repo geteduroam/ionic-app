@@ -70,12 +70,12 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         String servername = null;
-        if (call.getString("servername") != "" && call.getString("servername") != null) {
+        if (call.getString("servername") != null && call.getString("servername") != "") {
             servername = call.getString("servername");
-        } else {
+        } /*else {
             call.reject("Missing servername");
             res = false;
-        }
+        }*/
 
         String anonymousIdentity = null;
         if (call.getString("anonymous") != null && call.getString("anonymous") != "") {
