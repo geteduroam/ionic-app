@@ -134,7 +134,9 @@ public class WifiEapConfigurator extends Plugin {
         if(anonymousIdentity!=null && anonymousIdentity!=""){
             enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
         }
-        enterpriseConfig.setDomainSuffixMatch(servername);
+        if(servername != null && servername != ""){
+            enterpriseConfig.setDomainSuffixMatch(servername);
+        }
         Integer eapMethod = getEapMethod(eap, call);
         enterpriseConfig.setEapMethod(eapMethod);
         Integer authMethod = getAuthMethod(auth, call);
