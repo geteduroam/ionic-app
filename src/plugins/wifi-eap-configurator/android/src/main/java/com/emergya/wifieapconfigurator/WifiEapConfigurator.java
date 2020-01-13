@@ -70,12 +70,12 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         String servername = null;
-        if (call.getString("servername") != "" && call.getString("servername") != null) {
+        if (call.getString("servername") != null && call.getString("servername") != "") {
             servername = call.getString("servername");
-        } else {
+        } /*else {
             call.reject("Missing servername");
             res = false;
-        }
+        }*/
 
         String anonymousIdentity = null;
         if (call.getString("anonymous") != null && call.getString("anonymous") != "") {
@@ -134,7 +134,9 @@ public class WifiEapConfigurator extends Plugin {
         if(anonymousIdentity!=null && anonymousIdentity!=""){
             enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
         }
-        enterpriseConfig.setDomainSuffixMatch(servername);
+        if(servername != null && servername != ""){
+            enterpriseConfig.setDomainSuffixMatch(servername);
+        }
         Integer eapMethod = getEapMethod(eap, call);
         enterpriseConfig.setEapMethod(eapMethod);
         Integer authMethod = getAuthMethod(auth, call);
