@@ -141,4 +141,10 @@ export class GeteduroamServices {
   //
   //   });
   }
+
+  async connectProfile(url, params, headers) {
+    const response = await this.http.get(url, params, headers);
+    console.log('Connect Profile: '+ response);
+    return response;
+  }
 }
