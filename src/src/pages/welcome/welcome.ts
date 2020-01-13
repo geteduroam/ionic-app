@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, Platform } from 'ionic-angular';
 import { ConfigurationScreen } from '../configScreen/configScreen';
-import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
-
 
 @Component({
   selector: 'page-welcome',
@@ -11,7 +9,9 @@ import { ErrorHandlerProvider } from '../../providers/error-handler/error-handle
 
 export class WelcomePage  {
 
-  constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams) {
+
+  constructor(private platform: Platform, public navCtrl: NavController, public navParams: NavParams ) {
+
   }
 
   async navigateTo() {

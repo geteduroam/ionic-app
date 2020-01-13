@@ -2,7 +2,8 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
-// import * as JSONdata from "../../../resources/fake-data/fake-data.json"
+declare var Capacitor;
+const { WifiEapConfigurator } = Capacitor.Plugins;
 
 
 /**
@@ -140,5 +141,9 @@ export class GeteduroamServices {
   //     console.log('Method get generator: ', res);
   //
   //   });
+  }
+
+  async connectProfile(config) {
+    return await WifiEapConfigurator.configureAP(config);
   }
 }

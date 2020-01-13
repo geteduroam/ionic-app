@@ -43,7 +43,6 @@ export class StoringProvider {
   async storeFile(fileCert) {
     this.createFolder();
     this.writeFile(fileCert);
-    this.readFile(fileCert);
     this.appendFile(fileCert);
     this.getUri();
   }
@@ -96,11 +95,16 @@ export class StoringProvider {
    * This method create the folder 'certs' to save it certificates
    */
   async createFolder() {
-    return await Filesystem.mkdir({
+    await Filesystem.mkdir({
       createIntermediateDirectories: true,
       path: 'certs',
       directory: FilesystemDirectory.Documents,
       recursive: true
+    });
+
+    await Filesystem.readdir({
+      path: 'certs',
+      directory: FilesystemDirectory.Documents
     });
   }
 

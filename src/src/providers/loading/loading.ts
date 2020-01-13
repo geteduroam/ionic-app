@@ -13,7 +13,7 @@ export class LoadingProvider {
     this.loadingAttribute = this.loadingCtrl.create({
       spinner: 'circles',
       showBackdrop: true,
-      duration: 5000
+      duration: 2000
     });
   }
 

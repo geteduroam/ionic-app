@@ -16,6 +16,7 @@ export class ValidatorProvider extends Validators {
         return regExpEmail.test(String(email).toLowerCase());
     }
 
+    // TODO: REFACTOR VALIDATE EAP-CONFIG
     /**
      * Method to validate the eapconfig file and obtain its elements.
      * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
@@ -56,10 +57,9 @@ export class ValidatorProvider extends Validators {
                     // Provider Info
                     //--------
                     if (key === 'EAPIdentityProvider') {
-                        // providerInfo = new ProviderInfo();
 
                         if (!!jsonAux[0] !== undefined && !!jsonAux[0].ProviderInfo) {
-                            await providerInfo.fillEntity(jsonAux[0].ProviderInfo);
+                            await providerInfo.fillEntity(jsonAux[0].ProviderInfo[0]);
                         }
                     }
 

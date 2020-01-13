@@ -14,6 +14,8 @@ export class ErrorHandlerProvider extends ErrorHandler {
 
   async handleError(errorText: string, isFinal?:boolean, helpDeskUrl?:string) {
 
+    console.log('handlerError: ', errorText);
+
     let localFinal: boolean = !!isFinal ? isFinal : false;
     let localUrl:string = !!helpDeskUrl ? helpDeskUrl : '';
     let errorModal = this.modalCtrl.create(ErrorsPage, {error: errorText, isFinal: localFinal, link: localUrl});

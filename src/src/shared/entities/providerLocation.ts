@@ -9,7 +9,6 @@ export class ProviderLocation extends BaseJson {
     super();
   }
 
-  // TODO: create model and fillEntity ProviderInfo
   fillEntity(jsonAux: any) {
     this.longitude = this.getSingleProperty(jsonAux, 'Longitude', true);
     this.latitude = this.getSingleProperty(jsonAux, 'Latitude', true);
