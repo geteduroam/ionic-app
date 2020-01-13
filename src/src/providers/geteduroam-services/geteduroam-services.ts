@@ -2,7 +2,8 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
-// import * as JSONdata from "../../../resources/fake-data/fake-data.json"
+declare var Capacitor;
+const { WifiEapConfigurator } = Capacitor.Plugins;
 
 
 /**
@@ -142,9 +143,7 @@ export class GeteduroamServices {
   //   });
   }
 
-  async connectProfile(url, params, headers) {
-    const response = await this.http.get(url, params, headers);
-    console.log('Connect Profile: '+ response);
-    return response;
+  async connectProfile(config) {
+    return await WifiEapConfigurator.configureAP(config);
   }
 }
