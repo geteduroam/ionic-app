@@ -10,6 +10,7 @@
     "lint": "ionic-app-scripts lint",
     "test": "jest",
     "doc": "compodoc -p tsconfig.json --theme vagrant",
+    "compile": "npm run build && npx cap sync android",
     "run:android": "ionic capacitor run android -l --address=10.35.25.9 --external"
   },
   "dependencies": {
