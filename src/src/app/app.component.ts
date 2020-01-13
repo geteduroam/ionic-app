@@ -1,11 +1,12 @@
 import { Config, Platform } from 'ionic-angular';
+import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/Transition';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
-import { Plugins } from '@capacitor/core';
-const { Toast, Network } = Plugins;
+import { AppUrlOpen, Plugins } from '@capacitor/core';
+const { Toast, Network, App } = Plugins;
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
@@ -26,12 +27,12 @@ export class GeteduroamApp {
    * @constructor
    *
    */
-  constructor(private platform: Platform, private config: Config,
+  constructor(private platform: Platform, private config: Config, public splashScreen: SplashScreen,
               private screenOrientation: ScreenOrientation,
               private networkInterface: NetworkInterface) {
 
     this.platform.ready().then(() => {
-
+      this.splashScreen.hide();
       // Transition provider, to navigate between pages
       this.config.setTransition('transition', Transition);
 
@@ -56,9 +57,27 @@ export class GeteduroamApp {
         });
 
       });
+      App.addListener('appUrlOpen', (urlOpen: AppUrlOpen) => {
+        console.log('App URL Open', urlOpen);
+        this.navigate(urlOpen.url);
+      });
+      this.getLaunchUrl();
     });
   }
+  async getLaunchUrl() {
+    const urlOpen = await Plugins.App.getLaunchUrl();
+    if(!urlOpen || !urlOpen.url) return;
+    console.log('Launch URL', urlOpen);
+    this.navigate(urlOpen.url);
+  }
 
+  navigate(uri: string) {
+    // THIS MUST EQUAL THE 'custom_url_scheme' from your Android intent:
+    if (!uri.includes('.eap-config')) return;
+    // Strip off the custom scheme:
+    uri = uri.substring(19);
+    console.log('esto es uri de navigate: ', uri)
+  }
   async wifiConfigurator() {
 
     await WifiEapConfigurator.configureAP({

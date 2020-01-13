@@ -101,10 +101,7 @@ export class StoringProvider {
       directory: FilesystemDirectory.Documents,
       recursive: true
     });
-    this.readDir();
-  }
 
-  async readDir() {
     await Filesystem.readdir({
       path: 'certs',
       directory: FilesystemDirectory.Documents
