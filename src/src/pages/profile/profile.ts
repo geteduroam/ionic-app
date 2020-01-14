@@ -58,6 +58,10 @@ export class ProfilePage implements OnInit{
    * @return {boolean}
    */
   validateForm(): boolean {
+
+    console.log('this.termsOfUse',this.termsOfUse);
+    console.log('this.provide.terms', this.provide.terms);
+
     const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
 
     return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
@@ -75,15 +79,24 @@ export class ProfilePage implements OnInit{
 
     if (!!this.validateForm()) {
 
+      console.log('before connecting');
+
+      console.log('this.provide.email', this.provide.email);
+      console.log('this.provide.pass', this.provide.pass);
+      console.log('this.authenticationMethods[0].eapMethod.type', this.authenticationMethods[0].eapMethod.type);
+      console.log('this.authenticationMethods[0].serverSideCredential.serverID', this.authenticationMethods[0].serverSideCredential.serverID);
+      console.log('this.authenticationMethods[0].serverSideCredential.ca', this.authenticationMethods[0].serverSideCredential.ca);
+
+
       let config = {
         ssid: "eduroam",
-        username: "",
-        password: "",
-        eap: 25,
-        servername: "",
+        username: this.provide.email,
+        password: this.provide.pass,
+        eap:  this.authenticationMethods[0].eapMethod.type,
+        servername: this.authenticationMethods[0].serverSideCredential.serverID,
         auth: 4,
-        anonymous: "",
-        caCertificate: ""
+        anonymous: "", //TODO check if this must be empty or where is this info available
+        caCertificate: this.authenticationMethods[0].serverSideCredential.ca
       };
       /*
         {
