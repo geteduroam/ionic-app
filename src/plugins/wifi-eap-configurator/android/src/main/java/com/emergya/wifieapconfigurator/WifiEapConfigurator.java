@@ -151,9 +151,9 @@ public class WifiEapConfigurator extends Plugin {
             try {
                 certFactory = CertificateFactory.getInstance("X.509");
                 caCert = (X509Certificate) certFactory.generateCertificate(b);
-
                 enterpriseConfig.setCaCertificate(caCert);
             } catch (CertificateException e) {
+                call.reject("Error while adding certificate: "+e.getMessage());
                 e.printStackTrace();
                 Log.e("error", e.getMessage());
             }
@@ -167,6 +167,10 @@ public class WifiEapConfigurator extends Plugin {
         myWifiManager.disconnect();
         myWifiManager.enableNetwork(id, true);
         myWifiManager.reconnect();
+
+        JSObject object = new JSObject();
+        object.put("message","Success");
+        call.success(object);
 
     }
 
