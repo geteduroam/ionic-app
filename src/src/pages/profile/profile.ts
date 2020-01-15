@@ -13,8 +13,7 @@ import {ValidatorProvider} from "../../providers/validator/validator";
 import {Plugins} from "@capacitor/core";
 import { ProfileModel } from '../../shared/models/profile-model';
 import { ProvideModel } from '../../shared/models/provide-model';
-declare var Capacitor;
-const { WifiEapConfigurator } = Capacitor.Plugins;
+import { GlobalProvider } from '../../providers/global/global';
 const {Browser} = Plugins;
 
 @Component({
@@ -41,6 +40,8 @@ export class ProfilePage implements OnInit{
    */
   authenticationMethods: AuthenticationMethod[];
 
+  validMethod: AuthenticationMethod;
+
   providerInfo: ProviderInfo;
 
   termsOfUse: boolean = false;
@@ -49,9 +50,11 @@ export class ProfilePage implements OnInit{
 
   errorPass: boolean = false;
 
+  suffixIdentity: string;
+
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              private validator: ValidatorProvider, private store: StoringProvider) {
+              private validator: ValidatorProvider, private store: StoringProvider, private global: GlobalProvider) {
 
   }
 
@@ -60,17 +63,13 @@ export class ProfilePage implements OnInit{
    * @return {boolean}
    */
   validateForm(): boolean {
-
-    console.log('this.termsOfUse',this.termsOfUse);
-    console.log('this.provide.terms', this.provide.terms);
-
     const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
 
     return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
   }
 
   validEmail(email: string) {
-      return this.validator.validateEmail(email)
+    return this.validator.validateEmail(email, this.suffixIdentity)
   }
 
   /**
@@ -80,52 +79,20 @@ export class ProfilePage implements OnInit{
     console.log('checkForm: ', this.provide);
 
     if (!!this.validateForm()) {
-
-      console.log('before connecting');
-
-      console.log('ssid', "eduroam");
-      console.log('username', this.provide.email);
-      console.log('password', this.provide.pass);
-      // console.log('eap', parseInt(''+this.authenticationMethods[0].eapMethod.type));
-      console.log('eap', parseInt(''+21));
-      console.log('servername', "");
-      console.log('auth', parseInt(''+4));
-      console.log('anonymous', "");
-      // console.log('caCertificate', this.authenticationMethods[0].serverSideCredential.ca.content);
-      console.log('caCertificate', "");
-
-
+      const caCert = '-----BEGIN CERTIFICATE-----\n'+this.validMethod.serverSideCredential.ca.content+'\n-----END CERTIFICATE----- ';
       let config = {
-        ssid: "eduroam",
+        ssid: this.global.getSsid(),
         username: this.provide.email,
         password: this.provide.pass,
-        // eap: parseInt(''+this.authenticationMethods[0].eapMethod.type),
-        eap: 21,
-        servername: "", //TODO for now empty
-        auth: 4,
-        anonymous: "", //TODO for now empty
-        // caCertificate: this.authenticationMethods[0].serverSideCredential.ca.content
-        caCertificate: ""
+        eap: parseInt(this.validMethod.eapMethod.type.toString()),
+        servername: "",
+        auth: this.global.auth.MSCHAPv2,
+        anonymous: "",
+        caCertificate: caCert
       };
-      /*
-        {
-          ssid: "eduroam",
-          username: "emergya@ad.eduroam.no",
-          password: "crocodille",
-          eap: 25,
-          servername: "eduroam.uninett.no",
-          auth: 4,
-          anonymous: "anonymous@uninett.no",
-          caCertificate: "MIIEbzCCA1egAwIBAgIJAJAhu7l6dg+nMA0GCSqGSIb3DQEBBQUAMEoxCzAJBgNVBAYTAk5PMRMwEQYDVQQKEwpVTklORVRUIEFTMSYwJAYDVQQDEx1VTklORVRUIENlcnRpZmljYXRlIEF1dGhvcml0eTAeFw0xMDAyMDYwMDEyMzBaFw0yMDAyMDQwMDEyMzBaMEoxCzAJBgNVBAYTAk5PMRMwEQYDVQQKEwpVTklORVRUIEFTMSYwJAYDVQQDEx1VTklORVRUIENlcnRpZmljYXRlIEF1dGhvcml0eTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK2+21jlJLycaCgg6TBo+i37DkWvW4UR3ptLzQAQfBuOSfPBPG9zXhmn0z/gNWfpbAwETiW+2oTcSKz/XJ0Ej1dFnySNWBnNb6rOY7GrTAvkRfDbpacQATPwg9RnvBs4xR+6TGNLcYjcyEnjF+Xd29aRzH/rFkJHq2pM6rT5BpScQ4n1DrB2y+E812UjDYhx8KnD9Zh+83wpa3tMRI5J9n7AuqrBThS4xudCAcJLMyu3KTEnBpRMRfduVyndPTJe+EVcp3XBip41Biza73ZFScqMDFfskc2jT3XV3Tz+0Actg56m+JirRtcQc8lP7o/P6BXTRmIfeXbHuX7/BSE+AXECAwEAAaOCAVYwggFSMB0GA1UdDgQWBBQlxqCOiIgff64MlbIUojA2QgTzTjB6BgNVHSMEczBxgBQlxqCOiIgff64MlbIUojA2QgTzTqFOpEwwSjELMAkGA1UEBhMCTk8xEzARBgNVBAoTClVOSU5FVFQgQVMxJjAkBgNVBAMTHVVOSU5FVFQgQ2VydGlmaWNhdGUgQXV0aG9yaXR5ggkAkCG7uXp2D6cwDAYDVR0TBAUwAwEB/zAbBgNVHREEFDASgRBkcmlmdEB1bmluZXR0Lm5vMDgGA1UdHwQxMC8wLaAroCmGJ2h0dHA6Ly9jYS51bmluZXR0Lm5vL3VuaW5ldHQtY2EtY3JsLnBlbTAzBggrBgEFBQcBAQQnMCUwIwYIKwYBBQUHMAGGF2h0dHA6Ly9vY3NwLnVuaW5ldHQubm8vMBsGA1UdEgQUMBKBEGRyaWZ0QHVuaW5ldHQubm8wDQYJKoZIhvcNAQEFBQADggEBAA9/27nksOl8d7uwi8Ce0u8WOpwDnwUUdYu0/1U91bG+bVxFL/rmenLVJJ9vaU0jxa/xHG2r8Q1RvIz1OqGX8XpbzB9cIB2Bj4kIJ+wg+pHroH9hmhJkf1gxMphtcZL3B2KAAc1B27ZchEJifFJuvL+wghAWVh0iwxhul5JOgDH0cXwvNyjRJjR70uvpU2YmRhNunqhU6hd89HPZpSybq5LU939i5HSnSgAsqQmOSCt0APlJNlJ/y5UWxMBO9ayycIuSHbORBJ8ZnXHw3yScbIEioqvAaDJNQUTNw8Pnn/dq6ffTELCFs/4QBOz7av0IxjnemYuCzgUZmb+YPhYKW+c="
-        }
-      */
 
-
-      // const checkRequest = this.getEduroamServices.connectProfile(config);
-
-      const checkRequest = WifiEapConfigurator.configureAP(config).then().catch(async (e) => {
-        await this.errorHandler.handleError(e.message, false);
-      });
+      console.log( 'config: ', config);
+      const checkRequest = this.getEduroamServices.connectProfile(config);
 
       if (!!checkRequest) {
         this.navigateTo();
@@ -175,7 +142,11 @@ export class ProfilePage implements OnInit{
 
     if (validEap) {
       await this.storageFile(eapConfig);
-      this.getFirstValidAuthenticationMethod();
+      this.validMethod = await this.getFirstValidAuthenticationMethod();
+      console.log(this.validMethod);
+      this.suffixIdentity = !!this.validMethod.clientSideCredential.innerIdentityHint ?
+        this.validMethod.clientSideCredential.innerIdentitySuffix : '';
+
       this.createTerms();
 
     } else {
@@ -220,7 +191,7 @@ export class ProfilePage implements OnInit{
    * Method to get the first valid authentication method form an eap institutionSearch file.
    * @return {AuthenticationMethod} the first valid authentication method
    */
-  private async getFirstValidAuthenticationMethod(){
+  private async getFirstValidAuthenticationMethod() {
 
     for (let authenticationMethod of this.authenticationMethods) {
       if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){

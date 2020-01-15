@@ -45,7 +45,7 @@ export class GeteduroamApp {
       this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
 
       // Plugin wifiEAPConfigurator
-      this.wifiConfigurator();
+     // this.wifiConfigurator();
 
       // Listener to get status connection, apply when change status network
       this.checkConnection();
@@ -55,7 +55,7 @@ export class GeteduroamApp {
 
         // If the user opens the app with wifi disabled, then try to connect with eduroam
         if (connect.connectionType === 'wifi') {
-          this.wifiConfigurator();
+         // this.wifiConfigurator();
         }
 
       });

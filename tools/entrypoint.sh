@@ -14,9 +14,9 @@ echo "npm run build"
 npm run build
 
 #Check if android folder already exists to delete it
-if [ -d "/home/gradle/myApp/android" ]; then
+if [ -d "/home/gradle/myApp/andriod" ]; then
     echo "Removing android dir"
-    rm -rf /home/gradle/myApp/android
+    rm -rf /home/gradle/myApp/andriod
 fi
 
 npm install --save @capacitor/core @capacitor/cli
@@ -34,9 +34,9 @@ cd android
 cd app/build/outputs/apk/debug/
 
 #Check if app-debug-aligned.apk already exists to delete it
-if [ -f "/home/gradle/myApp/android/app/build/outputs/apk/debug/app-debug-aligned.apk" ]; then
+if [ -f "/home/gradle/myApp/andriod/app/build/outputs/apk/debug/app-debug-aligned.apk" ]; then
     echo "Removing app-debug-aligned.apk"
-    rm -f /home/gradle/myApp/android/app/build/outputs/apk/debug/app-debug-aligned.apk
+    rm -f /home/gradle/myApp/andriod/app/build/outputs/apk/debug/app-debug-aligned.apk
 fi
 
 #Align the APK
