@@ -1,13 +1,15 @@
-import { Config, Platform } from 'ionic-angular';
+import {Config, Platform} from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
+import { ProfilePage } from '../pages/profile/profile';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/Transition';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
 import { AppUrlOpen, Plugins } from '@capacitor/core';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
+import {ProfileModel} from "../shared/models/profile-model";
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
@@ -25,6 +27,10 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
 export class GeteduroamApp {
   rootPage = WelcomePage;
 
+  /*launchEap: boolean;
+*/
+  profile: ProfileModel;
+
   /**
    * @constructor
    *
@@ -33,7 +39,7 @@ export class GeteduroamApp {
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
               private networkInterface: NetworkInterface, private global: GlobalProvider) {
 
-    this.platform.ready().then(() => {
+    this.platform.ready().then(async () => {
 
       this.splashScreen.hide();
 
@@ -42,7 +48,7 @@ export class GeteduroamApp {
 
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
-      this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
+      await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
 
       // Plugin wifiEAPConfigurator
      // this.wifiConfigurator();
@@ -65,7 +71,7 @@ export class GeteduroamApp {
         this.navigate(urlOpen.url);
       });
 
-      this.getLaunchUrl();
+      await this.getLaunchUrl();
     });
   }
 
@@ -76,14 +82,26 @@ export class GeteduroamApp {
     const urlOpen = await Plugins.App.getLaunchUrl();
     if(!urlOpen || !urlOpen.url) return;
 
-    this.navigate(urlOpen.url);
+    this.profile = new ProfileModel();
+    this.profile.eapconfig_endpoint = urlOpen.url;
+    this.profile.oauth = false;
+    this.profile.id = "FileEap";
+    this.profile.name = "FileEap";
+
+    this.global.setProfile(this.profile);
+
   }
+
+
 
   navigate(uri: string) {
     if (!uri.includes('.eap-config')) return;
 
     // Route of the opened file
+
+    console.log(uri);
     uri = uri.substring(19);
+
 
   }
 
@@ -136,6 +154,10 @@ export class GeteduroamApp {
    */
   private async statusConnection() {
     return await Network.getStatus()
+  }
+
+  getRoot(){
+    return !this.profile ? WelcomePage : ProfilePage;
   }
 }
 

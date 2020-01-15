@@ -79,7 +79,6 @@ export class ProfilePage implements OnInit{
     console.log('checkForm: ', this.provide);
 
     if (!!this.validateForm()) {
-      const caCert = '-----BEGIN CERTIFICATE-----\n'+this.validMethod.serverSideCredential.ca.content+'\n-----END CERTIFICATE----- ';
       let config = {
         ssid: this.global.getSsid(),
         username: this.provide.email,
@@ -88,7 +87,7 @@ export class ProfilePage implements OnInit{
         servername: "",
         auth: this.global.auth.MSCHAPv2,
         anonymous: "",
-        caCertificate: caCert
+        caCertificate: this.validMethod.serverSideCredential.ca.content
       };
 
       console.log( 'config: ', config);
@@ -131,7 +130,12 @@ export class ProfilePage implements OnInit{
    */
   async ngOnInit() {
     this.loading.createAndPresent();
-    this.profile = this.navParams.get('profile');
+
+    this.profile = !!this.navParams.get('profile') ? this.navParams.get('profile') : this.global.getProfile();
+
+    console.log('profile in profile.ts', this.profile);
+
+
 
     const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
 

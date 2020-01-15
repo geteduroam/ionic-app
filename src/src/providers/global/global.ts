@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import {ProfileModel} from "../../shared/models/profile-model";
 
 @Injectable()
 export class GlobalProvider {
@@ -11,6 +12,8 @@ export class GlobalProvider {
   protected ssid: string;
   protected username: string;
   protected pass: string;
+
+  private profile: ProfileModel;
 
   //TODO: CREATE METHODS TO GET DATA
   getSsid() {
@@ -31,6 +34,14 @@ export class GlobalProvider {
 
   getAnonUser() {
     return ""
+  }
+
+  getProfile(){
+    return this.profile;
+  }
+
+  setProfile(profile: ProfileModel){
+    this.profile = profile;
   }
 
 }
