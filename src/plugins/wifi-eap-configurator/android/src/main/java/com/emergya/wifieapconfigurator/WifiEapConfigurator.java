@@ -24,6 +24,7 @@ import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.PluginResult;
 
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
@@ -52,7 +53,10 @@ public class WifiEapConfigurator extends Plugin {
         if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
             ssid = call.getString("ssid");
         } else {
-            call.reject("plugin.wifieapconfigurator.error.ssid.missing");
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
             res = false;
         }
 
@@ -60,7 +64,10 @@ public class WifiEapConfigurator extends Plugin {
         if (!call.getString("username").equals("") && call.getString("username") != null) {
             username = call.getString("username");
         } else {
-            call.reject("plugin.wifieapconfigurator.error.username.missing");
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.username.missing");
+            call.success(object);
             res = false;
         }
 
@@ -68,7 +75,10 @@ public class WifiEapConfigurator extends Plugin {
         if (!call.getString("password").equals("") && call.getString("password") != null) {
             password = call.getString("password");
         } else {
-            call.reject("plugin.wifieapconfigurator.error.password.missing");
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.password.missing");
+            call.success(object);
             res = false;
         }
 
@@ -92,7 +102,10 @@ public class WifiEapConfigurator extends Plugin {
                 || call.getInt("eap") == 25)) {//13 21 25
             eap = call.getInt("eap");
         } else {
-            call.reject("plugin.wifieapconfigurator.error.eap.missing");
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.eap.missing");
+            call.success(object);
             res = false;
         }
 
@@ -100,13 +113,16 @@ public class WifiEapConfigurator extends Plugin {
         if (call.getInt("auth") != null) {
             auth = call.getInt("auth");
         } else {
-            call.reject("plugin.wifieapconfigurator.error.auth.missing");
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.auth.missing");
+            call.success(object);
             res = false;
         }
 
-        if (res) {
+       /* if (res) {
             res = checkEnabledWifi(call);
-        }
+        }*/
 
         if (res) {
             res = getNetworkAssociated(call, ssid);
@@ -119,6 +135,7 @@ public class WifiEapConfigurator extends Plugin {
 
     void connectAP(String ssid, String username, String password, String servername, String caCertificate,
                    Integer eap, Integer auth, String anonymousIdentity, PluginCall call) {
+
         WifiConfiguration config = new WifiConfiguration();
 
         config.SSID = "\"" + ssid + "\"";
@@ -131,10 +148,10 @@ public class WifiEapConfigurator extends Plugin {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
         enterpriseConfig.setIdentity(username);
         enterpriseConfig.setPassword(password);
-        if(anonymousIdentity!=null && !anonymousIdentity.equals("")){
+        if (anonymousIdentity != null && !anonymousIdentity.equals("")) {
             enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
         }
-        if(servername != null && !servername.equals("")){
+        if (servername != null && !servername.equals("")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 enterpriseConfig.setDomainSuffixMatch(servername);
             }
@@ -155,7 +172,17 @@ public class WifiEapConfigurator extends Plugin {
                 caCert = (X509Certificate) certFactory.generateCertificate(b);
                 enterpriseConfig.setCaCertificate(caCert);
             } catch (CertificateException e) {
-                call.reject("plugin.wifieapconfigurator.error.ca.invalid");
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
+                call.success(object);
+                e.printStackTrace();
+                Log.e("error", e.getMessage());
+            } catch (IllegalArgumentException e) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
+                call.success(object);
                 e.printStackTrace();
                 Log.e("error", e.getMessage());
             }
@@ -170,8 +197,12 @@ public class WifiEapConfigurator extends Plugin {
         myWifiManager.enableNetwork(id, true);
         myWifiManager.reconnect();
 
+        WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(true);
+
         JSObject object = new JSObject();
-        object.put("message","plugin.wifieapconfigurator.success.network.linked");
+        object.put("success", true);
+        object.put("message", "plugin.wifieapconfigurator.success.network.linked");
         call.success(object);
 
     }
@@ -181,48 +212,68 @@ public class WifiEapConfigurator extends Plugin {
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         if (!wifi.isWifiEnabled()) {
-            call.reject("plugin.wifieapconfigurator.error.wifi.disabled");
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
+            call.success(object);
             res = false;
         }
         return res;
     }
 
     @PluginMethod
-    public void enableWifi(PluginCall call){
+    public void enableWifi(PluginCall call) {
 
         WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if(wifiManager.setWifiEnabled(true)){
+        if (wifiManager.setWifiEnabled(true)) {
             JSObject object = new JSObject();
-            object.put("message","plugin.wifieapconfigurator.success.wifi.enabled");
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.wifi.enabled");
             call.success(object);
-        }else{
-            call.reject("plugin.wifieapconfigurator.error.wifi.disabled");
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
+            call.success(object);
         }
 
     }
 
     @PluginMethod
-    public void isNetworkAssociated(PluginCall call){
+    public boolean isNetworkAssociated(PluginCall call) {
         String ssid = null;
-        boolean res = true;
-        if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
+        boolean res = false;
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
             ssid = call.getString("ssid");
         } else {
-            call.reject("plugin.wifieapconfigurator.error.ssid.missing");
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+            return res;
         }
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
-                call.reject("plugin.wifieapconfigurator.error.network.alreadyAssociated");
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
+                object.put("overridable", false);
+                call.success(object);
+                res = true;
                 break;
             }
         }
+        if(!res){
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.success(object);
+        }
 
-        JSObject object = new JSObject();
-        object.put("message","plugin.wifieapconfigurator.success.network.missing");
-        call.success(object);
+        return res;
     }
 
     private boolean getNetworkAssociated(PluginCall call, String ssid) {
@@ -232,7 +283,11 @@ public class WifiEapConfigurator extends Plugin {
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
-                call.reject("plugin.wifieapconfigurator.error.network.alreadyAssociated\"");
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
+                object.put("overridable", false);
+                call.success(object);
                 res = false;
                 break;
             }
@@ -254,7 +309,10 @@ public class WifiEapConfigurator extends Plugin {
                 res = WifiEnterpriseConfig.Eap.PEAP;
                 break;
             default:
-                call.reject("plugin.wifieapconfigurator.error.eap.invalid");
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.eap.invalid");
+                call.success(object);
                 res = 0;
                 break;
         }
@@ -273,8 +331,14 @@ public class WifiEapConfigurator extends Plugin {
             case 5:
                 res = WifiEnterpriseConfig.Phase2.PAP;
                 break;
+            case 6:
+                res = WifiEnterpriseConfig.Phase2.GTC;
+                break;
             default:
-                call.reject("plugin.wifieapconfigurator.error.auth.invalid");
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.auth.invalid");
+                call.success(object);
                 res = 0;
                 break;
         }
