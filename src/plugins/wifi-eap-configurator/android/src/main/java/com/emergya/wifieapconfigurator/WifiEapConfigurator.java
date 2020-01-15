@@ -24,6 +24,7 @@ import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.PluginResult;
 
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
@@ -239,35 +240,39 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     @PluginMethod
-    public void isNetworkAssociated(PluginCall call) {
+    public boolean isNetworkAssociated(PluginCall call) {
         String ssid = null;
-        boolean res = true;
+        boolean res = false;
         if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
             ssid = call.getString("ssid");
         } else {
-            JSObject object = new JSObject();
+            PluginResult object = new PluginResult();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
-            call.success(object);
+            call.successCallback(object);
         }
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
-                JSObject object = new JSObject();
+                PluginResult object = new PluginResult();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
                 object.put("overridable", false);
-                call.success(object);
+                call.successCallback(object);
+                res = true;
                 break;
             }
         }
+        if(!res){
+            PluginResult object = new PluginResult();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.successCallback(object);
+        }
 
-        JSObject object = new JSObject();
-        object.put("success", true);
-        object.put("message", "plugin.wifieapconfigurator.success.network.missing");
-        call.success(object);
+        return res;
     }
 
     private boolean getNetworkAssociated(PluginCall call, String ssid) {
