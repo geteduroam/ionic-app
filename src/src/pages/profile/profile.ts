@@ -79,7 +79,8 @@ export class ProfilePage implements OnInit{
     console.log('checkForm: ', this.provide);
 
     if (!!this.validateForm()) {
-      const caCert = '-----BEGIN CERTIFICATE-----\n'+this.validMethod.serverSideCredential.ca.content+'\n-----END CERTIFICATE----- ';
+      const caCert = this.validMethod.serverSideCredential.ca.content;
+
       let config = {
         ssid: this.global.getSsid(),
         username: this.provide.email,

@@ -44,19 +44,14 @@ export class GeteduroamApp {
       this.screenOrientation.unlock();
       this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
 
-      // Plugin wifiEAPConfigurator
-     // this.wifiConfigurator();
+      // Plugin wifiEAPConfigurator associatedNetwork
+      this.associatedNetwork();
 
       // Listener to get status connection, apply when change status network
       this.checkConnection();
 
       Network.addListener('networkStatusChange', async () => {
-        const connect = await this.statusConnection();
-
-        // If the user opens the app with wifi disabled, then try to connect with eduroam
-        if (connect.connectionType === 'wifi') {
-         // this.wifiConfigurator();
-        }
+        await this.statusConnection();
 
       });
 
@@ -66,6 +61,16 @@ export class GeteduroamApp {
       });
 
       this.getLaunchUrl();
+    });
+  }
+
+  associatedNetwork() {
+    WifiEapConfigurator.isNetworkAssociated(this.global.getSsid()).then((res) => {
+      console.log('Network associated then: ', res)
+      // TODO: rootPage: Configure new network
+    }).catch((e) => {
+      console.log('Network Associated error: ', e)
+      // TODO: rootPage: Re-configure
     });
   }
 
@@ -79,32 +84,13 @@ export class GeteduroamApp {
     this.navigate(urlOpen.url);
   }
 
+  // TODO: Open from a file
   navigate(uri: string) {
     if (!uri.includes('.eap-config')) return;
 
     // Route of the opened file
     uri = uri.substring(19);
 
-  }
-
-  /**
-   * This method initialized plugin WifiEapConfigurator
-   */
-  async wifiConfigurator() {
-    const config = {
-      ssid: this.global.getSsid(),
-      username: this.global.getUsername(),
-      password: this.global.getPass(),
-      eap: 21,
-      servername: this.global.getServerName(),
-      auth: this.global.auth.MSCHAPv2,
-      anonymous: this.global.getAnonUser(),
-      caCertificate: ""
-    };
-
-    WifiEapConfigurator.configureAP(config).then().catch(async (e) => {
-      await this.errorHandler.handleError(e.message, false);
-    });
   }
 
   /**
