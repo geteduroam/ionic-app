@@ -1,4 +1,4 @@
-import {Config, Platform} from 'ionic-angular';
+import { Config, Platform } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
@@ -27,10 +27,7 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
 export class GeteduroamApp {
   rootPage = WelcomePage;
 
-  /*launchEap: boolean;
-*/
   profile: ProfileModel;
-
   /**
    * @constructor
    *
@@ -50,19 +47,14 @@ export class GeteduroamApp {
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
 
-      // Plugin wifiEAPConfigurator
-     // this.wifiConfigurator();
+      // Plugin wifiEAPConfigurator associatedNetwork
+      this.associatedNetwork();
 
       // Listener to get status connection, apply when change status network
       this.checkConnection();
 
       Network.addListener('networkStatusChange', async () => {
-        const connect = await this.statusConnection();
-
-        // If the user opens the app with wifi disabled, then try to connect with eduroam
-        if (connect.connectionType === 'wifi') {
-         // this.wifiConfigurator();
-        }
+        await this.statusConnection();
 
       });
 
@@ -75,6 +67,20 @@ export class GeteduroamApp {
     });
   }
 
+  async associatedNetwork() {
+    WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()}).then((res) => {
+      res.message === 'plugin.wifieapconfigurator.error.network.alreadyAssociated' ?
+        this.errorHandler.handleError('A network connection called '+ this.global.getSsid() +
+          ' is already available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it' +
+          ' if you want to reconfigure '+ this.global.getSsid() + '.', false) :
+        this.enableWifi();
+    });
+
+  }
+
+  enableWifi() {
+    WifiEapConfigurator.enableWifi();
+  }
   /**
    * This method throw the app when is opened from a file
    */
@@ -92,37 +98,13 @@ export class GeteduroamApp {
 
   }
 
-
-
+  // TODO: Open from a file
   navigate(uri: string) {
     if (!uri.includes('.eap-config')) return;
 
     // Route of the opened file
-
-    console.log(uri);
     uri = uri.substring(19);
 
-
-  }
-
-  /**
-   * This method initialized plugin WifiEapConfigurator
-   */
-  async wifiConfigurator() {
-    const config = {
-      ssid: this.global.getSsid(),
-      username: this.global.getUsername(),
-      password: this.global.getPass(),
-      eap: 21,
-      servername: this.global.getServerName(),
-      auth: this.global.auth.MSCHAPv2,
-      anonymous: this.global.getAnonUser(),
-      caCertificate: ""
-    };
-
-    WifiEapConfigurator.configureAP(config).then().catch(async (e) => {
-      await this.errorHandler.handleError(e.message, false);
-    });
   }
 
   /**

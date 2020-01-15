@@ -133,8 +133,6 @@ export class ProfilePage implements OnInit{
 
     this.profile = !!this.navParams.get('profile') ? this.navParams.get('profile') : this.global.getProfile();
 
-    console.log('profile in profile.ts', this.profile);
-
 
 
     const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
