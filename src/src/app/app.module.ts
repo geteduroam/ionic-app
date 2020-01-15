@@ -1,6 +1,6 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicApp, IonicModule, PageTransition, Transition } from 'ionic-angular';
+import { IonicApp, IonicModule } from 'ionic-angular';
 import { GeteduroamApp } from './app.component';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 
@@ -15,6 +15,7 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { LoadingProvider } from '../providers/loading/loading';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx'
 import { StoringProvider } from '../providers/storing/storing';
+import { GlobalProvider } from '../providers/global/global';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { StoringProvider } from '../providers/storing/storing';
     ScreenOrientation,
     LoadingProvider,
     NetworkInterface,
-    StoringProvider
+    StoringProvider,
+    GlobalProvider
   ],
   exports:[]
 })
