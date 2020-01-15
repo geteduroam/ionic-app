@@ -65,13 +65,15 @@ export class GeteduroamApp {
   }
 
   associatedNetwork() {
-    WifiEapConfigurator.isNetworkAssociated(this.global.getSsid()).then((res) => {
+    const associated = WifiEapConfigurator.isNetworkAssociated(this.global.getSsid()).then((res) => {
       console.log('Network associated then: ', res)
       // TODO: rootPage: Configure new network
     }).catch((e) => {
       console.log('Network Associated error: ', e)
       // TODO: rootPage: Re-configure
     });
+    
+    console.log('asssociated: ', associated)
   }
 
   /**
