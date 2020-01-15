@@ -47,6 +47,8 @@ export class ProfilePage implements OnInit{
 
   errorPass: boolean = false;
 
+  suffixIdentity: string;
+
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, private store: StoringProvider) {
@@ -59,12 +61,13 @@ export class ProfilePage implements OnInit{
    */
   validateForm(): boolean {
     const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
-    const validEmail = this.validator.validateEmail(this.provide.email);
 
-    return validEmail && this.provide.pass !== '' && validateTerms;
+    return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
   }
 
-
+  validEmail(email: string) {
+    return this.validator.validateEmail(email, this.suffixIdentity)
+  }
 
   /**
    * Method to check form and navigate.
@@ -134,7 +137,8 @@ export class ProfilePage implements OnInit{
     const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
 
     if (validEap) {
-      console.log('authenticationMethods: ', this.authenticationMethods);
+      this.suffixIdentity = !!this.authenticationMethods[0].clientSideCredential.innerIdentityHint ?
+        this.authenticationMethods[0].clientSideCredential.innerIdentitySuffix : '';
 
       await this.storageFile(eapConfig);
       this.getFirstValidAuthenticationMethod();

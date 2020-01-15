@@ -10,13 +10,17 @@
         <div  class="content-profile" padding-top >
             <ion-label class="label-conf" text-left> Username </ion-label>
 
-            <input [(ngModel)]="provide.email"
-                   [ngClass]="provide.email !== '' && provide.email.length > 6 &&
-                        !validEmail(provide.email) ? 'error-validation' : ''" class="input-profile"
-                   name="email" padding-left placeholder="name@example.com" type="email"/>
+            <input [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
+                   !validEmail(provide.email) && suffixIdentity !== '' && !provide.email.includes(suffixIdentity) ?
+                   'error-validation' : ''"  class="input-profile" name="email" padding-left
+                   placeholder="name@example.com" type="email"/>
 
-            <p *ngIf="provide.email !== '' && provide.email.length > 6 && !validEmail(provide.email)" class="error-msg">
+            <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
                 The email account is incorrect </p>
+
+            <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
+                && !provide.email.includes(suffixIdentity)" class="error-msg">
+                The email domain must include {{suffixIdentity}} </p>
         </div>
 
         <div class="content-profile" margin-top>
