@@ -102,7 +102,7 @@ export class GeteduroamApp {
       caCertificate: ""
     };
 
-    await WifiEapConfigurator.configureAP(config).then().catch(async (e) => {
+    WifiEapConfigurator.configureAP(config).then().catch(async (e) => {
       await this.errorHandler.handleError(e.message, false);
     });
   }
