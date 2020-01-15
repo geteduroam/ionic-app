@@ -34,6 +34,11 @@
 add(WifiEapConfigurator.class)
 ```
 
+6. (Android Only) Add two permissions to the manifest:
+
+- <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+- <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
 ## HOW TO USE ##
 
 each time you want to use the configurator you will have to do a few steps, configurating first the whole implementation, as follows:
@@ -48,7 +53,15 @@ const { WifiEapConfigurator } = Capacitor.Plugins
 ```TypeScript
 WifiEapConfigurator.configureAP({ssid: String, username: String, password: String, eap: Number, servername: String, auth: Number, caCertificate: String})
 ```
-3. And that's it! You should be using the library already!
+3. With ``WifiEapConfigurator`` will bring a function called ``.networkAssociated()`` which has the following parameters: 
+```TypeScript
+WifiEapConfigurator.networkAssociated({ssid: String})
+```
+4. With ``WifiEapConfigurator`` will bring a function called ``.enableWifi()`` which has the following parameters: 
+```TypeScript
+WifiEapConfigurator.enableWifi()
+```
+5. And that's it! You should be using the library already!
 
 ## Variables
 
@@ -61,7 +74,8 @@ So there's a couple of values that comes into this function, which are explained
 |username|`String`|❌|Email Address  |
 |password|`String`|❌|Password|
 |eap|`Number`|❌|21|
-|servername |`String`|❌|radius.upo.es|
+|servername |`String`|✅|radius.upo.es|
+|anonymous |`String`|✅|anonymousIdentity|
 |auth|`Number`|❌|5|
 |caCertificate|`String`|✅|Certificate Base64|
 
@@ -84,3 +98,4 @@ auth is the variable that determines which TTLS Auth Type we are doing, it can g
 - 3 <= For MSCHAP connections
 - 4 <= For MSCHAPv2 connections
 - 5 <= For PAP connections
+- 6 <= For GTC connections
