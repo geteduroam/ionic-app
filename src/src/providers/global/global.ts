@@ -32,4 +32,5 @@ export class GlobalProvider {
   getAnonUser() {
     return ""
   }
+
 }

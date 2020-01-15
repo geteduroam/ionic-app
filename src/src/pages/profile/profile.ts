@@ -13,6 +13,7 @@ import {ValidatorProvider} from "../../providers/validator/validator";
 import {Plugins} from "@capacitor/core";
 import { ProfileModel } from '../../shared/models/profile-model';
 import { ProvideModel } from '../../shared/models/provide-model';
+import { GlobalProvider } from '../../providers/global/global';
 const {Browser} = Plugins;
 
 @Component({
@@ -39,6 +40,8 @@ export class ProfilePage implements OnInit{
    */
   authenticationMethods: AuthenticationMethod[];
 
+  validMethod: AuthenticationMethod;
+
   providerInfo: ProviderInfo;
 
   termsOfUse: boolean = false;
@@ -51,7 +54,7 @@ export class ProfilePage implements OnInit{
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              private validator: ValidatorProvider, private store: StoringProvider) {
+              private validator: ValidatorProvider, private store: StoringProvider, private global: GlobalProvider) {
 
   }
 
@@ -76,18 +79,19 @@ export class ProfilePage implements OnInit{
     console.log('checkForm: ', this.provide);
 
     if (!!this.validateForm()) {
-
+      const caCert = '-----BEGIN CERTIFICATE-----\n'+this.validMethod.serverSideCredential.ca.content+'\n-----END CERTIFICATE----- ';
       let config = {
-        ssid: "eduroam",
+        ssid: this.global.getSsid(),
         username: this.provide.email,
         password: this.provide.pass,
-        eap: 25,
+        eap: parseInt(this.validMethod.eapMethod.type.toString()),
         servername: "",
-        auth: 4,
+        auth: this.global.auth.MSCHAPv2,
         anonymous: "",
-        caCertificate: ""
+        caCertificate: caCert
       };
 
+      console.log( 'config: ', config);
       const checkRequest = this.getEduroamServices.connectProfile(config);
 
       if (!!checkRequest) {
@@ -137,11 +141,12 @@ export class ProfilePage implements OnInit{
     const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
 
     if (validEap) {
-      this.suffixIdentity = !!this.authenticationMethods[0].clientSideCredential.innerIdentityHint ?
-        this.authenticationMethods[0].clientSideCredential.innerIdentitySuffix : '';
-
       await this.storageFile(eapConfig);
-      this.getFirstValidAuthenticationMethod();
+      this.validMethod = await this.getFirstValidAuthenticationMethod();
+      console.log(this.validMethod);
+      this.suffixIdentity = !!this.validMethod.clientSideCredential.innerIdentityHint ?
+        this.validMethod.clientSideCredential.innerIdentitySuffix : '';
+
       this.createTerms();
 
     } else {
@@ -186,7 +191,7 @@ export class ProfilePage implements OnInit{
    * Method to get the first valid authentication method form an eap institutionSearch file.
    * @return {AuthenticationMethod} the first valid authentication method
    */
-  private async getFirstValidAuthenticationMethod(){
+  private async getFirstValidAuthenticationMethod() {
 
     for (let authenticationMethod of this.authenticationMethods) {
       if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){

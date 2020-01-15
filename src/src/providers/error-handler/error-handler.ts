@@ -14,7 +14,7 @@ export class ErrorHandlerProvider extends ErrorHandler {
 
   async handleError(errorText: string, isFinal?:boolean, helpDeskUrl?:string) {
 
-    errorText = errorText.includes('associated') ? errorText + ".\nPlease delete the eduroam network stored in 'Saved networks'" : errorText;
+  //  errorText = errorText.includes('associated') ? errorText + ".\nPlease delete the eduroam network stored in 'Saved networks'" : errorText;
 
     let localFinal: boolean = !!isFinal ? isFinal : false;
     let localUrl:string = !!helpDeskUrl ? helpDeskUrl : '';
