@@ -28,7 +28,7 @@ export class WelcomePage  {
   }
 
   async enableWifi() {
-   await WifiEapConfigurator.enableWifi({ssid: "eduroam"})
+   await WifiEapConfigurator.enableWifi()
   }
 
   async navigateTo() {

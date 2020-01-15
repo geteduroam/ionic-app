@@ -35,9 +35,10 @@ add(WifiEapConfigurator.class)
 ```
 
 6. (Android Only) Add two permissions to the manifest:
-
-- <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-- <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+```bash
+ <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+ <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+```
 
 ## HOW TO USE ##
 
