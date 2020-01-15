@@ -222,6 +222,39 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     @PluginMethod
+    public boolean removeNetwork(PluginCall call) {
+        String ssid = null;
+        boolean res = false;
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
+            ssid = call.getString("ssid");
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+            return res;
+        }
+
+        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
+        for (WifiConfiguration conf : configuredNetworks) {
+            if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+                wifi.removeNetwork(conf.networkId);
+                wifi.saveConfiguration();
+                res=true;
+            }
+        }
+        if(!res){
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.success(object);
+        }
+
+        return res;
+    }
+
+    @PluginMethod
     public void enableWifi(PluginCall call) {
 
         WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
