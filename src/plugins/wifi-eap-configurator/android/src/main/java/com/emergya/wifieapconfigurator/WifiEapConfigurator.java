@@ -243,33 +243,34 @@ public class WifiEapConfigurator extends Plugin {
     public boolean isNetworkAssociated(PluginCall call) {
         String ssid = null;
         boolean res = false;
-        if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
             ssid = call.getString("ssid");
         } else {
-            PluginResult object = new PluginResult();
+            JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
-            call.successCallback(object);
+            call.success(object);
+            return res;
         }
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
-                PluginResult object = new PluginResult();
+                JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
                 object.put("overridable", false);
-                call.successCallback(object);
+                call.success(object);
                 res = true;
                 break;
             }
         }
         if(!res){
-            PluginResult object = new PluginResult();
+            JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.missing");
-            call.successCallback(object);
+            call.success(object);
         }
 
         return res;
