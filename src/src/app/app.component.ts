@@ -64,18 +64,15 @@ export class GeteduroamApp {
     });
   }
 
-  associatedNetwork() {
-    const associated = WifiEapConfigurator.isNetworkAssociated(this.global.getSsid()).then((res) => {
-      console.log('Network associated then: ', res)
-      // TODO: rootPage: Configure new network
-    }).catch((e) => {
-      console.log('Network Associated error: ', e)
-      // TODO: rootPage: Re-configure
-    });
-    
-    console.log('asssociated: ', associated)
+  async associatedNetwork() {
+    const associated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+    !associated.success ? this.alertConnection('A network connect with name '+this.global.getSsid()+'.\n Please go to Settings > Wifi Networks > Saved Networks and remove it.') :
+    this.enableWifi();
   }
 
+  enableWifi() {
+    WifiEapConfigurator.enableWifi();
+  }
   /**
    * This method throw the app when is opened from a file
    */
