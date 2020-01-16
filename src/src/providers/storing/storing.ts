@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { FilesystemDirectory, FilesystemEncoding, Plugins } from '@capacitor/core';
 
 const { Filesystem, Toast } = Plugins;
+declare var window;
 
 @Injectable()
 export class StoringProvider {
@@ -118,6 +119,16 @@ export class StoringProvider {
       directory: FilesystemDirectory.Documents,
       encoding: FilesystemEncoding.UTF8
     });
+  }
+
+  async readExtFile(uri){
+
+    try {
+      return await Filesystem.readFile({path: uri });
+
+    } catch (e) {
+      console.log(e)
+    }
   }
 
 }

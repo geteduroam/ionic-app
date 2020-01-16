@@ -129,12 +129,11 @@ export class ProfilePage implements OnInit{
    * The method obtains the first valid authentication method by calling [getFirstValidAuthenticationMethod()]{#getFirstValidAuthenticationMethod}
    */
   async ngOnInit() {
+
     this.loading.createAndPresent();
 
     this.profile = !!this.navParams.get('profile') ? this.navParams.get('profile') : this.global.getProfile();
-
-
-
+    const externalProfile = this.profile.eapconfig_endpoint.includes('content://') || this.profile.eapconfig_endpoint.includes('file://');
     const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
 
     this.authenticationMethods = [];
@@ -143,14 +142,15 @@ export class ProfilePage implements OnInit{
     const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
 
     if (validEap) {
-
       this.validMethod = await this.getFirstValidAuthenticationMethod();
 
       if (!!this.validMethod) {
-        await this.storageFile(eapConfig);
 
+        if (!externalProfile) {
+          await this.storageFile(eapConfig);
+        }
         this.suffixIdentity = !!this.validMethod && !!this.validMethod.clientSideCredential.innerIdentityHint ?
-            this.validMethod.clientSideCredential.innerIdentitySuffix : '';
+          this.validMethod.clientSideCredential.innerIdentitySuffix : '';
 
         this.createTerms();
       }

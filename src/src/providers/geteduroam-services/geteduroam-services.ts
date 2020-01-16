@@ -2,6 +2,7 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
+import { StoringProvider } from '../storing/storing';
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
@@ -12,7 +13,7 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
 @Injectable()
 export class GeteduroamServices {
 
-  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider) {
+  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider) {
 
   }
 
@@ -56,18 +57,22 @@ export class GeteduroamServices {
 
         const params = {};
         const headers = {};
+        let response: any;
 
-        console.log('url', url);
+        if (url.includes('content://')) {
 
-        const response = await this.http.get(url, params, headers);
+          response = await this.store.readExtFile(url);
+          response.data = atob(response.data);
 
+        } else {
+          response = await this.http.get(url, params, headers);
+        }
         let jsonResult = '';
 
         xml2js.parseString(response.data, function (err, result) {
             jsonResult = result;
         });
 
-        console.log('jsonResult:',jsonResult);
         return jsonResult;
 
     }
