@@ -208,7 +208,7 @@ export class ProfilePage implements OnInit{
     let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
       !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
 
-    await this.errorHandler.handleError('No valid authentication method available from the eapconfig file', true, url);
+    await this.errorHandler.handleError('No valid authentication method available from the eap-config file', true, url);
     return null;
   }
 

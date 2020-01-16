@@ -16,7 +16,7 @@
                    placeholder="name@example.com" type="email"/>
 
             <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
-                The email account is incorrect </p>
+                The username is incorrect </p>
 
             <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
                 && !provide.email.includes(suffixIdentity)" class="error-msg">

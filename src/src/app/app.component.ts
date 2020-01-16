@@ -70,7 +70,7 @@ export class GeteduroamApp {
   async associatedNetwork() {
     WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()}).then((res) => {
       res.message === 'plugin.wifieapconfigurator.error.network.alreadyAssociated' ?
-        this.errorHandler.handleError('A network connection called '+ this.global.getSsid() +
+        this.errorHandler.handleError('A network profile called '+ this.global.getSsid() +
           ' is already available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it' +
           ' if you want to reconfigure '+ this.global.getSsid() + '.', false) :
         this.enableWifi();
