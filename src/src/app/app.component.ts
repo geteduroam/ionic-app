@@ -127,7 +127,7 @@ export class GeteduroamApp {
     let connect = await this.statusConnection();
 
     // Disconnect error
-    !connect.connected ?  this.alertConnection('Please connect device to network') :
+    !connect.connected ?  this.alertConnection('Please turn on mobile data or use Wi-Fi to access data') :
       this.alertConnection('Connected by: '+ connect.connectionType);
   }
 

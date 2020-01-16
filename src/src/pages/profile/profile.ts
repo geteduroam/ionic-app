@@ -50,7 +50,7 @@ export class ProfilePage implements OnInit{
 
   errorPass: boolean = false;
 
-  suffixIdentity: string;
+  suffixIdentity: string = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
@@ -143,16 +143,20 @@ export class ProfilePage implements OnInit{
     const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
 
     if (validEap) {
-      await this.storageFile(eapConfig);
-      this.validMethod = await this.getFirstValidAuthenticationMethod();
-      console.log(this.validMethod);
-      this.suffixIdentity = !!this.validMethod.clientSideCredential.innerIdentityHint ?
-        this.validMethod.clientSideCredential.innerIdentitySuffix : '';
 
-      this.createTerms();
+      this.validMethod = await this.getFirstValidAuthenticationMethod();
+
+      if (!!this.validMethod) {
+        await this.storageFile(eapConfig);
+
+        this.suffixIdentity = !!this.validMethod && !!this.validMethod.clientSideCredential.innerIdentityHint ?
+            this.validMethod.clientSideCredential.innerIdentitySuffix : '';
+
+        this.createTerms();
+      }
 
     } else {
-      await this.errorHandler.handleError('Invalid eapconfig file', false);
+      await this.errorHandler.handleError('Invalid eap-config file', false);
     }
 
     this.loading.dismiss();
