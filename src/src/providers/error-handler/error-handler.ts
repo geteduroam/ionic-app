@@ -19,7 +19,6 @@ export class ErrorHandlerProvider extends ErrorHandler {
     let localFinal: boolean = !!isFinal ? isFinal : false;
     let localUrl:string = !!helpDeskUrl ? helpDeskUrl : '';
     let errorModal = this.modalCtrl.create(ErrorsPage, {error: errorText, isFinal: localFinal, link: localUrl});
-
     if ( !this.showModal ) {
       this.showModal = true;
 
