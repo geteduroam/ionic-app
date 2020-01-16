@@ -275,7 +275,7 @@ public class WifiEapConfigurator extends Plugin {
     @PluginMethod
     public boolean isNetworkAssociated(PluginCall call) {
         String ssid = null;
-        boolean res = false;
+        boolean res = false, isOverridable = false;
         if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
             ssid = call.getString("ssid");
         } else {
@@ -290,10 +290,16 @@ public class WifiEapConfigurator extends Plugin {
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+
+                String packageName = getContext().getPackageName();
+                if(conf.toString().toLowerCase().contains(packageName.toLowerCase())){
+                    isOverridable = true;
+                }
+
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
-                object.put("overridable", false);
+                object.put("overridable", isOverridable);
                 call.success(object);
                 res = true;
                 break;
@@ -310,16 +316,21 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     private boolean getNetworkAssociated(PluginCall call, String ssid) {
-        boolean res = true;
+        boolean res = true, isOverridable = false;
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+                String packageName = getContext().getPackageName();
+                if(conf.toString().toLowerCase().contains(packageName.toLowerCase())){
+                    isOverridable = true;
+                }
+
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
-                object.put("overridable", false);
+                object.put("overridable", isOverridable);
                 call.success(object);
                 res = false;
                 break;
