@@ -62,7 +62,15 @@ WifiEapConfigurator.networkAssociated({ssid: String})
 ```TypeScript
 WifiEapConfigurator.enableWifi()
 ```
-5. And that's it! You should be using the library already!
+5. With ``WifiEapConfigurator`` will bring a function called ``.reachableSSID()`` which has the following parameters: 
+```TypeScript
+WifiEapConfigurator.reachableSSID({ssid: String})
+```
+6. With ``WifiEapConfigurator`` will bring a function called ``.isConnectedSSID()`` which has the following parameters: 
+```TypeScript
+WifiEapConfigurator.isConnectedSSID({ssid: String})
+```
+7. And that's it! You should be using the library already!
 
 ## Variables
 
