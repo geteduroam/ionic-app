@@ -76,7 +76,6 @@ export class ProfilePage implements OnInit{
    * Method to check form and navigate.
    */
   async checkForm() {
-    console.log('checkForm: ', this.provide);
 
     if (!!this.validateForm()) {
       let config = {
@@ -90,7 +89,6 @@ export class ProfilePage implements OnInit{
         caCertificate: this.validMethod.serverSideCredential.ca.content
       };
 
-      console.log( 'config: ', config);
       const checkRequest = this.getEduroamServices.connectProfile(config);
 
       if (!!checkRequest) {
