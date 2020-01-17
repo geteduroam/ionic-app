@@ -1,26 +1,23 @@
+<div *ngIf="showAll">
+    <div class="header-content" margin-top padding-top>
+        <img #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
+        <h1> Enjoy using eduroam!</h1>
+    </div>
 
-<ion-content class="container" text-center>
+    <div class="content-info" text-center>
 
-    <div class="base-content">
+        <div class="info-text" no-margin>
 
-        <div class="header-content">
-            <img src="../../assets/icon/cog-outline.svg" />
-            <h1> Eduroam wifi confirmation</h1>
+            <p class="copy" margin padding>
+                eduroam is now configured on your device.
+            </p>
         </div>
-
-        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
+    </div>
+    <div class="footer-info" text-center>
 
         <div class="content-button">
-            <button class="button-control" ion-button> Re-configure </button>
+            <button (click)="exitApp()" class="button-control" ion-button text-capitalize> ok </button>
         </div>
-
-        <p text-center >No, thanks</p>
-
     </div>
+</div>
 
-    <!-- REMOVE THIS LINES -->
-    <div class="other-views">
-        <p>To view others pages</p>
-        <button (click)="navigateTo('welcome')" class="button-control" ion-button> Welcome Screen </button>
-    </div>
-</ion-content>

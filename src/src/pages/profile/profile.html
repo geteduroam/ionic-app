@@ -1,12 +1,51 @@
-<ion-header>
+<div *ngIf="showAll" class="container-profile">
+    <div class="header-content" margin-top padding-top>
+        <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
+        <h1> Provide information </h1>
+    </div>
 
-  <ion-navbar>
-    <ion-title>profile</ion-title>
-  </ion-navbar>
+    <div class="content-form" text-center>
+     <form (ngSubmit)="checkForm()">
 
-</ion-header>
+        <div  class="content-profile" padding-top >
+            <ion-label class="label-conf" text-left> Username </ion-label>
 
-<ion-content padding>
+            <input [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
+                   !validEmail(provide.email) && suffixIdentity !== '' && !provide.email.includes(suffixIdentity) ?
+                   'error-validation' : ''"  class="input-profile" name="email" padding-left
+                   placeholder="name@example.com" type="email"/>
 
-    <p>Profile page</p>
-</ion-content>
+            <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
+                The email account is incorrect </p>
+
+            <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
+                && !provide.email.includes(suffixIdentity)" class="error-msg">
+                The email domain must include {{suffixIdentity}} </p>
+        </div>
+
+        <div class="content-profile" margin-top>
+            <ion-label class="label-conf" text-left> Password </ion-label>
+            <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
+                   name="pass" padding-left type="password"/>
+
+            <p *ngIf="errorPass" class="error-msg"> Password is incorrect </p>
+        </div>
+        <div *ngIf="termsOfUse" class="content-terms" ion-row>
+            <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
+            <ion-label col-6 no-padding text-left>Accept <a class="terms" href="{{termsUrl}}"> terms of use </a></ion-label>
+        </div>
+     </form>
+
+    </div>
+
+    <div class="footer-form">
+        <form (ngSubmit)="checkForm()">
+            <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
+                <button [ngClass]="!validateForm() ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit"> Next </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+

@@ -1,14 +1,40 @@
+<ion-content #modal class="container" scrollDownOnLoad text-center>
+    <img alt="icon" class="logo" margin margin-top src="../../assets/imgs/logo.png">
 
-<ion-header>
-
-  <ion-navbar>
-    <ion-title>errors</ion-title>
-  </ion-navbar>
-
-</ion-header>
+    <div class="bar-upped" margin></div>
+    <div class="base-content" margin-bottom margin-end margin-left margin-right padding>
 
 
-<ion-content padding>
+        <div class="header-content" margin-top padding-top>
+            <img alt="setting" src="../../assets/icon/alert-outline.svg" />
+            <h1>Error</h1>
+        </div>
+        <div class="content-info" text-center>
 
-    <p>Error page</p>
+            <div class="info-text" no-margin>
+
+                <p class="copy message" margin padding> {{text}} </p>
+            </div>
+        </div>
+        <div *ngIf="isFinal" class="footer-info" text-center>
+
+            <div  class="content-button">
+                <button (click)="clickKnowMore()" *ngIf="!isLinkEmail()" class="button-control" ion-button text-capitalize> Know more </button>
+                <a *ngIf="isLinkEmail()" class="button-control" href="{{getEmail()}}" ion-button text-capitalize> Send e-mail </a>
+            </div>
+
+            <div (click)="exitApp()" class="text-bottom" margin-top>
+                <p class="text-down" padding-top text-center >Close</p>
+            </div>
+        </div>
+        <div *ngIf="!isFinal" class="footer-info" text-center>
+
+            <div class="content-button">
+                <button (click)="closeModal()" class="button-control" ion-button text-capitalize> Back </button>
+            </div>
+        </div>
+
+    </div>
 </ion-content>
+
+

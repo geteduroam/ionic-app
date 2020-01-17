@@ -9,11 +9,14 @@
       "ScrollEnabled": "false",
       "android-minSdkVersion": "19",
       "BackupWebStorage": "none",
-      "SplashMaintainAspectRatio": "true",
-      "FadeSplashScreenDuration": "300",
-      "SplashShowOnlyFirstTime": "true",
-      "SplashScreen": "true",
-      "SplashScreenDelay": "3000"
+      "SplashShowOnlyFirstTime": "false",
+      "SplashScreen": "false"
+    }
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "showSpinner": false
     }
   }
 }

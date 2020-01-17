@@ -4,7 +4,7 @@ import { NavController, NavParams } from 'ionic-angular';
 import {WifiConfirmation} from "../wifiConfirmation/wifiConfirmation";
 
 @Component({
-  selector: 'page-welcome',
+  selector: 'page-wifi-config',
   templateUrl: 'wifiConfiguration.html',
 })
 export class WifiConfiguration {
@@ -13,10 +13,8 @@ export class WifiConfiguration {
   }
 
   // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-  async navigateTo(page: string) {
-    if (page === 'wifiConfirmation') {
+  async navigateTo() {
       await this.navCtrl.push(WifiConfirmation);
-    }
   }
 
 }

@@ -1,3 +1,48 @@
 page-profile {
+  .container-profile {
+    background: #FFFFFF;
+  }
+
+  .input-profile {
+    border-radius: 4px;
+    margin-left: 14px !important;
+    border: 1px solid #CAD0D6 !important;
+    width: calc(100% - 30px);
+    margin-right: 12px;
+    height: 40px;
+  }
+
+  .content-terms {
+
+    ion-checkbox {
+      margin: 14px 0 0 20px !important;
+    }
+
+    ion-label {
+      font-family: Helvetica, sans-serif;
+      font-size: 15px !important;
+
+    }
+  }
+
+  .bottom-button {
+    margin: 30px;
+  }
+  .error-msg {
+    font-size: 11px;
+    color: $color-danger;
+  }
+  .error-validation {
+    border: solid 1px red !important;
+  }
+
+}
+
+//---------------------------------//
+// Show all elements to tap input  //
+//---------------------------------//
+ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
+  contain: unset !important;
+  overflow: unset !important;
 
 }
