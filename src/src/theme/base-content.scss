@@ -33,6 +33,11 @@ ion-content {
     margin-top: 0;
     border-top: none;
 
+    .container-content {
+      background: #FFFFFF;
+      height: calc(100% - 20px);
+    }
+
     .header-content {
 
       height: 22%;

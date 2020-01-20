@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
@@ -6,22 +6,17 @@ import { AuthenticationMethod } from '../../shared/entities/authenticationMethod
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { ProviderInfo } from '../../shared/entities/providerInfo';
-import { StoringProvider } from '../../providers/storing/storing';
 import {ValidatorProvider} from "../../providers/validator/validator";
-
-// TODO: CREATE PROVIDER TO EXTERNAL BROWSER
-import {Plugins} from "@capacitor/core";
 import { ProfileModel } from '../../shared/models/profile-model';
 import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
-const {Browser} = Plugins;
 
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
 })
 
-export class ProfilePage implements OnInit{
+export class ProfilePage {
 
   showAll: boolean = false;
 
@@ -54,22 +49,18 @@ export class ProfilePage implements OnInit{
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              private validator: ValidatorProvider, private store: StoringProvider, private global: GlobalProvider) {
+              private validator: ValidatorProvider, private global: GlobalProvider) {
 
   }
 
   /**
-   * Method to validate form.
-   * @return {boolean}
+   *  Method executed when the class did enter
    */
-  validateForm(): boolean {
-    const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
-
-    return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
-  }
-
-  validEmail(email: string) {
-    return this.validator.validateEmail(email, this.suffixIdentity)
+  async ionViewDidEnter() {
+    this.loading.createAndPresent();
+    this.profile = await this.getProfile();
+    this.loading.dismiss();
+    this.showAll = true;
   }
 
   /**
@@ -94,8 +85,6 @@ export class ProfilePage implements OnInit{
       if (!!checkRequest) {
         this.navigateTo();
       }
-    } else{
-      console.error('The e-mail address is not valid');
     }
   }
 
@@ -118,62 +107,6 @@ export class ProfilePage implements OnInit{
   getEapconfigEndpoint() {
     return this.profile.eapconfig_endpoint;
   }
-
-  // TODO: REFACTOR THIS CODE
-  /**
-   * Method executed when the class is initialized.
-   * This method updates the property [eapConfig]{@link #eapConfig} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
-   * This method also calls [validateEapconfig()]{@link #validateEapconfig}
-   * The method obtains the first valid authentication method by calling [getFirstValidAuthenticationMethod()]{#getFirstValidAuthenticationMethod}
-   */
-  async ngOnInit() {
-
-    this.loading.createAndPresent();
-
-    this.profile = !!this.navParams.get('profile') ? this.navParams.get('profile') : this.global.getProfile();
-    const externalProfile = this.profile.eapconfig_endpoint.includes('content://') || this.profile.eapconfig_endpoint.includes('file://');
-    const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
-
-    this.authenticationMethods = [];
-    this.providerInfo = new ProviderInfo();
-
-    const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
-
-    if (validEap) {
-      this.validMethod = await this.getFirstValidAuthenticationMethod();
-
-      if (!!this.validMethod) {
-
-        if (!externalProfile) {
-          await this.storageFile(eapConfig);
-        }
-        this.suffixIdentity = !!this.validMethod && !!this.validMethod.clientSideCredential.innerIdentityHint ?
-          this.validMethod.clientSideCredential.innerIdentitySuffix : '';
-
-        this.createTerms();
-      }
-
-    } else {
-      await this.errorHandler.handleError('Invalid eap-config file', false);
-    }
-
-    this.loading.dismiss();
-    this.showAll = true;
-  }
-
-  /**
-   * Method to store eap-config files.
-   */
-  async storageFile(file) {
-    try {
-      const fileCert = JSON.stringify(file);
-      await this.store.readFile(fileCert)
-
-    } catch(e) {
-      await this.errorHandler.handleError('Unable to write file', false);
-
-    }
-  };
 
   /**
    * Method to activate terms of use on view.
@@ -210,10 +143,49 @@ export class ProfilePage implements OnInit{
     return null;
   }
 
-  /**
-   * Method executed when the class did enter, usually when swipe back from the next page
-   */
-  ionViewDidEnter() {
-    this.showAll = true;
+
+
+  async getProfile() {
+    this.profile = !!this.navParams.get('profile') ? this.navParams.get('profile') : this.global.getProfile();
+    this.checkValidation();
+    return this.profile;
   }
+
+  async checkValidation() {
+    this.authenticationMethods = [];
+    this.providerInfo = new ProviderInfo();
+
+    const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
+    const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
+
+    if (validEap) {
+      this.validMethod = await this.getFirstValidAuthenticationMethod();
+
+      if (!!this.validMethod) {
+
+        this.suffixIdentity = !!this.validMethod && !!this.validMethod.clientSideCredential.innerIdentityHint ?
+          this.validMethod.clientSideCredential.innerIdentitySuffix : '';
+
+        this.createTerms();
+      }
+
+    } else {
+      await this.errorHandler.handleError('Invalid eap-config file', false);
+    }
+  }
+
+  /**
+   * Method to validate form.
+   * @return {boolean}
+   */
+  validateForm(): boolean {
+    const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
+
+    return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
+  }
+
+  validEmail(email: string) {
+    return this.validator.validateEmail(email, this.suffixIdentity);
+  }
+
 }
