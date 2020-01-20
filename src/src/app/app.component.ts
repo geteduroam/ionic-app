@@ -1,8 +1,8 @@
 import { Config, Platform } from 'ionic-angular';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { ProfilePage } from '../pages/profile/profile';
+import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/Transition';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
@@ -25,21 +25,18 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
  *
  **/
 export class GeteduroamApp {
-  rootPage = WelcomePage;
+  rootPage;
 
   profile: ProfileModel;
   /**
    * @constructor
    *
    */
-  constructor(private platform: Platform, private config: Config, public splashScreen: SplashScreen,
+  constructor(private platform: Platform, private config: Config,
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
               private networkInterface: NetworkInterface, private global: GlobalProvider) {
 
     this.platform.ready().then(async () => {
-
-      this.splashScreen.hide();
-
       // Transition provider, to navigate between pages
       this.config.setTransition('transition', Transition);
 
@@ -53,34 +50,28 @@ export class GeteduroamApp {
       // Listener to get status connection, apply when change status network
       this.checkConnection();
 
-      Network.addListener('networkStatusChange', async () => {
-        await this.statusConnection();
-
-      });
-
-      // Listener to open app when open from a file
-      App.addListener('appUrlOpen', (urlOpen: AppUrlOpen) => {
-        this.navigate(urlOpen.url);
-      });
-
+      // Open app from a file
       await this.getLaunchUrl();
     });
   }
 
   async associatedNetwork() {
+    this.enableWifi();
+
     WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()}).then((res) => {
-      res.message === 'plugin.wifieapconfigurator.error.network.alreadyAssociated' ?
-        this.errorHandler.handleError('A network connection called '+ this.global.getSsid() +
-          ' is already available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it' +
-          ' if you want to reconfigure '+ this.global.getSsid() + '.', false) :
-        this.enableWifi();
+      this.rootPage = !!res.success ? ConfigurationScreen : res.overridable ? WelcomePage : this.removeAssociated();
     });
-
   }
 
-  enableWifi() {
-    WifiEapConfigurator.enableWifi();
+  async removeAssociated() {
+    this.rootPage = WelcomePage;
+
+    // TODO: MESSAGES CENTRALITÉ
+    await this.errorHandler.handleError('A network connection called '+ this.global.getSsid() + ' is already' +
+      ' available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it if you want ' +
+      'to reconfigure '+ this.global.getSsid() + '.', false);
   }
+
   /**
    * This method throw the app when is opened from a file
    */
@@ -98,37 +89,19 @@ export class GeteduroamApp {
 
   }
 
-  // TODO: Open from a file
-  navigate(uri: string) {
-    if (!uri.includes('.eap-config')) return;
-
-    // Route of the opened file
-    uri = uri.substring(19);
-
-  }
-
   /**
    * This method show a toast message
    * @param text
    */
   async alertConnection(text: string) {
-
     await Toast.show({
       text: text,
       duration: 'long'
     })
   }
 
-  /**
-   * This method check connection to initialized app
-   * and show Toast message
-   */
-  private async checkConnection() {
-    let connect = await this.statusConnection();
-
-    // Disconnect error
-    !connect.connected ?  this.alertConnection('Please turn on mobile data or use Wi-Fi to access data') :
-      this.alertConnection('Connected by: '+ connect.connectionType);
+  enableWifi() {
+    WifiEapConfigurator.enableWifi();
   }
 
   /**
@@ -138,8 +111,35 @@ export class GeteduroamApp {
     return await Network.getStatus()
   }
 
-  getRoot(){
-    return !this.profile ? WelcomePage : ProfilePage;
+  addListeners() {
+    // Listening to changes in network states
+    Network.addListener('networkStatusChange', async () => {
+      await this.statusConnection();
+    });
+
+    // Listening to open app when open from a file
+    App.addListener('appUrlOpen', (urlOpen: AppUrlOpen) => {
+      this.navigate(urlOpen.url);
+    });
   }
+
+  navigate(uri: string) {
+    this.rootPage = ProfilePage;
+    if (!uri.includes('.eap-config')) return;
+  }
+
+  /**
+   * This method check connection to initialized app
+   * and show Toast message
+   */
+  private async checkConnection() {
+    let connect = await this.statusConnection();
+    // Listeners needed
+    this.addListeners();
+    // Disconnect error
+    !connect.connected ?  this.alertConnection('Please turn on mobile data or use Wi-Fi to access data') :
+      this.alertConnection('Connected by: '+ connect.connectionType);
+  }
+
 }
 
