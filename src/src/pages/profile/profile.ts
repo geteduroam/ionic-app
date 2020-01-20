@@ -99,17 +99,13 @@ export class ProfilePage implements OnInit{
     }
   }
 
-  // TODO: REFACTOR THIS LINES
   async navigateTo() {
     this.showAll = false;
-    if (this.providerInfo.providerLogo) {
-      await this.navCtrl.push(WifiConfirmation, {
-        logo: this.providerInfo.providerLogo
-      }, { animation: 'transition' });
 
-    } else {
-      await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
-    }
+    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+      logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+      await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+
   }
   /**
    * Method which returns the eap institutionSearch endpoint
