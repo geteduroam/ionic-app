@@ -31,3 +31,4 @@ npm-debug.log*
 /www
 /tsconfig.spec.json
 /documentation
+/plugins/wifi-eap-configurator/android/build
