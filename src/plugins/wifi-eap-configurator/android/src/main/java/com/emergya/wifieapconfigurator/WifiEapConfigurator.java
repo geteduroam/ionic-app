@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.net.ssl.TrustManagerFactory;
@@ -207,17 +209,36 @@ public class WifiEapConfigurator extends Plugin {
 
     }
 
-    boolean checkEnabledWifi(PluginCall call) {
-        boolean res = true;
-        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-        if (!wifi.isWifiEnabled()) {
+    @PluginMethod
+    public boolean removeNetwork(PluginCall call) {
+        String ssid = null;
+        boolean res = false;
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
+            ssid = call.getString("ssid");
+        } else {
             JSObject object = new JSObject();
             object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
             call.success(object);
-            res = false;
+            return res;
         }
+
+        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
+        for (WifiConfiguration conf : configuredNetworks) {
+            if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+                wifi.removeNetwork(conf.networkId);
+                wifi.saveConfiguration();
+                res = true;
+            }
+        }
+        if (!res) {
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.success(object);
+        }
+
         return res;
     }
 
@@ -242,7 +263,7 @@ public class WifiEapConfigurator extends Plugin {
     @PluginMethod
     public boolean isNetworkAssociated(PluginCall call) {
         String ssid = null;
-        boolean res = false;
+        boolean res = false, isOverridable = false;
         if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
             ssid = call.getString("ssid");
         } else {
@@ -257,16 +278,22 @@ public class WifiEapConfigurator extends Plugin {
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+
+                String packageName = getContext().getPackageName();
+                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
+                    isOverridable = true;
+                }
+
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
-                object.put("overridable", false);
+                object.put("overridable", isOverridable);
                 call.success(object);
                 res = true;
                 break;
             }
         }
-        if(!res){
+        if (!res) {
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.missing");
@@ -276,17 +303,119 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
+    @PluginMethod
+    public void reachableSSID(PluginCall call) {
+        String ssid = null;
+        boolean isReachable = false;
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
+            ssid = call.getString("ssid");
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+        }
+
+        boolean granted = getPermission(call);
+
+        LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        boolean location = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!location) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.location.disabled");
+            call.success(object);
+        } else if (granted) {
+
+            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            Iterator<ScanResult> results = wifiManager.getScanResults().iterator();
+
+            while (isReachable == false && results.hasNext()) {
+                ScanResult s = results.next();
+                if (s.SSID.toLowerCase().equals(ssid.toLowerCase())) {
+                    isReachable = true;
+                }
+            }
+
+            String message = isReachable ? "plugin.wifieapconfigurator.success.network.reachable" : "plugin.wifieapconfigurator.error.network.notReachable";
+
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", message);
+            object.put("isReachable", isReachable);
+            call.success(object);
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.permission.notGranted");
+            call.success(object);
+        }
+    }
+
+    @PluginMethod
+    public void isConnectedSSID(PluginCall call) {
+        String ssid = null;
+        boolean isConnected = false;
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
+            ssid = call.getString("ssid");
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+        }
+
+        boolean granted = getPermission(call);
+
+        LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+        boolean location = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (!location) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.location.disabled");
+            call.success(object);
+        } else if (granted) {
+            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = wifiManager.getConnectionInfo();
+            String currentlySsid = info.getSSID();
+            if (currentlySsid != null && currentlySsid.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+                isConnected = true;
+            }
+
+            String message = isConnected ? "plugin.wifieapconfigurator.success.network.connected" : "plugin.wifieapconfigurator.error.network.notConnected";
+
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", message);
+            object.put("isConnected", isConnected);
+            call.success(object);
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.permission.notGranted");
+            call.success(object);
+        }
+
+    }
+
     private boolean getNetworkAssociated(PluginCall call, String ssid) {
-        boolean res = true;
+        boolean res = true, isOverridable = false;
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+                String packageName = getContext().getPackageName();
+                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
+                    isOverridable = true;
+                }
+
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
-                object.put("overridable", false);
+                object.put("overridable", isOverridable);
                 call.success(object);
                 res = false;
                 break;
@@ -295,6 +424,21 @@ public class WifiEapConfigurator extends Plugin {
 
         return res;
     }
+
+    boolean checkEnabledWifi(PluginCall call) {
+        boolean res = true;
+        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        if (!wifi.isWifiEnabled()) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
+            call.success(object);
+            res = false;
+        }
+        return res;
+    }
+
 
     private Integer getEapMethod(Integer eap, PluginCall call) {
         Integer res = null;
@@ -341,6 +485,15 @@ public class WifiEapConfigurator extends Plugin {
                 call.success(object);
                 res = 0;
                 break;
+        }
+        return res;
+    }
+
+    boolean getPermission(PluginCall call) {
+        boolean res = true;
+        if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            res = false;
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
         }
         return res;
     }
