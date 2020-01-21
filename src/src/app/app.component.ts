@@ -14,7 +14,6 @@ const { Toast, Network, App } = Plugins;
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
-
 @Component({
   templateUrl: 'app.html'
 })
@@ -43,13 +42,10 @@ export class GeteduroamApp {
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
-
-      // Plugin wifiEAPConfigurator associatedNetwork
-      this.associatedNetwork();
-
       // Listener to get status connection, apply when change status network
       this.checkConnection();
-
+      // Plugin wifiEAPConfigurator associatedNetwork
+      this.associatedNetwork();
       // Open app from a file
       await this.getLaunchUrl();
     });
@@ -58,15 +54,15 @@ export class GeteduroamApp {
   async associatedNetwork() {
     this.enableWifi();
 
-    WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()}).then((res) => {
-      this.rootPage = !!res.success ? ConfigurationScreen : res.overridable ? WelcomePage : this.removeAssociated();
-    });
+    const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+    if (!this.rootPage) {
+      this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
+
+    }
+    !isAssociated.overridable ? this.removeAssociated() : '';
   }
 
   async removeAssociated() {
-    this.rootPage = WelcomePage;
-
-    // TODO: MESSAGES CENTRALITÉ
     await this.errorHandler.handleError('A network connection called '+ this.global.getSsid() + ' is already' +
       ' available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it if you want ' +
       'to reconfigure '+ this.global.getSsid() + '.', false);
@@ -100,8 +96,8 @@ export class GeteduroamApp {
     })
   }
 
-  enableWifi() {
-    WifiEapConfigurator.enableWifi();
+  async enableWifi() {
+   await WifiEapConfigurator.enableWifi();
   }
 
   /**
@@ -112,9 +108,13 @@ export class GeteduroamApp {
   }
 
   addListeners() {
-    // Listening to changes in network states
+    // Listening to changes in network states, it show toast message when status changed
     Network.addListener('networkStatusChange', async () => {
-      await this.statusConnection();
+      let connect = await this.statusConnection();
+
+      !connect.connected ? this.alertConnection('Please turn on mobile data \n or use Wi-Fi to access data') :
+      this.alertConnection('Connected by: '+ connect.connectionType);
+
     });
 
     // Listening to open app when open from a file
@@ -128,18 +128,21 @@ export class GeteduroamApp {
     if (!uri.includes('.eap-config')) return;
   }
 
+  async notConnectionNetwork() {
+    this.rootPage = WelcomePage;
+    this.addListeners();
+    await this.errorHandler.handleError('Please turn on mobile data to configure eduroam network.', false)
+  }
+
   /**
    * This method check connection to initialized app
    * and show Toast message
    */
   private async checkConnection() {
     let connect = await this.statusConnection();
-    // Listeners needed
-    this.addListeners();
-    // Disconnect error
-    !connect.connected ?  this.alertConnection('Please turn on mobile data or use Wi-Fi to access data') :
-      this.alertConnection('Connected by: '+ connect.connectionType);
-  }
 
+    // Disconnect error
+    !connect.connected ? this.notConnectionNetwork() : this.addListeners();
+  }
 }
 
