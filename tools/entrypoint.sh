@@ -18,6 +18,9 @@ npm rebuild node-sass
 #    rm -rf /home/gradle/myApp/android
 #fi
 
+#rename android directory to override later
+mv android android_bk
+
 npm install --save @capacitor/core @capacitor/cli
 
 #build wifi-eap-configurator plugin
@@ -30,6 +33,12 @@ npm install ./plugins/wifi-eap-configurator --save
 # Build the application
 echo "npm run build"
 npm run build
+
+echo "npx cap add android"
+npx cap add android
+
+echo "copy from android_bk overriding"
+\cp -rf android_bk/* android
 
 echo "npx cap sync android"
 npx cap sync android
