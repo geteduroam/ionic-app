@@ -59,10 +59,12 @@ if [ -f "/home/gradle/myApp/android/app/build/outputs/apk/debug/app-debug-aligne
 fi
 
 #Align the APK
+echo "Aligning the APK"
 $ANDROID_HOME/build-tools/28.0.3/zipalign -v -p 4 app-debug.apk app-debug-aligned.apk
 
 #Sign the APK
 #TODO take password as parameter
+echo "Signing the APK"
 $ANDROID_HOME/build-tools/28.0.3/apksigner sign --ks /release-key.jks --ks-pass pass:${PASS_PHRASE} --key-pass pass:${PASS_PHRASE} --out geteduroam.apk app-debug-aligned.apk
 
 cp geteduroam.apk /home/gradle/final-apk/
