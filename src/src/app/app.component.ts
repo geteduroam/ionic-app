@@ -56,7 +56,7 @@ export class GeteduroamApp {
 
     const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
     if (!this.rootPage) {
-      this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
+      this.rootPage = !!isAssociated.success ? WelcomePage : ConfigurationScreen;
 
     }
     !isAssociated.overridable ? this.removeAssociated() : '';
