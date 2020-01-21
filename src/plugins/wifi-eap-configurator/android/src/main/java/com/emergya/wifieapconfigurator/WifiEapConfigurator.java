@@ -229,12 +229,16 @@ public class WifiEapConfigurator extends Plugin {
             if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
                 wifi.removeNetwork(conf.networkId);
                 wifi.saveConfiguration();
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.network.removed");
+                call.success(object);
                 res = true;
             }
         }
         if (!res) {
             JSObject object = new JSObject();
-            object.put("success", true);
+            object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.success.network.missing");
             call.success(object);
         }
