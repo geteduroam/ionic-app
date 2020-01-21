@@ -10,21 +10,31 @@ npm install
 echo "npm rebuild node-sass"
 npm rebuild node-sass
 
-echo "npm run build"
-npm run build
 
-#Check if android folder already exists to delete it
-if [ -d "/home/gradle/myApp/android" ]; then
-    echo "Removing android dir"
-    rm -rf /home/gradle/myApp/android
-fi
+
+##Check if android folder already exists to delete it NO LONGER NEEDED!!!
+#if [ -d "/home/gradle/myApp/android" ]; then
+#    echo "Removing android dir"
+#    rm -rf /home/gradle/myApp/android
+#fi
 
 npm install --save @capacitor/core @capacitor/cli
 
-echo "npx cap add android"
-npx cap add android
+#build wifi-eap-configurator plugin
+cd plugins/wifi-eap-configurator
+npm install
 
-# Enter the new created android directory
+cd ../..
+npm install ./plugins/wifi-eap-configurator --save
+
+# Build the application
+echo "npm run build"
+npm run build
+
+echo "npx cap sync android"
+npx cap sync android
+
+# Enter the updated android directory
 cd android
 
 #generate dbug apk

@@ -40,3 +40,4 @@ npm-debug.log*
 /android/build
 /android/capacitor-cordova-android-plugins
 /android/local.properties
+/android/.idea
