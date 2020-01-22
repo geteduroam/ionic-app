@@ -52,8 +52,9 @@ export class GeteduroamApp {
   }
 
   async associatedNetwork() {
-    this.enableWifi();
-
+    if (this.platform.is('android')) {
+      this.enableWifi();
+    }
     const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
     if (!this.rootPage) {
       this.rootPage = !!isAssociated.success ? WelcomePage : ConfigurationScreen;

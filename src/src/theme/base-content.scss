@@ -78,25 +78,6 @@ ion-content {
       }
     }
 
-    .content-error {
-      height: calc(60% - 20px);
-
-      .error-text {
-        height: 100%;
-        padding-top: 10%;
-
-        p {
-          font-family: Helvetica, sans-serif;
-          font-size: 16px;
-          color: #404B52;
-          letter-spacing: 0.9px;
-          text-align: center;
-          overflow: hidden;
-          height: 85%;
-        }
-      }
-    }
-
     .content-form {
       height: calc(60% - 30px);
 
