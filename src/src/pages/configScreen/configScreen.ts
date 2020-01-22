@@ -1,14 +1,21 @@
-import {Component, OnInit} from '@angular/core';
-import {NavController, NavParams} from 'ionic-angular';
+import { Component } from '@angular/core';
+import { ModalController, NavController, NavParams } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
-import { Oauthflow } from '../oauthflow/oauthflow';
+import { OauthFlow } from '../oauthFlow/oauthFlow';
+import { LoadingProvider } from '../../providers/loading/loading';
+import { InstitutionSearch } from '../institutionSearch/institutionSearch';
+import { Plugins } from '@capacitor/core';
+const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
-export class ConfigurationScreen implements OnInit {
+export class ConfigurationScreen {
+
+  showAll: boolean = false;
+
   /**
    * Set of available profiles
    */
@@ -64,40 +71,38 @@ export class ConfigurationScreen implements OnInit {
    */
   showButton: boolean = true;
 
+
   /**
    * Constructor
    * */
-  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices,
+              public loading: LoadingProvider, public modalCtrl: ModalController) {
+
   }
 
   /**
-   * Method which filters the institutions by the string introduced in the search-bar.
-   * The filter is not case sensitive.
-   * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
-   * @param {any} ev event triggered.
-   */
-  getItems(ev: any) {
-    const val = ev.target.value;
+   * Method executes when the search bar is tapped.
+   * */
+  async showModal() {
+    await Keyboard.hide();
+    let searchModal = this.modalCtrl.create(InstitutionSearch, {
+      instances: this.instances,
+      instanceName: this.instanceName}
+      );
 
-    if (val && val.trim() != '') {
-      this.showButton = false;
-      this.filteredInstances = this.instances.filter((item:any) => {
-        this.showInstanceItems= true;
-        return (item.name.toLowerCase().indexOf(val.toLowerCase()) > -1);
-      })
-    } else { //val is empty
-      this.clearInstance();
-    }
-  }
+    searchModal.onDidDismiss((data) => {
 
-  /**
-   * Method which gets all the institutions.
-   * Used after cleaning or first click on the search-bar.
-   * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
-   */
-  getAllItems(){
-    this.filteredInstances = this.instances;
-    this.showInstanceItems= true;
+        if (data !== undefined) {
+          this.instance = data;
+          this.instanceName = data.name;
+
+          this.initializeProfiles(this.instance);
+
+        }
+      });
+
+      return await searchModal.present();
+
   }
 
   /**
@@ -108,39 +113,6 @@ export class ConfigurationScreen implements OnInit {
     this.profile = '';
     this.profileName = '';
     this.selectedProfileId = '';
-  }
-
-  /**
-   * Method which clears the instance after pressing X in the search-bar.
-   * This method updates the properties [showInstanceItems]{@link #showInstanceItems}, [instance]{@link #instance},
-   * [instanceName]{@link #instanceName}, [defaultProfile]{@link #defaultProfile} and [profiles]{@link #profiles}.
-   * This method also calls the methods [clearProfile()]{@link #clearProfile} and [getAllItems()]{@link #getAllItems}
-   */
-  clearInstance(){
-    this.showInstanceItems= false;
-    this.instance = '';
-    this.instanceName = '';
-    this.defaultProfile = '';
-    this.profiles = '';
-    this.showButton = false;
-    this.clearProfile();
-    this.getAllItems();
-  }
-
-  /**
-   * Method which manages the selection of a new institution.
-   * This method updates the properties [instance]{@link #instance}, [instanceName]{@link #instanceName}
-   * and [showInstanceItems]{@link #showInstanceItems}.
-   * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
-   * @param {any} institution the selected institution.
-   */
-  selectInstitution(institution: any) {
-    this.instance = institution;
-    this.instanceName = institution.name;
-    this.showButton = true;
-    this.showInstanceItems = false;
-    this.initializeProfiles(institution);
-    this.checkProfiles();
   }
 
   /**
@@ -162,6 +134,7 @@ export class ConfigurationScreen implements OnInit {
    */
   initializeProfiles(institution: any) {
     this.profiles = institution.profiles;
+    this.checkProfiles();
   }
 
   /**
@@ -190,11 +163,15 @@ export class ConfigurationScreen implements OnInit {
 
   /**
    * Method which navigates to the following view.
-   * If the selected profile is oauth, navigates to [Oauthflow]{Oauthflow}.
+   * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   navigateTo(profile) {
-    !!profile.oauth ? this.navCtrl.push(Oauthflow) : this.navCtrl.push(ProfilePage, {profile});
+    this.showAll = false;
+
+    !!profile.oauth ?
+      this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
+      this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
 
   }
 
@@ -202,9 +179,11 @@ export class ConfigurationScreen implements OnInit {
    * Method executed when the class is initialized.
    * This method updates the property [instances]{@link #instances} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
    */
-  async ngOnInit() {
+  async ionViewDidEnter() {
+    this.loading.createAndPresent();
     const response = await this.getEduroamServices.discovery();
+    this.loading.dismiss();
     this.instances = response.instances;
+    this.showAll = true;
   }
-
 }

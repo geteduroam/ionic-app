@@ -18,6 +18,7 @@
     <preference name="SplashScreen" value="true" />
     <preference name="SplashScreenDelay" value="3000" />
     <preference name="orientation" value="portrait" />
+    <preference name="KeyboardDisplayRequiresUserAction" value="true" />
     <platform name="android">
         <allow-intent href="market:*" />
         <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />

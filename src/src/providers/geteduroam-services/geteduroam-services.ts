@@ -1,5 +1,11 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
+import xml2js from 'xml2js';
+import {ErrorHandlerProvider} from "../error-handler/error-handler";
+import { StoringProvider } from '../storing/storing';
+declare var Capacitor;
+const { WifiEapConfigurator } = Capacitor.Plugins;
+
 
 /**
  *  @class GeteduroamServices provider
@@ -7,26 +13,68 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class GeteduroamServices {
 
-  constructor(private http: HTTP) {
+  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider) {
 
   }
 
   /**
-   * This method is to work wih the discovery method:
+   * This discovery method retrieves all institutions and their profiles from a [json]{@link https://discovery.geteduroam.no/discovery-v1.json}:
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
    *
    */
    async discovery() {
 
-    const url = 'https://discovery.geteduroam.no/discovery-v1.json';
-    const params = {};
-    const headers = {};
+    // const url = 'https://discovery.geteduroam.no/discovery-v1.json';
 
-    const response = await this.http.get(url, params, headers);
+      //TODO replace the fake data json for the real one before go to PRO environment
+      //   const url = 'https://drive.google.com/file/d/1HbtpkGoB7Yc_rhnITYgXWJ8-gLzeMgoR/view?usp=sharing';
+      const url = 'https://drive.google.com/a/emergya.com/uc?authuser=0&id=1HbtpkGoB7Yc_rhnITYgXWJ8-gLzeMgoR&export=download';
 
-    return JSON.parse(response.data);
+        // const url = '../../../resources/fake-data/fake-data.ts';
+        const params = {};
+        const headers = {};
 
+        try {
+            const response = await this.http.get(url, params, headers);
+
+            return JSON.parse(response.data);
+
+            // return JSON.parse(FAKE_DATA.toString());
+
+        } catch (e) {
+            console.log(e);
+            await this.errorHandler.handleError(e.error,false);
+        }
   }
+
+    /**
+     * This gets an eapcongig file form an url which receives as parameter
+     * @param url in which the eapconfig xml file is available
+     * @return the parsed xml
+     */
+    async getEapConfig(url: string) {
+
+        const params = {};
+        const headers = {};
+        let response: any;
+
+        if (url.includes('content://')) {
+
+          response = await this.store.readExtFile(url);
+          response.data = atob(response.data);
+
+        } else {
+          response = await this.http.get(url, params, headers);
+        }
+        let jsonResult = '';
+
+        xml2js.parseString(response.data, function (err, result) {
+            jsonResult = result;
+        });
+
+        return jsonResult;
+
+    }
 
   /**
    * This method is to work with the oAuthEndpoint method:
@@ -97,5 +145,9 @@ export class GeteduroamServices {
   //     console.log('Method get generator: ', res);
   //
   //   });
+  }
+
+  async connectProfile(config) {
+    return await WifiEapConfigurator.configureAP(config);
   }
 }

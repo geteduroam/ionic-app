@@ -1,0 +1,110 @@
+{
+	"version" : 1,
+	"seq" : 2,
+	"instances" : [
+		{
+			"country" : ["NO"],
+			"coordinates" : [63.4158,10.3950],
+			"name" : "Uninett AS",
+			"profiles" : [
+				{
+					"id" : "cat_10",
+					"name" : "Uninett ansatt",
+					"eapconfig_endpoint" : "https://cat.eduroam.org/user/API.php?action=downloadInstaller&device=eap-config&profile=10",
+					"oauth" : false
+				},
+				{
+					"id" : "geteduroam_no",
+					"name" : "geteduroam",
+					"default" : true,
+					"eapconfig_endpoint" : "https://geteduroam.no/generate.php",
+					"token_endpoint" : "https://geteduroam.no/token.php",
+					"authorization_endpoint" : "https://geteduroam.no/authorize.php",
+					"oauth" : true
+				},
+				{
+					"id" : "cat_2223",
+					"name" : "Christmas tree",
+					"eapconfig_endpoint" : "https://cat.eduroam.org/user/API.php?action=downloadInstaller&device=eap-config&profile=2223",
+					"oauth" : false
+				}
+			]
+		},
+		{
+			"country" : ["ES"],
+			"coordinates" : [-5.9365437,37.3568239],
+			"name" : "Universidad Pablo de Olavide",
+			"profiles" : [
+				{
+					"id" : "cat_2569",
+					"name" : "Universidad Pablo de Olavide",
+					"eapconfig_endpoint" : "https://cat.eduroam.org/user/API.php?action=downloadInstaller&device=eap-config&profile=2569",
+					"oauth" : false
+				}
+			]
+		},
+		{
+			"country" : ["ES"],
+			"coordinates" : [-5.9365437,37.3568239],
+			"name" : "Fake Profile",
+			"profiles" : [
+				{
+					"id" : "cat_2564",
+					"name" : "Fake Profile",
+					"eapconfig_endpoint" : "https://cat.eduroam.org/user/API.php?action=downloadInstaller&device=eap-config&profile=000",
+					"oauth" : false
+				}
+			]
+		},
+		{
+			"country" : ["ES"],
+			"coordinates" : [-5.9365437,37.3568239],
+			"name" : "Wrong EAP File",
+			"profiles" : [
+				{
+					"id" : "cat_666",
+					"name" : "No valid Type",
+					"default" : true,
+					"eapconfig_endpoint" : "https://drive.google.com/a/emergya.com/uc?authuser=0&id=1UI4G3nGWfHOovX15MEfhlz2LPudDsYO0&export=download",
+					"oauth" : false
+				},
+				{
+					"id" : "cat_999",
+					"name" : "Wrong EAP: no method",
+					"eapconfig_endpoint" : "https://drive.google.com/a/emergya.com/uc?authuser=0&id=1Lqhpez6-jnpn8olyhnINHzmFz8Otuj09/view?usp=sharing&export=download",
+					"oauth" : false
+				},
+				{
+					"id" : "cat_888",
+					"name" : "Wrong EAP: no identity provider",
+					"eapconfig_endpoint" : "https://drive.google.com/a/emergya.com/uc?authuser=0&id=1mJhiwsQyC5hl9bB7DIrJmgcU8xJCXruj/view?usp=sharing&export=download",
+					"oauth" : false
+				}
+			]
+		},
+		{
+			"country" : ["ES"],
+			"coordinates" : [-5.9365437,37.3568239],
+			"name" : "Fake OAuth",
+			"profiles" : [
+				{
+					"id" : "fake_no",
+					"name" : "Fake OAuth",
+					"default" : true,
+					"eapconfig_endpoint" : "https://geteduroam.no/generate.php",
+					"token_endpoint" : "https://geteduroam.no/token.php",
+					"authorization_endpoint" : "https://geteduroam.no/authorize.php",
+					"oauth" : true
+				},
+				{
+					"id" : "fake2_no",
+					"name" : "Fake OAuth2",
+					"eapconfig_endpoint" : "https://geteduroam.no/generate.php",
+					"token_endpoint" : "https://geteduroam.no/token.php",
+					"authorization_endpoint" : "https://geteduroam.no/authorize.php",
+					"oauth" : true
+				}
+			]
+		}
+	]
+}

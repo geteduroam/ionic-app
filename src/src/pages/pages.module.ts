@@ -9,13 +9,17 @@ import { WifiConfiguration} from "./wifiConfiguration/wifiConfiguration";
 import { WifiConfirmation} from "./wifiConfirmation/wifiConfirmation";
 import { FormsModule } from '@angular/forms';
 import { ProfilePage } from './profile/profile';
-import { Oauthflow } from './oauthflow/oauthflow';
+import { OauthFlow } from './oauthFlow/oauthFlow';
+import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
+import { InstitutionSearch } from './institutionSearch/institutionSearch';
+import { ValidatorProvider } from '../providers/validator/validator';
 
 const Pages = [
   WelcomePage,
   ErrorsPage,
   ProfilePage,
-  Oauthflow,
+  OauthFlow,
+  InstitutionSearch,
   ConfigurationScreen,
   WifiConfiguration,
   WifiConfirmation
@@ -29,7 +33,9 @@ const Pages = [
     IonicPageModule.forChild(Pages),
   ],
   providers: [
-    FormsModule
+    FormsModule,
+    ErrorHandlerProvider,
+    ValidatorProvider
   ]
 })
 export class PagesModule {}
