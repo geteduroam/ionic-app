@@ -60,7 +60,7 @@ export class GeteduroamApp {
       this.rootPage = !!isAssociated.success ? WelcomePage : ConfigurationScreen;
 
     }
-    !isAssociated.overridable ? this.removeAssociated() : '';
+    !!isAssociated.success && !isAssociated.overridable ? this.removeAssociated() : '';
   }
 
   async removeAssociated() {
