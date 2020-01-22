@@ -1,13 +1,14 @@
-<div *ngIf="showAll" class="container-content">
+<div *ngIf="showAll" >
+    <!-- FIX BEHAVIOUR [ngClass]="getProfile() ? 'profile-content' : 'container-content'"-->
     <div class="header-content" margin-top padding-top>
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
         <h1> Provide information </h1>
     </div>
 
-    <div class="content-form" margin-bottom text-center>
+    <div class="content-form" text-center>
      <form (ngSubmit)="checkForm()">
 
-        <div  class="content-profile" padding-top >
+        <div class=" row content-profile" padding-top >
             <ion-label class="label-conf" text-left> Username </ion-label>
 
             <input [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
@@ -15,15 +16,16 @@
                    'error-validation' : ''"  class="input-profile" name="email" padding-left
                    placeholder="name@example.com" type="email"/>
 
-            <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
+            <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)"
+               class="error-msg" margin-left>
                 The username is incorrect </p>
 
             <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
-                && !provide.email.includes(suffixIdentity)" class="error-msg">
+                && !provide.email.includes(suffixIdentity)" class="error-msg" margin-left>
                 The email domain must include {{suffixIdentity}} </p>
         </div>
 
-        <div class="content-profile" margin-top>
+        <div class="row content-profile" margin-top>
             <ion-label class="label-conf" text-left> Password </ion-label>
             <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
                    name="pass" padding-left type="password"/>
@@ -39,7 +41,7 @@
     </div>
 
     <div class="footer-form">
-        <form (ngSubmit)="checkForm()">
+        <form (ngSubmit)="checkForm()" no-margin no-padding>
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
                 <button [ngClass]="!validateForm() ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit"> Next </button>
             </div>
