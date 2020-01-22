@@ -9,7 +9,7 @@ generate-apk:
     echo "Running docker to generate and sign APK for android..."; \
     docker-compose -f ../docker-compose.yml up
 compile-plugin:
-	echo "Compiling wifi-eap-configurator plugin..."; \
+	@echo "Compiling wifi-eap-configurator plugin..."; \
     cd ../src/plugins/wifi-eap-configurator; \
     npm install; \
     cd ../..; \
