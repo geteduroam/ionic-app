@@ -33,6 +33,11 @@ ion-content {
     margin-top: 0;
     border-top: none;
 
+    .container-content {
+      background: #FFFFFF;
+      height: auto;
+    }
+
     .header-content {
 
       height: 22%;
@@ -154,10 +159,15 @@ ion-content {
   }
 
 }
+////---------------------------------
+//// Show all elements in searchable
+////---------------------------------
+ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
+  contain: unset !important;
+  overflow: unset !important;
+}
 
-
-
-  .nav-decor {
-    display: none !important;
-  }
+.nav-decor {
+  display: none !important;
+}
 

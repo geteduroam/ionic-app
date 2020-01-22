@@ -36,8 +36,7 @@ export class GeteduroamServices {
 
         try {
             const response = await this.http.get(url, params, headers);
-            // console.log(JSONdata);
-            // return JSONdata;
+
             return JSON.parse(response.data);
 
             // return JSON.parse(FAKE_DATA.toString());

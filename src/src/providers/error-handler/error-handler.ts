@@ -26,7 +26,6 @@ export class ErrorHandlerProvider extends ErrorHandler {
     }
 
     errorModal.onDidDismiss(res => {
-      console.log('onDidDismiss modal: ', res);
       this.showModal = false;
     });
   }
