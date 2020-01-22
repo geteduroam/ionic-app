@@ -15,6 +15,8 @@ export class GlobalProvider {
 
   private profile: ProfileModel;
 
+  private dictionary: any;
+
   //TODO: CREATE METHODS TO GET DATA
   getSsid() {
     return 'eduroam';
@@ -42,6 +44,14 @@ export class GlobalProvider {
 
   setProfile(profile: ProfileModel){
     this.profile = profile;
+  }
+
+  getDictionary(){
+    return this.dictionary;
+  }
+
+  setDictionary(dictionary: any){
+    this.dictionary = dictionary;
   }
 
 }

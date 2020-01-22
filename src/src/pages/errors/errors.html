@@ -7,7 +7,7 @@
 
         <div class="header-content" margin-top padding-top>
             <img alt="setting" src="../../assets/icon/alert-outline.svg" />
-            <h1>Error</h1>
+            <h1>{{getString('header', 'error')}}</h1>
         </div>
         <div class="content-error" text-center>
 
@@ -19,8 +19,8 @@
         <div *ngIf="isFinal" class="footer-info" text-center>
 
             <div  class="content-button">
-                <button (click)="clickKnowMore()" *ngIf="!isLinkEmail()" class="button-control" ion-button text-capitalize> Know more </button>
-                <a *ngIf="isLinkEmail()" class="button-control" href="{{getEmail()}}" ion-button text-capitalize> Send e-mail </a>
+                <button (click)="clickKnowMore()" *ngIf="!isLinkEmail()" class="button-control" ion-button text-capitalize>{{getString('button', 'more')}}</button>
+                <a *ngIf="isLinkEmail()" class="button-control" href="{{getEmail()}}" ion-button text-capitalize>{{getString('button', 'email')}}</a>
             </div>
 
             <div (click)="exitApp()" class="text-bottom" margin-top>
@@ -30,7 +30,7 @@
         <div *ngIf="!isFinal" class="footer-info" text-center>
 
             <div class="content-button">
-                <button (click)="closeModal()" class="button-control" ion-button text-capitalize> Back </button>
+                <button (click)="closeModal()" class="button-control" ion-button text-capitalize>{{getString('button', 'back')}}</button>
             </div>
         </div>
 

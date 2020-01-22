@@ -1,18 +1,22 @@
 import { Component } from '@angular/core';
-import { ModalController, NavController, NavParams } from 'ionic-angular';
+import {ModalController, NavController, NavParams, Platform} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { InstitutionSearch } from '../institutionSearch/institutionSearch';
 import { Plugins } from '@capacitor/core';
+import {BasePage} from "../basePage";
+import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import {GlobalProvider} from "../../providers/global/global";
+import {DictionaryService} from "../../providers/dictionary-service/dictionary-service";
 const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
-export class ConfigurationScreen {
+export class ConfigurationScreen extends BasePage{
 
   showAll: boolean = false;
 
@@ -75,9 +79,9 @@ export class ConfigurationScreen {
   /**
    * Constructor
    * */
-  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices,
-              public loading: LoadingProvider, public modalCtrl: ModalController) {
-
+  constructor(protected navCtrl: NavController, protected navParams: NavParams, protected getEduroamServices: GeteduroamServices,
+              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected errorHandler: ErrorHandlerProvider,  protected global: GlobalProvider, protected dictionary: DictionaryService) {
+    super(navCtrl, navParams, loading, errorHandler, global, dictionary);
   }
 
   /**
@@ -179,11 +183,18 @@ export class ConfigurationScreen {
    * Method executed when the class is initialized.
    * This method updates the property [instances]{@link #instances} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
    */
-  async ionViewDidEnter() {
-    this.loading.createAndPresent();
-    const response = await this.getEduroamServices.discovery();
-    this.loading.dismiss();
-    this.instances = response.instances;
+  // async ionViewDidEnter() {
+  //   this.loading.createAndPresent();
+  //   const response = await this.getEduroamServices.discovery();
+  //   this.loading.dismiss();
+  //   this.instances = response.instances;
+  //   this.showAll = true;
+  // }
+
+  async ionViewWillEnter() {
+    const firstResponse = this.getEduroamServices.discovery();
+    const secondResponse = await this.waitingSpinner(firstResponse);
+    this.instances = secondResponse.instances;
     this.showAll = true;
   }
 }

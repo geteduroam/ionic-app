@@ -13,6 +13,7 @@ import { OauthFlow } from './oauthFlow/oauthFlow';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { InstitutionSearch } from './institutionSearch/institutionSearch';
 import { ValidatorProvider } from '../providers/validator/validator';
+import {DictionaryService} from "../providers/dictionary-service/dictionary-service";
 
 const Pages = [
   WelcomePage,
@@ -35,7 +36,8 @@ const Pages = [
   providers: [
     FormsModule,
     ErrorHandlerProvider,
-    ValidatorProvider
+    ValidatorProvider,
+    DictionaryService
   ]
 })
 export class PagesModule {}

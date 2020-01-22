@@ -10,6 +10,8 @@ import { AppUrlOpen, Plugins } from '@capacitor/core';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
+import {DictionaryService} from "../providers/dictionary-service/dictionary-service";
+
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
@@ -33,12 +35,13 @@ export class GeteduroamApp {
    */
   constructor(private platform: Platform, private config: Config,
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
-              private networkInterface: NetworkInterface, private global: GlobalProvider) {
+              private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryService) {
 
     this.platform.ready().then(async () => {
       // Transition provider, to navigate between pages
       this.config.setTransition('transition', Transition);
-
+      // Setting the dictionary
+      this.setDictionary();
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
@@ -145,6 +148,13 @@ export class GeteduroamApp {
 
     // Disconnect error
     !connect.connected ? this.notConnectionNetwork() : this.addListeners();
+  }
+
+  /**
+   * This method sets the global dictionary
+   */
+  private setDictionary(){
+    this.dictionary.loadDictionary('en');
   }
 }
 

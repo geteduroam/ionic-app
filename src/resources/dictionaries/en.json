@@ -1,0 +1,35 @@
+{
+	"header": {
+		"config": "eduroam configuration",
+		"profile": "Provide information",
+		"confirmation": "Enjoy using eduroam!",
+		"error": "Error"
+	},
+	"label": {
+		"institution": "Institution",
+		"username": "Username",
+		"accept": "Accept ",
+		"terms": "terms of use"
+	},
+	"placeholder": {
+		"institution": "Select an institution...",
+		"profile": "Select a profile...",
+		"example": "name@example.com"
+	},
+	"button": {
+		"next": "Next",
+		"ok": "ok",
+		"more": "Know more",
+		"email": "Send e-mail",
+		"back": "Back"
+	},
+	"error": {
+		"username": "The username is incorrect",
+		"domain": "The email domain must include ",
+		"password": "Password is incorrect"
+	},
+	"text": {
+		"configured": "eduroam is now configured on your device."
+	},
+	"defaultError": "Key not found"
+}
