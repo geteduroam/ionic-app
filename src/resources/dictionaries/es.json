@@ -1,3 +1,44 @@
 {
-	"hello": "Hola mundo"
+	"header": {
+		"config": "Configuración de eduroam",
+		"profile": "Proporciona información",
+		"confirmation": "¡Disfruta eduroam!",
+		"error": "Error"
+	},
+	"label": {
+		"institution": "Institución",
+		"username": "Usuario",
+		"accept": "Aceptar ",
+		"terms": "términos de uso"
+	},
+	"placeholder": {
+		"institution": "Selecciona una institución...",
+		"profile": "Selecciona un perfil...",
+		"example": "nombre@ejemplo.com"
+	},
+	"button": {
+		"next": "Siguiente",
+		"ok": "ok",
+		"more": "Más información",
+		"email": "Enviar e-mail",
+		"back": "Atrás",
+		"done": "Hecho",
+		"reconfigure": "Reconfigurar",
+		"no-thanks": "No, gracias"
+	},
+	"error": {
+		"username": "El usuario es incorrecto",
+		"domain": "El dominio del email debe incluir ",
+		"password": "Contraseña errónea",
+		"turn-on": "Por favor, active los datos móviles para configurar la red eduroam.",
+		"available1": "Una conexión de red llamada ",
+		"available2": " se encuentra ya disponible en el dispositivo.\n Por favor vaya a Configuración > Redes e Internet > Wi-Fi y elimine la configuración para reconfigurar ",
+		"invalid-eap": "Fichero eap-config erróneo",
+		"invalid-method": "Ningún método válido de autenticación en el fichero eap-config"
+	},
+	"text": {
+		"configured": "eduroam ya está cinfugurada en tu dispositivo.",
+		"reconfigure": "Hola, Parece que tienes eduroam configurada en tu dispositivo.\n ¿Quieres volver a configurarla?"
+	},
+	"defaultError": "Clave no encontrada"
 }
