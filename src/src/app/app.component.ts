@@ -153,7 +153,8 @@ export class GeteduroamApp {
    * This method sets the global dictionary
    */
   private setDictionary(){
-    this.dictionary.loadDictionary('es');
+    //TODO 'en' can be replaced by 'es' for Spanish translation
+    this.dictionary.loadDictionary('en');
   }
 }
 
