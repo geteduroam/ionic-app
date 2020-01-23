@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {ModalController, NavController, NavParams, Platform} from 'ionic-angular';
+import {ModalController, NavController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -7,9 +7,7 @@ import { LoadingProvider } from '../../providers/loading/loading';
 import { InstitutionSearch } from '../institutionSearch/institutionSearch';
 import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
-import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
-import {GlobalProvider} from "../../providers/global/global";
-import {DictionaryService} from "../../providers/dictionary-service/dictionary-service";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -79,9 +77,9 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Constructor
    * */
-  constructor(protected navCtrl: NavController, protected navParams: NavParams, protected getEduroamServices: GeteduroamServices,
-              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected errorHandler: ErrorHandlerProvider,  protected global: GlobalProvider, protected dictionary: DictionaryService) {
-    super(navCtrl, navParams, loading, errorHandler, global, dictionary);
+  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
+              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider) {
+    super(loading, dictionary);
   }
 
   /**

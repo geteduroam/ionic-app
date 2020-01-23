@@ -1,11 +1,10 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { NavController, NavParams, Platform } from 'ionic-angular';
+import { NavParams, Platform } from 'ionic-angular';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {BasePage} from "../basePage";
-import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
-import {DictionaryService} from "../../providers/dictionary-service/dictionary-service";
 
 
 @Component({
@@ -23,10 +22,10 @@ export class WifiConfirmation extends BasePage implements OnInit {
 
   @ViewChild('imgLogo') imgLogo: ElementRef;
 
-  constructor(protected navCtrl: NavController, protected navParams: NavParams, private platform: Platform,
-              protected loading: LoadingProvider, protected errorHandler: ErrorHandlerProvider,
-              private sanitizer: DomSanitizer, protected global: GlobalProvider, protected dictionary:DictionaryService) {
-    super(navCtrl, navParams, loading, errorHandler, global, dictionary);
+  constructor(private navParams: NavParams, private platform: Platform,
+              protected loading: LoadingProvider, private sanitizer: DomSanitizer,
+              protected dictionary:DictionaryServiceProvider, private global: GlobalProvider) {
+    super(loading, dictionary);
   }
 
   ionViewWillEnter() {

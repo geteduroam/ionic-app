@@ -11,7 +11,7 @@ import { ProfileModel } from '../../shared/models/profile-model';
 import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import {BasePage} from "../basePage";
-import {DictionaryService} from "../../providers/dictionary-service/dictionary-service";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 
 @Component({
   selector: 'page-profile',
@@ -49,10 +49,10 @@ export class ProfilePage extends BasePage{
 
   suffixIdentity: string = '';
 
-  constructor(protected navCtrl: NavController, protected navParams: NavParams, protected loading: LoadingProvider,
-              private getEduroamServices: GeteduroamServices, protected errorHandler: ErrorHandlerProvider,
-              private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryService) {
-      super(navCtrl, navParams, loading, errorHandler, global, dictionary);
+  constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
+              private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
+              private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider) {
+    super(loading, dictionary);
 
   }
 

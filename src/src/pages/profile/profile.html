@@ -24,7 +24,7 @@
         </div>
 
         <div class="content-profile" margin-top>
-            <ion-label class="label-conf" text-left> Password </ion-label>
+            <ion-label class="label-conf" text-left>{{getString('label', 'password')}}</ion-label>
             <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
                    name="pass" padding-left type="password"/>
 

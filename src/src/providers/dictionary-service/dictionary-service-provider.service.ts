@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
-import {ErrorHandlerProvider} from "../error-handler/error-handler";
 import { GlobalProvider } from '../global/global';
 import {catchError} from "rxjs/operators";
 
 
 /**
- *  @class DictionaryService provider
+ *  @class DictionaryServiceProvider provider
  */
 @Injectable()
-export class DictionaryService {
+export class DictionaryServiceProvider {
 
-    constructor(private errorHandler : ErrorHandlerProvider, private global: GlobalProvider) {
+    constructor(private global: GlobalProvider) {
 
     }
 

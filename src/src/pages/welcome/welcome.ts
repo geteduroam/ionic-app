@@ -3,9 +3,8 @@ import { NavController, NavParams, Platform } from 'ionic-angular';
 import { ConfigurationScreen } from '../configScreen/configScreen';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
-import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
-import {DictionaryService} from "../../providers/dictionary-service/dictionary-service";
 
 @Component({
   selector: 'page-welcome',
@@ -15,9 +14,9 @@ import {DictionaryService} from "../../providers/dictionary-service/dictionary-s
 export class WelcomePage extends BasePage{
 
 
-  constructor(protected platform: Platform, protected navCtrl: NavController, protected navParams: NavParams, protected loading: LoadingProvider, protected errorHandler: ErrorHandlerProvider,  protected global: GlobalProvider, protected dictionary: DictionaryService) {
-    super(navCtrl, navParams, loading, errorHandler, global, dictionary);
-
+  constructor(private platform: Platform, private navCtrl: NavController, protected loading: LoadingProvider,
+              protected dictionary: DictionaryServiceProvider, private global: GlobalProvider) {
+    super(loading, dictionary);
   }
 
   async navigateTo() {

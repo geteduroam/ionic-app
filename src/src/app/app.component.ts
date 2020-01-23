@@ -10,7 +10,7 @@ import { AppUrlOpen, Plugins } from '@capacitor/core';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
-import {DictionaryService} from "../providers/dictionary-service/dictionary-service";
+import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
@@ -35,7 +35,7 @@ export class GeteduroamApp {
    */
   constructor(private platform: Platform, private config: Config,
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
-              private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryService) {
+              private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryServiceProvider) {
 
     this.platform.ready().then(async () => {
       // Transition provider, to navigate between pages
@@ -135,7 +135,7 @@ export class GeteduroamApp {
   async notConnectionNetwork() {
     this.rootPage = WelcomePage;
     this.addListeners();
-    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on'), false)
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false)
   }
 
   /**
@@ -153,7 +153,7 @@ export class GeteduroamApp {
    * This method sets the global dictionary
    */
   private setDictionary(){
-    this.dictionary.loadDictionary('en');
+    this.dictionary.loadDictionary('es');
   }
 }
 

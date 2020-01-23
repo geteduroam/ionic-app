@@ -1,11 +1,9 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, NavParams, Platform, Searchbar, ViewController } from 'ionic-angular';
+import { NavParams, Platform, Searchbar, ViewController } from 'ionic-angular';
 import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
-import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
-import {GlobalProvider} from "../../providers/global/global";
-import {DictionaryService} from "../../providers/dictionary-service/dictionary-service";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -45,10 +43,10 @@ export class InstitutionSearch extends BasePage{
 
   @ViewChild('searchBar') searchBar: Searchbar;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController,
-              private platform: Platform, protected loading: LoadingProvider, protected errorHandler: ErrorHandlerProvider,
-              protected global: GlobalProvider, protected dictionary: DictionaryService) {
-    super(navCtrl, navParams, loading, errorHandler, global,dictionary);
+  constructor(public navParams: NavParams, private viewCtrl: ViewController,
+              private platform: Platform, protected loading: LoadingProvider,
+              protected dictionary: DictionaryServiceProvider) {
+    super(loading, dictionary);
   }
 
   /**

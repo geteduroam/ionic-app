@@ -1,19 +1,14 @@
-import {NavController, NavParams} from "ionic-angular";
 import {LoadingProvider} from "../providers/loading/loading";
-import {ErrorHandlerProvider} from "../providers/error-handler/error-handler";
-import {GlobalProvider} from "../providers/global/global";
-import {DictionaryService} from "../providers/dictionary-service/dictionary-service";
+import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 
 
-export class BasePage {
+export abstract class BasePage {
 
-    constructor(protected navCtrl: NavController, protected navParams: NavParams, protected loading: LoadingProvider, protected errorHandler: ErrorHandlerProvider,
-                protected global: GlobalProvider, protected dictionary: DictionaryService) {
-
+    protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider) {
     }
 
     /**
-     * This method calls the getTranslation method form the service [DictionaryService]{@link ./providers/dictionary-service/DictionaryService.html}.
+     * This method calls the getTranslation method form the service [DictionaryService]{@link ./providers/dictionary-service/DictionaryServiceProvider.html}.
      * @param key to search in the dictionary
      * @param section in which to look for the key
      * @return the translated phrase
