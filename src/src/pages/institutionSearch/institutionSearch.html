@@ -1,13 +1,13 @@
 <ion-header transparent>
     <ion-toolbar *ngIf="ios">
         <ion-searchbar #searchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)"
-                       [(ngModel)]="instanceName" placeholder="Select an institution..."
-                       [showCancelButton]="true" (ionCancel)="dismiss()" cancelButtonText="Done"></ion-searchbar>
+                       [(ngModel)]="instanceName" placeholder="{{getString('placeholder', 'institution')}}"
+                       [showCancelButton]="true" (ionCancel)="dismiss()" cancelButtonText="{{getString('button', 'done')}}"></ion-searchbar>
     </ion-toolbar>
 
     <ion-toolbar *ngIf="!ios">
         <ion-searchbar #searchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)"
-                       [(ngModel)]="instanceName" placeholder="Select an institution..."></ion-searchbar>
+                       [(ngModel)]="instanceName" placeholder="{{getString('placeholder', 'institution')}}"></ion-searchbar>
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>

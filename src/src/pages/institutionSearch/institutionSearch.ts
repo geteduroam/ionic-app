@@ -1,13 +1,18 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, NavParams, Platform, Searchbar, ViewController } from 'ionic-angular';
 import { Plugins } from '@capacitor/core';
+import {BasePage} from "../basePage";
+import {LoadingProvider} from "../../providers/loading/loading";
+import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import {GlobalProvider} from "../../providers/global/global";
+import {DictionaryService} from "../../providers/dictionary-service/dictionary-service";
 const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-institution-search',
   templateUrl: 'institutionSearch.html',
 })
-export class InstitutionSearch {
+export class InstitutionSearch extends BasePage{
   instances: any;
   /**
    * Set of institutions filtered by what is written in the search-bar
@@ -41,8 +46,9 @@ export class InstitutionSearch {
   @ViewChild('searchBar') searchBar: Searchbar;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private viewCtrl: ViewController,
-              private platform: Platform) {
-
+              private platform: Platform, protected loading: LoadingProvider, protected errorHandler: ErrorHandlerProvider,
+              protected global: GlobalProvider, protected dictionary: DictionaryService) {
+    super(navCtrl, navParams, loading, errorHandler, global,dictionary);
   }
 
   /**

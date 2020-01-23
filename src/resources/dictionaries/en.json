@@ -21,15 +21,24 @@
 		"ok": "ok",
 		"more": "Know more",
 		"email": "Send e-mail",
-		"back": "Back"
+		"back": "Back",
+		"done": "Done",
+		"reconfigure": "Reconfigure",
+		"no-thanks": "No, thanks"
 	},
 	"error": {
 		"username": "The username is incorrect",
 		"domain": "The email domain must include ",
-		"password": "Password is incorrect"
+		"password": "Password is incorrect",
+		"turn-on": "Please turn on mobile data to configure eduroam network.",
+		"available1": "A network connection called ",
+		"available2": " is already available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it if you want to reconfigure ",
+		"invalid-eap": "Invalid eap-config file",
+		"invalid-method": "No valid authentication method available from the eap-config file"
 	},
 	"text": {
-		"configured": "eduroam is now configured on your device."
+		"configured": "eduroam is now configured on your device.",
+		"reconfigure": "Hi, It seems you have eduroam configured on your device.\n Do you want to reconfigure it?"
 	},
 	"defaultError": "Key not found"
 }

@@ -68,9 +68,8 @@ export class GeteduroamApp {
   }
 
   async removeAssociated() {
-    await this.errorHandler.handleError('A network connection called '+ this.global.getSsid() + ' is already' +
-      ' available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it if you want ' +
-      'to reconfigure '+ this.global.getSsid() + '.', false);
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
+        this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
   }
 
   /**
@@ -136,7 +135,7 @@ export class GeteduroamApp {
   async notConnectionNetwork() {
     this.rootPage = WelcomePage;
     this.addListeners();
-    await this.errorHandler.handleError('Please turn on mobile data to configure eduroam network.', false)
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on'), false)
   }
 
   /**

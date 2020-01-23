@@ -138,7 +138,7 @@ export class ProfilePage extends BasePage{
     let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
       !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
 
-    await this.errorHandler.handleError('No valid authentication method available from the eap-config file', true, url);
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
     return null;
   }
 
@@ -169,7 +169,7 @@ export class ProfilePage extends BasePage{
       }
 
     } else {
-      await this.errorHandler.handleError('Invalid eap-config file', false);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false);
     }
   }
 
