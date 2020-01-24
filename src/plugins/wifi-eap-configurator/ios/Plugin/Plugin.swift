@@ -70,13 +70,10 @@ public class WifiEapConfigurator: CAPPlugin {
             eapSettings.outerIdentity = anonymous
         }
         
-        if call.getString("caCertificate") != nil {
-            
+        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
             if let certificate = call.getString("caCertificate") {
-                if addCertificate(certName: "Certificate " + ssid, certificate: certificate)
-                {
-                    
-                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                 if addCertificate(certName: "Certificate " + ssid, certificate: certificate)
+                {  let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                    kSecAttrLabel as String: "Certificate " + ssid,
                                                    kSecReturnRef as String: kCFBooleanTrue]
                     var item: CFTypeRef?
