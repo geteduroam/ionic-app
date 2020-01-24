@@ -10,13 +10,15 @@ import {ValidatorProvider} from "../../providers/validator/validator";
 import { ProfileModel } from '../../shared/models/profile-model';
 import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
+import {BasePage} from "../basePage";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
 })
 
-export class ProfilePage {
+export class ProfilePage extends BasePage{
 
   showAll: boolean = false;
 
@@ -47,9 +49,10 @@ export class ProfilePage {
 
   suffixIdentity: string = '';
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
+  constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
-              private validator: ValidatorProvider, private global: GlobalProvider) {
+              private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider) {
+    super(loading, dictionary);
 
   }
 
@@ -135,7 +138,7 @@ export class ProfilePage {
     let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
       !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
 
-    await this.errorHandler.handleError('No valid authentication method available from the eap-config file', true, url);
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
     return null;
   }
 
@@ -166,7 +169,7 @@ export class ProfilePage {
       }
 
     } else {
-      await this.errorHandler.handleError('Invalid eap-config file', false);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false);
     }
   }
 

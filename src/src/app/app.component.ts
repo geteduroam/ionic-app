@@ -10,6 +10,8 @@ import { AppUrlOpen, Plugins } from '@capacitor/core';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
+import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
+
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
@@ -33,12 +35,13 @@ export class GeteduroamApp {
    */
   constructor(private platform: Platform, private config: Config,
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
-              private networkInterface: NetworkInterface, private global: GlobalProvider) {
+              private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryServiceProvider) {
 
     this.platform.ready().then(async () => {
       // Transition provider, to navigate between pages
       this.config.setTransition('transition', Transition);
-
+      // Setting the dictionary
+      this.setDictionary();
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
@@ -65,9 +68,8 @@ export class GeteduroamApp {
   }
 
   async removeAssociated() {
-    await this.errorHandler.handleError('A network connection called '+ this.global.getSsid() + ' is already' +
-      ' available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it if you want ' +
-      'to reconfigure '+ this.global.getSsid() + '.', false);
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
+        this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
   }
 
   /**
@@ -133,7 +135,7 @@ export class GeteduroamApp {
   async notConnectionNetwork() {
     this.rootPage = WelcomePage;
     this.addListeners();
-    await this.errorHandler.handleError('Please turn on mobile data to configure eduroam network.', false)
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false)
   }
 
   /**
@@ -145,6 +147,14 @@ export class GeteduroamApp {
 
     // Disconnect error
     !connect.connected ? this.notConnectionNetwork() : this.addListeners();
+  }
+
+  /**
+   * This method sets the global dictionary
+   */
+  private setDictionary(){
+    //TODO 'en' can be replaced by 'es' for Spanish translation
+    this.dictionary.loadDictionary('en');
   }
 }
 

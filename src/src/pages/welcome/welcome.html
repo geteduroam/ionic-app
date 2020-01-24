@@ -1,7 +1,7 @@
 
 <div class="header-content" margin-top padding-top>
     <img alt="setting" src="../../assets/icon/cog-outline.svg" />
-    <h1>eduroam configuration</h1>
+    <h1>{{getString('header', 'config')}}</h1>
 </div>
 
 <div class="content-info" text-center>
@@ -9,18 +9,17 @@
     <div class="info-text" no-margin>
 
         <p class="copy" margin padding>
-            Hi, It seems you have eduroam configured on your device.
-            Do you want to reconfigure it?
+            {{getString('text', 'reconfigure1')}}{{global.getSsid()}}{{getString('text', 'reconfigure2')}}
         </p>
     </div>
 </div>
 <div class="footer-info" text-center>
 
     <div class="content-button">
-        <button (click)="navigateTo()"  class="button-control" ion-button text-capitalize> Reconfigure </button>
+        <button (click)="navigateTo()"  class="button-control" ion-button text-capitalize>{{getString('button', 'reconfigure')}}</button>
     </div>
 
     <div (click)="exitApp()" class="text-bottom" margin-top>
-        <p class="text-down" padding-top text-center >No, thanks</p>
+        <p class="text-down" padding-top text-center >{{getString('button', 'no-thanks')}}</p>
     </div>
 </div>

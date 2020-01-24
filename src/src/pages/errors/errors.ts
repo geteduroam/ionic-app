@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
-import {NavController, NavParams, Platform, ViewController} from "ionic-angular";
+import {NavParams, Platform, ViewController} from "ionic-angular";
 import {Plugins} from "@capacitor/core";
 import {ValidatorProvider} from "../../providers/validator/validator";
+import {BasePage} from "../basePage";
+import {LoadingProvider} from "../../providers/loading/loading";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 const {Browser} = Plugins;
 
 
@@ -9,14 +12,16 @@ const {Browser} = Plugins;
   selector: 'page-errors',
   templateUrl: 'errors.html',
 })
-export class ErrorsPage {
+export class ErrorsPage extends BasePage{
 
   text: string;
   link: string;
   public isFinal: boolean = false;
 
 
-  constructor(private platform: Platform, public navParams: NavParams, public viewCtrl: ViewController, public navCtrl: NavController, private validator: ValidatorProvider) {
+  constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController,
+              private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider) {
+    super(loading, dictionary);
 
     if (!!this.navParams.get('isFinal')) {
 
