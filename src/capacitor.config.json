@@ -18,5 +18,8 @@
       "launchAutoHide": true,
       "showSpinner": false
     }
+  },
+  "server": {
+    "url": "http://10.35.100.192:8100"
   }
 }

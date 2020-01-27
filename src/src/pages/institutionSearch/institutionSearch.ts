@@ -59,9 +59,17 @@ export class InstitutionSearch extends BasePage{
   async selectInstitution(institution: any) {
     this.instances = institution;
 
-    Keyboard.addListener('keyboardDidHide', () => {
-      this.viewCtrl.dismiss(institution);
-    })
+    let searchBarFocused = this.searchBar.isFocus();
+
+    if (searchBarFocused){
+      Keyboard.addListener('keyboardDidShow', () => {
+        this.viewCtrl.dismiss(institution);
+      });
+    } else{
+      Keyboard.addListener('keyboardDidHide', () => {
+        this.viewCtrl.dismiss(institution);
+      });
+    }
 
   }
 
