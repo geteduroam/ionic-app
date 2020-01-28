@@ -1,10 +1,18 @@
 import {LoadingProvider} from "../providers/loading/loading";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
+import {Events} from "ionic-angular";
 
 
 export abstract class BasePage {
 
-    protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider) {
+    protected activateNavigation:boolean;
+
+    protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
+        protected event:Events) {
+        let status = this.event.subscribe('connection', (data) => {
+            console.log('Error handler subscribe: ', data);
+            this.activateNavigation = data == 'connected';
+        });
     }
 
     /**
@@ -22,5 +30,9 @@ export abstract class BasePage {
             const response = methodResponse;
             this.loading.dismiss();
             return response;
+    }
+
+    protected getActiveNavigation(){
+        return this.activateNavigation;
     }
 }

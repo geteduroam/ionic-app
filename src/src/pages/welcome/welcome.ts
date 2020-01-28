@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform } from 'ionic-angular';
+import {Events, NavController, NavParams, Platform} from 'ionic-angular';
 import { ConfigurationScreen } from '../configScreen/configScreen';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
@@ -15,8 +15,10 @@ export class WelcomePage extends BasePage{
 
 
   constructor(private platform: Platform, private navCtrl: NavController, protected loading: LoadingProvider,
-              protected dictionary: DictionaryServiceProvider, private global: GlobalProvider) {
-    super(loading, dictionary);
+              protected dictionary: DictionaryServiceProvider, private global: GlobalProvider,
+              protected event: Events) {
+    super(loading, dictionary, event);
+    console.log('activateNavigation', this.activateNavigation);
   }
 
   async navigateTo() {

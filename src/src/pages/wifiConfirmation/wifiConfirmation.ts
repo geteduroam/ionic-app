@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { NavParams, Platform } from 'ionic-angular';
+import {Events, NavParams, Platform} from 'ionic-angular';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {BasePage} from "../basePage";
@@ -24,8 +24,9 @@ export class WifiConfirmation extends BasePage implements OnInit {
 
   constructor(private navParams: NavParams, private platform: Platform,
               protected loading: LoadingProvider, private sanitizer: DomSanitizer,
-              protected dictionary:DictionaryServiceProvider, private global: GlobalProvider) {
-    super(loading, dictionary);
+              protected dictionary:DictionaryServiceProvider, private global: GlobalProvider,
+              protected event: Events) {
+    super(loading, dictionary, event);
   }
 
   ionViewWillEnter() {

@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavParams, Platform, Searchbar, ViewController } from 'ionic-angular';
+import {Events, NavParams, Platform, Searchbar, ViewController} from 'ionic-angular';
 import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
@@ -45,8 +45,9 @@ export class InstitutionSearch extends BasePage{
 
   constructor(public navParams: NavParams, private viewCtrl: ViewController,
               private platform: Platform, protected loading: LoadingProvider,
-              protected dictionary: DictionaryServiceProvider) {
-    super(loading, dictionary);
+              protected dictionary: DictionaryServiceProvider,
+              protected event: Events) {
+    super(loading, dictionary, event);
   }
 
   /**
