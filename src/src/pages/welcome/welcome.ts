@@ -18,7 +18,7 @@ export class WelcomePage extends BasePage{
               protected dictionary: DictionaryServiceProvider, private global: GlobalProvider,
               protected event: Events) {
     super(loading, dictionary, event);
-    console.log('activateNavigation', this.activateNavigation);
+    console.log('activateNavigation', this.activeNavigation);
   }
 
   async navigateTo() {

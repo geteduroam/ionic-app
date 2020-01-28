@@ -5,13 +5,14 @@ import {Events} from "ionic-angular";
 
 export abstract class BasePage {
 
-    protected activateNavigation:boolean;
+    protected activeNavigation:boolean;
 
     protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
         protected event:Events) {
         let status = this.event.subscribe('connection', (data) => {
-            console.log('Error handler subscribe: ', data);
-            this.activateNavigation = data == 'connected';
+            console.log('before changing, activeNavigation: ', this.activeNavigation);
+            this.activeNavigation = data == 'connected';
+            console.log('after changing, activeNavigation: ', this.activeNavigation);
         });
     }
 
@@ -33,6 +34,6 @@ export abstract class BasePage {
     }
 
     protected getActiveNavigation(){
-        return this.activateNavigation;
+        return this.activeNavigation;
     }
 }

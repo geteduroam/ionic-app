@@ -29,8 +29,11 @@
         </div>
         <div *ngIf="!isFinal" class="footer-info" text-center>
 
+<!--            <div class="content-button">-->
+<!--                <button (click)="closeModal()" [disabled]="!getActiveNavigation()" class="button-control" ion-button text-capitalize>{{getString('button', 'back')}}</button>-->
+<!--            </div>-->
             <div class="content-button">
-                <button (click)="closeModal()" [disabled]="!getActiveNavigation()" class="button-control" ion-button text-capitalize>{{getString('button', 'back')}}</button>
+                <button (click)="closeModal()" [ngClass]="!activeNavigation ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize>{{getString('button', 'back')}}</button>
             </div>
         </div>
 
