@@ -15,6 +15,7 @@ public class WifiEapConfigurator: CAPPlugin {
             return .eapttlsInnerAuthenticationMSCHAPv2
         case 5:
             return .eapttlsInnerAuthenticationPAP
+
         default:
             return nil
         }
@@ -69,13 +70,10 @@ public class WifiEapConfigurator: CAPPlugin {
             eapSettings.outerIdentity = anonymous
         }
         
-        if call.getString("caCertificate") != nil {
-            
+        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
             if let certificate = call.getString("caCertificate") {
-                if addCertificate(certName: "Certificate " + ssid, certificate: certificate)
-                {
-                    
-                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                 if addCertificate(certName: "Certificate " + ssid, certificate: certificate)
+                {  let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                    kSecAttrLabel as String: "Certificate " + ssid,
                                                    kSecReturnRef as String: kCFBooleanTrue]
                     var item: CFTypeRef?
@@ -86,8 +84,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     eapSettings.setTrustedServerCertificates([savedCert])
                 }
             }
-        }
-        
+        }        
         
         let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
@@ -137,36 +134,54 @@ public class WifiEapConfigurator: CAPPlugin {
                 "success": false,
             ])
         }
-        NEHotspotConfigurationManager.shared.removeConfiguration(forSSID: ssidToCheck)
-        var removed = false
+        var foundNetwork = false
+        let s = NEHotspotConfigurationManager.shared.getConfiguredSSIDs
         NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
             for ssid in ssids {
-                if ssidToCheck != ssid {
-                    removed = true
+                if ssidToCheck == ssid {
+                    foundNetwork = true
                 }
             }
-            call.success([
-                "message": "plugin.wifieapconfigurator.success.network.removed",
-                "success": removed
-            ])
         }
         
+        if foundNetwork {
+            NEHotspotConfigurationManager.shared.removeConfiguration(forSSID: ssidToCheck)
+            var removed = true
+            NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
+                for ssid in ssids {
+                    if ssidToCheck == ssid {
+                        removed = false
+                    }
+                }
+            }
+            
+            let message = removed ?  "plugin.wifieapconfigurator.success.network.removed": "plugin.wifieapconfigurator.error.network.removed"
+            call.success([
+                           "message": message,
+                           "success": removed
+                       ])
+        }
+        else{
+            call.success([
+                              "message": "plugin.wifieapconfigurator.error.network.notFound",
+                              "success": false
+                          ])
+        }
     }
+    
     func addCertificate(certName: String, certificate: String) -> Bool {
         let certBase64 = certificate
         let data = Data(base64Encoded: certBase64)!
         let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData)!
         let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                        kSecValueRef as String: certRef,
-                                       // kSecAttrAccessGroup as String: "$(AppIdentifierPrefix)$(TeamIdentifierPrefix)com.apple.networkextensionsharing",
-            kSecAttrLabel as String: certName]
+                                       kSecAttrLabel as String: certName]
         let status = SecItemAdd(addquery as CFDictionary, nil)
         guard status == errSecSuccess else {
             if status == errSecDuplicateItem {
                 let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                kSecAttrLabel as String: certName,
-                                               // kSecAttrAccessGroup as String: "$(AppIdentifierPrefix)$(TeamIdentifierPrefix)com.apple.networkextensionsharing",
-                    kSecReturnRef as String: kCFBooleanTrue]
+                                               kSecReturnRef as String: kCFBooleanTrue]
                 var item: CFTypeRef?
                 let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                 let statusDelete = SecItemDelete(getquery as CFDictionary)
@@ -191,26 +206,30 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
             return call.success([
-                "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                "message": "plugin.wifieapconfigurator.error.network.notConnected",
                 "success": false,
+                "isConnected": false
             ])
         }
         for i in 0...interfaceNames.count {
             guard let info = CNCopyCurrentNetworkInfo(interfaceNames[i] as CFString) as? [String: AnyObject] else {
                 return call.success([
-                    "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                    "message": "plugin.wifieapconfigurator.error.network.notConnected",
                     "success": false,
+                    "isConnected": false
                 ])
             }
             guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
                 return call.success([
-                    "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                    "message": "plugin.wifieapconfigurator.error.network.notConnected",
                     "success": false,
+                    "isConnected": false
                 ])
             }
             return call.success([
                 "message": "plugin.wifieapconfigurator.success.network.connected",
                 "success": true,
+                "isConnected": true
             ])
         }
     }
