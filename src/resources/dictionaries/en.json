@@ -42,10 +42,8 @@
 	"text": {
 		"configured": " is now configured on your device.",
 		"reconfigure1": "Hi, It seems you have ",
-		"reconfigure": " configured on your device.\n Do you want to reconfigure it?"
+		"reconfigure": " configured on your device.\n Do you want to reconfigure it?",
+        "ios": "Thank you for using our services."
 	},
-    "exit": {
-      "ios": "Thank you for using our services."
-    },
 	"defaultError": "Key not found"
 }
