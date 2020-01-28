@@ -12,9 +12,6 @@
                 {{global.getSsid()}}{{getString('text', 'configured')}}
             </p>
 
-            <p *ngIf="!getInfo()" class="copy" margin padding-top>
-                {{getString('text', 'ios')}}
-            </p>
         </div>
     </div>
     <div *ngIf="getInfo()" class="footer-info" text-center>

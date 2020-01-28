@@ -42,8 +42,7 @@
 	"text": {
 		"configured": " ya está configurada en tu dispositivo.",
 		"reconfigure1": "Hola, Parece que tienes ",
-		"reconfigure2":" configurada en tu dispositivo.\n ¿Quieres volver a configurarla?",
-        "ios": "Gracias por usar nuestros servicios."
+		"reconfigure2":" configurada en tu dispositivo.\n ¿Quieres volver a configurarla?"
 	},
 	"defaultError": "Clave no encontrada"
 }
