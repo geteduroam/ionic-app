@@ -57,14 +57,17 @@ export class GeteduroamApp {
   async associatedNetwork() {
     if (this.platform.is('android')) {
       this.enableWifi();
-    }
-    const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
-    console.log('isAssociated: ', isAssociated);
-    if (!this.rootPage) {
-      this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
+      const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
 
+      if (!this.rootPage) {
+        this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
+
+      }
+      !isAssociated.success && !isAssociated.overridable ? this.removeAssociated() : '';
+    } else {
+      this.rootPage = ConfigurationScreen;
     }
-    !isAssociated.success && !isAssociated.overridable ? this.removeAssociated() : '';
+
   }
 
   async removeAssociated() {

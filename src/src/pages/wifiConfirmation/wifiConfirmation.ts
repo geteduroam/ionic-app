@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
+import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 
 
 @Component({
@@ -50,14 +51,15 @@ export class WifiConfirmation extends BasePage implements OnInit {
   }
   async ngOnInit(){
     this.loading.createAndPresent();
-
-
     this.loading.dismiss();
     this.showAll = true;
   }
-  // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
+
   exitApp() {
       this.platform.exitApp();
   }
 
+  getInfo() {
+    return this.platform.is('android');
+  }
 }

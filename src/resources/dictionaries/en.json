@@ -44,5 +44,8 @@
 		"reconfigure1": "Hi, It seems you have ",
 		"reconfigure": " configured on your device.\n Do you want to reconfigure it?"
 	},
+    "exit": {
+      "ios": "Thank you for using our services."
+    },
 	"defaultError": "Key not found"
 }
