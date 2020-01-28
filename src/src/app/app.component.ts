@@ -64,10 +64,10 @@ export class GeteduroamApp {
       this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
 
     }
-    !isAssociated.success && !isAssociated.overridable ? this.removeAssociated() : '';
+    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
   }
 
-  async removeAssociated() {
+  async removeAssociatedManually() {
     await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
         this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
   }
@@ -116,8 +116,11 @@ export class GeteduroamApp {
     Network.addListener('networkStatusChange', async () => {
       let connect = await this.statusConnection();
 
-      !connect.connected ? this.alertConnection('Please turn on mobile data \n or use Wi-Fi to access data') :
-      this.alertConnection('Connected by: '+ connect.connectionType);
+      // !connect.connected ? this.alertConnection('Please, turn on mobile data \n or use Wi-Fi to access data') :
+      // this.alertConnection('Connected by: '+ connect.connectionType);
+      !connect.connected ? this.alertConnection(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.') :
+          // this.alertConnection('Connected by: '+ connect.connectionType);
+        this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
 
     });
 
@@ -135,7 +138,7 @@ export class GeteduroamApp {
   async notConnectionNetwork() {
     this.rootPage = WelcomePage;
     this.addListeners();
-    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false)
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', true)
   }
 
   /**
