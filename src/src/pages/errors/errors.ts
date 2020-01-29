@@ -37,6 +37,8 @@ export class ErrorsPage extends BasePage{
       this.isFinal = false;
     }
 
+    super.activeNavigation = this.navParams.get('navigation');
+
   }
 
 

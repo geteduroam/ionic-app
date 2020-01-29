@@ -12,13 +12,15 @@ export class ErrorHandlerProvider extends ErrorHandler {
 
   }
 
-  async handleError(errorText: string, isFinal?:boolean, helpDeskUrl?:string) {
+  async handleError(errorText: string, isFinal?:boolean, helpDeskUrl?:string, navigation?:boolean) {
 
   //  errorText = errorText.includes('associated') ? errorText + ".\nPlease delete the eduroam network stored in 'Saved networks'" : errorText;
 
+
+    let localNavigation: boolean = navigation == undefined ? true : navigation;
     let localFinal: boolean = !!isFinal ? isFinal : false;
     let localUrl:string = !!helpDeskUrl ? helpDeskUrl : '';
-    let errorModal = this.modalCtrl.create(ErrorsPage, {error: errorText, isFinal: localFinal, link: localUrl});
+    let errorModal = this.modalCtrl.create(ErrorsPage, {error: errorText, isFinal: localFinal, link: localUrl, navigation: localNavigation});
     if ( !this.showModal ) {
       this.showModal = true;
 
