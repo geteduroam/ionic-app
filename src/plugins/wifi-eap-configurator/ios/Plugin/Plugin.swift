@@ -80,8 +80,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                     guard status == errSecSuccess else { return }
                     let savedCert = item as! SecCertificate
-                    
-                    eapSettings.setTrustedServerCertificates([savedCert])
+                    let certStatus = eapSettings.setTrustedServerCertificates([savedCert])
                 }
             }
         }        
@@ -121,10 +120,17 @@ public class WifiEapConfigurator: CAPPlugin {
                     iterator = true
                 }
             }
-            call.success([
-                "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
-                "success": iterator
-            ])
+            if(iterator){
+               call.success([
+                   "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                   "success": false
+               ])
+            }else{
+               call.success([
+                   "message": "plugin.wifieapconfigurator.success.network.missing",
+                   "success": true
+               ])
+            }
         }
     }
     @objc func removeNetwork(_ call: CAPPluginCall) {
