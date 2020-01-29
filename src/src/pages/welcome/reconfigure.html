@@ -20,11 +20,11 @@
 <div class="footer-info" text-center>
 
     <div *ngIf="showReconfigure" class="content-button">
-        <button (click)="navigateTo()"  class="button-control" ion-button text-capitalize>{{getString('button', 'reconfigure')}}</button>
+        <button (click)="navigateTo()" class="button-control" ion-button text-capitalize>{{getString('button', 'reconfigure')}}</button>
     </div>
 
     <div *ngIf="!showReconfigure" class="content-button">
-        <button (click)="navigateTo()"  class="button-control" ion-button text-capitalize>{{getString('button', 'configure')}}</button>
+        <button (click)="navigateTo()" class="button-control" ion-button text-capitalize>{{getString('button', 'configure')}}</button>
     </div>
 
     <div *ngIf="showReconfigure" (click)="exitApp()" class="text-bottom" margin-top>

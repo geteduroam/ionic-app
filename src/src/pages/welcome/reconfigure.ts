@@ -17,23 +17,24 @@ export class ReconfigurePage extends BasePage{
 
   constructor(private platform: Platform, private navParams: NavParams, private nav: Nav, private navCtrl: NavController,
               protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
-              private global: GlobalProvider,protected event: Events) {
-    super(loading, dictionary, event);
+              protected global: GlobalProvider,protected event: Events) {
+    super(loading, dictionary, event, global);
 
   }
 
   ionViewWillEnter() {
-    console.log('this.navParams', this.nav['rootParams'].reconfigure);
     if(this.nav['rootParams'].reconfigure !== undefined){
       this.showReconfigure = this.nav['rootParams'].reconfigure;
-      console.log('reconfigureAux', this.showReconfigure);
-
     }
 
   }
 
   async navigateTo() {
-    await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
+    if(this.activeNavigation){
+      await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
+    } else{
+      await this.alertConnectionDisabled();
+    }
   }
 
   exitApp() {

@@ -4,6 +4,7 @@ import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -46,8 +47,8 @@ export class InstitutionSearch extends BasePage{
   constructor(public navParams: NavParams, private viewCtrl: ViewController,
               private platform: Platform, protected loading: LoadingProvider,
               protected dictionary: DictionaryServiceProvider,
-              protected event: Events) {
-    super(loading, dictionary, event);
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
   }
 
   /**

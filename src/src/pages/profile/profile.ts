@@ -53,7 +53,7 @@ export class ProfilePage extends BasePage{
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events) {
-    super(loading, dictionary, event);
+    super(loading, dictionary, event, global);
 
   }
 

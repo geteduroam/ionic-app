@@ -24,9 +24,9 @@ export class WifiConfirmation extends BasePage implements OnInit {
 
   constructor(private navParams: NavParams, private platform: Platform,
               protected loading: LoadingProvider, private sanitizer: DomSanitizer,
-              protected dictionary:DictionaryServiceProvider, private global: GlobalProvider,
+              protected dictionary:DictionaryServiceProvider, protected global: GlobalProvider,
               protected event: Events) {
-    super(loading, dictionary, event);
+    super(loading, dictionary, event, global);
   }
 
   ionViewWillEnter() {
