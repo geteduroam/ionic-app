@@ -8,14 +8,14 @@ const { Toast } = Plugins;
 
 export abstract class BasePage {
 
-    protected activeNavigation:boolean;
+    protected activeNavigation:boolean = true;
 
     protected messageShown:boolean = false;
 
     protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
         protected event:Events, protected global: GlobalProvider) {
-        let status = this.event.subscribe('connection', (data) => {
-            this.activeNavigation = data == 'connected';
+        this.event.subscribe('connection', (data) => {
+           this.activeNavigation = data == 'connected';
         });
     }
 
@@ -30,10 +30,12 @@ export abstract class BasePage {
     }
 
     protected async waitingSpinner(methodResponse){
-            this.loading.createAndPresent();
-            const response = methodResponse;
-            this.loading.dismiss();
-            return response;
+        this.loading.createAndPresent();
+        return methodResponse;
+    }
+
+    protected removeSpinner() {
+      this.loading.dismiss();
     }
 
     protected getActiveNavigation(){

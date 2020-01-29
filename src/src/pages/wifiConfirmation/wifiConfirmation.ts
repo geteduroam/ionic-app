@@ -56,7 +56,11 @@ export class WifiConfirmation extends BasePage implements OnInit {
     this.loading.dismiss();
     this.showAll = true;
   }
-  // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
+
+  isAndroid() {
+    return this.platform.is('android');
+  }
+
   exitApp() {
       this.platform.exitApp();
   }

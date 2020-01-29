@@ -184,22 +184,11 @@ export class ConfigurationScreen extends BasePage{
 
   }
 
-  /**
-   * Method executed when the class is initialized.
-   * This method updates the property [instances]{@link #instances} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
-   */
-  // async ionViewDidEnter() {
-  //   this.loading.createAndPresent();
-  //   const response = await this.getEduroamServices.discovery();
-  //   this.loading.dismiss();
-  //   this.instances = response.instances;
-  //   this.showAll = true;
-  // }
-
   async ionViewWillEnter() {
       const firstResponse = this.getEduroamServices.discovery();
       const secondResponse = await this.waitingSpinner(firstResponse);
       this.instances = secondResponse.instances;
+      this.removeSpinner();
       this.showAll = true;
   }
 }
