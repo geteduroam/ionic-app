@@ -93,11 +93,15 @@ export class ProfilePage extends BasePage{
   }
 
   async navigateTo() {
-    this.showAll = false;
+    if (this.activeNavigation) {
+      this.showAll = false;
 
-    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
-      logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-      await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+      !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+          logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+        await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+    } else {
+      await this.alertConnectionDisabled();
+    }
 
   }
   /**

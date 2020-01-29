@@ -74,14 +74,16 @@ export class GeteduroamApp {
       this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
     }
 
-    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually(true) : '';
+    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
   }
   /**
    * This method check if network is enabled and show a error message to user remove network already associated
    * manually
    */
-  async removeAssociatedManually(connectionEnabled: boolean) {
-    if (connectionEnabled) {
+  async removeAssociatedManually() {
+    let connect = await this.statusConnection();
+
+    if (connect.connected) {
 
       await this.errorHandler.handleError(
         this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
@@ -155,7 +157,7 @@ export class GeteduroamApp {
     this.rootParams = !!isAssociated.success ? {'reconfigure': false} : {'reconfigure': true};
 
     if (!isAssociated.success && !isAssociated.overridable) {
-      this.removeAssociatedManually(false);
+      this.removeAssociatedManually();
 
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
@@ -198,7 +200,7 @@ export class GeteduroamApp {
    * This method throw an event to disabled button when network is disconnected.
    * @param connectionStatus
    */
-  private connectionEvent(connectionStatus: NetworkStatus){
+  protected connectionEvent(connectionStatus: NetworkStatus){
     connectionStatus.connected ? this.event.publish('connection', 'connected') :
       this.event.publish('connection', 'disconnected');
   }
