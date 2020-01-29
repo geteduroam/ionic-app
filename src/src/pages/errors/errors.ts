@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {NavParams, Platform, ViewController} from "ionic-angular";
+import {Events, NavParams, Platform, ViewController} from "ionic-angular";
 import {Plugins} from "@capacitor/core";
 import {ValidatorProvider} from "../../providers/validator/validator";
 import {BasePage} from "../basePage";
@@ -20,8 +20,13 @@ export class ErrorsPage extends BasePage{
 
 
   constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController,
-              private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider) {
-    super(loading, dictionary);
+              private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
+              protected event: Events) {
+    super(loading, dictionary, event);
+    this.event.subscribe('connection', (data) => {
+      this.activeNavigation = data == 'connected';
+      console.log('error - activeNavigation: ', this.activeNavigation);
+    });
 
     if (!!this.navParams.get('isFinal')) {
 
@@ -52,7 +57,7 @@ export class ErrorsPage extends BasePage{
   }
 
   async clickKnowMore() {
-    if(!!this.link){
+    if(!this.emptyLink()){
       await Browser.open({'url': this.link});
     }
 
@@ -64,6 +69,10 @@ export class ErrorsPage extends BasePage{
     } else {
       return '';
     }
+  }
+
+  emptyLink(): boolean{
+    return !!this.link || this.link.length == 0;
   }
 
   isLinkEmail(): boolean {

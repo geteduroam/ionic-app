@@ -1,4 +1,4 @@
-import { Config, Platform } from 'ionic-angular';
+import {Config, Events, Platform} from 'ionic-angular';
 import { Component } from '@angular/core';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { ProfilePage } from '../pages/profile/profile';
@@ -11,6 +11,7 @@ import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
+import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
 
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
@@ -35,7 +36,8 @@ export class GeteduroamApp {
    */
   constructor(private platform: Platform, private config: Config,
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
-              private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryServiceProvider) {
+              private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryServiceProvider,
+              public event: Events) {
 
     this.platform.ready().then(async () => {
       // Transition provider, to navigate between pages
@@ -45,10 +47,12 @@ export class GeteduroamApp {
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
+      // Add listeners to app
+      await this.addListeners();
       // Listener to get status connection, apply when change status network
-      this.checkConnection();
+       await this.checkConnection();
       // Plugin wifiEAPConfigurator associatedNetwork
-      this.associatedNetwork();
+      await this.associatedNetwork();
       // Open app from a file
       await this.getLaunchUrl();
     });
@@ -57,20 +61,18 @@ export class GeteduroamApp {
   async associatedNetwork() {
     if (this.platform.is('android')) {
       this.enableWifi();
-      const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
-
-      if (!this.rootPage) {
-        this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
-
-      }
-      !isAssociated.success && !isAssociated.overridable ? this.removeAssociated() : '';
-    } else {
-      this.rootPage = ConfigurationScreen;
     }
 
+    const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+
+    if (!this.rootPage) {
+      this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
+    }
+
+    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
   }
 
-  async removeAssociated() {
+  async removeAssociatedManually() {
     await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
         this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
   }
@@ -107,20 +109,17 @@ export class GeteduroamApp {
    await WifiEapConfigurator.enableWifi();
   }
 
-  /**
-   * This method check status of connection
-   */
-  private async statusConnection() {
-    return await Network.getStatus()
-  }
-
   addListeners() {
     // Listening to changes in network states, it show toast message when status changed
-    Network.addListener('networkStatusChange', async () => {
-      let connect = await this.statusConnection();
 
-      !connect.connected ? this.alertConnection('Please turn on mobile data \n or use Wi-Fi to access data') :
-      this.alertConnection('Connected by: '+ connect.connectionType);
+    Network.addListener('networkStatusChange', async () => {
+      let connectionStatus: NetworkStatus = await this.statusConnection();
+
+      this.connectionEvent(connectionStatus);
+
+      !connectionStatus.connected ?
+          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.') :
+          this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
 
     });
 
@@ -130,15 +129,27 @@ export class GeteduroamApp {
     });
   }
 
+  async notConnectionNetwork() {
+    this.rootPage = WelcomePage;
+    //this.addListeners();
+    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false);
+  }
+
+  /**
+   * This method check status of connection
+   */
+  private async statusConnection():Promise<NetworkStatus> {
+    return await Network.getStatus()
+  }
+
+
   navigate(uri: string) {
     this.rootPage = ProfilePage;
     if (!uri.includes('.eap-config')) return;
   }
 
-  async notConnectionNetwork() {
-    this.rootPage = WelcomePage;
-    this.addListeners();
-    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false)
+  private connectionEvent(connectionStatus: NetworkStatus){
+    connectionStatus.connected ? this.event.publish('connection', 'connected') : this.event.publish('connection', 'disconnected');
   }
 
   /**
@@ -146,10 +157,15 @@ export class GeteduroamApp {
    * and show Toast message
    */
   private async checkConnection() {
-    let connect = await this.statusConnection();
+    let connectionStatus = await this.statusConnection();
+
+    this.connectionEvent(connectionStatus);
 
     // Disconnect error
-    !connect.connected ? this.notConnectionNetwork() : this.addListeners();
+    if (!connectionStatus.connected){
+      this.notConnectionNetwork();
+    }
+
   }
 
   /**

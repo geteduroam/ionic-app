@@ -77,7 +77,7 @@ export class ProfilePage extends BasePage{
         username: this.provide.email,
         password: this.provide.pass,
         eap: parseInt(this.validMethod.eapMethod.type.toString()),
-        servername: "",
+        servername: this.validMethod.serverSideCredential.serverID,
         auth: this.global.auth.MSCHAPv2,
         anonymous: "",
         caCertificate: this.validMethod.serverSideCredential.ca.content
