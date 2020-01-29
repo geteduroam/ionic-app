@@ -5,6 +5,7 @@ import {ValidatorProvider} from "../../providers/validator/validator";
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
 const {Browser} = Plugins;
 
 
@@ -21,8 +22,8 @@ export class ErrorsPage extends BasePage{
 
   constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController,
               private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events) {
-    super(loading, dictionary, event);
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
 
 
     if (!!this.navParams.get('isFinal')) {
@@ -52,6 +53,8 @@ export class ErrorsPage extends BasePage{
   async closeModal() {
     if(this.activeNavigation){
       await this.viewCtrl.dismiss();
+    } else{
+      this.alertConnectionDisabled();
     }
   }
 

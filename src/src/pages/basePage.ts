@@ -1,14 +1,19 @@
 import {LoadingProvider} from "../providers/loading/loading";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {Events} from "ionic-angular";
+import {Plugins} from "@capacitor/core";
+import {GlobalProvider} from "../providers/global/global";
+const { Toast } = Plugins;
 
 
 export abstract class BasePage {
 
     protected activeNavigation:boolean;
 
+    protected messageShown:boolean = false;
+
     protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
-        protected event:Events) {
+        protected event:Events, protected global: GlobalProvider) {
         let status = this.event.subscribe('connection', (data) => {
             console.log('before changing, activeNavigation: ', this.activeNavigation);
             this.activeNavigation = data == 'connected';
@@ -35,6 +40,19 @@ export abstract class BasePage {
 
     protected getActiveNavigation(){
         return this.activeNavigation;
+    }
+
+    /**
+     * This method show a toast message
+     */
+    protected async alertConnectionDisabled() {
+        if(!this.messageShown){
+            await Toast.show({
+                text: this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.',
+                duration: 'long'
+            });
+            this.messageShown = true;
+        }
     }
 
 }

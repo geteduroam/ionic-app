@@ -17,8 +17,8 @@ export class ReconfigurePage extends BasePage{
 
   constructor(private platform: Platform, private navParams: NavParams, private nav: Nav, private navCtrl: NavController,
               protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
-              private global: GlobalProvider,protected event: Events) {
-    super(loading, dictionary, event);
+              protected global: GlobalProvider,protected event: Events) {
+    super(loading, dictionary, event, global);
 
   }
 
@@ -33,7 +33,11 @@ export class ReconfigurePage extends BasePage{
   }
 
   async navigateTo() {
-    await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
+    if(this.activeNavigation){
+      await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
+    } else{
+      await this.alertConnectionDisabled();
+    }
   }
 
   exitApp() {

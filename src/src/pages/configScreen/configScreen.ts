@@ -8,6 +8,7 @@ import { InstitutionSearch } from '../institutionSearch/institutionSearch';
 import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -79,8 +80,8 @@ export class ConfigurationScreen extends BasePage{
    * */
   constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
               protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
-              protected event: Events) {
-    super(loading, dictionary, event);
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
   }
 
   /**
@@ -169,12 +170,17 @@ export class ConfigurationScreen extends BasePage{
    * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
-  navigateTo(profile) {
-    this.showAll = false;
+  async navigateTo(profile) {
+    if (this.activeNavigation){
+      this.showAll = false;
 
-    !!profile.oauth ?
-      this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
-      this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
+      !!profile.oauth ?
+          await this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
+          await this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
+    } else{
+      await this.alertConnectionDisabled();
+    }
+
 
   }
 
