@@ -8,7 +8,7 @@ const { Toast } = Plugins;
 
 export abstract class BasePage {
 
-    protected activeNavigation:boolean;
+    protected activeNavigation:boolean = true;
 
     protected messageShown:boolean = false;
 

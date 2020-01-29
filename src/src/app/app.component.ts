@@ -67,7 +67,6 @@ export class GeteduroamApp {
     }
 
     const isAssociated = await this.isAssociatedNetwork();
-    console.log('isAssociated value: ', isAssociated);
     if (!this.rootPage) {
       this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
     }
@@ -81,7 +80,7 @@ export class GeteduroamApp {
           this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
-          this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false);
+          this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false, '', false);
     }
   }
 
@@ -142,7 +141,7 @@ export class GeteduroamApp {
     if (!isAssociated.success && !isAssociated.overridable){
       this.removeAssociatedManually(false);
     } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false, '',false);
     }
   }
 
