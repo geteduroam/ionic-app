@@ -8,18 +8,26 @@
 
     <div class="info-text" no-margin>
 
-        <p class="copy" margin padding>
+        <p *ngIf="showReconfigure" class="copy" margin padding>
             {{getString('text', 'reconfigure1')}}{{global.getSsid()}}{{getString('text', 'reconfigure2')}}
+        </p>
+
+        <p *ngIf="!showReconfigure" class="copy" margin padding>
+            {{getString('text', 'configure')}}{{global.getSsid()}}
         </p>
     </div>
 </div>
 <div class="footer-info" text-center>
 
-    <div class="content-button">
+    <div *ngIf="showReconfigure" class="content-button">
         <button (click)="navigateTo()"  class="button-control" ion-button text-capitalize>{{getString('button', 'reconfigure')}}</button>
     </div>
 
-    <div (click)="exitApp()" class="text-bottom" margin-top>
+    <div *ngIf="!showReconfigure" class="content-button">
+        <button (click)="navigateTo()"  class="button-control" ion-button text-capitalize>{{getString('button', 'configure')}}</button>
+    </div>
+
+    <div *ngIf="showReconfigure" (click)="exitApp()" class="text-bottom" margin-top>
         <p class="text-down" padding-top text-center >{{getString('button', 'no-thanks')}}</p>
     </div>
 </div>

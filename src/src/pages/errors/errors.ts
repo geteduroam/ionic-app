@@ -50,7 +50,9 @@ export class ErrorsPage extends BasePage{
   }
 
   async closeModal() {
-    await this.viewCtrl.dismiss();
+    if(this.activeNavigation){
+      await this.viewCtrl.dismiss();
+    }
   }
 
   async clickKnowMore() {

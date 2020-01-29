@@ -1,6 +1,6 @@
 import {Config, Events, Platform} from 'ionic-angular';
 import { Component } from '@angular/core';
-import { WelcomePage } from '../pages/welcome/welcome';
+import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
@@ -29,6 +29,8 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
 export class GeteduroamApp {
   rootPage;
 
+  rootParams = {};
+
   profile: ProfileModel;
   /**
    * @constructor
@@ -50,7 +52,7 @@ export class GeteduroamApp {
       // Add listeners to app
       await this.addListeners();
       // Listener to get status connection, apply when change status network
-       await this.checkConnection();
+      await this.checkConnection();
       // Plugin wifiEAPConfigurator associatedNetwork
       await this.associatedNetwork();
       // Open app from a file
@@ -59,20 +61,28 @@ export class GeteduroamApp {
   }
 
   async associatedNetwork() {
+
     if (this.platform.is('android')) {
       this.enableWifi();
     }
-    const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
-    if (!this.rootPage) {
-      this.rootPage = !!isAssociated.success ? ConfigurationScreen : WelcomePage;
 
+    const isAssociated = await this.isAssociatedNetwork();
+    console.log('isAssociated value: ', isAssociated);
+    if (!this.rootPage) {
+      this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
     }
-    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+
+    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually(true) : '';
   }
 
-  async removeAssociatedManually() {
-    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
-        this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
+  async removeAssociatedManually(connectionEnabled: boolean) {
+    if(connectionEnabled){
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
+          this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
+    } else {
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
+          this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false);
+    }
   }
 
   /**
@@ -90,28 +100,6 @@ export class GeteduroamApp {
 
     this.global.setProfile(this.profile);
 
-  }
-
-  /**
-   * This method show a toast message
-   * @param text
-   */
-  async alertConnection(text: string) {
-    await Toast.show({
-      text: text,
-      duration: 'long'
-    })
-  }
-
-  async enableWifi() {
-   await WifiEapConfigurator.enableWifi();
-  }
-
-  /**
-   * This method check status of connection
-   */
-  private async statusConnection():Promise<NetworkStatus> {
-    return await Network.getStatus()
   }
 
   addListeners() {
@@ -145,9 +133,17 @@ export class GeteduroamApp {
   }
 
   async notConnectionNetwork() {
-    this.rootPage = WelcomePage;
-    //this.addListeners();
-    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false);
+
+    this.rootPage = ReconfigurePage;
+
+    const isAssociated = await this.isAssociatedNetwork();
+    this.rootParams = !!isAssociated.success ? {'reconfigure': false} : {'reconfigure': true};
+
+    if (!isAssociated.success && !isAssociated.overridable){
+      this.removeAssociatedManually(false);
+    } else {
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false);
+    }
   }
 
   /**
@@ -172,6 +168,33 @@ export class GeteduroamApp {
   private setDictionary(){
     //TODO 'en' can be replaced by 'es' for Spanish translation
     this.dictionary.loadDictionary('en');
+  }
+
+
+  async isAssociatedNetwork() {
+    return await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+  }
+
+  /**
+   * This method check status of connection
+   */
+  private async statusConnection():Promise<NetworkStatus> {
+    return await Network.getStatus()
+  }
+
+  /**
+   * This method show a toast message
+   * @param text
+   */
+  async alertConnection(text: string) {
+    await Toast.show({
+      text: text,
+      duration: 'long'
+    })
+  }
+
+  async enableWifi() {
+    await WifiEapConfigurator.enableWifi();
   }
 }
 

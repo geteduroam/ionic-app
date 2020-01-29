@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { WelcomePage } from './welcome/welcome';
+import { ReconfigurePage } from './welcome/reconfigure';
 
 import { ErrorsPage } from './errors/errors';
 
@@ -15,7 +15,7 @@ import { ValidatorProvider } from '../providers/validator/validator';
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 
 const Pages = [
-  WelcomePage,
+  ReconfigurePage,
   ErrorsPage,
   ProfilePage,
   OauthFlow,
