@@ -15,9 +15,7 @@ export abstract class BasePage {
     protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
         protected event:Events, protected global: GlobalProvider) {
         let status = this.event.subscribe('connection', (data) => {
-            console.log('before changing, activeNavigation: ', this.activeNavigation);
             this.activeNavigation = data == 'connected';
-            console.log('after changing, activeNavigation: ', this.activeNavigation);
         });
     }
 

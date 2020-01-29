@@ -23,11 +23,8 @@ export class ReconfigurePage extends BasePage{
   }
 
   ionViewWillEnter() {
-    console.log('this.navParams', this.nav['rootParams'].reconfigure);
     if(this.nav['rootParams'].reconfigure !== undefined){
       this.showReconfigure = this.nav['rootParams'].reconfigure;
-      console.log('reconfigureAux', this.showReconfigure);
-
     }
 
   }
