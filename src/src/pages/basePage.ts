@@ -36,4 +36,5 @@ export abstract class BasePage {
     protected getActiveNavigation(){
         return this.activeNavigation;
     }
+
 }

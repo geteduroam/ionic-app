@@ -191,9 +191,9 @@ export class ConfigurationScreen extends BasePage{
   // }
 
   async ionViewWillEnter() {
-    const firstResponse = this.getEduroamServices.discovery();
-    const secondResponse = await this.waitingSpinner(firstResponse);
-    this.instances = secondResponse.instances;
-    this.showAll = true;
+      const firstResponse = this.getEduroamServices.discovery();
+      const secondResponse = await this.waitingSpinner(firstResponse);
+      this.instances = secondResponse.instances;
+      this.showAll = true;
   }
 }

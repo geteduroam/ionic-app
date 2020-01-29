@@ -26,6 +26,7 @@
 		"back": "Atrás",
 		"done": "Hecho",
 		"reconfigure": "Reconfigurar",
+		"configure" : "Configurar",
 		"no-thanks": "No, gracias",
 		"close": "Cerrar"
 	},
@@ -41,6 +42,7 @@
 	},
 	"text": {
 		"configured": " ya está cinfugurada en tu dispositivo.",
+		"configure" : "Continuar para configurar ",
 		"reconfigure1": "Hola, Parece que tienes ",
 		"reconfigure2":" configurada en tu dispositivo.\n ¿Quieres volver a configurarla?",
 		"network-available": "Acceso remoto disponible"
