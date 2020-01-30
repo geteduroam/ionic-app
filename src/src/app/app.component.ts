@@ -59,7 +59,9 @@ export class GeteduroamApp {
       await this.getLaunchUrl();
     });
   }
-
+  /**
+   * This method check if network is associated and flow to initialize app
+   */
   async associatedNetwork() {
 
     if (this.platform.is('android')) {
@@ -71,16 +73,29 @@ export class GeteduroamApp {
       this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
     }
 
-    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually(true) : '';
+    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
   }
+  /**
+   * This method check if network is enabled and show a error message to user remove network already associated
+   * manually
+   */
+  async removeAssociatedManually() {
+    let connect = await this.statusConnection();
 
-  async removeAssociatedManually(connectionEnabled: boolean) {
-    if(connectionEnabled){
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
-          this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.', false);
+    if (connect.connected) {
+
+      await this.errorHandler.handleError(
+        this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
+        this.dictionary.getTranslation('error', 'available2') +
+        this.global.getSsid() + '.', false);
+
     } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'available1')+ this.global.getSsid() +
-          this.dictionary.getTranslation('error', 'available2')+ this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false, '', false);
+
+      await this.errorHandler.handleError(
+        this.dictionary.getTranslation('error', 'available1') +
+        this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
+        this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
+        this.global.getSsid() + '.', false);
     }
   }
 
@@ -96,23 +111,23 @@ export class GeteduroamApp {
     this.profile.oauth = false;
     this.profile.id = "FileEap";
     this.profile.name = "FileEap";
-
     this.global.setProfile(this.profile);
-
   }
 
+  /**
+   * This method add listeners needed to app
+   */
   addListeners() {
     // Listening to changes in network states, it show toast message when status changed
-
     Network.addListener('networkStatusChange', async () => {
       let connectionStatus: NetworkStatus = await this.statusConnection();
 
       this.connectionEvent(connectionStatus);
 
       !connectionStatus.connected ?
-          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.') :
+          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on') +
+            this.global.getSsid() + '.') :
           this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
-
     });
 
     // Listening to open app when open from a file
@@ -121,16 +136,18 @@ export class GeteduroamApp {
     });
   }
 
-  private connectionEvent(connectionStatus: NetworkStatus){
-    connectionStatus.connected ? this.event.publish('connection', 'connected') : this.event.publish('connection', 'disconnected');
-  }
-
-
+  /**
+   * This method open ProfilePage when the app is initialize from an eap-config file
+   * @param uri
+   */
   navigate(uri: string) {
     this.rootPage = ProfilePage;
     if (!uri.includes('.eap-config')) return;
   }
 
+  /**
+   * This method shown an error message when network is disconnect
+   */
   async notConnectionNetwork() {
 
     this.rootPage = ReconfigurePage;
@@ -138,11 +155,21 @@ export class GeteduroamApp {
     const isAssociated = await this.isAssociatedNetwork();
     this.rootParams = !!isAssociated.success ? {'reconfigure': false} : {'reconfigure': true};
 
-    if (!isAssociated.success && !isAssociated.overridable){
-      this.removeAssociatedManually(false);
+    if (!isAssociated.success && !isAssociated.overridable) {
+      this.removeAssociatedManually();
+
     } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.', false, '',false);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
+        this.global.getSsid() + '.', false);
     }
+  }
+
+  /**
+   *  This method call to IAGT plugin and return if network if just associated
+   *
+   */
+  async isAssociatedNetwork() {
+    return await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
   }
 
   /**
@@ -154,7 +181,6 @@ export class GeteduroamApp {
 
     this.connectionEvent(connectionStatus);
 
-    // Disconnect error
     if (!connectionStatus.connected){
       this.notConnectionNetwork();
     }
@@ -162,16 +188,20 @@ export class GeteduroamApp {
   }
 
   /**
-   * This method sets the global dictionary
+   * This method enable wifi on Android devices.
+   *
    */
-  private setDictionary(){
-    //TODO 'en' can be replaced by 'es' for Spanish translation
-    this.dictionary.loadDictionary('en');
+  async enableWifi() {
+    await WifiEapConfigurator.enableWifi();
   }
 
-
-  async isAssociatedNetwork() {
-    return await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+  /**
+   * This method throw an event to disabled button when network is disconnected.
+   * @param connectionStatus
+   */
+  protected connectionEvent(connectionStatus: NetworkStatus){
+    connectionStatus.connected ? this.event.publish('connection', 'connected') :
+      this.event.publish('connection', 'disconnected');
   }
 
   /**
@@ -192,8 +222,12 @@ export class GeteduroamApp {
     })
   }
 
-  async enableWifi() {
-    await WifiEapConfigurator.enableWifi();
+  /**
+   * This method sets the global dictionary
+   *  Default: 'en'
+   */
+  private setDictionary(){
+    this.dictionary.loadDictionary('en');
   }
 }
 

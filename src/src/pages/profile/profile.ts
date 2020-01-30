@@ -61,9 +61,9 @@ export class ProfilePage extends BasePage{
    *  Method executed when the class did enter
    */
   async ionViewDidEnter() {
-    this.loading.createAndPresent();
-    this.profile = await this.getProfile();
-    this.loading.dismiss();
+    const profile = await this.getProfile();
+    this.profile = await this.waitingSpinner(profile);
+    this.removeSpinner();
     this.showAll = true;
   }
 
@@ -78,7 +78,7 @@ export class ProfilePage extends BasePage{
         username: this.provide.email,
         password: this.provide.pass,
         eap: parseInt(this.validMethod.eapMethod.type.toString()),
-        servername: "",
+        servername: this.validMethod.serverSideCredential.serverID,
         auth: this.global.auth.MSCHAPv2,
         anonymous: "",
         caCertificate: this.validMethod.serverSideCredential.ca.content
@@ -93,11 +93,15 @@ export class ProfilePage extends BasePage{
   }
 
   async navigateTo() {
-    this.showAll = false;
+    if (this.activeNavigation) {
+      this.showAll = false;
 
-    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
-      logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-      await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+      !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+          logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+        await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+    } else {
+      await this.alertConnectionDisabled();
+    }
 
   }
   /**

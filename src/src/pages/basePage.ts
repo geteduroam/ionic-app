@@ -3,7 +3,7 @@ import {DictionaryServiceProvider} from "../providers/dictionary-service/diction
 import {Events} from "ionic-angular";
 import {Plugins} from "@capacitor/core";
 import {GlobalProvider} from "../providers/global/global";
-const { Toast } = Plugins;
+const { Toast, Network } = Plugins;
 
 
 export abstract class BasePage {
@@ -14,11 +14,15 @@ export abstract class BasePage {
 
     protected constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
         protected event:Events, protected global: GlobalProvider) {
-        let status = this.event.subscribe('connection', (data) => {
-            this.activeNavigation = data == 'connected';
+        this.statusConnection();
+        this.event.subscribe('connection', (data) => {
+           this.activeNavigation = data == 'connected';
         });
     }
-
+    protected async statusConnection() {
+      let connect = await Network.getStatus();
+      this.activeNavigation = connect.connected;
+    }
     /**
      * This method calls the getTranslation method form the service [DictionaryService]{@link ./providers/dictionary-service/DictionaryServiceProvider.html}.
      * @param key to search in the dictionary
@@ -30,10 +34,12 @@ export abstract class BasePage {
     }
 
     protected async waitingSpinner(methodResponse){
-            this.loading.createAndPresent();
-            const response = methodResponse;
-            this.loading.dismiss();
-            return response;
+        this.loading.createAndPresent();
+        return methodResponse;
+    }
+
+    protected removeSpinner() {
+      this.loading.dismiss();
     }
 
     protected getActiveNavigation(){
@@ -44,7 +50,7 @@ export abstract class BasePage {
      * This method show a toast message
      */
     protected async alertConnectionDisabled() {
-        if(!this.messageShown){
+        if (!this.messageShown) {
             await Toast.show({
                 text: this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.',
                 duration: 'long'

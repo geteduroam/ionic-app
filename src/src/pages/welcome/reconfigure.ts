@@ -14,6 +14,7 @@ import {GlobalProvider} from "../../providers/global/global";
 export class ReconfigurePage extends BasePage{
 
   showReconfigure : boolean = true;
+  isAndroid: boolean;
 
   constructor(private platform: Platform, private navParams: NavParams, private nav: Nav, private navCtrl: NavController,
               protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
@@ -26,11 +27,11 @@ export class ReconfigurePage extends BasePage{
     if(this.nav['rootParams'].reconfigure !== undefined){
       this.showReconfigure = this.nav['rootParams'].reconfigure;
     }
-
+    this.isAndroid = this.platform.is('android');
   }
 
   async navigateTo() {
-    if(this.activeNavigation){
+    if (this.activeNavigation) {
       await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
     } else{
       await this.alertConnectionDisabled();
