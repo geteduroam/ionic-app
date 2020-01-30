@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
-import {Events, NavController, NavParams} from 'ionic-angular';
+import { Events, NavController, NavParams } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
 import { ErrorHandlerProvider } from '../../providers/error-handler/error-handler';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { ProviderInfo } from '../../shared/entities/providerInfo';
-import {ValidatorProvider} from "../../providers/validator/validator";
+import { ValidatorProvider } from "../../providers/validator/validator";
 import { ProfileModel } from '../../shared/models/profile-model';
 import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
-import {BasePage} from "../basePage";
-import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import { BasePage } from "../basePage";
+import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
 
 @Component({
   selector: 'page-profile',
@@ -58,11 +58,19 @@ export class ProfilePage extends BasePage{
   }
 
   /**
+   *  Method executed when the class did load
+   */
+  async ionViewDidLoad() {
+    const profile = await this.getProfile();
+    this.profile = await this.waitingSpinner(profile);
+    const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
+    this.manageProfileValidation(validProfile);
+  }
+
+  /**
    *  Method executed when the class did enter
    */
   async ionViewDidEnter() {
-    const profile = await this.getProfile();
-    this.profile = await this.waitingSpinner(profile);
     this.removeSpinner();
     this.showAll = true;
   }
@@ -128,55 +136,38 @@ export class ProfilePage extends BasePage{
     }
   }
 
-  /**
-   * Method to get the first valid authentication method form an eap institutionSearch file.
-   * @return {AuthenticationMethod} the first valid authentication method
-   */
-  private async getFirstValidAuthenticationMethod() {
 
-    for (let authenticationMethod of this.authenticationMethods) {
-      if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
-        return authenticationMethod;
-      }
-    }
-
-    let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
-      !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-
-    await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-    return null;
-  }
 
 
 
   async getProfile() {
     this.profile = !!this.navParams.get('profile') ? this.navParams.get('profile') : this.global.getProfile();
-    this.checkValidation();
+    // this.checkValidation();
     return this.profile;
   }
 
-  async checkValidation() {
-    this.authenticationMethods = [];
-    this.providerInfo = new ProviderInfo();
-
-    const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
-    const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
-
-    if (validEap) {
-      this.validMethod = await this.getFirstValidAuthenticationMethod();
-
-      if (!!this.validMethod) {
-
-        this.suffixIdentity = !!this.validMethod && !!this.validMethod.clientSideCredential.innerIdentityHint ?
-          this.validMethod.clientSideCredential.innerIdentitySuffix : '';
-
-        this.createTerms();
-      }
-
-    } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false);
-    }
-  }
+  // async checkValidation() {
+  //   this.authenticationMethods = [];
+  //   this.providerInfo = new ProviderInfo();
+  //
+  //   const eapConfig = await this.getEduroamServices.getEapConfig(this.profile.eapconfig_endpoint);
+  //   const validEap:boolean = await this.validator.validateEapconfig(eapConfig, this.authenticationMethods, this.providerInfo);
+  //
+  //   if (validEap) {
+  //     this.validMethod = await this.getFirstValidAuthenticationMethod();
+  //
+  //     if (!!this.validMethod) {
+  //
+  //       this.suffixIdentity = !!this.validMethod && !!this.validMethod.clientSideCredential.innerIdentityHint ?
+  //         this.validMethod.clientSideCredential.innerIdentitySuffix : '';
+  //
+  //       this.createTerms();
+  //     }
+  //
+  //   } else {
+  //     await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false);
+  //   }
+  // }
 
   /**
    * Method to validate form.
@@ -190,6 +181,25 @@ export class ProfilePage extends BasePage{
 
   validEmail(email: string) {
     return this.validator.validateEmail(email, this.suffixIdentity);
+  }
+
+  async manageProfileValidation(validProfile: boolean){
+    this.providerInfo = this.global.getProviderInfo();
+    if(validProfile){
+      this.validMethod = this.global.getAuthenticationMethod();
+    } else {
+      await this.navCtrl.pop();
+      console.log('*********************************** after pop ');
+      console.log('*********************************** providerInfo ', this.providerInfo);
+      if(!!this.providerInfo && this.providerInfo != undefined){
+        let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
+            !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
+                await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+        console.log('*********************************** after sending error');
+      } else {
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), false, '');
+      }
+    }
   }
 
 }

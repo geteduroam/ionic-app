@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import {ProfileModel} from "../../shared/models/profile-model";
+import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
+import {ProviderInfo} from "../../shared/entities/providerInfo";
 
 @Injectable()
 export class GlobalProvider {
@@ -16,6 +18,9 @@ export class GlobalProvider {
   private profile: ProfileModel;
 
   private dictionary: any;
+
+  private authenticationMethod: AuthenticationMethod;
+  private providerInfo: ProviderInfo;
 
   //TODO: CREATE METHODS TO GET DATA
   getSsid() {
@@ -52,6 +57,22 @@ export class GlobalProvider {
 
   setDictionary(dictionary: any){
     this.dictionary = dictionary;
+  }
+
+  getAuthenticationMethod(){
+    return this.authenticationMethod;
+  }
+
+  setAuthenticationMethod(authenticationMethod: AuthenticationMethod){
+    this.authenticationMethod = authenticationMethod;
+  }
+
+  getProviderInfo(){
+    return this.providerInfo;
+  }
+
+  setProviderInfo(providerInfo: ProviderInfo){
+    this.providerInfo = providerInfo;
   }
 
 }

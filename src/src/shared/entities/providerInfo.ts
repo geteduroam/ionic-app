@@ -29,6 +29,8 @@ export class ProviderInfo extends BaseJson {
     this.providerLogo = this.getSingleProperty(jsonAux, 'ProviderLogo', false);
     this.termsOfUse = this.getSingleProperty(jsonAux, 'TermsOfUse', false);
 
+    console.log('prodiderInfo in fillEntity: ', this.displayName, this.description, this.providerLocation, this.providerLogo, this.termsOfUse, this.helpdesk);
+
 
   }
 

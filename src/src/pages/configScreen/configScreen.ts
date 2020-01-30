@@ -9,6 +9,7 @@ import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
+import {ProfileModel} from "../../shared/models/profile-model";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -47,7 +48,7 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Selected profile
    */
-  profile: any;
+  profile: ProfileModel;
 
   /**
    * Default profile (if exists) in the selected institution profiles set
@@ -114,7 +115,7 @@ export class ConfigurationScreen extends BasePage{
    * This method updates the properties [profile]{@link #profile}, [profileName]{@link #profileName} and [selectedProfileId]{@link #selectedProfileId}
    */
   clearProfile(){
-    this.profile = '';
+    this.profile = new ProfileModel();
     this.profileName = '';
     this.selectedProfileId = '';
   }
@@ -170,8 +171,9 @@ export class ConfigurationScreen extends BasePage{
    * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
-  async navigateTo(profile) {
-    if (this.activeNavigation){
+  async navigateTo(profile:ProfileModel) {
+    if (this.activeNavigation && this.validProfile(profile)){
+
       this.showAll = false;
 
       !!profile.oauth ?
@@ -191,4 +193,9 @@ export class ConfigurationScreen extends BasePage{
       this.removeSpinner();
       this.showAll = true;
   }
+
+  validProfile(profile:ProfileModel):boolean {
+    return true;
+  }
+
 }
