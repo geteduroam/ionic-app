@@ -37,8 +37,8 @@
 		"turn-on": "Por favor, active los datos móviles para configurar ",
 		"available1": "Una conexión de red llamada ",
 		"available2": " se encuentra ya disponible en el dispositivo.\n Por favor vaya a Configuración > Redes e Internet > Wi-Fi y elimine la configuración para reconfigurar ",
-		"invalid-eap": "Fichero eap-config erróneo",
-		"invalid-method": "Ningún método válido de autenticación en el fichero eap-config"
+		"invalid-eap": "El perfil seleccionado es erróneo",
+		"invalid-method": "Ningún método válido de autenticación en el perfil seleccionado"
 	},
 	"text": {
 		"configured": " ya está cinfugurada en tu dispositivo.",
