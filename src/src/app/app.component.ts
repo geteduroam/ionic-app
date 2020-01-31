@@ -56,7 +56,7 @@ export class GeteduroamApp {
       // Plugin wifiEAPConfigurator associatedNetwork
       await this.associatedNetwork();
       // Open app from a file
-      await this.getLaunchUrl();
+      await this.handleOpenUrl();
     });
   }
   /**
@@ -103,7 +103,7 @@ export class GeteduroamApp {
   /**
    * This method throw the app when is opened from a file
    */
-  async getLaunchUrl() {
+  async handleOpenUrl() {
     const urlOpen = await Plugins.App.getLaunchUrl();
     if(!urlOpen || !urlOpen.url) return;
 
