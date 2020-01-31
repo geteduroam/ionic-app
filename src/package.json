@@ -80,7 +80,10 @@
     "plugins": {
       "cordova-plugin-screen-orientation": {},
       "cordova-plugin-advanced-http": {},
-      "cordova-plugin-networkinterface": {}
+      "cordova-plugin-networkinterface": {},
+      "cordova-plugin-customurlscheme": {
+        "URL_SCHEME": "capacitor"
+      }
     }
   }
 }
