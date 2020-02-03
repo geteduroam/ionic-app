@@ -24,7 +24,6 @@
 				<string>com.emergya.eduroam</string>
 			</array>
 		</dict>
-		<dict/>
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
@@ -41,17 +40,8 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleDocumentTypes</key>
-			<array>
-				<dict>
-					<key>CFBundleTypeMIMETypes</key>
-					<array>
-						<string>application/eap-config</string>
-					</array>
-				</dict>
-			</array>
 			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
+			<string>Editor</string>
 			<key>CFBundleURLName</key>
 			<string>com.emergya.eduroam</string>
 			<key>CFBundleURLSchemes</key>
@@ -109,12 +99,16 @@
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
+			<key>LSSupportsOpeningDocumentsInPlace</key>
+			<true/>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.xml</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>EAP Config File </string>
+			<key>UTTypeIconFiles</key>
+			<array/>
 			<key>UTTypeIdentifier</key>
 			<string>com.emergya.eduroam</string>
 			<key>UTTypeTagSpecification</key>

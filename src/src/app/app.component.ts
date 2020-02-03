@@ -104,7 +104,14 @@ export class GeteduroamApp {
    * This method throw the app when is opened from a file
    */
   async handleOpenUrl() {
+
+    App.addListener('appUrlOpen', (res) => {
+      console.log('app url open: ', res);
+    });
+
     const urlOpen = await Plugins.App.getLaunchUrl();
+    console.log('urlOpen: ', urlOpen);
+
     if(!urlOpen || !urlOpen.url) return;
 
     this.profile = new ProfileModel();
