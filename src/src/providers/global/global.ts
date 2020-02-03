@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {ProfileModel} from "../../shared/models/profile-model";
+import { Platform } from 'ionic-angular';
 
 @Injectable()
 export class GlobalProvider {
@@ -12,9 +13,9 @@ export class GlobalProvider {
   protected ssid: string;
   protected username: string;
   protected pass: string;
-
   private profile: ProfileModel;
 
+  constructor(public platform: Platform) {}
   //TODO: CREATE METHODS TO GET DATA
   getSsid() {
     return 'eduroam';
@@ -44,4 +45,7 @@ export class GlobalProvider {
     this.profile = profile;
   }
 
+  isAndroid() {
+    return this.platform.is('android');
+  }
 }

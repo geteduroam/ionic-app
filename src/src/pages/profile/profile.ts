@@ -47,6 +47,7 @@ export class ProfilePage {
 
   suffixIdentity: string = '';
 
+
   constructor(public navCtrl: NavController, public navParams: NavParams, public loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, private global: GlobalProvider) {
@@ -139,8 +140,6 @@ export class ProfilePage {
     return null;
   }
 
-
-
   async getProfile() {
     this.profile = !!this.navParams.get('profile') ? this.navParams.get('profile') : this.global.getProfile();
     this.checkValidation();
@@ -184,4 +183,7 @@ export class ProfilePage {
     return this.validator.validateEmail(email, this.suffixIdentity);
   }
 
+  getType() {
+    return this.global.isAndroid();
+  }
 }

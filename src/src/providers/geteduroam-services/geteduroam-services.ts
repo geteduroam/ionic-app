@@ -1,8 +1,11 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
+import * as rbjs from 'random-bytes-js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
 import { StoringProvider } from '../storing/storing';
+import { oAuthModel } from '../../shared/models/oauth-model';
+import { CryptoUtil } from '../util/crypto-util';
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
@@ -136,18 +139,63 @@ export class GeteduroamServices {
    * @param data
    */
   buildGenerator(data: any){
+/*
+  //  Example: /generate.php?format=eap-metadata
+     const url = `${data}?format=eap-metadata`;
 
-  // // Example: /generate.php?format=eap-metadata
-  //   const url = ``;
-  //
-  //   //TODO: Build Header Authorization: Bearer AAAAAA==${token}
-  //   this.http.get(url, {}).subscribe((res) => {
-  //     console.log('Method get generator: ', res);
-  //
-  //   });
+     //TODO: Build Header Authorization: Bearer AAAAAA==${token}
+     this.http.get(url, {}, {}).then((res) => {
+       console.log('Method get generator: ', res);
+     }).catch((e) => {
+       console.log('Error on buildGenerator: ', e)
+     });*/
   }
 
   async connectProfile(config) {
     return await WifiEapConfigurator.configureAP(config);
+  }
+  // TODO: MOVE TO CRYPTO
+  generateRandomString(length) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+  }
+
+  async generateOAuthFlow(data: oAuthModel) {
+
+    let url = `${data.oAuthUrl}?client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}&scope=${data.scope}&state=${this.randomString(10)}`;
+    let codeVerifier = this.generateRandomString(43);
+    let codeChallenge = await CryptoUtil.deriveChallenge(codeVerifier);
+    if (!!data.pkce) {
+      let codeChallengeMethod='S256';
+      url += "&code_challenge="+ codeChallenge;
+      url += "&code_challenge_method=S256";
+    } else {
+      url += "&code_challenge=" + codeChallenge;
+      url += "&code_challenge_method=plain";
+    }
+
+    return {
+      uri: encodeURI(url),
+      codeVerifier,
+      codeChallenge,
+      redirectUrl: data.redirectUrl,
+      codeChallengeMethod: 'S256'
+    }
+
+  }
+
+  randomString(length: number) {
+    const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    let text = "";
+    for (let i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return text;
   }
 }

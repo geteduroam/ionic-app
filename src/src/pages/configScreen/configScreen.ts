@@ -169,9 +169,9 @@ export class ConfigurationScreen {
   navigateTo(profile) {
     this.showAll = false;
 
-    !!profile.oauth ?
-      this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
-      this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
+    const toPage = !!profile.oauth ? OauthFlow : ProfilePage;
+    this.navCtrl.push(toPage, {profile}, {animation: 'transition'});
+
 
   }
 

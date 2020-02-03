@@ -13,6 +13,7 @@ import { OauthFlow } from './oauthFlow/oauthFlow';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { InstitutionSearch } from './institutionSearch/institutionSearch';
 import { ValidatorProvider } from '../providers/validator/validator';
+import { CryptoUtil } from '../providers/util/crypto-util';
 
 const Pages = [
   WelcomePage,
