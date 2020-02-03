@@ -1,7 +1,6 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
-import * as rbjs from 'random-bytes-js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
 import { StoringProvider } from '../storing/storing';
 import { oAuthModel } from '../../shared/models/oauth-model';

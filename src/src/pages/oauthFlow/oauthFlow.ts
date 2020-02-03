@@ -8,6 +8,7 @@ import { oAuthModel } from '../../shared/models/oauth-model';
 import { HTTP } from '@ionic-native/http/ngx';
 
 declare var window: any;
+
 @Component({
   selector: 'page-oauthFlow',
   templateUrl: 'oauthFlow.html',
@@ -66,10 +67,11 @@ export class OauthFlow {
     this.buildFlowAuth(oAuth, oauth2Options);
   }
 
-   buildFlowAuth(oAuth, oauth2Options) {
+  buildFlowAuth(oAuth, oauth2Options) {
      let urlToken;
+     let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes, clearsessioncache=no ,clearcache=no");
+
      const flowAuth = new Promise(function (resolve, reject) {
-       let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes, clearsessioncache=no ,clearcache=no");
 
        browserRef.addEventListener('loadstart', (event) => {
 
@@ -98,9 +100,9 @@ export class OauthFlow {
        });
      });
 
-     flowAuth.then((res) => {
+     flowAuth.then(async (res) => {
        console.log('Promise then:', res);
-       this.getToken(urlToken);
+       await this.getToken(urlToken);
      });
   }
 
@@ -115,6 +117,9 @@ export class OauthFlow {
     // TODO: POST -> CREATE BEARER AUTHORIZATION
 
     this.tokenURl = JSON.parse(response.data);
+
+    console.log('token: ', this.tokenURl);
+
     let access_token = this.tokenURl.access_token.split('.')[2];
     console.log(access_token);
 
