@@ -176,9 +176,12 @@ ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
     }
   }
 }
-ion-app, ion-alert:last-child div:last-child button{
-  font-weight: bold !important;
-  font-size: 21px;
+
+ion-app, ion-alert div:last-child {
+  div.alert-radio-group > button:first-child {
+    font-weight: bold !important;
+  }
+
 }
 
 .nav-decor {
