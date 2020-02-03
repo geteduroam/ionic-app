@@ -38,7 +38,8 @@
     "available1": "Una conexión de red llamada ",
     "available2": " se encuentra ya disponible en el dispositivo.\n Por favor vaya a Configuración > Redes e Internet > Wi-Fi y elimine la configuración para reconfigurar ",
     "invalid-eap": "El perfil seleccionado es erróneo",
-    "invalid-method": "Ningún método válido de autenticación en el perfil seleccionado"
+    "invalid-method": "Ningún método válido de autenticación en el perfil seleccionado",
+    "invalid-profile": "El perfil seleccionado es erróneo"
   },
   "text": {
     "configured": " ya está cinfugurada en tu dispositivo.",

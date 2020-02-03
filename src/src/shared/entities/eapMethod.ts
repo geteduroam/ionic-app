@@ -16,7 +16,10 @@ export class EapMethod extends BaseJson{
      * This method updates the property [type]{@link #type}
      * @param {any} jsonAux json from which to retrieve the info.
      */
-    fillEntity(jsonAux: any){
-       this.type = this.getSingleProperty(jsonAux, 'Type', true);
+    fillEntity(jsonAux: any):boolean{
+        let returnValue: boolean = true;
+        this.type = this.getSingleProperty(jsonAux, 'Type', true);
+        returnValue = returnValue && this.type != null;
+        return returnValue
     }
 }

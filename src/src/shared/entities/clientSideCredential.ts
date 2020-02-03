@@ -20,8 +20,10 @@ export class ClientSideCredential extends BaseJson{
      * This method updates the properties [innerIdentitySuffix]{@link #innerIdentitySuffix} and [innerIdentityHint]{@link #innerIdentityHint}
      * @param {any} jsonAux json from which to retrieve the info.
      */
-    fillEntity(jsonAux: any){
+    fillEntity(jsonAux: any): boolean{
+        let returnValue: boolean = true;
         this.innerIdentitySuffix = this.getSingleProperty(jsonAux, 'InnerIdentitySuffix', false);
         this.innerIdentityHint = this.getSingleProperty(jsonAux, 'InnerIdentityHint', false);
+        return returnValue;
     }
 }

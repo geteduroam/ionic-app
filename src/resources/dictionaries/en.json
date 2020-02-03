@@ -38,7 +38,8 @@
     "available1": "A network connection called ",
     "available2": " is already available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it if you want to reconfigure ",
     "invalid-eap": "Invalid selected profile",
-    "invalid-method": "No valid authentication method available from the selected profile"
+    "invalid-method": "No valid authentication method available from the selected profile",
+    "invalid-profile": "The selected profile is wrong"
   },
   "text": {
     "configured": " is now configured on your device.",

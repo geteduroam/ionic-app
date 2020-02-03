@@ -18,7 +18,7 @@
         </div>
         <div *ngIf="isFinal" class="footer-info" text-center>
 
-            <div class="content-button">
+            <div class="content-button" *ngIf="!emptyLink()">
                 <button (click)="clickKnowMore()" *ngIf="!isLinkEmail()" class="button-control" ion-button text-capitalize>{{getString('button', 'more')}}</button>
                 <a *ngIf="isLinkEmail()" class="button-control" href="{{getEmail()}}" ion-button text-capitalize>{{getString('button', 'email')}}</a>
             </div>

@@ -53,16 +53,19 @@ export class GeteduroamApp {
       await this.addListeners();
       // Listener to get status connection, apply when change status network
       await this.checkConnection();
-      // Plugin wifiEAPConfigurator associatedNetwork
-      await this.associatedNetwork();
       // Open app from a file
       await this.getLaunchUrl();
+      console.log('value of global profile: ',this.global.getProfile());
+      // Plugin wifiEAPConfigurator associatedNetwork
+      await this.associatedNetwork();
     });
   }
   /**
    * This method check if network is associated and flow to initialize app
    */
   async associatedNetwork() {
+
+    console.log('beginning of the method: this.rootPage', this.rootPage);
 
     if (this.platform.is('android')) {
       this.enableWifi();
@@ -74,6 +77,8 @@ export class GeteduroamApp {
     }
 
     !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+
+    console.log('end of the method: this.rootPage', this.rootPage);
   }
   /**
    * This method check if network is enabled and show a error message to user remove network already associated
@@ -104,13 +109,18 @@ export class GeteduroamApp {
    */
   async getLaunchUrl() {
     const urlOpen = await Plugins.App.getLaunchUrl();
+    console.log('urlOpen', urlOpen);
     if(!urlOpen || !urlOpen.url) return;
 
+    console.log('urlOpen.url', urlOpen.url);
+
     this.profile = new ProfileModel();
+
     this.profile.eapconfig_endpoint = urlOpen.url;
     this.profile.oauth = false;
     this.profile.id = "FileEap";
     this.profile.name = "FileEap";
+    console.log('this.profile', this.profile);
     this.global.setProfile(this.profile);
   }
 
