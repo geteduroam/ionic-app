@@ -32,16 +32,20 @@ export class AuthenticationMethod extends BaseJson {
      * This method updates the properties [eapMethod]{@link #eapMethod}, [serverSideCredential]{@link #serverSideCredential}, [clientSideCredential]{@link #clientSideCredential} and [innerAuthenticationMethod]{@link #innerAuthenticationMethod}
      * @param {any} jsonAux json from which to retrieve the info.
      */
-    async fillEntity(jsonAux: any){
+    fillEntity(jsonAux: any):boolean{
+
+        let returnValue: boolean = true;
 
         this.eapMethod = new EapMethod();
         this.serverSideCredential = new ServerSideCredential();
         this.clientSideCredential = new ClientSideCredential();
         this.innerAuthenticationMethod = new InnerAuthenticationMethod();
 
-        this.assignComplexProperty(this.eapMethod, 'eapMethod', jsonAux, 'EAPMethod', true);
-        this.assignComplexProperty(this.serverSideCredential, 'serverSideCredential', jsonAux, 'ServerSideCredential', true);
-        this.assignComplexProperty(this.clientSideCredential, 'clientSideCredential', jsonAux, 'ClientSideCredential', true);
+        returnValue = returnValue && this.assignComplexProperty(this.eapMethod, 'eapMethod', jsonAux, 'EAPMethod', true);
+        returnValue = returnValue && this.assignComplexProperty(this.serverSideCredential, 'serverSideCredential', jsonAux, 'ServerSideCredential', true);
+        returnValue = returnValue && this.assignComplexProperty(this.clientSideCredential, 'clientSideCredential', jsonAux, 'ClientSideCredential', true);
         this.assignComplexProperty(this.innerAuthenticationMethod, 'innerAuthenticationMethod', jsonAux, 'InnerAuthenticationMethod', false);
+
+        return returnValue;
     }
 }

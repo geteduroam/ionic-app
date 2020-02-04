@@ -1,18 +1,22 @@
 import { Component } from '@angular/core';
-import { ModalController, NavController, NavParams } from 'ionic-angular';
+import {Events, ModalController, NavController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { InstitutionSearch } from '../institutionSearch/institutionSearch';
 import { Plugins } from '@capacitor/core';
+import {BasePage} from "../basePage";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
+import {ProfileModel} from "../../shared/models/profile-model";
 const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
-export class ConfigurationScreen {
+export class ConfigurationScreen extends BasePage{
 
   showAll: boolean = false;
 
@@ -44,7 +48,7 @@ export class ConfigurationScreen {
   /**
    * Selected profile
    */
-  profile: any;
+  profile: ProfileModel;
 
   /**
    * Default profile (if exists) in the selected institution profiles set
@@ -75,9 +79,10 @@ export class ConfigurationScreen {
   /**
    * Constructor
    * */
-  constructor(public navCtrl: NavController, public navParams: NavParams, private getEduroamServices: GeteduroamServices,
-              public loading: LoadingProvider, public modalCtrl: ModalController) {
-
+  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
+              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
   }
 
   /**
@@ -110,7 +115,7 @@ export class ConfigurationScreen {
    * This method updates the properties [profile]{@link #profile}, [profileName]{@link #profileName} and [selectedProfileId]{@link #selectedProfileId}
    */
   clearProfile(){
-    this.profile = '';
+    this.profile = new ProfileModel();
     this.profileName = '';
     this.selectedProfileId = '';
   }
@@ -166,24 +171,31 @@ export class ConfigurationScreen {
    * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
-  navigateTo(profile) {
-    this.showAll = false;
+  async navigateTo(profile:ProfileModel) {
+    if (this.activeNavigation && this.validProfile(profile)){
 
-    const toPage = !!profile.oauth ? OauthFlow : ProfilePage;
-    this.navCtrl.push(toPage, {profile}, {animation: 'transition'});
+      this.showAll = false;
+
+      !!profile.oauth ?
+          await this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
+          await this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
+    } else{
+      await this.alertConnectionDisabled();
+    }
 
 
   }
 
-  /**
-   * Method executed when the class is initialized.
-   * This method updates the property [instances]{@link #instances} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
-   */
-  async ionViewDidEnter() {
-    this.loading.createAndPresent();
-    const response = await this.getEduroamServices.discovery();
-    this.loading.dismiss();
-    this.instances = response.instances;
-    this.showAll = true;
+  async ionViewWillEnter() {
+      const firstResponse = this.getEduroamServices.discovery();
+      const secondResponse = await this.waitingSpinner(firstResponse);
+      this.instances = secondResponse.instances;
+      this.removeSpinner();
+      this.showAll = true;
   }
+
+  validProfile(profile:ProfileModel):boolean {
+    return true;
+  }
+
 }

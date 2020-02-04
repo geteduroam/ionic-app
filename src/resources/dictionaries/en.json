@@ -1,0 +1,52 @@
+{
+  "header": {
+    "config": "eduroam configuration",
+    "profile": "Provide information",
+    "confirmation": "Enjoy using eduroam!",
+    "error": "Error"
+  },
+  "label": {
+    "institution": "Institution",
+    "username": "Username",
+    "accept": "Accept ",
+    "terms": "terms of use",
+    "profile": "Profile",
+    "password": "Password"
+  },
+  "placeholder": {
+    "institution": "Select an institution...",
+    "profile": "Select a profile...",
+    "example": "name@example.com"
+  },
+  "button": {
+    "next": "Next",
+    "ok": "ok",
+    "more": "Know more",
+    "email": "Send e-mail",
+    "back": "Back",
+    "done": "Done",
+    "reconfigure": "Reconfigure",
+    "configure" : "Configure",
+    "no-thanks": "No, thanks",
+    "close": "Close"
+  },
+  "error": {
+    "username": "The username is incorrect",
+    "domain": "The email domain must include ",
+    "password": "Password is incorrect",
+    "turn-on": "Please, turn on mobile data to configure ",
+    "available1": "A network connection called ",
+    "available2": " is already available in the device.\n Please go to Settings > Wifi Networks > Saved Networks and remove it if you want to reconfigure ",
+    "invalid-eap": "Invalid selected profile",
+    "invalid-method": "No valid authentication method available from the selected profile",
+    "invalid-profile": "The selected profile is wrong"
+  },
+  "text": {
+    "configured": " is now configured on your device.",
+    "configure": "Continue to configure ",
+    "reconfigure1": "Hi, It seems you have ",
+    "reconfigure2": " configured on your device.\n Do you want to reconfigure it?",
+    "network-available": "External access available"
+  },
+  "defaultError": "Key not found"
+}

@@ -281,7 +281,7 @@ public class WifiEapConfigurator extends Plugin {
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase())) {
 
                 String packageName = getContext().getPackageName();
                 if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {

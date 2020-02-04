@@ -3,6 +3,13 @@ import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
 import { StoringProvider } from '../storing/storing';
+import {ProfileModel} from "../../shared/models/profile-model";
+import {ValidatorProvider} from "../validator/validator";
+import {ProviderInfo} from "../../shared/entities/providerInfo";
+import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
+import {DictionaryServiceProvider} from "../dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../global/global";
+import {isArray, isObject} from "ionic-angular/util/util";
 import { oAuthModel } from '../../shared/models/oauth-model';
 import { CryptoUtil } from '../util/crypto-util';
 declare var Capacitor;
@@ -15,7 +22,8 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
 @Injectable()
 export class GeteduroamServices {
 
-  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider) {
+  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider,
+              private validator: ValidatorProvider, private dictionary: DictionaryServiceProvider, private global: GlobalProvider) {
 
   }
 
@@ -82,7 +90,6 @@ export class GeteduroamServices {
 
     }
 
-
   /**
    * This method is to work with the oAuthEndpoint method:
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#authorization-endpoint}
@@ -143,16 +150,15 @@ export class GeteduroamServices {
    * @param data
    */
   buildGenerator(data: any){
-/*
-  //  Example: /generate.php?format=eap-metadata
-     const url = `${data}?format=eap-metadata`;
 
-     //TODO: Build Header Authorization: Bearer AAAAAA==${token}
-     this.http.get(url, {}, {}).then((res) => {
-       console.log('Method get generator: ', res);
-     }).catch((e) => {
-       console.log('Error on buildGenerator: ', e)
-     });*/
+  // // Example: /generate.php?format=eap-metadata
+  //   const url = ``;
+  //
+  //   //TODO: Build Header Authorization: Bearer AAAAAA==${token}
+  //   this.http.get(url, {}).subscribe((res) => {
+  //     console.log('Method get generator: ', res);
+  //
+  //   });
   }
 
   async connectProfile(config) {
@@ -202,4 +208,164 @@ export class GeteduroamServices {
 
     return text;
   }
+
+    public async getFirstAuthenticationMethod(authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo):Promise<AuthenticationMethod>{
+        for (let authenticationMethod of authenticationMethods) {
+            if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
+                return authenticationMethod;
+            }
+        }
+
+        console.log('No valid method');
+
+        // let url = !!providerInfo.helpdesk.webAddress ? providerInfo.helpdesk.webAddress :
+        //     !!providerInfo.helpdesk.emailAddress ? providerInfo.helpdesk.emailAddress : '';
+        //
+        // await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+        return null;
+    }
+
+    /**
+     * Method to get the first valid authentication method form an eap institutionSearch file.
+     * @return {AuthenticationMethod} the first valid authentication method
+     */
+    public async eapValidation(profile:ProfileModel):Promise<boolean> {
+
+        console.log('before using profile.eapconfig_endpoint: ');
+
+        const eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
+
+        let authenticationMethods:AuthenticationMethod[] = [];
+        let providerInfo:ProviderInfo= new ProviderInfo();
+
+        const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo);
+
+        console.log('*********************************** validEap', validEap);
+
+        if (validEap){
+            this.global.setProviderInfo(providerInfo);
+            let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
+            if(!!authenticationMethod){
+                this.global.setAuthenticationMethod(authenticationMethod);
+                return true;
+            } else{
+                return false;
+            }
+        } else {
+            this.global.setProviderInfo(null);
+            return false;
+        }
+    }
+
+
+    // TODO: REFACTOR VALIDATE EAP-CONFIG
+    /**
+     * Method to validate the eapconfig file and obtain its elements.
+     * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
+     */
+    validateEapconfig(eapConfig: any, authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo): boolean{
+
+        let returnValue:boolean = true;
+
+            let keys = [
+            'EAPIdentityProviderList',
+            'EAPIdentityProvider',
+            'AuthenticationMethods',
+            'AuthenticationMethod'
+        ];
+
+
+
+        let jsonAux = eapConfig;
+
+        //----------------
+        // EAP-CONFIG
+        //----------------
+        if (!!jsonAux){
+            console.log('Eap content: ',jsonAux);
+            for (let key of keys){
+                if (returnValue){
+                    jsonAux = this.readJson(jsonAux, key);
+                    if(jsonAux == null){
+                        console.log('jsonAux is null');
+                        returnValue = false;
+                    } else if (key === 'EAPIdentityProvider'){
+                        //----------------
+                        // Provider Info
+                        //----------------
+                        let providerInfoAux = this.readJson(jsonAux, 'ProviderInfo');
+                        console.log('jsonAux after getting providerInfoAux:',jsonAux);
+                        if(providerInfoAux != null){
+                            if (isArray(providerInfoAux)){
+                                console.log('providerInfoAux array', providerInfoAux[0]);
+                                returnValue = returnValue && providerInfo.fillEntity(providerInfoAux[0]);
+                            } else if (isObject(providerInfoAux)){
+                                console.log('providerInfoAux object', providerInfoAux);
+                                returnValue = returnValue && providerInfo.fillEntity(providerInfoAux);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //--------
+            // AUTHENTICATION METHODS
+            //--------
+
+            // authenticationMethods = [];
+
+            if (jsonAux != null && returnValue){
+                for (let i in jsonAux){
+                    console.log('AuthenticationMethod: ', jsonAux[i]);
+                    if(!!jsonAux[i] && returnValue){
+                        let authenticationMethodAux = new AuthenticationMethod();
+                        try {
+                            returnValue = returnValue && authenticationMethodAux.fillEntity(jsonAux[i]);
+                            console.log('TRY for the authentication method');
+                            if(returnValue){
+                                authenticationMethods.push(authenticationMethodAux);
+                            }
+                        } catch (e) {
+                            console.log('CATCH when the authentication method is WRONG');
+                            returnValue = false;
+                        }
+                    }
+                }
+            }
+
+        } else {
+            console.error('wrong json', eapConfig);
+            returnValue = false;
+        }
+        console.log('authentication: ', authenticationMethods);
+        return returnValue;
+    }
+
+    private readJson(jsonAux: JSON, key: string):JSON{
+        let returnedJson: JSON;
+        if (isArray(jsonAux)){
+            if (jsonAux[0].hasOwnProperty(key)){
+                console.log('adding the array key', key, jsonAux[0][key]);
+                returnedJson = jsonAux[0][key];
+            } else {
+                console.error('Invalid eapconfig file, it does not contain the array key '+key, jsonAux);
+                return null;
+            }
+
+        } else if (isObject(jsonAux)) {
+            if (jsonAux.hasOwnProperty(key)) {
+                console.log('adding the object key', key, jsonAux[key]);
+                returnedJson = jsonAux[key];
+            } else {
+                console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
+                return null;
+            }
+
+        } else {
+            console.error('Invalid eapconfig file', jsonAux);
+            return null;
+        }
+        return returnedJson;
+    }
+
 }

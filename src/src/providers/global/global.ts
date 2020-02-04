@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import {ProfileModel} from "../../shared/models/profile-model";
+import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
+import {ProviderInfo} from "../../shared/entities/providerInfo";
 import { Platform } from 'ionic-angular';
 
 @Injectable()
@@ -14,6 +16,11 @@ export class GlobalProvider {
   protected username: string;
   protected pass: string;
   private profile: ProfileModel;
+
+  private dictionary: any;
+
+  private authenticationMethod: AuthenticationMethod;
+  private providerInfo: ProviderInfo;
 
   constructor(public platform: Platform) {}
   //TODO: CREATE METHODS TO GET DATA
@@ -43,6 +50,30 @@ export class GlobalProvider {
 
   setProfile(profile: ProfileModel){
     this.profile = profile;
+  }
+
+  getDictionary(){
+    return this.dictionary;
+  }
+
+  setDictionary(dictionary: any){
+    this.dictionary = dictionary;
+  }
+
+  getAuthenticationMethod(){
+    return this.authenticationMethod;
+  }
+
+  setAuthenticationMethod(authenticationMethod: AuthenticationMethod){
+    this.authenticationMethod = authenticationMethod;
+  }
+
+  getProviderInfo(){
+    return this.providerInfo;
+  }
+
+  setProviderInfo(providerInfo: ProviderInfo){
+    this.providerInfo = providerInfo;
   }
 
   isAndroid() {

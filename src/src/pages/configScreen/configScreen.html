@@ -1,23 +1,23 @@
 <div *ngIf="showAll" class="container-content">
     <div class="header-content" margin-top padding-top>
         <img alt="setting" src="../../assets/icon/cog-outline.svg" />
-        <h1>eduroam configuration</h1>
+        <h1>{{getString('header', 'config')}}</h1>
     </div>
 
-    <div class="content-form" margin-top padding text-center>
-        <ion-label class="label-conf" no-margin padding-top text-left>Institution</ion-label>
+    <div class="content-form" margin-top padding-top text-center>
+        <ion-label class="label-conf" no-margin padding-top text-left>{{getString('label', 'institution')}}</ion-label>
 
         <div class="row" padding-top>
 
             <ion-searchbar (click)="showModal()" [(ngModel)]="instanceName" cancelButtonText
-                           class="searchbar-input" no-padding placeholder="Select an institution">
+                           class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">
 
             </ion-searchbar>
         </div>
 
-        <div class="row" padding-top>
+        <div class="row" margin-top>
 
-            <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" margin-left text-left >Profile</ion-label>
+            <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" margin-left text-left >{{getString('label', 'profile')}}</ion-label>
 
             <ion-item *ngIf="!!profiles && profiles.length > 1" class="item-profile" no-margin no-padding>
 
@@ -25,7 +25,7 @@
                             [(ngModel)]="selectedProfileId"
                             [ngClass]="profile === defaultProfile ? 'default-profile': ''"
                             [selectedText]="profileName" class="select-profile" name="selectProfile"
-                            placeholder="Select a profile..." text-left >
+                            placeholder="{{getString('placeholder', 'profile')}}" text-left >
 
                     <ion-option *ngFor="let profileAux of profiles" [value]="profileAux.id" [className]="!!profileAux.default ? 'default-profile':'normal'">{{profileAux.name}}</ion-option>
                 </ion-select>
@@ -35,7 +35,7 @@
     <div class="footer-form">
 
         <div class="content-button" margin *ngIf="showButton">
-            <button (click)="navigateTo(profile)" [disabled]="!profile" class="button-control" ion-button text-capitalize> Next </button>
+            <button (click)="navigateTo(profile)" [disabled]="!profile" class="button-control" ion-button text-capitalize>{{getString('button', 'next')}}</button>
         </div>
     </div>
 </div>

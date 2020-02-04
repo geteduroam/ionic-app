@@ -165,9 +165,20 @@ ion-content {
 ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
   contain: unset !important;
   overflow: unset !important;
+
+
+  @media only screen
+  and (max-device-width: 812px)
+  and (orientation: portrait) {
+
+    ion-modal .show-page {
+      top: 20px !important;
+    }
+  }
 }
 
 .nav-decor {
   display: none !important;
 }
+
 

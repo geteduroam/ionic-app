@@ -1,7 +1,11 @@
 import { Component } from '@angular/core';
-import {NavController, NavParams, Platform, ViewController} from "ionic-angular";
+import {Events, NavParams, Platform, ViewController} from "ionic-angular";
 import {Plugins} from "@capacitor/core";
 import {ValidatorProvider} from "../../providers/validator/validator";
+import {BasePage} from "../basePage";
+import {LoadingProvider} from "../../providers/loading/loading";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
 const {Browser} = Plugins;
 
 
@@ -9,14 +13,18 @@ const {Browser} = Plugins;
   selector: 'page-errors',
   templateUrl: 'errors.html',
 })
-export class ErrorsPage {
+export class ErrorsPage extends BasePage{
 
   text: string;
   link: string;
   public isFinal: boolean = false;
 
 
-  constructor(private platform: Platform, public navParams: NavParams, public viewCtrl: ViewController, public navCtrl: NavController, private validator: ValidatorProvider) {
+  constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController,
+              private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
+
 
     if (!!this.navParams.get('isFinal')) {
 
@@ -28,6 +36,8 @@ export class ErrorsPage {
       this.text = this.navParams.get('error');
       this.isFinal = false;
     }
+
+    super.activeNavigation = this.navParams.get('navigation');
 
   }
 
@@ -43,11 +53,15 @@ export class ErrorsPage {
   }
 
   async closeModal() {
-    await this.viewCtrl.dismiss();
+    if(this.activeNavigation){
+      await this.viewCtrl.dismiss();
+    } else{
+      this.alertConnectionDisabled();
+    }
   }
 
   async clickKnowMore() {
-    if(!!this.link){
+    if(!this.emptyLink()){
       await Browser.open({'url': this.link});
     }
 
@@ -59,6 +73,10 @@ export class ErrorsPage {
     } else {
       return '';
     }
+  }
+
+  emptyLink(): boolean{
+    return !!this.link || this.link.length == 0;
   }
 
   isLinkEmail(): boolean {
