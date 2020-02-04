@@ -54,10 +54,14 @@ export class GeteduroamServices {
      * @param url in which the eapconfig xml file is available
      * @return the parsed xml
      */
-    async getEapConfig(url: string) {
+    async getEapConfig(url: string, token?:string) {
 
         const params = {};
-        const headers = {};
+
+        let headers = {};
+        if(token){
+            headers = {'Authorization': 'Bearer ' + token};
+        }
         let response: any;
 
         if (url.includes('content://')) {
@@ -77,6 +81,7 @@ export class GeteduroamServices {
         return jsonResult;
 
     }
+
 
   /**
    * This method is to work with the oAuthEndpoint method:

@@ -31,7 +31,7 @@ export class OauthFlow {
   /**
    * Method executed when the class did enter, usually when swipe back from the next page
    */
-  ionViewDidEnter() {
+  async ionViewDidEnter() {
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
    // this.geteduroamServices.buildAuthUrl(this.profile.authorization_endpoint);
@@ -45,7 +45,7 @@ export class OauthFlow {
       authorization_endpoint: "https://geteduroam.no/authorize.php"
     }
      */
-    this.getData();
+    await this.getData();
     this.loading.dismiss();
     this.showAll = true;
   }
@@ -120,13 +120,21 @@ export class OauthFlow {
 
     console.log('token: ', this.tokenURl);
 
-    let access_token = this.tokenURl.access_token.split('.')[2];
-    console.log(access_token);
+    // let access_token = this.tokenURl.access_token.split('.')[2];
+    // console.log(access_token);
 
     //client_id: "f817fbcc-e8f4-459e-af75-0822d86ff47a"
 
-    let generate = `https://geteduroam.no/generate.php?acces_token=Bearer bhFE0rDXByB6JYQByEmF8VwBbLWRZbde1reF5blnkvOHaJhdHmxxIVDz3ZlO-jjJ0pT6oA21PaIAqPeOMwMtbPmP9HYGEDcHBSXkif2GyKRYfpVCtfkbvB4wJUUqpkVQNvP1KMCA-9Jrt6kIIMZrH2ZUJli-yP4Y0Qc44BSAYAlEb-SGCQT0L5IKpFaR-1xaxyyyH6udm5tamn52S8co1umXUmNPCzGuDlK6b9sUlElWw-Rcz-JV21EmvwBiBN6Xlsatzg&format=eap-metadata&`;
+    let header = `'Authorization': '${this.tokenURl.token_type} ${this.tokenURl.access_token}'`;
+    console.log('Auth header: ', header);
+    //let generateUrl = await this.http.get('https://demo.eduroam.no/generate.php?format=eap-metadata', {}, {header});
+
+
+    let generateUrl = await this.geteduroamServices.getEapConfig('https://demo.eduroam.no/generate.php?format=eap-metadata', this.tokenURl.access_token);
+
+    console.log('generateUrl', generateUrl);
+
+    //let generate = `https://geteduroam.no/generate.php?acces_token=Bearer bhFE0rDXByB6JYQByEmF8VwBbLWRZbde1reF5blnkvOHaJhdHmxxIVDz3ZlO-jjJ0pT6oA21PaIAqPeOMwMtbPmP9HYGEDcHBSXkif2GyKRYfpVCtfkbvB4wJUUqpkVQNvP1KMCA-9Jrt6kIIMZrH2ZUJli-yP4Y0Qc44BSAYAlEb-SGCQT0L5IKpFaR-1xaxyyyH6udm5tamn52S8co1umXUmNPCzGuDlK6b9sUlElWw-Rcz-JV21EmvwBiBN6Xlsatzg&format=eap-metadata&`;
 
   }
 }
-
