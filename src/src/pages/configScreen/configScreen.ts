@@ -137,9 +137,9 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
-    let profiles = [];
+    const profiles = [];
     let defaultProfile = '';
-    console.log('initialize Profile', institution);
+
     if (institution.profiles.length > 1 ) {
 
       institution.profiles.forEach(profile => {
