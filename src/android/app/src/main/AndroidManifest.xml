@@ -26,18 +26,6 @@
                 android:theme="@style/AppTheme.NoActionBarLaunch"
                 android:launchMode="singleTask">
 
-            <intent-filter
-                android:icon="@mipmap/ic_launcher">
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="application/eap-config" />
-                <data android:pathPattern=".*\\.eap-config" />
-                <data android:host="*" />
-            </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SEND"/>
@@ -45,7 +33,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT"/>
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:host="*" />
