@@ -22,8 +22,8 @@ export class ProviderInfo extends BaseJson {
     this.providerLocation = new ProviderLocation();
     this.helpdesk = new Helpdesk();
 
-    returnValue = returnValue && this.assignComplexProperty(this.providerLocation, 'providerLocation', jsonAux, 'ProviderLocation', true);
-    returnValue = returnValue && this.assignComplexProperty(this.helpdesk, 'helpdesk', jsonAux, 'Helpdesk', true);
+    this.assignComplexProperty(this.providerLocation, 'providerLocation', jsonAux, 'ProviderLocation', false);
+    this.assignComplexProperty(this.helpdesk, 'helpdesk', jsonAux, 'Helpdesk', false);
 
     this.displayName = this.getSingleProperty(jsonAux, 'DisplayName', true);
     returnValue = returnValue && this.displayName != null;

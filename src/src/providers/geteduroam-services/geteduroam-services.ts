@@ -231,9 +231,20 @@ export class GeteduroamServices {
      */
     public async eapValidation(profile:ProfileModel):Promise<boolean> {
 
-        console.log('before using profile.eapconfig_endpoint: ');
+        console.log('before using profile.eapconfig_endpoint: ', profile.eapconfig_endpoint);
 
-        const eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
+        let eapConfigFile: any;
+
+        console.log('profile.oauth', profile.oauth);
+        console.log('profile.token', profile.token);
+
+        if(profile.oauth){
+            eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint+'?format=eap-metadata', profile.token);
+            console.log('eapConfigFile', eapConfigFile);
+        } else{
+            eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
+
+        }
 
         let authenticationMethods:AuthenticationMethod[] = [];
         let providerInfo:ProviderInfo= new ProviderInfo();

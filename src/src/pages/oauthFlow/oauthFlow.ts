@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import {Events, NavController, NavParams} from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { ProfileModel } from '../../shared/models/profile-model';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 import { oAuthModel } from '../../shared/models/oauth-model';
 import { HTTP } from '@ionic-native/http/ngx';
+import {BasePage} from "../basePage";
+import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
+import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
+import {ProviderInfo} from "../../shared/entities/providerInfo";
+import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 
 declare var window: any;
 
@@ -13,13 +19,19 @@ declare var window: any;
   selector: 'page-oauthFlow',
   templateUrl: 'oauthFlow.html',
 })
-export class OauthFlow {
+export class OauthFlow extends BasePage{
 
   showAll: boolean = false;
   profile: ProfileModel;
   tokenURl: any;
+  validMethod: AuthenticationMethod = new AuthenticationMethod();
 
-  constructor(private http: HTTP, public navCtrl: NavController, public navParams: NavParams, protected loading: LoadingProvider, protected geteduroamServices: GeteduroamServices) {
+  providerInfo: ProviderInfo = new ProviderInfo();
+
+  constructor(private http: HTTP, public navCtrl: NavController, public navParams: NavParams, protected loading: LoadingProvider,
+              private getEduroamServices: GeteduroamServices, protected dictionary: DictionaryServiceProvider, protected event: Events,
+              protected global: GlobalProvider, private errorHandler: ErrorHandlerProvider)  {
+    super(loading, dictionary, event, global);
 
   }
 
@@ -34,6 +46,7 @@ export class OauthFlow {
   async ionViewDidEnter() {
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
+    console.log('profile taken form navParams: ', this.profile);
    // this.geteduroamServices.buildAuthUrl(this.profile.authorization_endpoint);
     //this.geteduroamServices.buildGenerator(this.profile.eapconfig_endpoint);
 
@@ -50,11 +63,11 @@ export class OauthFlow {
     this.showAll = true;
   }
 
-// TODO: REFACTOR
+// TODO: REFACTOR set global if necessary
   async getData() {
     const oauth2Options: oAuthModel = {
-      client_id: "f817fbcc-e8f4-459e-af75-0822d86ff47a",
-      oAuthUrl: "https://demo.eduroam.no/authorize.php",
+      client_id: this.global.getClientId(),
+      oAuthUrl: this.profile.authorization_endpoint,
       type: "code",
       redirectUrl: 'http://localhost:8080/',
       pkce: true,
@@ -62,14 +75,14 @@ export class OauthFlow {
 
     };
 
-    let oAuth = await this.geteduroamServices.generateOAuthFlow(oauth2Options);
+    let oAuth = await this.getEduroamServices.generateOAuthFlow(oauth2Options);
 
-    this.buildFlowAuth(oAuth, oauth2Options);
+    this.buildFlowAuth(oAuth, oauth2Options, this.profile.token_endpoint);
   }
 
-  buildFlowAuth(oAuth, oauth2Options) {
+  buildFlowAuth(oAuth, oauth2Options, token_endpoint) {
      let urlToken;
-     let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes, clearsessioncache=no ,clearcache=no");
+     let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
 
      const flowAuth = new Promise(function (resolve, reject) {
 
@@ -82,19 +95,17 @@ export class OauthFlow {
           let state = arrayData[1];
 
           if (state !== undefined && code !== undefined) {
-            const optionToken = {
-              url: "https://demo.eduroam.no/token.php",
-            };
 
-            urlToken = `${optionToken.url}?client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}`;
+            urlToken = `${token_endpoint}?client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}`;
             resolve(urlToken);
-            let tokenRef = window.cordova.InAppBrowser.open(urlToken, "_blank", "location=yes, clearsessioncache=no ,clearcache=no");
+            let tokenRef = window.cordova.InAppBrowser.open(urlToken, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
 
             tokenRef.addEventListener('beforeload', () => {
               tokenRef.close();
             });
 
             browserRef.close();
+            console.log('Closing InAppBrowser');
           }
         }
        });
@@ -107,6 +118,7 @@ export class OauthFlow {
   }
 
   async getToken(res) {
+    console.log('Inside getToken');
     const response = await this.http.get(res, {}, {});
     /*
     access_token: "v2.local.bhFE0rDXByB6JYQByEmF8VwBbLWRZbde1reF5blnkvOHaJhdHmxxIVDz3ZlO-jjJ0pT6oA21PaIAqPeOMwMtbPmP9HYGEDcHBSXkif2GyKRYfpVCtfkbvB4wJUUqpkVQNvP1KMCA-9Jrt6kIIMZrH2ZUJli-yP4Y0Qc44BSAYAlEb-SGCQT0L5IKpFaR-1xaxyyyH6udm5tamn52S8co1umXUmNPCzGuDlK6b9sUlElWw-Rcz-JV21EmvwBiBN6Xlsatzg"
@@ -120,21 +132,62 @@ export class OauthFlow {
 
     console.log('token: ', this.tokenURl);
 
-    // let access_token = this.tokenURl.access_token.split('.')[2];
-    // console.log(access_token);
-
-    //client_id: "f817fbcc-e8f4-459e-af75-0822d86ff47a"
-
     let header = `'Authorization': '${this.tokenURl.token_type} ${this.tokenURl.access_token}'`;
     console.log('Auth header: ', header);
-    //let generateUrl = await this.http.get('https://demo.eduroam.no/generate.php?format=eap-metadata', {}, {header});
 
+    console.log('oauth profile: ',this.profile);
 
-    let generateUrl = await this.geteduroamServices.getEapConfig('https://demo.eduroam.no/generate.php?format=eap-metadata', this.tokenURl.access_token);
+    this.profile.token = this.tokenURl.access_token;
 
-    console.log('generateUrl', generateUrl);
+    const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
 
-    //let generate = `https://geteduroam.no/generate.php?acces_token=Bearer bhFE0rDXByB6JYQByEmF8VwBbLWRZbde1reF5blnkvOHaJhdHmxxIVDz3ZlO-jjJ0pT6oA21PaIAqPeOMwMtbPmP9HYGEDcHBSXkif2GyKRYfpVCtfkbvB4wJUUqpkVQNvP1KMCA-9Jrt6kIIMZrH2ZUJli-yP4Y0Qc44BSAYAlEb-SGCQT0L5IKpFaR-1xaxyyyH6udm5tamn52S8co1umXUmNPCzGuDlK6b9sUlElWw-Rcz-JV21EmvwBiBN6Xlsatzg&format=eap-metadata&`;
+    console.log('validProfile', validProfile);
 
+    this.manageProfileValidation(validProfile);
+
+  }
+
+  /**
+   * Method to check form and navigate.
+   */
+  async checkForm() {
+    console.log('this.validMethod: ',this.validMethod);
+    let config = {
+      ssid: this.global.getSsid(),
+      username: this.validMethod.clientSideCredential.anonymousIdentity,
+      password: this.validMethod.clientSideCredential.passphrase,
+      eap: parseInt(this.validMethod.eapMethod.type.toString()),
+      servername: '',
+      auth: this.global.auth.MSCHAP,
+      anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
+      caCertificate: this.validMethod.serverSideCredential.ca.content
+    };
+
+    const checkRequest = this.getEduroamServices.connectProfile(config);
+
+    if (!!checkRequest) {
+      this.navigateTo();
+    }
+  }
+
+  async manageProfileValidation(validProfile: boolean){
+    console.log('global providerInfo', this.global.getProviderInfo());
+    this.providerInfo = this.global.getProviderInfo();
+    if(validProfile){
+      this.validMethod = this.global.getAuthenticationMethod();
+      console.log('validMethod', this.validMethod);
+      this.checkForm();
+    } else {
+      if(!!this.providerInfo){
+        let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
+            !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
+        console.log('*************************url', url);
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+        console.log('*********************************** after sending error');
+      } else {
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
+      }
+      await this.navCtrl.pop();
+    }
   }
 }

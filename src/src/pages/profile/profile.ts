@@ -141,9 +141,6 @@ export class ProfilePage extends BasePage{
   }
 
 
-
-
-
   async getProfile() {
     let profileAux = this.navParams.get('profile');
     console.log('entra en getProfile con profileAux: ', profileAux, ' y global profile: ', this.global.getProfile());

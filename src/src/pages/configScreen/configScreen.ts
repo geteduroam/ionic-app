@@ -176,9 +176,9 @@ export class ConfigurationScreen extends BasePage{
 
       this.showAll = false;
 
-      !!profile.oauth ?
-          await this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
-          await this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
+      let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
+      await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
+
     } else{
       await this.alertConnectionDisabled();
     }

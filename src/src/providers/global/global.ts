@@ -22,6 +22,8 @@ export class GlobalProvider {
   private authenticationMethod: AuthenticationMethod;
   private providerInfo: ProviderInfo;
 
+  private clientId : string = 'f817fbcc-e8f4-459e-af75-0822d86ff47a';
+
   constructor(public platform: Platform) {}
   //TODO: CREATE METHODS TO GET DATA
   getSsid() {
@@ -78,5 +80,9 @@ export class GlobalProvider {
 
   isAndroid() {
     return this.platform.is('android');
+  }
+
+  getClientId(){
+    return this.clientId;
   }
 }

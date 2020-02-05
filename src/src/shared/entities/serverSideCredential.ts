@@ -25,8 +25,7 @@ export class ServerSideCredential extends BaseJson{
         let returnValue: boolean = true;
         this.ca = new Ca();
         returnValue = returnValue && this.assignComplexProperty(this.ca, 'ca', jsonAux, 'CA', true);
-        this.serverID = this.getSingleProperty(jsonAux, 'ServerID', true);
-        returnValue = returnValue && this.serverID != null;
+        this.serverID = this.getSingleProperty(jsonAux, 'ServerID', false);
         return returnValue;
     }
 }

@@ -5,11 +5,5 @@ export class ProfileModel {
   oauth: boolean;
   token_endpoint?: string;
   authorization_endpoint?: string;
-
-  constructor() {
-    this.id = '';
-    this.name = '';
-    this.eapconfig_endpoint = '';
-    this.oauth = false;
-  }
+  token?: string;
 }
