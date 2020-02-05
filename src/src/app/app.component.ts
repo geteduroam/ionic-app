@@ -55,8 +55,7 @@ export class GeteduroamApp {
       await this.checkConnection();
       // Plugin wifiEAPConfigurator associatedNetwork
       await this.associatedNetwork();
-      // Open app from a file
-      await this.handleOpenUrl();
+
     });
   }
   /**
@@ -105,10 +104,6 @@ export class GeteduroamApp {
    */
   async handleOpenUrl() {
 
-    App.addListener('appUrlOpen', (res) => {
-      console.log('app url open: ', res);
-    });
-
     const urlOpen = await Plugins.App.getLaunchUrl();
     console.log('urlOpen: ', urlOpen);
 
@@ -139,7 +134,8 @@ export class GeteduroamApp {
     });
 
     // Listening to open app when open from a file
-    App.addListener('appUrlOpen', (urlOpen: AppUrlOpen) => {
+    App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
+      await this.handleOpenUrl();
       this.navigate(urlOpen.url);
     });
   }
