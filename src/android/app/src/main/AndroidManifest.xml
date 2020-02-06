@@ -40,8 +40,7 @@
                 <data android:mimeType="application/eap-config" />
                 <data android:mimeType="text/plain"/>
             </intent-filter>
-
-<!--            TODO remove this ontent. Only for testing purposes-->
+            
             <intent-filter>
                 <data android:scheme="content" />
                 <action android:name="android.intent.action.VIEW" />
