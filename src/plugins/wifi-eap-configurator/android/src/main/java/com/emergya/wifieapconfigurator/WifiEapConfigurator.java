@@ -298,7 +298,7 @@ public class WifiEapConfigurator extends Plugin {
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\""+ssid.toLowerCase()+"\"")) {
                 wifi.removeNetwork(conf.networkId);
                 wifi.saveConfiguration();
                 JSObject object = new JSObject();
@@ -353,7 +353,7 @@ public class WifiEapConfigurator extends Plugin {
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase())) {
+            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\""+ssid.toLowerCase()+"\"")) {
 
                 String packageName = getContext().getPackageName();
                 if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
@@ -409,7 +409,7 @@ public class WifiEapConfigurator extends Plugin {
 
             while (isReachable == false && results.hasNext()) {
                 ScanResult s = results.next();
-                if (s.SSID.toLowerCase().equals(ssid.toLowerCase())) {
+                if (s.SSID.toLowerCase().equals(ssid.toLowerCase()) || s.SSID.toLowerCase().equals("\""+ssid.toLowerCase()+"\"")) {
                     isReachable = true;
                 }
             }
@@ -456,7 +456,7 @@ public class WifiEapConfigurator extends Plugin {
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = wifiManager.getConnectionInfo();
             String currentlySsid = info.getSSID();
-            if (currentlySsid != null && currentlySsid.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+            if (currentlySsid != null && (currentlySsid.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"") || currentlySsid.toLowerCase().equals(ssid.toLowerCase()))) {
                 isConnected = true;
             }
 
@@ -482,7 +482,7 @@ public class WifiEapConfigurator extends Plugin {
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.toLowerCase().contains(ssid.toLowerCase())) {
+            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\""+ssid.toLowerCase()+"\"")) {
                 String packageName = getContext().getPackageName();
                 if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
                     isOverridable = true;
