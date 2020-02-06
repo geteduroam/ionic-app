@@ -54,7 +54,6 @@ export class ProfilePage extends BasePage{
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events) {
     super(loading, dictionary, event, global);
-    console.log('constructor');
 
   }
 
@@ -62,10 +61,8 @@ export class ProfilePage extends BasePage{
    *  Method executed when the class did load
    */
   async ionViewDidLoad() {
-    console.log('ionViewDidLoad');
     const profile = await this.getProfile();
     this.profile = await this.waitingSpinner(profile);
-    console.log('profile value before validating: ', this.profile);
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
     this.manageProfileValidation(validProfile);
   }
@@ -76,6 +73,21 @@ export class ProfilePage extends BasePage{
   async ionViewDidEnter() {
     this.removeSpinner();
     this.showAll = true;
+  }
+
+  getEmail() {
+    if (!!this.provide.email && !this.provide.email.includes('@') && !!this.suffixIdentity) {
+      this.provide.email = `${this.provide.email}@${this.suffixIdentity}`;
+    }
+  }
+
+  getPlaceholder() {
+    if (this.suffixIdentity !== '') {
+      return `username@${this.suffixIdentity}`;
+    } else {
+      return this.getString('placeholder', 'example');
+    }
+
   }
 
   /**
@@ -120,7 +132,6 @@ export class ProfilePage extends BasePage{
    * @return {any} eapconfig_endpoint the eap institutionSearch endpoint
    */
   getEapconfigEndpoint() {
-    console.log('using eapconfig_endpoint');
     return this.profile.eapconfig_endpoint;
   }
 
@@ -140,12 +151,9 @@ export class ProfilePage extends BasePage{
     }
   }
 
-
   async getProfile() {
     let profileAux = this.navParams.get('profile');
-    console.log('entra en getProfile con profileAux: ', profileAux, ' y global profile: ', this.global.getProfile());
-    this.profile = !!profileAux && profileAux!= undefined && profileAux ? this.navParams.get('profile') : this.global.getProfile();
-    // this.checkValidation();
+    this.profile = !!profileAux && profileAux ? this.navParams.get('profile') : this.global.getProfile();
     return this.profile;
   }
 
@@ -164,17 +172,25 @@ export class ProfilePage extends BasePage{
   }
 
   async manageProfileValidation(validProfile: boolean){
-    console.log('global providerInfo', this.global.getProviderInfo());
     this.providerInfo = this.global.getProviderInfo();
-    if(validProfile){
+
+    if (validProfile) {
+
       this.validMethod = this.global.getAuthenticationMethod();
+
+      if (!!this.validMethod.clientSideCredential.innerIdentitySuffix) {
+        this.suffixIdentity = this.validMethod.clientSideCredential.innerIdentitySuffix;
+      }
+
     } else {
-      if(!!this.providerInfo && this.providerInfo != undefined){
+
+      if (!!this.providerInfo) {
+
         let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
             !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-        console.log('*************************url', url);
-                await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-        console.log('*********************************** after sending error');
+
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+
       } else {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
       }
