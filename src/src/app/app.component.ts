@@ -12,6 +12,7 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
+import {Page} from "ionic-angular/navigation/nav-util";
 
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
@@ -130,6 +131,12 @@ export class GeteduroamApp {
     // Listening to open app when open from a file
     App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
       this.navigate(urlOpen.url);
+    });
+
+    App.addListener('backButton', (data: AppUrlOpen) => {
+      this.platform.backButton.observers.pop();
+      console.log('Preventing to go back with back button');
+
     });
   }
 
