@@ -102,15 +102,9 @@ export class GeteduroamApp {
   /**
    * This method throw the app when is opened from a file
    */
-  async handleOpenUrl() {
-
-    const urlOpen = await Plugins.App.getLaunchUrl();
-    console.log('urlOpen: ', urlOpen);
-
-    if(!urlOpen || !urlOpen.url) return;
-
+  async handleOpenUrl(uri: string) {
     this.profile = new ProfileModel();
-    this.profile.eapconfig_endpoint = urlOpen.url;
+    this.profile.eapconfig_endpoint = uri;
     this.profile.oauth = false;
     this.profile.id = "FileEap";
     this.profile.name = "FileEap";
@@ -135,7 +129,6 @@ export class GeteduroamApp {
 
     // Listening to open app when open from a file
     App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
-      await this.handleOpenUrl();
       this.navigate(urlOpen.url);
     });
   }
@@ -144,9 +137,11 @@ export class GeteduroamApp {
    * This method open ProfilePage when the app is initialize from an eap-config file
    * @param uri
    */
-  navigate(uri: string) {
-    this.rootPage = ProfilePage;
+  async navigate(uri: string) {
     if (!uri.includes('.eap-config')) return;
+    await this.handleOpenUrl(uri);
+    this.rootPage = ProfilePage;
+
   }
 
   /**
