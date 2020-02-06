@@ -138,7 +138,24 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
-    this.profiles = institution.profiles;
+    let profiles = [];
+    let defaultProfile = '';
+
+    if (!!institution.profiles) {
+      institution.profiles.forEach(res => {
+        if (!!res.default) {
+          defaultProfile = res;
+        } else {
+          profiles.push(res);
+        }
+      });
+      profiles.unshift(defaultProfile);
+      this.profiles = profiles;
+    } else {
+      this.profiles = institution;
+    }
+
+
     this.checkProfiles();
   }
 
@@ -148,7 +165,7 @@ export class ConfigurationScreen extends BasePage{
    * [selectedProfileId]{@link #selectedProfileId} and [defaultProfile]{@link #defaultProfile},
    */
   checkProfiles(){
-    if(this.profiles.length === 1){
+    if (this.profiles.length === 1) {
       this.profile = this.profiles[0];
       this.profileName = this.profile.name;
       this.selectedProfileId = this.profile.id;

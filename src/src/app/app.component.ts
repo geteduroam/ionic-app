@@ -53,11 +53,9 @@ export class GeteduroamApp {
       await this.addListeners();
       // Listener to get status connection, apply when change status network
       await this.checkConnection();
-      // Open app from a file
-      await this.getLaunchUrl();
-      console.log('value of global profile: ',this.global.getProfile());
       // Plugin wifiEAPConfigurator associatedNetwork
       await this.associatedNetwork();
+
     });
   }
   /**
@@ -65,20 +63,17 @@ export class GeteduroamApp {
    */
   async associatedNetwork() {
 
-    console.log('beginning of the method: this.rootPage', this.rootPage);
-
     if (this.platform.is('android')) {
       this.enableWifi();
     }
 
     const isAssociated = await this.isAssociatedNetwork();
+
     if (!this.rootPage) {
       this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
     }
 
     !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
-
-    console.log('end of the method: this.rootPage', this.rootPage);
   }
   /**
    * This method check if network is enabled and show a error message to user remove network already associated
@@ -107,20 +102,12 @@ export class GeteduroamApp {
   /**
    * This method throw the app when is opened from a file
    */
-  async getLaunchUrl() {
-    const urlOpen = await Plugins.App.getLaunchUrl();
-    console.log('urlOpen', urlOpen);
-    if(!urlOpen || !urlOpen.url) return;
-
-    console.log('urlOpen.url', urlOpen.url);
-
+  async handleOpenUrl(uri: string) {
     this.profile = new ProfileModel();
-
-    this.profile.eapconfig_endpoint = urlOpen.url;
+    this.profile.eapconfig_endpoint = uri;
     this.profile.oauth = false;
     this.profile.id = "FileEap";
     this.profile.name = "FileEap";
-    console.log('this.profile', this.profile);
     this.global.setProfile(this.profile);
   }
 
@@ -141,7 +128,7 @@ export class GeteduroamApp {
     });
 
     // Listening to open app when open from a file
-    App.addListener('appUrlOpen', (urlOpen: AppUrlOpen) => {
+    App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
       this.navigate(urlOpen.url);
     });
   }
@@ -150,9 +137,11 @@ export class GeteduroamApp {
    * This method open ProfilePage when the app is initialize from an eap-config file
    * @param uri
    */
-  navigate(uri: string) {
-    this.rootPage = ProfilePage;
+  async navigate(uri: string) {
     if (!uri.includes('.eap-config')) return;
+    await this.handleOpenUrl(uri);
+    this.rootPage = ProfilePage;
+
   }
 
   /**
