@@ -151,15 +151,18 @@ export class OauthFlow extends BasePage{
    * Method to check form and navigate.
    */
   async checkForm() {
+
+    //TODO change the method once the plugin is adapted to oauth flow
+
     console.log('this.validMethod: ',this.validMethod);
     let config = {
       ssid: this.global.getSsid(),
       username: this.validMethod.clientSideCredential.anonymousIdentity,
       password: this.validMethod.clientSideCredential.passphrase,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: '',
-      auth: this.global.auth.MSCHAP,
-      anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
+      servername: 'geteduroam.no',
+      auth: this.global.auth.MSCHAPv2,
+      anonymous: '',
       caCertificate: this.validMethod.serverSideCredential.ca.content
     };
 
