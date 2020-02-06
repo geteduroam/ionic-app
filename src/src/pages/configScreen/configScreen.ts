@@ -138,23 +138,20 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
-    let profiles = [];
+    const profiles = [];
     let defaultProfile = '';
 
-    if (!!institution.profiles) {
-      institution.profiles.forEach(res => {
-        if (!!res.default) {
-          defaultProfile = res;
-        } else {
-          profiles.push(res);
-        }
+    if (institution.profiles.length > 1 ) {
+
+      institution.profiles.forEach(profile => {
+        !!profile.default ? defaultProfile = profile : profiles.push(profile);
       });
       profiles.unshift(defaultProfile);
       this.profiles = profiles;
+
     } else {
       this.profiles = institution;
     }
-
 
     this.checkProfiles();
   }
@@ -174,8 +171,10 @@ export class ConfigurationScreen extends BasePage{
       let filteredProfiles = this.profiles.filter((item:any) => {
         return (item.default == true);
       });
+
       this.defaultProfile = filteredProfiles[0];
-      if(!!this.defaultProfile){
+
+      if (!!this.defaultProfile) {
         this.profile = this.defaultProfile;
         this.profileName = this.profile.name;
         this.selectedProfileId = this.profile.id;
