@@ -70,6 +70,8 @@ export class GeteduroamApp {
 
     const isAssociated = await this.isAssociatedNetwork();
 
+    console.log('associated network', isAssociated);
+
     if (!this.rootPage) {
       this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
     }
