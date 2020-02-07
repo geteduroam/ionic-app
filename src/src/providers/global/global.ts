@@ -24,6 +24,8 @@ export class GlobalProvider {
 
   private clientId : string = 'f817fbcc-e8f4-459e-af75-0822d86ff47a';
 
+  private overrideProfile: boolean = false;
+
   constructor(public platform: Platform) {}
   //TODO: CREATE METHODS TO GET DATA
   getSsid() {
@@ -84,5 +86,13 @@ export class GlobalProvider {
 
   getClientId(){
     return this.clientId;
+  }
+
+  getOverrideProfile(){
+    return this.overrideProfile;
+  }
+
+  setOverrideProfile(profile: boolean){
+    this.overrideProfile = profile;
   }
 }

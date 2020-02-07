@@ -72,8 +72,12 @@ export class GeteduroamApp {
 
     console.log('associated network', isAssociated);
 
-    if (!this.rootPage) {
-      this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
+    if (!this.rootPage && !!isAssociated.success) {
+      // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
+      this.rootPage = ConfigurationScreen;
+    } else{
+      this.rootPage = ReconfigurePage;
+      this.global.setOverrideProfile(true);
     }
 
     !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';

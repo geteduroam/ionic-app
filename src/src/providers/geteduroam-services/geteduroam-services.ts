@@ -162,8 +162,21 @@ export class GeteduroamServices {
   }
 
   async connectProfile(config) {
-    return await WifiEapConfigurator.configureAP(config);
+      if (this.global.getOverrideProfile()){
+          let config = {
+              ssid: this.global.getSsid()
+          }
+          this.removeProfile(config);
+      }
+      return await WifiEapConfigurator.configureAP(config);
   }
+
+    async removeProfile(config) {
+        return await WifiEapConfigurator.removeNetwork(config);
+    }
+
+
+
   // TODO: MOVE TO CRYPTO
   generateRandomString(length) {
     var text = "";
