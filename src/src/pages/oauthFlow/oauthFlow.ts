@@ -157,13 +157,15 @@ export class OauthFlow extends BasePage{
     console.log('this.validMethod: ',this.validMethod);
     let config = {
       ssid: this.global.getSsid(),
-      username: this.validMethod.clientSideCredential.anonymousIdentity,
-      password: this.validMethod.clientSideCredential.passphrase,
+      username: '',
+      password: '',
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: 'geteduroam.no',
-      auth: this.global.auth.MSCHAPv2,
-      anonymous: '',
-      caCertificate: this.validMethod.serverSideCredential.ca.content
+      servername: '',
+      auth: null,
+      anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
+      caCertificate: this.validMethod.serverSideCredential.ca.content,
+      clientCertificate: this.validMethod.clientSideCredential.clientCertificate,
+      passPhrase: this.validMethod.clientSideCredential.passphrase
     };
 
     const checkRequest = this.getEduroamServices.connectProfile(config);
