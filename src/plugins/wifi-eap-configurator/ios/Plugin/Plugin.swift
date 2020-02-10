@@ -15,7 +15,7 @@ public class WifiEapConfigurator: CAPPlugin {
             return .eapttlsInnerAuthenticationMSCHAPv2
         case 5:
             return .eapttlsInnerAuthenticationPAP
-
+            
         default:
             return nil
         }
@@ -29,20 +29,6 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
         
-        guard let username = call.getString("username") else {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.username.missing",
-                "success": false,
-            ])
-        }
-        
-        guard let password = call.getString("password") else {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.password.missing",
-                "success": false,
-            ])
-        }
-        
         guard let eapType = call.get("eap", NSNumber.self) else {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.auth.invalid",
@@ -50,19 +36,11 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
         
-        guard let authType = call.getInt("auth") else {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.auth.missing",
-                "success": false,
-            ])
-        }
         
         let eapSettings = NEHotspotEAPSettings()
         eapSettings.isTLSClientCertificateRequired = true
         eapSettings.supportedEAPTypes = [eapType]
-        eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType)!
-        eapSettings.username = username
-        eapSettings.password = password
+        
         if let server = call.getString("servername"){
             eapSettings.trustedServerNames = [server]
         }
@@ -70,17 +48,103 @@ public class WifiEapConfigurator: CAPPlugin {
             eapSettings.outerIdentity = anonymous
         }
         
+        var username:String? = nil
+        var password:String? = nil
+        var authType:Int? = nil
+        
+        if let clientCertificate = call.getString("clientCertificate"){
+            if let passPhrase = call.getString("passPhrase"){
+                if addClientCertificate(certName: "ce" + ssid, certificate: clientCertificate, password: passPhrase)
+                {
+                    //                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                    //                                                   kSecAttrLabel as String: "clientcertificate" + ssid,
+                    //                                                   kSecReturnRef as String: kCFBooleanTrue]
+                    //                    var item: CFTypeRef?
+                    //                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                    //                    guard status == errSecSuccess else {
+                    //                        return call.success([
+                    //                            "message": "plugin.wifieapconfigurator.error.clientCertificate.missing",
+                    //                            "success": false,
+                    //                        ])
+                    //                    }
+                    //                    let savedCert = item as! SecCertificate
+                    //                    var identity: SecIdentity?
+                    //                    let statusIdentity = SecIdentityCreateWithCertificate(nil, savedCert, &identity)
+                    
+                    let getquery: [String: Any] = [kSecClass as String: kSecClassIdentity,
+                                                   kSecAttrLabel as String: "ce" + ssid,
+                                                   kSecReturnRef as String: kCFBooleanTrue]
+                    
+                    
+                    var item: CFTypeRef?
+                    let statusIdentity = SecItemCopyMatching(getquery as CFDictionary, &item)
+                    
+                    
+                    
+                    
+                    guard statusIdentity == errSecSuccess else {
+                        return call.success([
+                            "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
+                            "success": false,
+                        ])
+                    }
+                    
+                    let identity = item as! SecIdentity
+                    eapSettings.setIdentity(identity)
+                }
+            }else{
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.passPhrase.missing",
+                    "success": false,
+                ])
+            }
+        }
+        else{
+            if call.getString("username") != nil && call.getString("username") != ""{
+                username = call.getString("username")
+            } else {
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.username.missing",
+                    "success": false,
+                ])
+            }
+            
+            if call.getString("password") != nil && call.getString("password") != ""{
+                password = call.getString("password")
+            }
+            else{
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.password.missing",
+                    "success": false,
+                ])
+            }
+            
+            if call.getInt("auth") != nil{
+                authType = call.getInt("auth")
+            }
+            else{
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.auth.missing",
+                    "success": false,
+                ])
+            }
+            
+            eapSettings.username = username ?? ""
+            eapSettings.password = password ?? ""
+            eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType ?? 0)!
+        }
+        
         if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
             if let certificate = call.getString("caCertificate") {
-                 if addCertificate(certName: "Certificate " + ssid, certificate: certificate)
+                if addCertificate(certName: "Certificate " + ssid, certificate: certificate)
                 {  let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                   kSecAttrLabel as String: "Certificate " + ssid,
-                                                   kSecReturnRef as String: kCFBooleanTrue]
+                                                  kSecAttrLabel as String: "Certificate " + ssid,
+                                                  kSecReturnRef as String: kCFBooleanTrue]
                     var item: CFTypeRef?
                     let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                     guard status == errSecSuccess else { return }
                     let savedCert = item as! SecCertificate
-                    let certStatus = eapSettings.setTrustedServerCertificates([savedCert])
+                    eapSettings.setTrustedServerCertificates([savedCert])
                 }
             }
         }        
@@ -121,18 +185,20 @@ public class WifiEapConfigurator: CAPPlugin {
                 }
             }
             if(iterator){
-               call.success([
-                   "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
-                   "success": false
-               ])
+                call.success([
+                    "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                    "success": false,
+                    "overridable": false
+                ])
             }else{
-               call.success([
-                   "message": "plugin.wifieapconfigurator.success.network.missing",
-                   "success": true
-               ])
+                call.success([
+                    "message": "plugin.wifieapconfigurator.success.network.missing",
+                    "success": true
+                ])
             }
         }
     }
+    
     @objc func removeNetwork(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
@@ -141,7 +207,6 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
         var foundNetwork = false
-        let s = NEHotspotConfigurationManager.shared.getConfiguredSSIDs
         NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
             for ssid in ssids {
                 if ssidToCheck == ssid {
@@ -163,15 +228,15 @@ public class WifiEapConfigurator: CAPPlugin {
             
             let message = removed ?  "plugin.wifieapconfigurator.success.network.removed": "plugin.wifieapconfigurator.error.network.removed"
             call.success([
-                           "message": message,
-                           "success": removed
-                       ])
+                "message": message,
+                "success": removed
+            ])
         }
         else{
             call.success([
-                              "message": "plugin.wifieapconfigurator.error.network.notFound",
-                              "success": false
-                          ])
+                "message": "plugin.wifieapconfigurator.error.network.notFound",
+                "success": false
+            ])
         }
     }
     
@@ -203,6 +268,42 @@ public class WifiEapConfigurator: CAPPlugin {
             return false
         }
     }
+    
+    func addClientCertificate(certName: String, certificate: String, password: String) -> Bool {
+        let options = [ kSecImportExportPassphrase as String: password ]
+        var rawItems: CFArray?
+        let certBase64 = certificate
+        let data = Data(base64Encoded: certBase64)!
+        let statusImport = SecPKCS12Import(data as CFData,
+                                           options as CFDictionary,
+                                           &rawItems)
+        guard statusImport == errSecSuccess else { return false }
+        let items = rawItems! as! Array<Dictionary<String, Any>>
+        let firstItem = items[0]
+        let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
+        let addquery: [String: Any] = [kSecValueRef as String: identity,
+                                       kSecAttrLabel as String: certName]
+        let status = SecItemAdd(addquery as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            if status == errSecDuplicateItem {
+                let getquery: [String: Any] = [kSecAttrLabel as String: certName,
+                                               kSecReturnRef as String: kCFBooleanTrue]
+                var item: CFTypeRef?
+                let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                let statusDelete = SecItemDelete(getquery as CFDictionary)
+                guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                return addClientCertificate(certName: certName, certificate: certificate, password: password)
+            }
+            return false
+        }
+        if status == errSecSuccess {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+    
     @objc func isConnectedSSID(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
