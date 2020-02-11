@@ -10,7 +10,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     return true
   }
-
+    
+  func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    let vc = window?.rootViewController as! CAPBridgeViewController
+    print("URLScheme: ", vc);
+    return true
+  }
+    
   func applicationWillResignActive(_ application: UIApplication) {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
@@ -32,23 +38,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func applicationWillTerminate(_ application: UIApplication) {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
   }
-  
-    private func application(_ application: UIApplication,
-                 open url: URL,
-                 options: [UIApplication.OpenURLOptionsKey : Any] = [:] ) {
-    
-    // Determine who sent the URL.
-    let sendingAppID = options[.sourceApplication]
-    print("source application = \(sendingAppID ?? "Unknown")")
-        
-    }
-    
+ 
   func handleOpenUrl(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     // Called when the app was launched with a url. Feel free to add additional processing here,
     // but if you want the App API to support tracking app url opens, make sure to keep this call
     return CAPBridge.handleOpenUrl(url, options)
   }
-  
     
   func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
     // Called when the app was launched with an activity, including Universal Links.
