@@ -17,6 +17,7 @@ import { NetworkInterface } from '@ionic-native/network-interface/ngx'
 import { StoringProvider } from '../providers/storing/storing';
 import { GlobalProvider } from '../providers/global/global';
 import { CryptoUtil } from '../providers/util/crypto-util';
+import { ErrorServiceProvider } from "../providers/error-service/error-service";
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { CryptoUtil } from '../providers/util/crypto-util';
     NetworkInterface,
     StoringProvider,
     GlobalProvider,
-    CryptoUtil
+    CryptoUtil,
+    ErrorServiceProvider
   ],
   exports:[]
 })

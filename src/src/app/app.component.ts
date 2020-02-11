@@ -94,7 +94,7 @@ export class GeteduroamApp {
       await this.errorHandler.handleError(
         this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
         this.dictionary.getTranslation('error', 'available2') +
-        this.global.getSsid() + '.', false);
+        this.global.getSsid() + '.', false, '', 'removeConnection');
 
     } else {
 
@@ -102,7 +102,7 @@ export class GeteduroamApp {
         this.dictionary.getTranslation('error', 'available1') +
         this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
         this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false);
+        this.global.getSsid() + '.', false, '', 'enableAccess');
     }
   }
 
@@ -172,12 +172,12 @@ export class GeteduroamApp {
 
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false);
+        this.global.getSsid() + '.', false, '', 'enableAccess');
     }
   }
 
   /**
-   *  This method call to IAGT plugin and return if network if just associated
+   *  This method call to the plugin and return if network if just associated
    *
    */
   async isAssociatedNetwork() {

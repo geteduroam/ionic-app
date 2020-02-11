@@ -50,9 +50,23 @@ export abstract class BasePage {
      * This method show a toast message
      */
     protected async alertConnectionDisabled() {
+        // if (!this.messageShown) {
+        //     await Toast.show({
+        //         text: this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.',
+        //         duration: 'long'
+        //     });
+        //     this.messageShown = true;
+        // }
+        this.showToast(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.');
+    }
+
+    /**
+     * This method show a toast message
+     */
+    protected async showToast(message: string) {
         if (!this.messageShown) {
             await Toast.show({
-                text: this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.',
+                text: message,
                 duration: 'long'
             });
             this.messageShown = true;
