@@ -58,7 +58,7 @@ export class GeteduroamServices {
         const headers = {};
         let response: any;
 
-        if (url.includes('content://')) {
+        if (url.includes('eap-config')) {
 
           response = await this.store.readExtFile(url);
           response.data = atob(response.data);

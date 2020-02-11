@@ -13,8 +13,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     let vc = window?.rootViewController as! CAPBridgeViewController
-    print("URLScheme: ", vc);
-    return true
+    
+    return handleOpenUrl(app, open: url)
   }
     
   func applicationWillResignActive(_ application: UIApplication) {

@@ -13,12 +13,10 @@
 			<array>
 				<string>eap-config</string>
 			</array>
-			<key>CFBundleTypeIconFiles</key>
-			<array/>
 			<key>CFBundleTypeName</key>
-			<string>EAP Config File</string>
+			<string>EAP Config Document</string>
 			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
+			<string>Editor</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
@@ -30,7 +28,7 @@
 				<string>com.emergya.eduroam.eap-config</string>
 			</array>
 			<key>NSDocumentClass</key>
-			<string>Profile</string>
+			<string>ProfileModel</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
@@ -51,10 +49,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<string>com.emergya.eduroam.eap-config</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>geteduroam</string>
+				<string>eduroam</string>
 			</array>
 		</dict>
 	</array>
@@ -64,11 +62,8 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>To Take Photos and Video</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -115,34 +110,6 @@
 			</array>
 			<key>UTTypeDescription</key>
 			<string>EAP - Config file</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.emergya.eduroam.eap-config</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>eap-config</string>
-				</array>
-				<key>public.mime-type</key>
-				<array>
-					<string>application/eap-config</string>
-				</array>
-			</dict>
-		</dict>
-	</array>
-	<key>UTImportedTypeDeclarations</key>
-	<array>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.data</string>
-				<string>public.content</string>
-				<string>com.apple.property-list</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>EAP - Config file</string>
-			<key>UTTypeIconFiles</key>
-			<array/>
 			<key>UTTypeIdentifier</key>
 			<string>com.emergya.eduroam.eap-config</string>
 			<key>UTTypeTagSpecification</key>

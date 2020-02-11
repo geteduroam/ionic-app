@@ -102,9 +102,9 @@ export class GeteduroamApp {
   /**
    * This method throw the app when is opened from a file
    */
-  async handleOpenUrl(uri: string) {
+  async handleOpenUrl(uri: string | any) {
     this.profile = new ProfileModel();
-    this.profile.eapconfig_endpoint = uri;
+    this.profile.eapconfig_endpoint = !!uri.url ? uri.url : uri;
     this.profile.oauth = false;
     this.profile.id = "FileEap";
     this.profile.name = "FileEap";
