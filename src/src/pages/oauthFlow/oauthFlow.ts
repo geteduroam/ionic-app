@@ -70,12 +70,12 @@ export class OauthFlow extends BasePage{
   }
 
   buildFlowAuth(oAuth, oauth2Options, token_endpoint) {
-     let urlToken;
-     let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+    let urlToken;
+    let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
 
-     const flowAuth = new Promise(function (resolve, reject) {
+    const flowAuth = new Promise(function (resolve, reject) {
 
-       browserRef.addEventListener('loadstart', (event) => {
+      browserRef.addEventListener('loadstart', (event) => {
 
         if (event.url.indexOf(oauth2Options.redirectUrl) === 0) {
           let urlData = event.url.split('code=')[1];
@@ -96,15 +96,19 @@ export class OauthFlow extends BasePage{
             browserRef.close();
           }
         }
-       });
-     });
+      });
+    });
+    flowAuth.then(async (res) => {
+      await this.getToken(urlToken);
+    });
 
-     flowAuth.then(async (res) => {
-       await this.getToken(urlToken);
-     });
+  }
+  showSpinner() {
+    this.loading.createAndPresent();
   }
 
   async getToken(res) {
+    this.showSpinner();
     const response = await this.http.get(res, {}, {});
 
     // TODO: POST -> CREATE BEARER AUTHORIZATION
@@ -144,7 +148,7 @@ export class OauthFlow extends BasePage{
     };
 
     const checkRequest = this.getEduroamServices.connectProfile(config);
-
+    this.loading.dismiss();
     if (!!checkRequest) {
       this.navigateTo();
     }
@@ -158,7 +162,7 @@ export class OauthFlow extends BasePage{
     } else {
       if(!!this.providerInfo){
         let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
-            !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
+          !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
       } else {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
