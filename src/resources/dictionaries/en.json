@@ -16,7 +16,7 @@
   "placeholder": {
     "institution": "Select an institution...",
     "profile": "Select a profile...",
-    "example": "name@example.com"
+    "example": "username"
   },
   "button": {
     "next": "Next",

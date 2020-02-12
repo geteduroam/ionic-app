@@ -9,7 +9,7 @@ page-config-screen {
     border: 1px solid #CAD0D6 !important;
     border-radius: 4px;
     margin-left: 7px;
-  //  width: 96% !important;
+    margin-right: 4px;
     height: 45px;
 
     .searchbar-input-container {
@@ -65,7 +65,7 @@ page-config-screen {
 //---------------------------
 ion-item.item-profile {
   width: 100%;
-  height: 46px;
+  height: 50px;
 
   div.item-inner {
     padding: 0 !important;
@@ -83,14 +83,6 @@ ion-list {
     background-color: unset;
   }
 }
-
-////---------------------------------
-//// Show all elements in searchable
-////---------------------------------
-//ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
-//  contain: unset !important;
-//  overflow: unset !important;
-//}
 
 //---------------------------------
 // Ion-select options style custom

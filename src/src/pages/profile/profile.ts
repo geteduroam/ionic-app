@@ -75,6 +75,21 @@ export class ProfilePage extends BasePage{
     this.showAll = true;
   }
 
+  getEmail() {
+    if (!!this.provide.email && !this.provide.email.includes('@') && !!this.suffixIdentity) {
+      this.provide.email = `${this.provide.email}@${this.suffixIdentity}`;
+    }
+  }
+
+  getPlaceholder() {
+    if (this.suffixIdentity !== '') {
+      return `username@${this.suffixIdentity}`;
+    } else {
+      return this.getString('placeholder', 'example');
+    }
+
+  }
+
   /**
    * Method to check form and navigate.
    */
@@ -136,11 +151,9 @@ export class ProfilePage extends BasePage{
     }
   }
 
-
   async getProfile() {
     let profileAux = this.navParams.get('profile');
-    this.profile = !!profileAux && profileAux!= undefined && profileAux ? this.navParams.get('profile') : this.global.getProfile();
-    // this.checkValidation();
+    this.profile = !!profileAux && profileAux ? this.navParams.get('profile') : this.global.getProfile();
     return this.profile;
   }
 
@@ -160,13 +173,24 @@ export class ProfilePage extends BasePage{
 
   async manageProfileValidation(validProfile: boolean){
     this.providerInfo = this.global.getProviderInfo();
-    if(validProfile){
+
+    if (validProfile) {
+
       this.validMethod = this.global.getAuthenticationMethod();
+
+      if (!!this.validMethod.clientSideCredential.innerIdentitySuffix) {
+        this.suffixIdentity = this.validMethod.clientSideCredential.innerIdentitySuffix;
+      }
+
     } else {
-      if(!!this.providerInfo && this.providerInfo != undefined){
+
+      if (!!this.providerInfo) {
+
         let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
             !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-                await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+
       } else {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
       }

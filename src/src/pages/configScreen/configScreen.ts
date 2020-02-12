@@ -23,27 +23,27 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Set of available profiles
    */
-  profiles: any;
+  profiles: ProfileModel[];
 
   /**
    * All the institutions retrieved by the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}
    */
-  instances: any;
+  instances: Object[];
 
   /**
    * Set of institutions filtered by what is written in the search-bar
    */
-  filteredInstances: any;
+  filteredInstances: Object[];
 
   /**
    * Selected institution
    */
-  instance: any;
+  instance: Object;
 
   /**
    * Name of the selected institution used in the search-bar
    */
-  instanceName : any = '';
+  instanceName: string = '';
 
   /**
    * Selected profile
@@ -53,17 +53,17 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Default profile (if exists) in the selected institution profiles set
    */
-  defaultProfile: any;
+  defaultProfile: ProfileModel;
 
   /**
    * Name of the selected profile
    */
-  profileName: any = '';
+  profileName: string = '';
 
   /**
    * Id of the selected profile
    */
-  selectedProfileId: any;
+  selectedProfileId: string;
 
   /**
    * Property to decide whether or not to show the institutions list
@@ -138,20 +138,19 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
-    const profiles = [];
-    let defaultProfile = '';
-
     if (institution.profiles.length > 1 ) {
-
-      institution.profiles.forEach(profile => {
-        !!profile.default ? defaultProfile = profile : profiles.push(profile);
+      // Check default profile and sort array for highlighting default profile
+      institution.profiles.forEach((profile, index) => {
+        if (!!profile.default) {
+          institution.profiles.splice(index,1);
+          this.defaultProfile = profile;
+          institution.profiles.unshift(this.defaultProfile);
+        }
       });
-      profiles.unshift(defaultProfile);
-      this.profiles = profiles;
-
     } else {
-      this.profiles = institution;
+      this.defaultProfile = institution.profiles[0];
     }
+    this.profiles = institution.profiles;
 
     this.checkProfiles();
   }
@@ -166,7 +165,7 @@ export class ConfigurationScreen extends BasePage{
       this.profile = this.profiles[0];
       this.profileName = this.profile.name;
       this.selectedProfileId = this.profile.id;
-      this.defaultProfile = '';
+      this.defaultProfile = null;
     } else {
       let filteredProfiles = this.profiles.filter((item:any) => {
         return (item.default == true);
@@ -188,8 +187,7 @@ export class ConfigurationScreen extends BasePage{
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
   async navigateTo(profile:ProfileModel) {
-    if (this.activeNavigation && this.validProfile(profile)){
-
+    if (!!this.activeNavigation) {
       this.showAll = false;
 
       let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
@@ -198,8 +196,6 @@ export class ConfigurationScreen extends BasePage{
     } else{
       await this.alertConnectionDisabled();
     }
-
-
   }
 
   async ionViewWillEnter() {
@@ -209,9 +205,4 @@ export class ConfigurationScreen extends BasePage{
       this.removeSpinner();
       this.showAll = true;
   }
-
-  validProfile(profile:ProfileModel):boolean {
-    return true;
-  }
-
 }
