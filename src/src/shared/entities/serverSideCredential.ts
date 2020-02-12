@@ -21,9 +21,11 @@ export class ServerSideCredential extends BaseJson{
      * This method updates the properties [ca]{@link #ca} and [serverID]{@link #serverID}
      * @param {any} jsonAux json from which to retrieve the info.
      */
-    fillEntity(jsonAux: any){
+    fillEntity(jsonAux: any):boolean{
+        let returnValue: boolean = true;
         this.ca = new Ca();
-        this.assignComplexProperty(this.ca, 'ca', jsonAux, 'CA', true);
-        this.serverID = this.getSingleProperty(jsonAux, 'ServerID', true);
+        returnValue = returnValue && this.assignComplexProperty(this.ca, 'ca', jsonAux, 'CA', true);
+        this.serverID = this.getSingleProperty(jsonAux, 'ServerID', false);
+        return returnValue;
     }
 }

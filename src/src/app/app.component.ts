@@ -12,6 +12,7 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
+import {Page} from "ionic-angular/navigation/nav-util";
 
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
@@ -69,8 +70,14 @@ export class GeteduroamApp {
 
     const isAssociated = await this.isAssociatedNetwork();
 
-    if (!this.rootPage) {
-      this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
+    console.log('associated network', isAssociated);
+
+    if (!this.rootPage && !!isAssociated.success) {
+      // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
+      this.rootPage = ConfigurationScreen;
+    } else{
+      this.rootPage = ReconfigurePage;
+      this.global.setOverrideProfile(true);
     }
 
     !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
@@ -87,7 +94,7 @@ export class GeteduroamApp {
       await this.errorHandler.handleError(
         this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
         this.dictionary.getTranslation('error', 'available2') +
-        this.global.getSsid() + '.', false);
+        this.global.getSsid() + '.', false, '', 'removeConnection');
 
     } else {
 
@@ -95,7 +102,7 @@ export class GeteduroamApp {
         this.dictionary.getTranslation('error', 'available1') +
         this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
         this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false);
+        this.global.getSsid() + '.', false, '', 'enableAccess');
     }
   }
 
@@ -131,6 +138,12 @@ export class GeteduroamApp {
     App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
       this.navigate(urlOpen.url);
     });
+
+    App.addListener('backButton', (data: AppUrlOpen) => {
+      this.platform.backButton.observers.pop();
+      console.log('Preventing to go back with back button');
+
+    });
   }
 
   /**
@@ -159,12 +172,12 @@ export class GeteduroamApp {
 
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false);
+        this.global.getSsid() + '.', false, '', 'enableAccess');
     }
   }
 
   /**
-   *  This method call to IAGT plugin and return if network if just associated
+   *  This method call to the plugin and return if network if just associated
    *
    */
   async isAssociatedNetwork() {

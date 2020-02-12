@@ -21,9 +21,11 @@ export class Ca extends BaseJson{
      * This method updates the properties [properties]{@link #properties} and [content]{@link #content}
      * @param {any} jsonAux json from which to retrieve the info.
      */
-    fillEntity(jsonAux: any){
+    fillEntity(jsonAux: any): boolean{
+        let returnValue: boolean = true;
         this.properties = new CaProperties();
-        this.assignComplexProperty(this.properties, 'properties', jsonAux, '$', true);
+        returnValue = returnValue && this.assignComplexProperty(this.properties, 'properties', jsonAux, '$', true);
         this.content = this.getSingleProperty(jsonAux, '_', false);
+        return returnValue;
     }
 }

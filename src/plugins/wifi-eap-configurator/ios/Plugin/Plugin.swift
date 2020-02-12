@@ -170,6 +170,7 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
     }
+    @available(iOS 12.0, *)
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([

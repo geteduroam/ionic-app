@@ -20,8 +20,11 @@ export class CaProperties extends BaseJson{
      * This method updates the properties [format]{@link #format} and [encoding]{@link #encoding}
      * @param {any} jsonAux json from which to retrieve the info.
      */
-    fillEntity(jsonAux: any){
+    fillEntity(jsonAux: any): boolean{
+        let returnValue: boolean = true;
         this.format = this.getSingleProperty(jsonAux, 'format', true);
         this.encoding = this.getSingleProperty(jsonAux, 'encoding', true);
+        returnValue = returnValue && this.format != null && this.encoding != null;
+        return returnValue;
     }
 }

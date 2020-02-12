@@ -6,6 +6,7 @@ import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
+import {ErrorServiceProvider} from "../../providers/error-service/error-service";
 const {Browser} = Plugins;
 
 
@@ -17,12 +18,13 @@ export class ErrorsPage extends BasePage{
 
   text: string;
   link: string;
+  checkMethod : string;
   public isFinal: boolean = false;
 
 
   constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController,
               private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, protected global: GlobalProvider) {
+              protected event: Events, protected global: GlobalProvider, private errorService: ErrorServiceProvider) {
     super(loading, dictionary, event, global);
 
 
@@ -31,13 +33,13 @@ export class ErrorsPage extends BasePage{
       this.link = this.navParams.get('link');
       this.text =  this.navParams.get('error');
       this.isFinal = true;
-
     } else {
       this.text = this.navParams.get('error');
       this.isFinal = false;
+      this.checkMethod = this.navParams.get('method');
     }
 
-    super.activeNavigation = this.navParams.get('navigation');
+    // super.activeNavigation = this.navParams.get('navigation');
 
   }
 
@@ -53,10 +55,15 @@ export class ErrorsPage extends BasePage{
   }
 
   async closeModal() {
-    if(this.activeNavigation){
+    // if(this.activeNavigation){
+    //   await this.viewCtrl.dismiss();
+    // } else{
+    //   this.alertConnectionDisabled();
+    // }
+    if (await this.errorService.checkAgain(this.checkMethod)){
       await this.viewCtrl.dismiss();
-    } else{
-      this.alertConnectionDisabled();
+    } else {
+      this.showToast(this.text);
     }
   }
 
