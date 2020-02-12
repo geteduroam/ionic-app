@@ -136,7 +136,7 @@ public class WifiEapConfigurator: CAPPlugin {
         
         if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
             if let certificate = call.getString("caCertificate") {
-                if (addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Bool)
+                if (addCertificate(certName: "Certificate " + ssid, certificate: certificate) as? Bool ?? false)
                 {
                     let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                    kSecAttrLabel as String: "Certificate " + ssid,
@@ -146,6 +146,9 @@ public class WifiEapConfigurator: CAPPlugin {
                     guard status == errSecSuccess else { return }
                     let savedCert = item as! SecCertificate
                     eapSettings.setTrustedServerCertificates([savedCert])
+                }
+                else {
+                    return call.success(addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
                 }
             }
         }        
@@ -256,7 +259,7 @@ public class WifiEapConfigurator: CAPPlugin {
         
     }
     
-    func addCertificate(certName: String, certificate: String) -> Any {
+    func addCertificate(certName: String, certificate: String) -> Any? {
         let certBase64 = certificate
         if let data = Data(base64Encoded: certBase64) {
             if let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) {
@@ -296,7 +299,6 @@ public class WifiEapConfigurator: CAPPlugin {
                 "success": false,
             ]
         }
-        return true
     }
     
     func addClientCertificate(certName: String, certificate: String, password: String) -> Bool {
