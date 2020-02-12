@@ -26,8 +26,10 @@ export class ReconfigurePage extends BasePage{
   ionViewWillEnter() {
     if(this.nav['rootParams'].reconfigure !== undefined){
       this.showReconfigure = this.nav['rootParams'].reconfigure;
+      console.log('**************this.nav[\'rootParams\'].reconfigure**************',this.nav['rootParams'].reconfigure);
     }
     this.isAndroid = this.platform.is('android');
+    console.log('**************RECONFIGURE**************',this.showReconfigure);
   }
 
   async navigateTo() {

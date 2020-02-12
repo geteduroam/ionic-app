@@ -12,7 +12,6 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
-import {Page} from "ionic-angular/navigation/nav-util";
 
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
@@ -50,13 +49,12 @@ export class GeteduroamApp {
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
-      // Add listeners to app
-      await this.addListeners();
       // Listener to get status connection, apply when change status network
       await this.checkConnection();
       // Plugin wifiEAPConfigurator associatedNetwork
       await this.associatedNetwork();
-
+      // Add listeners to app
+      await this.addListeners();
     });
   }
   /**
@@ -75,6 +73,7 @@ export class GeteduroamApp {
       this.rootPage = ConfigurationScreen;
     } else{
       this.rootPage = ReconfigurePage;
+      this.rootParams = !isAssociated.success || !isAssociated.overridable ? {'reconfigure': false} : {'reconfigure': true};
       this.global.setOverrideProfile(true);
     }
 
@@ -148,7 +147,7 @@ export class GeteduroamApp {
    * @param uri
    */
   async navigate(uri: string) {
-    if (!uri.includes('.eap-config')) return;
+    if (!uri.includes('.eap-config') || !uri.includes('file')) return;
     await this.handleOpenUrl(uri);
     this.rootPage = ProfilePage;
 
@@ -162,7 +161,7 @@ export class GeteduroamApp {
     this.rootPage = ReconfigurePage;
 
     const isAssociated = await this.isAssociatedNetwork();
-    this.rootParams = !!isAssociated.success ? {'reconfigure': false} : {'reconfigure': true};
+    this.rootParams = !isAssociated.success || !isAssociated.overridable ? {'reconfigure': false} : {'reconfigure': true};
 
     if (!isAssociated.success && !isAssociated.overridable) {
       this.removeAssociatedManually();

@@ -111,6 +111,8 @@ export class OauthFlow extends BasePage{
 
     this.tokenURl = JSON.parse(response.data);
 
+    // console.log(this.tokenURl.access_token);
+
     let header = `'Authorization': '${this.tokenURl.token_type} ${this.tokenURl.access_token}'`;
 
     this.profile.token = this.tokenURl.access_token;
