@@ -80,9 +80,6 @@ public class WifiEapConfigurator: CAPPlugin {
                     var item: CFTypeRef?
                     let statusIdentity = SecItemCopyMatching(getquery as CFDictionary, &item)
                     
-                    
-                    
-                    
                     guard statusIdentity == errSecSuccess else {
                         return call.success([
                             "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
@@ -92,6 +89,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     
                     let identity = item as! SecIdentity
                     eapSettings.setIdentity(identity)
+                    eapSettings.isTLSClientCertificateRequired = true
                 }
             }else{
                 return call.success([
@@ -160,6 +158,13 @@ public class WifiEapConfigurator: CAPPlugin {
                 if error.code == 13 {
                     call.success([
                         "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                        "success": false,
+                    ])
+                }
+                
+                if error.code == 7 {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.error.network.userCancelled",
                         "success": false,
                     ])
                 }
