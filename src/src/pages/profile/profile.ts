@@ -54,7 +54,6 @@ export class ProfilePage extends BasePage{
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events) {
     super(loading, dictionary, event, global);
-    console.log('constructor');
 
   }
 
@@ -62,10 +61,8 @@ export class ProfilePage extends BasePage{
    *  Method executed when the class did load
    */
   async ionViewDidLoad() {
-    console.log('ionViewDidLoad');
     const profile = await this.getProfile();
     this.profile = await this.waitingSpinner(profile);
-    console.log('profile value before validating: ', this.profile);
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
     this.manageProfileValidation(validProfile);
   }
@@ -120,7 +117,6 @@ export class ProfilePage extends BasePage{
    * @return {any} eapconfig_endpoint the eap institutionSearch endpoint
    */
   getEapconfigEndpoint() {
-    console.log('using eapconfig_endpoint');
     return this.profile.eapconfig_endpoint;
   }
 
@@ -143,7 +139,6 @@ export class ProfilePage extends BasePage{
 
   async getProfile() {
     let profileAux = this.navParams.get('profile');
-    console.log('entra en getProfile con profileAux: ', profileAux, ' y global profile: ', this.global.getProfile());
     this.profile = !!profileAux && profileAux!= undefined && profileAux ? this.navParams.get('profile') : this.global.getProfile();
     // this.checkValidation();
     return this.profile;
@@ -164,7 +159,6 @@ export class ProfilePage extends BasePage{
   }
 
   async manageProfileValidation(validProfile: boolean){
-    console.log('global providerInfo', this.global.getProviderInfo());
     this.providerInfo = this.global.getProviderInfo();
     if(validProfile){
       this.validMethod = this.global.getAuthenticationMethod();
@@ -172,9 +166,7 @@ export class ProfilePage extends BasePage{
       if(!!this.providerInfo && this.providerInfo != undefined){
         let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
             !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-        console.log('*************************url', url);
                 await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-        console.log('*********************************** after sending error');
       } else {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
       }

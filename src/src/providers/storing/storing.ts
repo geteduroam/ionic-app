@@ -125,11 +125,10 @@ export class StoringProvider {
 
     try {
       let data =  await Filesystem.readFile({path: uri });
-      console.log('URL data: ', data);
       return data;
 
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
 

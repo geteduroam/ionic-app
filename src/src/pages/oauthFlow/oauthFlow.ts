@@ -46,18 +46,7 @@ export class OauthFlow extends BasePage{
   async ionViewDidEnter() {
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
-    console.log('profile taken form navParams: ', this.profile);
-   // this.geteduroamServices.buildAuthUrl(this.profile.authorization_endpoint);
-    //this.geteduroamServices.buildGenerator(this.profile.eapconfig_endpoint);
 
-/*    this.geteduroamServices.buildTokenUrl(this.profile.token_endpoint);
-
-  profile: {
-      eapconfig_endpoint: "https://geteduroam.no/generate.php"
-      token_endpoint: "https://geteduroam.no/token.php"
-      authorization_endpoint: "https://geteduroam.no/authorize.php"
-    }
-     */
     await this.getData();
     this.loading.dismiss();
     this.showAll = true;
@@ -105,43 +94,28 @@ export class OauthFlow extends BasePage{
             });
 
             browserRef.close();
-            console.log('Closing InAppBrowser');
           }
         }
        });
      });
 
      flowAuth.then(async (res) => {
-       console.log('Promise then:', res);
        await this.getToken(urlToken);
      });
   }
 
   async getToken(res) {
-    console.log('Inside getToken');
     const response = await this.http.get(res, {}, {});
-    /*
-    access_token: "v2.local.bhFE0rDXByB6JYQByEmF8VwBbLWRZbde1reF5blnkvOHaJhdHmxxIVDz3ZlO-jjJ0pT6oA21PaIAqPeOMwMtbPmP9HYGEDcHBSXkif2GyKRYfpVCtfkbvB4wJUUqpkVQNvP1KMCA-9Jrt6kIIMZrH2ZUJli-yP4Y0Qc44BSAYAlEb-SGCQT0L5IKpFaR-1xaxyyyH6udm5tamn52S8co1umXUmNPCzGuDlK6b9sUlElWw-Rcz-JV21EmvwBiBN6Xlsatzg"
-    token_type: "Bearer"
-    expires_in: 3600
-     */
 
     // TODO: POST -> CREATE BEARER AUTHORIZATION
 
     this.tokenURl = JSON.parse(response.data);
 
-    console.log('token: ', this.tokenURl);
-
     let header = `'Authorization': '${this.tokenURl.token_type} ${this.tokenURl.access_token}'`;
-    console.log('Auth header: ', header);
-
-    console.log('oauth profile: ',this.profile);
 
     this.profile.token = this.tokenURl.access_token;
 
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
-
-    console.log('validProfile', validProfile);
 
     this.manageProfileValidation(validProfile);
 
@@ -154,7 +128,6 @@ export class OauthFlow extends BasePage{
 
     //TODO change the method once the plugin is adapted to oauth flow
 
-    console.log('this.validMethod: ',this.validMethod);
     let config = {
       ssid: this.global.getSsid(),
       username: '',
@@ -176,19 +149,15 @@ export class OauthFlow extends BasePage{
   }
 
   async manageProfileValidation(validProfile: boolean){
-    console.log('global providerInfo', this.global.getProviderInfo());
     this.providerInfo = this.global.getProviderInfo();
     if(validProfile){
       this.validMethod = this.global.getAuthenticationMethod();
-      console.log('validMethod', this.validMethod);
       this.checkForm();
     } else {
       if(!!this.providerInfo){
         let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
             !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-        console.log('*************************url', url);
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-        console.log('*********************************** after sending error');
       } else {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
       }

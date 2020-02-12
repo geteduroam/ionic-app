@@ -52,7 +52,6 @@ export class GeteduroamServices {
             // return JSON.parse(FAKE_DATA.toString());
 
         } catch (e) {
-            console.log(e);
             await this.errorHandler.handleError(e.error,false);
         }
   }
@@ -229,12 +228,6 @@ export class GeteduroamServices {
             }
         }
 
-        console.log('No valid method');
-
-        // let url = !!providerInfo.helpdesk.webAddress ? providerInfo.helpdesk.webAddress :
-        //     !!providerInfo.helpdesk.emailAddress ? providerInfo.helpdesk.emailAddress : '';
-        //
-        // await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
         return null;
     }
 
@@ -244,16 +237,10 @@ export class GeteduroamServices {
      */
     public async eapValidation(profile:ProfileModel):Promise<boolean> {
 
-        console.log('before using profile.eapconfig_endpoint: ', profile.eapconfig_endpoint);
-
         let eapConfigFile: any;
-
-        console.log('profile.oauth', profile.oauth);
-        console.log('profile.token', profile.token);
 
         if(profile.oauth){
             eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint+'?format=eap-metadata', profile.token);
-            console.log('eapConfigFile', eapConfigFile);
         } else{
             eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
 
@@ -263,8 +250,6 @@ export class GeteduroamServices {
         let providerInfo:ProviderInfo= new ProviderInfo();
 
         const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo);
-
-        console.log('*********************************** validEap', validEap);
 
         if (validEap){
             this.global.setProviderInfo(providerInfo);
@@ -306,25 +291,20 @@ export class GeteduroamServices {
         // EAP-CONFIG
         //----------------
         if (!!jsonAux){
-            console.log('Eap content: ',jsonAux);
             for (let key of keys){
                 if (returnValue){
                     jsonAux = this.readJson(jsonAux, key);
                     if(jsonAux == null){
-                        console.log('jsonAux is null');
                         returnValue = false;
                     } else if (key === 'EAPIdentityProvider'){
                         //----------------
                         // Provider Info
                         //----------------
                         let providerInfoAux = this.readJson(jsonAux, 'ProviderInfo');
-                        console.log('jsonAux after getting providerInfoAux:',jsonAux);
                         if(providerInfoAux != null){
                             if (isArray(providerInfoAux)){
-                                console.log('providerInfoAux array', providerInfoAux[0]);
                                 returnValue = returnValue && providerInfo.fillEntity(providerInfoAux[0]);
                             } else if (isObject(providerInfoAux)){
-                                console.log('providerInfoAux object', providerInfoAux);
                                 returnValue = returnValue && providerInfo.fillEntity(providerInfoAux);
                             }
                         }
@@ -340,17 +320,14 @@ export class GeteduroamServices {
 
             if (jsonAux != null && returnValue){
                 for (let i in jsonAux){
-                    console.log('AuthenticationMethod: ', jsonAux[i]);
                     if(!!jsonAux[i] && returnValue){
                         let authenticationMethodAux = new AuthenticationMethod();
                         try {
                             returnValue = returnValue && authenticationMethodAux.fillEntity(jsonAux[i]);
-                            console.log('TRY for the authentication method');
                             if(returnValue){
                                 authenticationMethods.push(authenticationMethodAux);
                             }
                         } catch (e) {
-                            console.log('CATCH when the authentication method is WRONG');
                             returnValue = false;
                         }
                     }
@@ -361,7 +338,6 @@ export class GeteduroamServices {
             console.error('wrong json', eapConfig);
             returnValue = false;
         }
-        console.log('authentication: ', authenticationMethods);
         return returnValue;
     }
 
@@ -369,7 +345,6 @@ export class GeteduroamServices {
         let returnedJson: JSON;
         if (isArray(jsonAux)){
             if (jsonAux[0].hasOwnProperty(key)){
-                console.log('adding the array key', key, jsonAux[0][key]);
                 returnedJson = jsonAux[0][key];
             } else {
                 console.error('Invalid eapconfig file, it does not contain the array key '+key, jsonAux);
@@ -378,10 +353,8 @@ export class GeteduroamServices {
 
         } else if (isObject(jsonAux)) {
             if (jsonAux.hasOwnProperty(key)) {
-                console.log('adding the object key', key, jsonAux[key]);
                 returnedJson = jsonAux[key];
             } else {
-                console.error('Invalid eapconfig file, it does not contain the key '+key, jsonAux);
                 return null;
             }
 

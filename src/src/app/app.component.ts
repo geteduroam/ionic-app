@@ -70,8 +70,6 @@ export class GeteduroamApp {
 
     const isAssociated = await this.isAssociatedNetwork();
 
-    console.log('associated network', isAssociated);
-
     if (!this.rootPage && !!isAssociated.success) {
       // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
       this.rootPage = ConfigurationScreen;
@@ -141,7 +139,6 @@ export class GeteduroamApp {
 
     App.addListener('backButton', (data: AppUrlOpen) => {
       this.platform.backButton.observers.pop();
-      console.log('Preventing to go back with back button');
 
     });
   }
