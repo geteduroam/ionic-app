@@ -136,15 +136,19 @@ public class WifiEapConfigurator: CAPPlugin {
         
         if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
             if let certificate = call.getString("caCertificate") {
-                if addCertificate(certName: "Certificate " + ssid, certificate: certificate)
-                {  let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                  kSecAttrLabel as String: "Certificate " + ssid,
-                                                  kSecReturnRef as String: kCFBooleanTrue]
+                if (addCertificate(certName: "Certificate " + ssid, certificate: certificate) as? Bool ?? false)
+                {
+                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                   kSecAttrLabel as String: "Certificate " + ssid,
+                                                   kSecReturnRef as String: kCFBooleanTrue]
                     var item: CFTypeRef?
                     let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                     guard status == errSecSuccess else { return }
                     let savedCert = item as! SecCertificate
                     eapSettings.setTrustedServerCertificates([savedCert])
+                }
+                else {
+                    return call.success(addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
                 }
             }
         }        
@@ -152,9 +156,12 @@ public class WifiEapConfigurator: CAPPlugin {
         let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
-                call.success([
-                    "message": error.localizedDescription,
-                    "success": false])
+                if error.code == 13 {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                        "success": false,
+                    ])
+                }
             } else {
                 if self.currentSSIDs().first == ssid {
                     call.success([
@@ -170,7 +177,6 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
     }
-    @available(iOS 12.0, *)
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
@@ -178,6 +184,8 @@ public class WifiEapConfigurator: CAPPlugin {
                 "success": false,
             ])
         }
+        
+        
         var iterator = false
         NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
             for ssid in ssids {
@@ -185,11 +193,20 @@ public class WifiEapConfigurator: CAPPlugin {
                     iterator = true
                 }
             }
-            if(iterator){
+            
+            if !iterator && ssids.count < 1 {
+                call.success([
+                    "message": "plugin.wifieapconfigurator.error.network.noNetworksFound",
+                    "success": false,
+                    "overridable": true
+                ])
+            }
+                
+            else if(iterator){
                 call.success([
                     "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
                     "success": false,
-                    "overridable": false
+                    "overridable": true
                 ])
             }else{
                 call.success([
@@ -214,59 +231,91 @@ public class WifiEapConfigurator: CAPPlugin {
                     foundNetwork = true
                 }
             }
-        }
-        
-        if foundNetwork {
-            NEHotspotConfigurationManager.shared.removeConfiguration(forSSID: ssidToCheck)
-            var removed = true
-            NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
-                for ssid in ssids {
-                    if ssidToCheck == ssid {
-                        removed = false
+            
+            if foundNetwork {
+                NEHotspotConfigurationManager.shared.removeConfiguration(forSSID: ssidToCheck)
+                var removed = true
+                NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
+                    for ssid in ssids {
+                        if ssidToCheck == ssid {
+                            removed = false
+                        }
                     }
+                    
+                    let message = removed ?  "plugin.wifieapconfigurator.success.network.removed": "plugin.wifieapconfigurator.error.network.removed"
+                    call.success([
+                        "message": message,
+                        "success": removed
+                    ])
                 }
             }
-            
-            let message = removed ?  "plugin.wifieapconfigurator.success.network.removed": "plugin.wifieapconfigurator.error.network.removed"
-            call.success([
-                "message": message,
-                "success": removed
-            ])
+            else{
+                call.success([
+                    "message": "plugin.wifieapconfigurator.error.network.notFound",
+                    "success": false
+                ])
+            }
         }
-        else{
-            call.success([
-                "message": "plugin.wifieapconfigurator.error.network.notFound",
-                "success": false
-            ])
-        }
+        
     }
     
-    func addCertificate(certName: String, certificate: String) -> Bool {
+    func cleanCertificate(certificate: String) -> String{
+        let certDirty = certificate
+        
+        let certWithoutHeader = certDirty.replacingOccurrences(of: "-----BEGIN CERTIFICATE-----\n", with: "")
+        let certWithoutBlankSpace = certWithoutHeader.replacingOccurrences(of: "\n", with: "")
+        let certClean = certWithoutBlankSpace.replacingOccurrences(of: "-----END CERTIFICATE-----", with: "")
+        
+        return certClean
+    }
+    
+    func addCertificate(certName: String, certificate: String) -> Any? {
         let certBase64 = certificate
-        let data = Data(base64Encoded: certBase64)!
-        let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData)!
-        let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                       kSecValueRef as String: certRef,
-                                       kSecAttrLabel as String: certName]
-        let status = SecItemAdd(addquery as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            if status == errSecDuplicateItem {
-                let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                               kSecAttrLabel as String: certName,
-                                               kSecReturnRef as String: kCFBooleanTrue]
-                var item: CFTypeRef?
-                let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                let statusDelete = SecItemDelete(getquery as CFDictionary)
-                guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
-                return addCertificate(certName: certName, certificate: certificate)
+        if let certDecoded = certBase64.base64Decoded() {
+            let certDecodedClean = cleanCertificate(certificate: certDecoded)
+            if let data = Data(base64Encoded: certDecodedClean) {
+                if let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) {
+                    let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                   kSecValueRef as String: certRef,
+                                                   kSecAttrLabel as String: certName]
+                    let status = SecItemAdd(addquery as CFDictionary, nil)
+                    guard status == errSecSuccess else {
+                        if status == errSecDuplicateItem {
+                            let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                           kSecAttrLabel as String: certName,
+                                                           kSecReturnRef as String: kCFBooleanTrue]
+                            var item: CFTypeRef?
+                            let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                            let statusDelete = SecItemDelete(getquery as CFDictionary)
+                            guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                            return addCertificate(certName: certName, certificate: certificate)
+                        }
+                        return false
+                    }
+                    
+                    if status == errSecSuccess {
+                        return true
+                    }
+                    else {
+                        return false
+                    }
+                } else {
+                    return [
+                        "message": "plugin.wifieapconfigurator.error.network.certificateRefConvertionFailed",
+                        "success": false,
+                    ]
+                }
+            } else {
+                return [
+                    "message": "plugin.wifieapconfigurator.error.network.certificateDataFailed",
+                    "success": false,
+                ]
             }
-            return false
-        }
-        if status == errSecSuccess {
-            return true
-        }
-        else {
-            return false
+        } else {
+            return [
+                "message": "plugin.wifieapconfigurator.error.network.couldNotDecodeCertificate",
+                "success": false,
+            ]
         }
     }
     
@@ -354,5 +403,21 @@ public class WifiEapConfigurator: CAPPlugin {
             }
             return ssid
         }
+    }
+}
+
+extension Error {
+    var code: Int { return (self as NSError).code }
+    var domain: String { return (self as NSError).domain }
+}
+
+extension String {
+    func base64Encoded() -> String? {
+        return data(using: .utf8)?.base64EncodedString()
+    }
+
+    func base64Decoded() -> String? {
+        guard let data = Data(base64Encoded: self) else { return nil }
+        return String(data: data, encoding: .utf8)
     }
 }
