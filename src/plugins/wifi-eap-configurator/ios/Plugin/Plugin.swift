@@ -165,6 +165,8 @@ public class WifiEapConfigurator: CAPPlugin {
         }        
         
         let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+        config.joinOnce = false
+        config.lifeTimeInDays = 5
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 if error.code == 13 {
