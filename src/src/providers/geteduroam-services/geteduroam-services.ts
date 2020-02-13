@@ -66,12 +66,12 @@ export class GeteduroamServices {
         const params = {};
 
         let headers = {};
-        if(token){
+        if (token){
             headers = {'Authorization': 'Bearer ' + token};
         }
         let response: any;
 
-        if (url.includes('eap-config')) {
+        if (url.includes('eap-config') && !url.includes('https')) {
 
           response = await this.store.readExtFile(url);
           response.data = atob(response.data);
@@ -80,7 +80,7 @@ export class GeteduroamServices {
           response = await this.http.get(url, params, headers);
         }
         let jsonResult = '';
-
+        console.log('response: ', response)
         xml2js.parseString(response.data, function (err, result) {
             jsonResult = result;
         });
@@ -239,7 +239,7 @@ export class GeteduroamServices {
 
         let eapConfigFile: any;
 
-        if(profile.oauth){
+        if(!!profile.oauth && !!profile.token){
             eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint+'?format=eap-metadata', profile.token);
         } else{
             eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
