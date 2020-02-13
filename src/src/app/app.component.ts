@@ -147,10 +147,10 @@ export class GeteduroamApp {
    * @param uri
    */
   async navigate(uri: string) {
-    if (!uri.includes('.eap-config') || !uri.includes('file')) return;
-    await this.handleOpenUrl(uri);
-    this.rootPage = ProfilePage;
-
+    if (!!uri.includes('.eap-config') || !!uri.includes('file')) {
+      await this.handleOpenUrl(uri);
+      this.rootPage = ProfilePage;
+    }
   }
 
   /**
