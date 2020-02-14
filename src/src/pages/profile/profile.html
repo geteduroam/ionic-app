@@ -1,4 +1,4 @@
-<div *ngIf="showAll" class="container-content">
+<div *ngIf="showAll" class="profile-content">
     <div class="header-content" margin-top padding-top>
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
         <h1>{{getString('header', 'profile')}}</h1>
@@ -10,10 +10,10 @@
         <div  class="content-profile" padding-top >
             <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
 
-            <input [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
+            <input (focusout)="getEmail()" [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
                    !validEmail(provide.email) && suffixIdentity !== '' && !provide.email.includes(suffixIdentity) ?
-                   'error-validation' : ''"  class="input-profile" name="email" padding-left
-                   placeholder="{{getString('placeholder', 'example')}}" type="email"/>
+                   'error-validation' : ''" [placeholder]="getPlaceholder()" autocomplete="on" class="input-profile" name="email"
+                   padding-left type="email"/>
 
             <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
                 {{getString('error', 'username')}} </p>

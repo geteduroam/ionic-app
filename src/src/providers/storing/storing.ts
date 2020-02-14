@@ -124,10 +124,11 @@ export class StoringProvider {
   async readExtFile(uri){
 
     try {
-      return await Filesystem.readFile({path: uri });
+      let data =  await Filesystem.readFile({path: uri });
+      return data;
 
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
 

@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import {ProfileModel} from "../../shared/models/profile-model";
+import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
+import {ProviderInfo} from "../../shared/entities/providerInfo";
+import { Platform } from 'ionic-angular';
 
 @Injectable()
 export class GlobalProvider {
@@ -12,11 +15,18 @@ export class GlobalProvider {
   protected ssid: string;
   protected username: string;
   protected pass: string;
-
   private profile: ProfileModel;
 
   private dictionary: any;
 
+  private authenticationMethod: AuthenticationMethod;
+  private providerInfo: ProviderInfo;
+
+  private clientId : string = 'f817fbcc-e8f4-459e-af75-0822d86ff47a';
+
+  private overrideProfile: boolean = false;
+
+  constructor(public platform: Platform) {}
   //TODO: CREATE METHODS TO GET DATA
   getSsid() {
     return 'eduroam';
@@ -54,4 +64,35 @@ export class GlobalProvider {
     this.dictionary = dictionary;
   }
 
+  getAuthenticationMethod(){
+    return this.authenticationMethod;
+  }
+
+  setAuthenticationMethod(authenticationMethod: AuthenticationMethod){
+    this.authenticationMethod = authenticationMethod;
+  }
+
+  getProviderInfo(){
+    return this.providerInfo;
+  }
+
+  setProviderInfo(providerInfo: ProviderInfo){
+    this.providerInfo = providerInfo;
+  }
+
+  isAndroid() {
+    return this.platform.is('android');
+  }
+
+  getClientId(){
+    return this.clientId;
+  }
+
+  getOverrideProfile(){
+    return this.overrideProfile;
+  }
+
+  setOverrideProfile(profile: boolean){
+    this.overrideProfile = profile;
+  }
 }

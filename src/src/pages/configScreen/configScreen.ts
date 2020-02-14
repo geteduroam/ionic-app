@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {ModalController, NavController} from 'ionic-angular';
+import {Events, ModalController, NavController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -8,6 +8,8 @@ import { InstitutionSearch } from '../institutionSearch/institutionSearch';
 import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
+import {ProfileModel} from "../../shared/models/profile-model";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -21,47 +23,47 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Set of available profiles
    */
-  profiles: any;
+  profiles: ProfileModel[];
 
   /**
    * All the institutions retrieved by the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}
    */
-  instances: any;
+  instances: Object[];
 
   /**
    * Set of institutions filtered by what is written in the search-bar
    */
-  filteredInstances: any;
+  filteredInstances: Object[];
 
   /**
    * Selected institution
    */
-  instance: any;
+  instance: Object;
 
   /**
    * Name of the selected institution used in the search-bar
    */
-  instanceName : any = '';
+  instanceName: string = '';
 
   /**
    * Selected profile
    */
-  profile: any;
+  profile: ProfileModel;
 
   /**
    * Default profile (if exists) in the selected institution profiles set
    */
-  defaultProfile: any;
+  defaultProfile: ProfileModel;
 
   /**
    * Name of the selected profile
    */
-  profileName: any = '';
+  profileName: string = '';
 
   /**
    * Id of the selected profile
    */
-  selectedProfileId: any;
+  selectedProfileId: string;
 
   /**
    * Property to decide whether or not to show the institutions list
@@ -78,8 +80,9 @@ export class ConfigurationScreen extends BasePage{
    * Constructor
    * */
   constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
-              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider) {
-    super(loading, dictionary);
+              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
   }
 
   /**
@@ -112,7 +115,7 @@ export class ConfigurationScreen extends BasePage{
    * This method updates the properties [profile]{@link #profile}, [profileName]{@link #profileName} and [selectedProfileId]{@link #selectedProfileId}
    */
   clearProfile(){
-    this.profile = '';
+    this.profile = new ProfileModel();
     this.profileName = '';
     this.selectedProfileId = '';
   }
@@ -135,7 +138,20 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
+    if (institution.profiles.length > 1 ) {
+      // Check default profile and sort array for highlighting default profile
+      institution.profiles.forEach((profile, index) => {
+        if (!!profile.default) {
+          institution.profiles.splice(index,1);
+          this.defaultProfile = profile;
+          institution.profiles.unshift(this.defaultProfile);
+        }
+      });
+    } else {
+      this.defaultProfile = institution.profiles[0];
+    }
     this.profiles = institution.profiles;
+
     this.checkProfiles();
   }
 
@@ -145,17 +161,19 @@ export class ConfigurationScreen extends BasePage{
    * [selectedProfileId]{@link #selectedProfileId} and [defaultProfile]{@link #defaultProfile},
    */
   checkProfiles(){
-    if(this.profiles.length === 1){
+    if (this.profiles.length === 1) {
       this.profile = this.profiles[0];
       this.profileName = this.profile.name;
       this.selectedProfileId = this.profile.id;
-      this.defaultProfile = '';
+      this.defaultProfile = null;
     } else {
       let filteredProfiles = this.profiles.filter((item:any) => {
         return (item.default == true);
       });
+
       this.defaultProfile = filteredProfiles[0];
-      if(!!this.defaultProfile){
+
+      if (!!this.defaultProfile) {
         this.profile = this.defaultProfile;
         this.profileName = this.profile.name;
         this.selectedProfileId = this.profile.id;
@@ -168,31 +186,23 @@ export class ConfigurationScreen extends BasePage{
    * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
-  navigateTo(profile) {
-    this.showAll = false;
+  async navigateTo(profile:ProfileModel) {
+    if (!!this.activeNavigation) {
+      this.showAll = false;
 
-    !!profile.oauth ?
-      this.navCtrl.push(OauthFlow, null, {animation: 'transition'}) :
-      this.navCtrl.push(ProfilePage, {profile}, {animation: 'transition'});
+      let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
+      await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
 
+    } else{
+      await this.alertConnectionDisabled();
+    }
   }
 
-  /**
-   * Method executed when the class is initialized.
-   * This method updates the property [instances]{@link #instances} by making use of the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}.
-   */
-  // async ionViewDidEnter() {
-  //   this.loading.createAndPresent();
-  //   const response = await this.getEduroamServices.discovery();
-  //   this.loading.dismiss();
-  //   this.instances = response.instances;
-  //   this.showAll = true;
-  // }
-
   async ionViewWillEnter() {
-    const firstResponse = this.getEduroamServices.discovery();
-    const secondResponse = await this.waitingSpinner(firstResponse);
-    this.instances = secondResponse.instances;
-    this.showAll = true;
+      const firstResponse = this.getEduroamServices.discovery();
+      const secondResponse = await this.waitingSpinner(firstResponse);
+      this.instances = secondResponse.instances;
+      this.removeSpinner();
+      this.showAll = true;
   }
 }

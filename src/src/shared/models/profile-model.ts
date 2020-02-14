@@ -3,4 +3,7 @@ export class ProfileModel {
   name: string;
   eapconfig_endpoint: string;
   oauth: boolean;
+  token_endpoint?: string;
+  authorization_endpoint?: string;
+  token?: string;
 }

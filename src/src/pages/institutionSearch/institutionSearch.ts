@@ -1,9 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavParams, Platform, Searchbar, ViewController } from 'ionic-angular';
+import {Events, NavParams, Platform, Searchbar, ViewController} from 'ionic-angular';
 import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -45,8 +46,9 @@ export class InstitutionSearch extends BasePage{
 
   constructor(public navParams: NavParams, private viewCtrl: ViewController,
               private platform: Platform, protected loading: LoadingProvider,
-              protected dictionary: DictionaryServiceProvider) {
-    super(loading, dictionary);
+              protected dictionary: DictionaryServiceProvider,
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
   }
 
   /**
@@ -56,15 +58,15 @@ export class InstitutionSearch extends BasePage{
    * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
    * @param {any} institution the selected institution.
    */
-  async selectInstitution(institution: any) {
+  selectInstitution(institution: any) {
     this.instances = institution;
-
-    Keyboard.addListener('keyboardDidHide', () => {
-      this.viewCtrl.dismiss(institution);
-    })
-
+    this.searchBar.setFocus();
+    this.viewCtrl.dismiss(institution);
   }
 
+  ionViewWillLeave() {
+    Keyboard.hide();
+  }
   /**
    * Method which filters the institutions by the string introduced in the search-bar.
    * The filter is not case sensitive.
@@ -88,6 +90,7 @@ export class InstitutionSearch extends BasePage{
       this.clearInstance();
     }
   }
+
 
   /**
    * Method which gets all the institutions.
@@ -130,7 +133,4 @@ export class InstitutionSearch extends BasePage{
     }, 10);
   }
 
-  async dismiss() {
-    await this.viewCtrl.dismiss();
-  }
 }
