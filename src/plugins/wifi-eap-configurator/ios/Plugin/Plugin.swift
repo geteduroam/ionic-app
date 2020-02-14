@@ -49,161 +49,155 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
         
-        if let certificadosEliminados = eliminarCertificadosPrecios(ssid: ssid) {
+        guard let eapType = call.get("eap", Int.self) else {
             return call.success([
-                "message": certificadosEliminados as! Bool,
-                "success": true
+                "message": "plugin.wifieapconfigurator.error.auth.invalid",
+                "success": false,
             ])
         }
-//
-//        guard let eapType = call.get("eap", Int.self) else {
-//            return call.success([
-//                "message": "plugin.wifieapconfigurator.error.auth.invalid",
-//                "success": false,
-//            ])
-//        }
-//
-//
-//        let eapSettings = NEHotspotEAPSettings()
-//        eapSettings.isTLSClientCertificateRequired = true
-//        eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
-//
-//
-////        if let server = call.getString("servername"){
-////            eapSettings.trustedServerNames = [server]
-////        }
-//        if let anonymous = call.getString("anonymous") {
-//            eapSettings.outerIdentity = anonymous
-//        }
-//
-//        var username:String? = nil
-//        var password:String? = nil
-//        var authType:Int? = nil
-//
-//        var certificates: [SecCertificate]? = nil
-//        if let clientCertificate = call.getString("clientCertificate"){
-//            if let passPhrase = call.getString("passPhrase"){
-//                if let queries = pruebaCertificado(certificate: clientCertificate, passPhrase: passPhrase) {
-//                    certificates = []
-//
-//                    for (index, query) in ((queries as? [[String: Any]])?.enumerated())! {
-//
-//                        var item: CFTypeRef?
-//                        let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
-//
-//                        guard statusCertificate == errSecSuccess else {
-//                            return call.success([
-//                                "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
-//                                "success": false,
-//                            ])
-//                        }
-//
-//                        let certificate = item as! SecCertificate
-//
-//                        certificates?.append(certificate)
-//
-//                    }
-//
-//                    eapSettings.setTrustedServerCertificates(certificates!)
-//                }
-//                if let identity = addClientCertificate(certName: "client" + ssid, certificate: clientCertificate, password: passPhrase)
-//                {
-//                    let id = identity as! SecIdentity
-//                    eapSettings.setIdentity(id)
-//                    eapSettings.isTLSClientCertificateRequired = true
-//                }
-//            }else{
-//                return call.success([
-//                    "message": "plugin.wifieapconfigurator.error.passPhrase.missing",
-//                    "success": false,
-//                ])
-//            }
-//        }
-//        else{
-//            if call.getString("username") != nil && call.getString("username") != ""{
-//                username = call.getString("username")
-//            } else {
-//                return call.success([
-//                    "message": "plugin.wifieapconfigurator.error.username.missing",
-//                    "success": false,
-//                ])
-//            }
-//
-//            if call.getString("password") != nil && call.getString("password") != ""{
-//                password = call.getString("password")
-//            }
-//            else{
-//                return call.success([
-//                    "message": "plugin.wifieapconfigurator.error.password.missing",
-//                    "success": false,
-//                ])
-//            }
-//
-//            if call.getInt("auth") != nil{
-//                authType = call.getInt("auth")
-//            }
-//            else{
-//                return call.success([
-//                    "message": "plugin.wifieapconfigurator.error.auth.missing",
-//                    "success": false,
-//                ])
-//            }
-//
-//            eapSettings.username = username ?? ""
-//            eapSettings.password = password ?? ""
-//            eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType ?? 0)!
-//        }
-//
-//        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
-//            if let certificate = call.getString("caCertificate") {
-//                if (addCertificate(certName: "Certificate " + ssid, certificate: certificate) as? Bool ?? false)
-//                {
-//                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-//                                                   kSecAttrLabel as String: "Certificate " + ssid,
-//                                                   kSecReturnRef as String: kCFBooleanTrue]
-//                    var item: CFTypeRef?
-//                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-//                    guard status == errSecSuccess else { return }
-//                    let savedCert = item as! SecCertificate
-//                    eapSettings.setTrustedServerCertificates([savedCert])
-//                }
-//                else {
-////                    return call.success(addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
-//                }
-//            }
-//        }
         
-//        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
-//        NEHotspotConfigurationManager.shared.apply(config) { (error) in
-//            if let error = error {
-//                if error.code == 13 {
-//                    call.success([
-//                        "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
-//                        "success": false,
-//                    ])
-//                }
-//
-//                if error.code == 7 {
-//                    call.success([
-//                        "message": "plugin.wifieapconfigurator.error.network.userCancelled",
-//                        "success": false,
-//                    ])
-//                }
-//            } else {
-//                if self.currentSSIDs().first == ssid {
-//                    call.success([
-//                        "message": "plugin.wifieapconfigurator.success.network.linked",
-//                        "success": true,
-//                    ])
-//                } else {
-//                    call.success([
-//                        "message": "plugin.wifieapconfigurator.error.network.notLinked",
-//                        "success": false,
-//                    ])
-//                }
-//            }
-//        }
+        
+        let eapSettings = NEHotspotEAPSettings()
+        eapSettings.isTLSClientCertificateRequired = true
+        eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
+        
+        
+        //        if let server = call.getString("servername"){
+        //            eapSettings.trustedServerNames = [server]
+        //        }
+        if let anonymous = call.getString("anonymous") {
+            eapSettings.outerIdentity = anonymous
+        }
+        
+        var username:String? = nil
+        var password:String? = nil
+        var authType:Int? = nil
+        
+        var certificates: [SecCertificate]? = nil
+        if let clientCertificate = call.getString("clientCertificate"){
+            if let passPhrase = call.getString("passPhrase"){
+                if let queries = pruebaCertificado(certificate: clientCertificate, passPhrase: passPhrase) {
+                    certificates = []
+                    
+                    for (index, query) in ((queries as? [[String: Any]])?.enumerated())! {
+                        
+                        var item: CFTypeRef?
+                        let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
+                        
+                        guard statusCertificate == errSecSuccess else {
+                            return call.success([
+                                "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
+                                "success": false,
+                            ])
+                        }
+                        
+                        let certificate = item as! SecCertificate
+                        
+                        certificates?.append(certificate)
+                        
+                    }
+                    
+                    eapSettings.setTrustedServerCertificates(certificates!)
+                }
+                if let identity = addClientCertificate(certName: "client" + ssid, certificate: clientCertificate, password: passPhrase)
+                {
+                    let id = identity as! SecIdentity
+                    eapSettings.setIdentity(id)
+                    eapSettings.isTLSClientCertificateRequired = true
+                }
+            }else{
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.passPhrase.missing",
+                    "success": false,
+                ])
+            }
+        }
+        else{
+            if call.getString("username") != nil && call.getString("username") != ""{
+                username = call.getString("username")
+            } else {
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.username.missing",
+                    "success": false,
+                ])
+            }
+            
+            if call.getString("password") != nil && call.getString("password") != ""{
+                password = call.getString("password")
+            }
+            else{
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.password.missing",
+                    "success": false,
+                ])
+            }
+            
+            if call.getInt("auth") != nil{
+                authType = call.getInt("auth")
+            }
+            else{
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.auth.missing",
+                    "success": false,
+                ])
+            }
+            
+            eapSettings.username = username ?? ""
+            eapSettings.password = password ?? ""
+            eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType ?? 0)!
+        }
+        
+        //        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
+        //            if let certificate = call.getString("caCertificate") {
+        //                if (addCertificate(certName: "Certificate " + ssid, certificate: certificate) as? Bool ?? false)
+        //                {
+        //                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+        //                                                   kSecAttrLabel as String: "Certificate " + ssid,
+        //                                                   kSecReturnRef as String: kCFBooleanTrue]
+        //                    var item: CFTypeRef?
+        //                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+        //                    guard status == errSecSuccess else { return }
+        //                    let savedCert = item as! SecCertificate
+        //                    eapSettings.setTrustedServerCertificates([savedCert])
+        //                }
+        //                else {
+        ////                    return call.success(addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
+        //                }
+        //            }
+        //        }
+        
+        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+        NEHotspotConfigurationManager.shared.apply(config) { (error) in
+            if let error = error {
+                if error.code == 13 {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                        "success": false,
+                    ])
+                }
+                
+                if error.code == 7 {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.error.network.userCancelled",
+                        "success": false,
+                    ])
+                }
+            } else {
+                if self.currentSSIDs().first == ssid {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.success.network.linked",
+                        "success": true,
+                    ])
+                } else {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.error.network.notLinked",
+                        "success": false,
+                    ])
+                }
+            }
+        }
     }
+    
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
