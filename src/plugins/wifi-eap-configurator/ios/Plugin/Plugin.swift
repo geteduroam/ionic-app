@@ -462,6 +462,25 @@ public class WifiEapConfigurator: CAPPlugin {
         let items = rawItems! as! Array<Dictionary<String, Any>>
         let firstItem = items[0]
         if let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity? {
+            
+            let addquery: [String: Any] = [kSecValueRef as String: identity,
+                                           kSecAttrLabel as String: certName]
+            let status = SecItemAdd(addquery as CFDictionary, nil)
+            guard status == errSecSuccess else {
+                if status == errSecDuplicateItem {
+                    let getquery: [String: Any] = [kSecValueRef as String: identity,
+                                                   kSecAttrLabel as String: certName,
+                                                   kSecReturnRef as String: kCFBooleanTrue]
+                    var item: CFTypeRef?
+                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                    let statusDelete = SecItemDelete(getquery as CFDictionary)
+                    guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                    return addClientCertificate(certName: certName, certificate: certificate, password: password)
+                }
+                
+                return false
+            }
+            
             return identity
             
         }
