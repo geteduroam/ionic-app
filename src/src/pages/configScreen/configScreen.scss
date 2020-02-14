@@ -1,8 +1,95 @@
-page-welcome {
-  background-color: #f6f4f3 !important;
+page-config-screen {
 
-  .other-views {
-    width: auto;
-    margin: 0 auto;
+  //---------------------------
+  // Searchbar custom style
+  //---------------------------
+  ion-searchbar {
+    background: none !important;
+    padding-bottom: 0 !important;
+    border: 1px solid #CAD0D6 !important;
+    border-radius: 4px;
+    margin-left: 7px;
+    margin-right: 4px;
+    height: 45px;
+
+    .searchbar-input-container {
+      border-radius: 4px;
+
+      input.searchbar-input {
+        box-shadow: none !important;
+        padding-left: 45px !important;
+      }
+
+      //---------------------------
+      // Icon searchbar custom style
+      //---------------------------
+      .searchbar-search-icon {
+        background-size: 28px !important;
+        margin-left: 0 !important;
+        height: 34px;
+        width: 37px;
+        color: #276fbf !important;
+        position: absolute;
+        top: 8px !important;
+        left: 10px !important;
+      }
+    }
   }
+
+ //---------------------------
+ // iOS searchbar custom style
+ //---------------------------
+  ion-searchbar.searchbar-ios {
+    width: 97% !important;
+
+    .searchbar-input-container {
+      input.searchbar-input {
+        padding-top: 10px !important;
+      }
+    }
+  }
+  //---------------------------
+  // ion-select custom style
+  //---------------------------
+  ion-select {
+    min-width: 97%;
+    //height: 100%;
+    border-radius: 4px;
+    margin-left: 7px !important;
+    border: 1px solid #CAD0D6 !important;
+  }
+
+}
+//---------------------------
+// ion-item custom style
+//---------------------------
+ion-item.item-profile {
+  width: 100%;
+  height: 50px;
+
+  div.item-inner {
+    padding: 0 !important;
+    border-bottom: 0 !important;
+  }
+}
+//---------------------------------
+// ion-list custom style
+//---------------------------------
+ion-list {
+  width: 100%;
+  margin-top: 1px !important;
+
+  ion-item {
+    background-color: unset;
+  }
+}
+
+//---------------------------------
+// Ion-select options style custom
+//---------------------------------
+.default-profile {
+  font-weight: bold;
+}
+.default-profile .alert-wrapper {
+  font-weight: bold !important;
 }

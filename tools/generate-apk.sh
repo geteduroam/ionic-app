@@ -9,6 +9,9 @@ if [ ! -d ~/.gradle ]; then
 fi
 
 cd ..
+echo "Removing old previous dockers..."
+docker-compose down --rmi all
+docker-compose rm -sfv
 echo "Running docker to generate and sign APK for android..."
 docker-compose up
 

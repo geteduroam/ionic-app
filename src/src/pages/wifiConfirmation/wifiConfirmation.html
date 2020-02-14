@@ -1,26 +1,23 @@
-
-<ion-content class="container" text-center>
-
-    <div class="base-content">
-
-        <div class="header-content">
-            <img src="../../assets/icon/cog-outline.svg" />
-            <h1> Eduroam wifi confirmation</h1>
-        </div>
-
-        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
-
-        <div class="content-button">
-            <button class="button-control" ion-button> Re-configure </button>
-        </div>
-
-        <p text-center >No, thanks</p>
-
+<div *ngIf="showAll" class="container-content">
+    <div class="header-content" margin padding-top>
+        <img #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
+        <h1>{{getString('header', 'confirmation')}}</h1>
     </div>
 
-    <!-- REMOVE THIS LINES -->
-    <div class="other-views">
-        <p>To view others pages</p>
-        <button (click)="navigateTo('welcome')" class="button-control" ion-button> Welcome Screen </button>
+    <div class="content-info" padding text-center>
+
+        <div class="info-text" no-margin>
+
+            <p class="copy" margin padding>
+                {{global.getSsid()}}{{getString('text', 'configured')}}
+            </p>
+        </div>
     </div>
-</ion-content>
+    <div class="footer-info" text-center>
+
+        <div *ngIf="isAndroid()" class="content-button" padding-top>
+            <button (click)="exitApp()" class="button-control" ion-button text-capitalize>{{getString('button', 'ok')}}</button>
+        </div>
+    </div>
+</div>
+

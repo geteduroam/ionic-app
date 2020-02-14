@@ -1,26 +1,40 @@
-
-<ion-content class="container" text-center>
-
-    <div class="base-content">
-
-        <div class="header-content">
-            <img src="../../assets/icon/cog-outline.svg" />
-            <h1> Eduroam configuration screen</h1>
-        </div>
-
-        <p class="copy">Hi,It seems you have a Eduroam configured in your device. Do you want to reconfigure it?</p>
-
-        <div class="content-button">
-            <button class="button-control" ion-button> Re-configure </button>
-        </div>
-
-        <p text-center >No, thanks</p>
-
+<div *ngIf="showAll" class="container-content">
+    <div class="header-content" margin-top padding-top>
+        <img alt="setting" src="../../assets/icon/cog-outline.svg" />
+        <h1>{{getString('header', 'config')}}</h1>
     </div>
 
-    <!-- REMOVE THIS LINES -->
-    <div class="other-views">
-        <p>To view others pages</p>
-        <button (click)="navigateTo('wifiConfiguration')" class="button-control" ion-button> Wifi Configuration </button>
+    <div class="content-form" margin-top padding-top text-center>
+        <ion-label class="label-conf" no-margin padding-top text-left>{{getString('label', 'institution')}}</ion-label>
+
+        <div class="row" padding-top>
+
+            <ion-searchbar (click)="showModal()" [(ngModel)]="instanceName" cancelButtonText
+                           class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">
+
+            </ion-searchbar>
+        </div>
+        <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" no-margin padding-top text-left >{{getString('label', 'profile')}}</ion-label>
+        <div class="row" margin-top>
+
+            <ion-item *ngIf="!!profiles && profiles.length > 1" class="item-profile" no-margin no-padding>
+
+                <ion-select (ionChange)="selectProfile()"  *ngIf="!!profiles && profiles.length > 1"
+                            [(ngModel)]="selectedProfileId"
+                            [ngClass]="profile === defaultProfile ? 'default-profile': ''"
+                            [selectedText]="profileName" class="select-profile" name="selectProfile"
+                            placeholder="{{getString('placeholder', 'profile')}}" text-left >
+
+                    <ion-option *ngFor="let profileAux of profiles" [value]="profileAux.id" [className]="!!profileAux.default ? 'default-profile':'normal'">{{profileAux.name}}</ion-option>
+                </ion-select>
+            </ion-item>
+        </div>
     </div>
-</ion-content>
+    <div class="footer-form">
+
+        <div class="content-button" margin *ngIf="showButton">
+            <button (click)="navigateTo(profile)" [disabled]="!profile" class="button-control" ion-button text-capitalize>{{getString('button', 'next')}}</button>
+        </div>
+    </div>
+</div>
+

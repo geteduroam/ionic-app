@@ -1,11 +1,26 @@
 {
-  "rules": {
-    "no-duplicate-variable": true,
-    "no-unused-variable": [
-      false
-    ]
-  },
   "rulesDirectory": [
-    "node_modules/tslint-eslint-rules/dist/rules"
-  ]
+    "node_modules/codelyzer"
+  ],
+  "extends": ["angular-tslint-rules"],
+  "rules": {
+    // override tslint rules here
+    "member-access": [
+      true,
+      "no-public"
+    ],
+    "no-this-assignment": true,
+    "static-this": true,
+    "no-empty-interface": true,
+    "no-invalid-template-strings": true,
+    "no-parameter-reassignment": true,
+    "prefer-const": true,
+    "no-duplicate-variable": [
+      true,
+      "check-parameters"
+    ],
+    "no-unbound-method": true,
+    "no-reference": true,
+    "cyclomatic-complexity": true
+  }
 }
