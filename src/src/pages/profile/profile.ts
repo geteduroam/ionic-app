@@ -37,16 +37,34 @@ export class ProfilePage extends BasePage{
    */
   authenticationMethods: AuthenticationMethod[];
 
+  /**
+   * First valid authentication method
+   */
   validMethod: AuthenticationMethod;
 
+  /**
+   * Info provider from eap-config file
+   */
   providerInfo: ProviderInfo;
 
+  /**
+   * Check terms of use
+   */
   termsOfUse: boolean = false;
 
+  /**
+   * Link url of terms of use
+   */
   termsUrl: string = '';
 
+  /**
+   * It checks password
+   */
   errorPass: boolean = false;
 
+  /**
+   * Identity of institution
+   */
   suffixIdentity: string = '';
 
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
@@ -58,55 +76,32 @@ export class ProfilePage extends BasePage{
   }
 
   /**
-   *  Method executed when the class did load
+   * Method to show dynamically identity institution on email input
    */
-  async ionViewDidLoad() {
-    const profile = await this.getProfile();
-    this.profile = await this.waitingSpinner(profile);
-    const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
-    this.manageProfileValidation(validProfile);
-  }
-
-  /**
-   *  Method executed when the class did enter
-   */
-  async ionViewDidEnter() {
-    this.removeSpinner();
-    this.showAll = true;
-  }
-
   getEmail() {
     if (!!this.provide.email && !this.provide.email.includes('@') && !!this.suffixIdentity) {
       this.provide.email = `${this.provide.email}@${this.suffixIdentity}`;
     }
   }
 
+  /**
+   * Method to get dynamically placeholder on input
+   */
   getPlaceholder() {
     if (this.suffixIdentity !== '') {
       return `username@${this.suffixIdentity}`;
     } else {
       return this.getString('placeholder', 'example');
     }
-
   }
 
   /**
    * Method to check form and navigate.
    */
   async checkForm() {
-
     if (!!this.validateForm()) {
-      let config = {
-        ssid: this.global.getSsid(),
-        username: this.provide.email,
-        password: this.provide.pass,
-        eap: parseInt(this.validMethod.eapMethod.type.toString()),
-        servername: this.validMethod.serverSideCredential.serverID,
-        auth: this.global.auth.MSCHAPv2,
-        anonymous: "",
-        caCertificate: this.validMethod.serverSideCredential.ca.content
-      };
 
+      let config = this.configConnection();
       const checkRequest = this.getEduroamServices.connectProfile(config);
 
       if (!!checkRequest) {
@@ -115,6 +110,9 @@ export class ProfilePage extends BasePage{
     }
   }
 
+  /**
+   * Navigation and check if navigation is active
+   */
   async navigateTo() {
     if (this.activeNavigation) {
       this.showAll = false;
@@ -125,36 +123,23 @@ export class ProfilePage extends BasePage{
     } else {
       await this.alertConnectionDisabled();
     }
-
   }
+
+  /**
+   * Check profile selected
+   */
+  async getProfile() {
+    let profileAux = this.navParams.get('profile');
+    this.profile = !!profileAux && profileAux ? this.navParams.get('profile') : this.global.getProfile();
+    return this.profile;
+  }
+
   /**
    * Method which returns the eap institutionSearch endpoint
    * @return {any} eapconfig_endpoint the eap institutionSearch endpoint
    */
   getEapconfigEndpoint() {
     return this.profile.eapconfig_endpoint;
-  }
-
-  /**
-   * Method to activate terms of use on view.
-   */
-  protected createTerms() {
-    if (this.providerInfo.termsOfUse !== '') {
-      // Activate checkbox on view
-      this.termsOfUse = true;
-
-      const terms = this.providerInfo.termsOfUse.toString();
-      // Get the web address within the terms of use
-      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
-        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
-
-    }
-  }
-
-  async getProfile() {
-    let profileAux = this.navParams.get('profile');
-    this.profile = !!profileAux && profileAux ? this.navParams.get('profile') : this.global.getProfile();
-    return this.profile;
   }
 
   /**
@@ -167,10 +152,18 @@ export class ProfilePage extends BasePage{
     return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
   }
 
+  /**
+   * Method to validate email.
+   * @return {boolean}
+   */
   validEmail(email: string) {
     return this.validator.validateEmail(email, this.suffixIdentity);
   }
 
+  /**
+   * Method to manage validation profile
+   * @param validProfile check if profile is valid
+   */
   async manageProfileValidation(validProfile: boolean){
     this.providerInfo = this.global.getProviderInfo();
 
@@ -183,18 +176,83 @@ export class ProfilePage extends BasePage{
       }
 
     } else {
-
-      if (!!this.providerInfo) {
-
-        let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
-            !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-
-      } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
-      }
-      await this.navCtrl.pop();
+      await this.notValidProfile();
     }
+  }
+
+  /**
+   * Method to check message when profile is not valid
+   */
+  async notValidProfile() {
+    if(!!this.providerInfo){
+
+      let url = this.checkUrlInfoProvide();
+
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+
+    } else {
+
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
+    }
+    await this.navCtrl.pop();
+  }
+
+  /**
+   * Method to check if provider info contains links
+   * and show it on error page
+   */
+  checkUrlInfoProvide() {
+    return !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
+      !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
+  }
+
+  /**
+   *  Lifecycle method executed when the class did load
+   */
+  async ionViewDidLoad() {
+    const profile = await this.getProfile();
+    this.profile = await this.waitingSpinner(profile);
+    const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
+    this.manageProfileValidation(validProfile);
+  }
+
+  /**
+   *  Lifecycle method executed when the class did enter
+   */
+  async ionViewDidEnter() {
+    this.removeSpinner();
+    this.showAll = true;
+  }
+
+  /**
+   * Method to activate terms of use on view.
+   */
+  protected createTerms() {
+    if (this.providerInfo.termsOfUse !== '') {
+
+      // Activate checkbox on view
+      this.termsOfUse = true;
+      const terms = this.providerInfo.termsOfUse.toString();
+
+      // Get the web address within the terms of use
+      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
+        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
+    }
+  }
+
+  /**
+   * Method to create configuration to plugin WifiEapConfigurator
+   */
+  private configConnection() {
+    return {
+      ssid: this.global.getSsid(),
+      username: this.provide.email,
+      password: this.provide.pass,
+      eap: parseInt(this.validMethod.eapMethod.type.toString()),
+      servername: this.validMethod.serverSideCredential.serverID,
+      auth: this.global.auth.MSCHAPv2,
+      anonymous: "",
+      caCertificate: this.validMethod.serverSideCredential.ca.content
+    };
   }
 }
