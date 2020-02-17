@@ -53,7 +53,7 @@ export class OauthFlow extends BasePage{
 
   /**
    * Method to open browser and initialize the oAuth flow
-   * See: [ #https://github.com/Uninett/lets-wifi/blob/master/API.md#authorization-endpoint ]
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#authorization-endpoint}
    * @param oAuth is an object to request the authorized endpoint
    * @param oauth2Options: oAuthModel
    * @param token_endpoint: url token
@@ -104,7 +104,7 @@ export class OauthFlow extends BasePage{
 
   /**
    * Method to create request to token
-   * See: [ #https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint ]
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}
    * @param res url to get token
    */
   async getToken(res) {
@@ -214,7 +214,7 @@ export class OauthFlow extends BasePage{
 
   /**
    * Provided oAuth Model by the authorization-endpoint
-   * See: [ #https://github.com/Uninett/lets-wifi/blob/master/API.md#authorization-endpoint ]
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}
    */
   private oAuthModel() {
     return {
