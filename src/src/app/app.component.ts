@@ -136,7 +136,7 @@ export class GeteduroamApp {
       this.navigate(urlOpen.url);
     });
 
-    App.addListener('backButton', (data: AppUrlOpen) => {
+    App.addListener('backButton', () => {
       this.platform.backButton.observers.pop();
 
     });
@@ -215,7 +215,7 @@ export class GeteduroamApp {
   /**
    * This method check status of connection
    */
-  private async statusConnection():Promise<NetworkStatus> {
+  private async statusConnection(): Promise<NetworkStatus> {
     return await Network.getStatus()
   }
 
