@@ -199,7 +199,7 @@ export class ConfigurationScreen extends BasePage{
   }
 
   /**
-   *  Life Cycle when entering a page, before it becomes the active one
+   *  Lifecycle when entering a page, before it becomes the active one
    *  Load the discovery data and show the spinner
    */
   async ionViewWillEnter() {

@@ -13,7 +13,14 @@ import {GlobalProvider} from "../../providers/global/global";
 
 export class ReconfigurePage extends BasePage{
 
+  /**
+   * It changes button message if network is associated
+   */
   showReconfigure : boolean = true;
+
+  /**
+   * It checks if it is an Android platform
+   */
   isAndroid: boolean;
 
   constructor(private platform: Platform, private navParams: NavParams, private nav: Nav, private navCtrl: NavController,
@@ -23,15 +30,9 @@ export class ReconfigurePage extends BasePage{
 
   }
 
-  ionViewWillEnter() {
-    if(this.nav['rootParams'].reconfigure !== undefined){
-      this.showReconfigure = this.nav['rootParams'].reconfigure;
-      console.log('**************this.nav[\'rootParams\'].reconfigure**************',this.nav['rootParams'].reconfigure);
-    }
-    this.isAndroid = this.platform.is('android');
-    console.log('**************RECONFIGURE**************',this.showReconfigure);
-  }
-
+  /**
+   * Navigation and check connection
+   */
   async navigateTo() {
     if (this.activeNavigation) {
       await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
@@ -40,8 +41,23 @@ export class ReconfigurePage extends BasePage{
     }
   }
 
+  /**
+   * This method close app.
+   * [ Only Android can closed app ]
+   */
   exitApp() {
     this.platform.exitApp();
   }
 
+  /**
+   *  Lifecycle when entering a page, before it becomes the active one
+   *
+   */
+  ionViewWillEnter() {
+    if (this.nav['rootParams'].reconfigure !== undefined) {
+
+      this.showReconfigure = this.nav['rootParams'].reconfigure;
+    }
+    this.isAndroid = this.platform.is('android');
+  }
 }
