@@ -1,9 +1,7 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { ReconfigurePage } from './welcome/reconfigure';
-
 import { ErrorsPage } from './errors/errors';
-
 import { ConfigurationScreen } from "./configScreen/configScreen";
 import { WifiConfirmation} from "./wifiConfirmation/wifiConfirmation";
 import { FormsModule } from '@angular/forms';
