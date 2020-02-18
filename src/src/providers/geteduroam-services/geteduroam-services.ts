@@ -110,8 +110,8 @@ export class GeteduroamServices {
    */
   async generateOAuthFlow(data: oAuthModel) {
 
-    let url = `${data.oAuthUrl}?client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}
-               &scope=${data.scope}&state=${CryptoUtil.generateRandomString(10)}`;
+    let url = `${data.oAuthUrl}?client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}`
+        url += `&scope=${data.scope}&state=${CryptoUtil.generateRandomString(10)}`;
     let codeVerifier = CryptoUtil.generateRandomString(43);
     let codeChallenge = await CryptoUtil.deriveChallenge(codeVerifier);
 
