@@ -1,3 +1,6 @@
+/**
+ * Model to Profile before oAuth flow
+ */
 export class ProfileModel {
   id: string;
   name: string;
