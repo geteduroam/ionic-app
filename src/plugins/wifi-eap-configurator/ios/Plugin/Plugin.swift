@@ -57,7 +57,7 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         
         
-        
+        eliminarCertificadosPrevios(ssid: ssid)
         
         let eapSettings = NEHotspotEAPSettings()
         eapSettings.isTLSClientCertificateRequired = true
@@ -81,28 +81,8 @@ public class WifiEapConfigurator: CAPPlugin {
         
         if let clientCertificate = call.getString("clientCertificate"){
             if let passPhrase = call.getString("passPhrase"){
-                if let queries = addClientCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
-                    certificates = []
-                    
-                    for query in ((queries as? [[String: Any]])?.enumerated())! {
-                        
-                        var item: CFTypeRef?
-                        let statusCertificate = SecItemCopyMatching(query as! CFDictionary, &item)
-                        
-                        guard statusCertificate == errSecSuccess else {
-                            return call.success([
-                                "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
-                                "success": false,
-                            ])
-                        }
-                        
-                        let certificate = item as! SecCertificate
-                        
-                        certificates?.append(certificate)
-                        
-                    }
-                    
-                    eapSettings.setTrustedServerCertificates(certificates!)
+                if let clientCertificates = addClientCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
+                    eapSettings.setTrustedServerCertificates(clientCertificates as! [SecCertificate])
                 }else {
                     return call.success(["messsage": "plugin.wifieapconfigurator.error.clientCertificate.couldNotBeAdded",
                                          "success": false])
@@ -362,26 +342,7 @@ public class WifiEapConfigurator: CAPPlugin {
     
     func eliminarCertificadosPrevios(ssid: String) -> Any? {
         
-        //La consulta
-        let getQueryCertificate: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                  kSecAttrLabel as String: "Certificate " + ssid,
-                                                  kSecReturnRef as String: kCFBooleanTrue]
-        
-        //La referencia
-        var itemCertificate: CFTypeRef?
-        
-        //La respuesta, si es 0 funcionó y se lo pasa a la referencia
-        let statusCertificate = SecItemCopyMatching(getQueryCertificate as CFDictionary, &itemCertificate)
-        
-        
-        //cuida de que funcione
-        guard statusCertificate == errSecSuccess else { return false }
-        
-        //Lo elimina
-        let statusCertificateDelete = SecItemDelete(getQueryCertificate as CFDictionary)
-        
-        //Cuida de que funcione el eliminar, si funciona continua el flujo
-        guard statusCertificateDelete == errSecSuccess else { return false }
+     
         
         //El item del identity
         var itemIdentity: CFTypeRef?
@@ -418,7 +379,7 @@ public class WifiEapConfigurator: CAPPlugin {
             let items = rawItems! as! Array<Dictionary<String, Any>>
             let firstItem = items[0]
             if let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]? {
-                var certificateQueries : [[String: Any]] = []
+                var certificateQueries : [SecCertificate] = []
                 
                 for (index, cert) in chain.enumerated() {
                     
@@ -447,10 +408,18 @@ public class WifiEapConfigurator: CAPPlugin {
                             return false
                         }
                         
-                        certificateQueries.append(
-                            [kSecClass as String: kSecClassCertificate,
-                             kSecAttrLabel as String: "getEduroamCertificate" + "\(index)",
-                                kSecReturnRef as String: kCFBooleanTrue])
+                        let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                     kSecAttrLabel as String: "getEduroamCertificate" + "\(index)",
+                                                        kSecReturnRef as String: kCFBooleanTrue]
+                        
+                        var certItem : CFTypeRef?
+                        let statusCertificate = SecItemCopyMatching(getquery as CFDictionary, &certItem)
+                        guard statusCertificate == errSecSuccess else { return nil }
+//
+                        
+                        certificateQueries.append(certItem as! SecCertificate)
+                    } else {
+                        return nil
                     }
                 }
                 return certificateQueries
@@ -466,7 +435,7 @@ public class WifiEapConfigurator: CAPPlugin {
         let options = [ kSecImportExportPassphrase as String: password ]
         var rawItems: CFArray?
         let certBase64 = certificate
-        //        if let certDecoded = certBase64.base64Decoded() {
+        //        if let certDecoded = certBase64.base64Decoded() {,
         //                        let certDecodedClean = cleanCertificate(certificate: certBase64)
         if let data = Data(base64Encoded: certBase64) {
             let statusImport = SecPKCS12Import(data as CFData,
