@@ -7,7 +7,7 @@ import UIKit
 @available(iOS 13.0, *)
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
-    
+
     func getAuthType(authType : Int) -> NEHotspotEAPSettings.TTLSInnerAuthenticationType? {
         switch authType {
         case 3:
@@ -16,12 +16,12 @@ public class WifiEapConfigurator: CAPPlugin {
             return .eapttlsInnerAuthenticationMSCHAPv2
         case 5:
             return .eapttlsInnerAuthenticationPAP
-            
+
         default:
             return nil
         }
     }
-    
+
     func getEAPType(eapType: Int) -> NSNumber? {
         switch eapType {
         case 43:
@@ -36,11 +36,11 @@ public class WifiEapConfigurator: CAPPlugin {
             return nil
         }
     }
-    
+
     var eapCertificates : [SecCertificate]? = nil
-    
-    
-    
+
+
+
     @objc func configureAP(_ call: CAPPluginCall) {
         guard let ssid = call.getString("ssid") else {
             return call.success([
@@ -48,55 +48,58 @@ public class WifiEapConfigurator: CAPPlugin {
                 "success": false,
             ])
         }
-        
+
         guard let eapType = call.get("eap", Int.self) else {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.auth.invalid",
                 "success": false,
             ])
         }
-        
-        
-        eliminarCertificadosPrevios(ssid: ssid)
-        
+
+
         let eapSettings = NEHotspotEAPSettings()
         eapSettings.isTLSClientCertificateRequired = true
         eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
-        
-        
-        if let server = call.getString("servername"){
-            eapSettings.trustedServerNames = [server]
-        }
-        
-        
+
         if let anonymous = call.getString("anonymous") {
-            eapSettings.outerIdentity = anonymous //Necesario para clientCertificate (no se si para los demás)
+            eapSettings.outerIdentity = anonymous
         }
-        
+
         var username:String? = nil
         var password:String? = nil
         var authType:Int? = nil
-        
+
         var certificates: [SecCertificate]? = nil
-        
         if let clientCertificate = call.getString("clientCertificate"){
             if let passPhrase = call.getString("passPhrase"){
-                if let clientCertificates = addClientCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
-                    eapSettings.setTrustedServerCertificates(clientCertificates as! [SecCertificate])
-                }else {
-                    return call.success(["messsage": "plugin.wifieapconfigurator.error.clientCertificate.couldNotBeAdded",
-                                         "success": false])
+                if let queries = pruebaCertificado(certificate: clientCertificate, passPhrase: passPhrase) {
+                    certificates = []
+
+                    for (index, query) in ((queries as? [[String: Any]])?.enumerated())! {
+
+                        var item: CFTypeRef?
+                        let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
+
+                        guard statusCertificate == errSecSuccess else {
+                            return call.success([
+                                "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
+                                "success": false,
+                            ])
+                        }
+
+                        let certificate = item as! SecCertificate
+
+                        certificates?.append(certificate)
+
+                    }
+
+                    eapSettings.setTrustedServerCertificates(certificates!)
                 }
-                
-                if let identity = addClientIdentity(certName: "client" + ssid, certificate: clientCertificate, password: passPhrase)
+                if let identity = addClientCertificate(certName: "client" + ssid, certificate: clientCertificate, password: passPhrase)
                 {
                     let id = identity as! SecIdentity
                     eapSettings.setIdentity(id)
                     eapSettings.isTLSClientCertificateRequired = true
-                }
-                else {
-                    return call.success(["messsage": "plugin.wifieapconfigurator.error.identity.couldNotBeAdded",
-                                         "success": false])
                 }
             }else{
                 return call.success([
@@ -106,7 +109,7 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
         else{
-            if call.getString("username") != nil && call.getString("username") != "" {
+            if call.getString("username") != nil && call.getString("username") != ""{
                 username = call.getString("username")
             } else {
                 return call.success([
@@ -114,7 +117,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     "success": false,
                 ])
             }
-            
+
             if call.getString("password") != nil && call.getString("password") != ""{
                 password = call.getString("password")
             }
@@ -124,7 +127,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     "success": false,
                 ])
             }
-            
+
             if call.getInt("auth") != nil{
                 authType = call.getInt("auth")
             }
@@ -134,36 +137,13 @@ public class WifiEapConfigurator: CAPPlugin {
                     "success": false,
                 ])
             }
-            
+
             eapSettings.username = username ?? ""
             eapSettings.password = password ?? ""
             eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType ?? 0)!
         }
-        
-        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
-            if let certificate = call.getString("caCertificate") {
-                if (addCertificate(certName: "caCert" + ssid, certificate: certificate) as? Bool ?? false)
-                {
-                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                   kSecAttrLabel as String: "caCert" + ssid,
-                                                   kSecReturnRef as String: kCFBooleanTrue]
-                    var item: CFTypeRef?
-                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                    guard status == errSecSuccess else { return }
-                    let savedCert = item as! SecCertificate
-                    
-                    certificates?.append(savedCert)
-                    
-                    if let certificates = certificates {
-                        eapSettings.setTrustedServerCertificates(certificates)
-                    }
-                }
-                else {
-                    return call.success(addCertificate(certName: "caCert" + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
-                }
-            }
-        }
-        
+
+
         let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
@@ -173,7 +153,7 @@ public class WifiEapConfigurator: CAPPlugin {
                         "success": false,
                     ])
                 }
-                
+
                 if error.code == 7 {
                     call.success([
                         "message": "plugin.wifieapconfigurator.error.network.userCancelled",
@@ -195,7 +175,7 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
     }
-    
+
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
@@ -203,8 +183,8 @@ public class WifiEapConfigurator: CAPPlugin {
                 "success": false,
             ])
         }
-        
-        
+
+
         var iterator = false
         NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
             for ssid in ssids {
@@ -212,7 +192,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     iterator = true
                 }
             }
-            
+
             if !iterator && ssids.count < 1 {
                 call.success([
                     "message": "plugin.wifieapconfigurator.error.network.noNetworksFound",
@@ -220,7 +200,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     "overridable": true
                 ])
             }
-                
+
             else if(iterator){
                 call.success([
                     "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
@@ -235,8 +215,8 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
     }
-    
-    
+
+
     @objc func removeNetwork(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
@@ -251,7 +231,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     foundNetwork = true
                 }
             }
-            
+
             if foundNetwork {
                 NEHotspotConfigurationManager.shared.removeConfiguration(forSSID: ssidToCheck)
                 var removed = true
@@ -261,7 +241,7 @@ public class WifiEapConfigurator: CAPPlugin {
                             removed = false
                         }
                     }
-                    
+
                     let message = removed ?  "plugin.wifieapconfigurator.success.network.removed": "plugin.wifieapconfigurator.error.network.removed"
                     call.success([
                         "message": message,
@@ -276,20 +256,20 @@ public class WifiEapConfigurator: CAPPlugin {
                 ])
             }
         }
-        
+
     }
-    
+
     func cleanCertificate(certificate: String) -> String{
         let certDirty = certificate
-        
+
         let certWithoutHeader = certDirty.replacingOccurrences(of: "-----BEGIN CERTIFICATE-----\n", with: "")
         let certWithoutBlankSpace = certWithoutHeader.replacingOccurrences(of: "\n", with: "")
         let certClean = certWithoutBlankSpace.replacingOccurrences(of: "-----END CERTIFICATE-----", with: "")
-        
+
         return certClean
     }
-    
-    
+
+
     func addCertificate(certName: String, certificate: String) -> Any? {
         let certBase64 = certificate
         if let certDecoded = certBase64.base64Decoded() {
@@ -309,11 +289,11 @@ public class WifiEapConfigurator: CAPPlugin {
                             let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                             let statusDelete = SecItemDelete(getquery as CFDictionary)
                             guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
-                            //                            return addCertificate(certName: certName, certificate: certificate)
+//                            return addCertificate(certName: certName, certificate: certificate)
                         }
                         return false
                     }
-                    
+
                     if status == errSecSuccess {
                         return true
                     }
@@ -339,142 +319,153 @@ public class WifiEapConfigurator: CAPPlugin {
             ]
         }
     }
-    
-    func eliminarCertificadosPrevios(ssid: String) -> Any? {
-        
-     
-        
+
+    func eliminarCertificadosPrecios(ssid: String) -> Any? {
+
+        //La consulta
+        let getQueryCertificate: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                       kSecAttrLabel as String: "Certificate " + ssid,
+                                       kSecReturnRef as String: kCFBooleanTrue]
+
+        //La referencia
+        var itemCertificate: CFTypeRef?
+
+        //La respuesta, si es 0 funcionó y se lo pasa a la referencia
+        let statusCertificate = SecItemCopyMatching(getQueryCertificate as CFDictionary, &itemCertificate)
+
+
+        //cuida de que funcione
+        guard statusCertificate == errSecSuccess else { return false }
+
+        //Lo elimina
+        let statusCertificateDelete = SecItemDelete(getQueryCertificate as CFDictionary)
+
+        //Cuida de que funcione el eliminar, si funciona continua el flujo
+        guard statusCertificateDelete == errSecSuccess else { return false }
+
         //El item del identity
         var itemIdentity: CFTypeRef?
-        
+
         //La consulta del identity
         let getQueryIdentity: [String: Any] = [kSecClass as String: kSecClassIdentity,
-                                               kSecAttrLabel as String: "ce" + ssid,
-                                               kSecReturnRef as String: kCFBooleanTrue]
-        
+                                       kSecAttrLabel as String: "ce" + ssid,
+                                       kSecReturnRef as String: kCFBooleanTrue]
+
         //Busca el identity, si funcionó es 0, y se lo pasa a la referencia
         let statusIdentityFound = SecItemCopyMatching(getQueryIdentity as CFDictionary, &itemIdentity)
-        
+
         //cuida de que funcione el buscar
         guard statusIdentityFound == errSecSuccess else { return false }
-        
-        
+
+
         //Lo elimina
         let statusIdentityDelete = SecItemDelete(getQueryIdentity as CFDictionary)
-        
+
         //verifica que lo eliminó
         guard statusIdentityDelete == errSecSuccess else { return false }
-        
+
         //Si lo eliminó retorna true.
         return true
     }
-    
-    func addClientCertificate(certificate: String, passPhrase: String) -> Any? {
+
+    func pruebaCertificado(certificate: String, passPhrase: String) -> Any? {
         let options = [ kSecImportExportPassphrase as String: passPhrase ]
         var rawItems: CFArray?
         let certBase64 = certificate
-        if let data = Data(base64Encoded: certBase64) {
-            let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
-            guard statusImport == errSecSuccess else { return false }
-            let items = rawItems! as! Array<Dictionary<String, Any>>
-            let firstItem = items[0]
-            if let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]? {
-                var certificateQueries : [SecCertificate] = []
-                
-                for (index, cert) in chain.enumerated() {
-                    
-                    let certData = SecCertificateCopyData(cert) as Data
-                    
-                    if let certificateData = SecCertificateCreateWithData(nil, certData as CFData) {
-                        let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                       kSecValueRef as String:  certificateData,
-                                                       kSecAttrLabel as String: "getEduroamCertificate" + "\(index)"]
-                        
-                        let statusUpload = SecItemAdd(addquery as CFDictionary, nil)
-                        
-                        guard statusUpload == errSecSuccess else {
-                            if statusUpload == errSecDuplicateItem {
-                                let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                               kSecAttrLabel as String: "getEduroamCertificate" + "\(index)",
-                                    kSecReturnRef as String: kCFBooleanTrue]
-                                
-                                var item: CFTypeRef?
-                                let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                                let statusDelete = SecItemDelete(getquery as CFDictionary)
-                                guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
-                                return addClientCertificate(certificate: certificate, passPhrase: passPhrase)
-                                
-                            }
-                            return false
+        /*If */let data = Data(base64Encoded: certBase64)!
+
+        let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
+        guard statusImport == errSecSuccess else { return false }
+        let items = rawItems! as! Array<Dictionary<String, Any>>
+        let firstItem = items[0]
+        let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
+        let trust = firstItem[kSecImportItemTrust as String] as! SecTrust?
+        if let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]? {
+            var certificateQueries : [[String: Any]] = []
+
+            for (index, cert) in chain.enumerated() {
+
+                let certData = SecCertificateCopyData(cert) as Data
+
+                if let certificateData = SecCertificateCreateWithData(nil, certData as CFData) {
+                    let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                   kSecValueRef as String:  certificateData,
+                                                   kSecAttrLabel as String: "getEduroamCertificate" + "\(index)"]
+
+                    let statusUpload = SecItemAdd(addquery as CFDictionary, nil)
+
+                    guard statusUpload == errSecSuccess else {
+                        if statusUpload == errSecDuplicateItem {
+                            let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                           kSecAttrLabel as String: "getEduroamCertificate" + "\(index)",
+                                kSecReturnRef as String: kCFBooleanTrue]
+
+                            var item: CFTypeRef?
+                            let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                            let statusDelete = SecItemDelete(getquery as CFDictionary)
+                            guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                            return pruebaCertificado(certificate: certificate, passPhrase: passPhrase)
+
                         }
-                        
-                        let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                     kSecAttrLabel as String: "getEduroamCertificate" + "\(index)",
-                                                        kSecReturnRef as String: kCFBooleanTrue]
-                        
-                        var certItem : CFTypeRef?
-                        let statusCertificate = SecItemCopyMatching(getquery as CFDictionary, &certItem)
-                        guard statusCertificate == errSecSuccess else { return nil }
-//
-                        
-                        certificateQueries.append(certItem as! SecCertificate)
-                    } else {
-                        return nil
+                        return false
                     }
+
+                    certificateQueries.append(
+                        [kSecClass as String: kSecClassCertificate,
+                         kSecAttrLabel as String: "getEduroamCertificate" + "\(index)",
+                            kSecReturnRef as String: kCFBooleanTrue])
                 }
-                return certificateQueries
             }
-        } else {
-            return nil
+
+
+            return certificateQueries
+
         }
+
         return nil
     }
-    
-    func addClientIdentity(certName: String, certificate: String, password: String) -> Any? {
-        
+
+    func addClientCertificate(certName: String, certificate: String, password: String) -> Any? {
+
         let options = [ kSecImportExportPassphrase as String: password ]
         var rawItems: CFArray?
         let certBase64 = certificate
-        //        if let certDecoded = certBase64.base64Decoded() {,
+        //        if let certDecoded = certBase64.base64Decoded() {
         //                        let certDecodedClean = cleanCertificate(certificate: certBase64)
-        if let data = Data(base64Encoded: certBase64) {
-            let statusImport = SecPKCS12Import(data as CFData,
-                                               options as CFDictionary,
-                                               &rawItems)
-            guard statusImport == errSecSuccess else { return false }
-            let items = rawItems! as! Array<Dictionary<String, Any>>
-            let firstItem = items[0]
-            if let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity? {
-                
-                let addquery: [String: Any] = [kSecValueRef as String: identity,
-                                               kSecAttrLabel as String: certName]
-                let status = SecItemAdd(addquery as CFDictionary, nil)
-                guard status == errSecSuccess else {
-                    if status == errSecDuplicateItem {
-                        let getquery: [String: Any] = [kSecValueRef as String: identity,
-                                                       kSecAttrLabel as String: certName,
-                                                       kSecReturnRef as String: kCFBooleanTrue]
-                        var item: CFTypeRef?
-                        let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                        let statusDelete = SecItemDelete(getquery as CFDictionary)
-                        guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
-                        return addClientIdentity(certName: certName, certificate: certificate, password: password)
-                    }
-                    
-                    return false
+        /*If */let data = Data(base64Encoded: certBase64)!
+        let statusImport = SecPKCS12Import(data as CFData,
+                                           options as CFDictionary,
+                                           &rawItems)
+        guard statusImport == errSecSuccess else { return false }
+        let items = rawItems! as! Array<Dictionary<String, Any>>
+        let firstItem = items[0]
+        if let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity? {
+
+            let addquery: [String: Any] = [kSecValueRef as String: identity,
+                                           kSecAttrLabel as String: certName]
+            let status = SecItemAdd(addquery as CFDictionary, nil)
+            guard status == errSecSuccess else {
+                if status == errSecDuplicateItem {
+                    let getquery: [String: Any] = [kSecValueRef as String: identity,
+                                                   kSecAttrLabel as String: certName,
+                                                   kSecReturnRef as String: kCFBooleanTrue]
+                    var item: CFTypeRef?
+                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                    let statusDelete = SecItemDelete(getquery as CFDictionary)
+                    guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                    return addClientCertificate(certName: certName, certificate: certificate, password: password)
                 }
-                
-                return identity
-                
+
+                return false
             }
-            
-            return nil
-        } else {
-            return nil
+
+            return identity
+
         }
-        
+
+        return nil
     }
-    
+
     @objc func isConnectedSSID(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
@@ -536,7 +527,7 @@ extension String {
     func base64Encoded() -> String? {
         return data(using: .utf8)?.base64EncodedString()
     }
-    
+
     func base64Decoded() -> String? {
         guard let data = Data(base64Encoded: self) else { return nil }
         return String(data: data, encoding: .utf8)

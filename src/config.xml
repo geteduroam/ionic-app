@@ -19,6 +19,7 @@
     <preference name="SplashScreenDelay" value="3000" />
     <preference name="orientation" value="portrait" />
     <preference name="KeyboardDisplayRequiresUserAction" value="true" />
+    <preference name="WKWebViewOnly" value="true" />
     <platform name="android">
         <allow-intent href="market:*" />
         <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />
@@ -89,4 +90,5 @@
     <plugin name="cordova.plugins.diagnostic" spec="5.0.1">
         <variable name="ANDROID_SUPPORT_VERSION" value="12.+" />
     </plugin>
+    <plugin name="cordova-plugin-inappbrowser" spec="https://github.com/kleeb/cordova-plugin-inappbrowser.git" source="git"/>
 </widget>

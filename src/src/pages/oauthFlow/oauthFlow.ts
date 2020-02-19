@@ -62,7 +62,7 @@ export class OauthFlow extends BasePage{
     let urlToken;
 
     // Initialized browser inside app
-    let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+    let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes,usewkwebview=yes");
 
     const flowAuth = new Promise(function (resolve, reject) {
 
@@ -82,7 +82,7 @@ export class OauthFlow extends BasePage{
             resolve(urlToken);
 
             // Initialized browser to token request
-            let tokenRef = window.cordova.InAppBrowser.open(urlToken, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+            let tokenRef = window.cordova.InAppBrowser.open(urlToken, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes,usewkwebview=yes");
 
             // Listener to close browser before token request
             tokenRef.addEventListener('beforeload', () => {
