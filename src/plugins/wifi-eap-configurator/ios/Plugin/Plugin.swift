@@ -26,7 +26,7 @@ public class WifiEapConfigurator: CAPPlugin {
         switch eapType {
         case 43:
             return NSNumber(value: NEHotspotEAPSettings.EAPType.EAPFAST.rawValue)
-        case 29:
+        case 25:
             return NSNumber(value: NEHotspotEAPSettings.EAPType.EAPPEAP.rawValue)
         case 13:
             return NSNumber(value: NEHotspotEAPSettings.EAPType.EAPTLS.rawValue)
@@ -60,7 +60,15 @@ public class WifiEapConfigurator: CAPPlugin {
         let eapSettings = NEHotspotEAPSettings()
         eapSettings.isTLSClientCertificateRequired = true
         eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
-
+        
+        if let server = call.getString("servername"){
+            if server != ""{
+                eapSettings.trustedServerNames = [server]
+                
+            }
+            
+        }
+        
         if let anonymous = call.getString("anonymous") {
             eapSettings.outerIdentity = anonymous
         }
