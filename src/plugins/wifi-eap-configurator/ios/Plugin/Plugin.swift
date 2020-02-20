@@ -16,7 +16,6 @@ public class WifiEapConfigurator: CAPPlugin {
             return .eapttlsInnerAuthenticationMSCHAPv2
         case 5:
             return .eapttlsInnerAuthenticationPAP
-            
         default:
             return nil
         }
@@ -26,7 +25,7 @@ public class WifiEapConfigurator: CAPPlugin {
         switch eapType {
         case 43:
             return NSNumber(value: NEHotspotEAPSettings.EAPType.EAPFAST.rawValue)
-        case 29:
+        case 25:
             return NSNumber(value: NEHotspotEAPSettings.EAPType.EAPPEAP.rawValue)
         case 13:
             return NSNumber(value: NEHotspotEAPSettings.EAPType.EAPTLS.rawValue)
@@ -36,10 +35,6 @@ public class WifiEapConfigurator: CAPPlugin {
             return nil
         }
     }
-    
-    var eapCertificates : [SecCertificate]? = nil
-    
-
     
     @objc func configureAP(_ call: CAPPluginCall) {
         guard let ssid = call.getString("ssid") else {
@@ -62,11 +57,16 @@ public class WifiEapConfigurator: CAPPlugin {
         eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
         
         
-        //        if let server = call.getString("servername"){
-        //            eapSettings.trustedServerNames = [server]
-        //        }
+        if let server = call.getString("servername"){
+            if server != ""{
+                eapSettings.trustedServerNames = [server]
+            }
+        }
+        
         if let anonymous = call.getString("anonymous") {
-            eapSettings.outerIdentity = anonymous
+            if anonymous != ""{
+                eapSettings.outerIdentity = anonymous
+            }
         }
         
         var username:String? = nil
@@ -147,24 +147,24 @@ public class WifiEapConfigurator: CAPPlugin {
             eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType ?? 0)!
         }
         
-        //        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
-        //            if let certificate = call.getString("caCertificate") {
-        //                if (addCertificate(certName: "Certificate " + ssid, certificate: certificate) as? Bool ?? false)
-        //                {
-        //                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-        //                                                   kSecAttrLabel as String: "Certificate " + ssid,
-        //                                                   kSecReturnRef as String: kCFBooleanTrue]
-        //                    var item: CFTypeRef?
-        //                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-        //                    guard status == errSecSuccess else { return }
-        //                    let savedCert = item as! SecCertificate
-        //                    eapSettings.setTrustedServerCertificates([savedCert])
-        //                }
-        //                else {
-        ////                    return call.success(addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
-        //                }
-        //            }
-        //        }
+        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
+            if let certificate = call.getString("caCertificate") {
+                if (addCertificate(certName: "certCA" + ssid, certificate: certificate) as? Bool ?? false)
+                {
+                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                   kSecAttrLabel as String: "certCA" + ssid,
+                                                   kSecReturnRef as String: kCFBooleanTrue]
+                    var item: CFTypeRef?
+                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                    guard status == errSecSuccess else { return }
+                    let savedCert = item as! SecCertificate
+                    eapSettings.setTrustedServerCertificates([savedCert])
+                }
+                else {
+                    //                    return call.success(addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
+                }
+            }
+        }
         
         let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
@@ -294,9 +294,9 @@ public class WifiEapConfigurator: CAPPlugin {
     
     func addCertificate(certName: String, certificate: String) -> Any? {
         let certBase64 = certificate
-        if let certDecoded = certBase64.base64Decoded() {
-            let certDecodedClean = cleanCertificate(certificate: certDecoded)
-            if let data = Data(base64Encoded: certDecodedClean) {
+//        if let certDecoded = certBase64.base64Decoded() {
+//            let certDecodedClean = cleanCertificate(certificate: certDecoded)
+            if let data = Data(base64Encoded: certBase64) {
                 if let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) {
                     let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                    kSecValueRef as String: certRef,
@@ -334,12 +334,12 @@ public class WifiEapConfigurator: CAPPlugin {
                     "success": false,
                 ]
             }
-        } else {
-            return [
-                "message": "plugin.wifieapconfigurator.error.network.couldNotDecodeCertificate",
-                "success": false,
-            ]
-        }
+//        } else {
+//            return [
+//                "message": "plugin.wifieapconfigurator.error.network.couldNotDecodeCertificate",
+//                "success": false,
+//            ]
+//        }
     }
     
     func eliminarCertificadosPrecios(ssid: String) -> Any? {
