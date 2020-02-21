@@ -191,7 +191,10 @@ export class OauthFlow extends BasePage{
    */
   async navigateTo() {
     this.showAll = false;
-    await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+
+    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+        logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+      await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
   }
 
   /**
