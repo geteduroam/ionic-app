@@ -3,7 +3,12 @@
 # And the CLI then renames it
 
 App/build
-App/Pods
+App/Pods/Headers
+App/Pods/Local Podspecs
+App/Pods/Target Support File
+App/Pods/Manifest.lock
+
+
 App/public
 App/Podfile.lock
 xcuserdata
