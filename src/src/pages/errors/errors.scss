@@ -32,5 +32,9 @@ and (orientation: portrait) {
 
   ion-app.platform-ios page-errors {
     top: 20px !important;
+
+    ion-content div.scroll-content {
+      overflow-y: hidden !important;
+    }
   }
 }
