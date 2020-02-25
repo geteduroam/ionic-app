@@ -1,10 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget xmlns:cdv="http://cordova.apache.org/ns/1.0" id="com.emergya.geteduroam" version="0.0.1" xmlns="http://www.w3.org/ns/widgets">
+<widget xmlns:cdv="http://cordova.apache.org/ns/1.0" id="org.eduroam.geteduroam" version="0.0.1" xmlns="http://www.w3.org/ns/widgets">
     <name>geteduroam</name>
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <allow-intent href="http://localhost:8080/" />
+    <allow-intent href="*://*.geteduroam.*/*" />
+    <allow-intent href="https://idp.feide.no/*" />
     <allow-intent href="tel:*" />
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
