@@ -171,7 +171,7 @@ ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
   and (max-device-width: 812px)
   and (orientation: portrait) {
 
-    ion-modal .show-page {
+    ion-app .platform-ios ion-modal .show-page {
       top: 20px !important;
     }
   }

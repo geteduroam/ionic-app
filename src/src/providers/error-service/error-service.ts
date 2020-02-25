@@ -25,7 +25,7 @@ export class ErrorServiceProvider {
             break;
         case 'enableAccess':
             const connect = await this.statusConnection();
-            returnValue = connect.connected;
+            returnValue = await this.checkAgain('removeConnection', false) && connect.connected;
             break;
         default:
             returnValue = !isFinal;

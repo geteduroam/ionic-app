@@ -82,14 +82,11 @@ export class OauthFlow extends BasePage{
         }
       } else if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.includes('?error')) {
         browserRef.close();
-        this.closeEventBrowser();
       }
     });
 
     browserRef.addEventListener("exit", () => {
-      if (!!urlToken) {
-        this.getToken(urlToken);
-      } else {
+      if (!urlToken) {
         this.closeEventBrowser();
       }
     })
