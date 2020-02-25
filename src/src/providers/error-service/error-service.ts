@@ -14,8 +14,9 @@ export class ErrorServiceProvider {
   /**
    * Method check type of error
    * @param method
+   * @param isFinal
    */
-  public async checkAgain(method: string) : Promise<boolean>{
+  public async checkAgain(method: string, isFinal: boolean) : Promise<boolean>{
     let returnValue: boolean;
 
     switch (method) {
@@ -28,7 +29,7 @@ export class ErrorServiceProvider {
             returnValue = connect.connected;
             break;
         default:
-            returnValue = false;
+            returnValue = !isFinal;
     }
     return returnValue;
   }

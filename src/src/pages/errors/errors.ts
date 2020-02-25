@@ -48,7 +48,7 @@ export class ErrorsPage extends BasePage{
 
       this.link = this.navParams.get('link');
       this.text =  this.navParams.get('error');
-      this.isFinal = true;
+      this.isFinal = this.navParams.get('isFinal');
 
     } else {
 
@@ -75,7 +75,7 @@ export class ErrorsPage extends BasePage{
    * This method close error page on modal screen.
    */
   async closeModal() {
-    if (await this.errorService.checkAgain(this.checkMethod)){
+    if (await this.errorService.checkAgain(this.checkMethod, this.isFinal)){
       await this.viewCtrl.dismiss();
     } else {
       this.showToast(this.text);

@@ -61,15 +61,16 @@ export class OauthFlow extends BasePage{
   buildFlowAuth(oAuth, oauth2Options: oAuthModel, token_endpoint) {
     let urlToken;
 
+    let target = !!this.global.isAndroid() ? "": "_blank";
     // Initialized browser inside app
-    let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+    let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, target, "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
 
     const flowAuth = new Promise(function (resolve, reject) {
 
-      browserRef.addEventListener('loadstart', (event) => {
+      browserRef.addEventListener("loadstart", (event) => {
 
         // Extract code and state to build authorized request
-        if (event.url.indexOf(oauth2Options.redirectUrl) === 0) {
+        if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.indexOf("error") === -1 ) {
           let urlData = event.url.split('code=')[1];
           let arrayData = urlData.split('&state=');
           let code = arrayData[0];
@@ -81,25 +82,41 @@ export class OauthFlow extends BasePage{
             urlToken = `${token_endpoint}?client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}`;
             resolve(urlToken);
 
-            // Initialized browser to token request
-            let tokenRef = window.cordova.InAppBrowser.open(urlToken, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
-
-            // Listener to close browser before token request
-            tokenRef.addEventListener('beforeload', () => {
-              tokenRef.close();
-            });
-
             browserRef.close();
           }
+        } else if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.includes('?error')) {
+          browserRef.close();
+
+          reject(Promise.reject().then(() => {throw Error}))
+
+        }
+
+      });
+
+      browserRef.addEventListener("exit", (event) => {
+        if (urlToken === undefined) {
+          browserRef.close();
+
+          reject(Promise.reject().then(() => {throw Error}))
+
+        } else {
+          resolve(urlToken);
+          browserRef.close();
         }
       });
     });
 
     // It resolves Promise and it is create token request
     flowAuth.then(async (res) => {
-      await this.getToken(urlToken);
-    });
+        await this.getToken(res);
 
+    }).catch(async () => {
+      this.loading.create();
+      await this.navCtrl.pop();
+      this.loading.dismiss();
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false);
+
+    })
   }
 
   /**
@@ -152,7 +169,7 @@ export class OauthFlow extends BasePage{
    * Method to check message when profile is not valid
    */
   async notValidProfile() {
-    if(!!this.providerInfo){
+    if(!!this.providerInfo) {
 
       let url = this.checkUrlInfoProvide();
 
