@@ -82,21 +82,22 @@ export class OauthFlow extends BasePage{
         }
       } else if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.includes('?error')) {
         browserRef.close();
+        this.closeEventBrowser(event.url.includes('?error'));
       }
     });
 
-    browserRef.addEventListener("exit", () => {
-      if (!urlToken) {
-        this.closeEventBrowser();
-      }
+    browserRef.addEventListener("exit", (event) => {
+      this.closeEventBrowser();
     })
   }
 
-  closeEventBrowser() {
+  closeEventBrowser(error?: boolean) {
     this.loading.create();
     this.navCtrl.pop();
+    if (!!error) {
+      this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
+    }
     this.loading.dismiss();
-    this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
   }
   /**
    * Method to create request to token
