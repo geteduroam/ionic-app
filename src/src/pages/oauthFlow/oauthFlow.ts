@@ -65,60 +65,42 @@ export class OauthFlow extends BasePage{
     // Initialized browser inside app
     let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, target, "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
 
-    const flowAuth = new Promise(function (resolve, reject) {
+    browserRef.addEventListener("loadstart", (event) => {
 
-      browserRef.addEventListener("loadstart", (event) => {
+      // Extract code and state to build authorized request
+      if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.indexOf("error") === -1 ) {
+        let urlData = event.url.split('code=')[1];
+        let arrayData = urlData.split('&state=');
+        let code = arrayData[0];
+        let state = arrayData[1];
 
-        // Extract code and state to build authorized request
-        if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.indexOf("error") === -1 ) {
-          let urlData = event.url.split('code=')[1];
-          let arrayData = urlData.split('&state=');
-          let code = arrayData[0];
-          let state = arrayData[1];
-
-          if (state !== undefined && code !== undefined) {
-
-            // Header to get token
-            urlToken = `${token_endpoint}?client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}`;
-            resolve(urlToken);
-
-            browserRef.close();
-          }
-        } else if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.includes('?error')) {
+        if (state !== undefined && code !== undefined) {
+          // Header to get token
+          urlToken = `${token_endpoint}?client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}`;
           browserRef.close();
-
-          reject(Promise.reject().then(() => {throw Error}))
-
+          this.getToken(urlToken);
         }
-
-      });
-
-      browserRef.addEventListener("exit", (event) => {
-        if (urlToken === undefined) {
-          browserRef.close();
-
-          reject(Promise.reject().then(() => {throw Error}))
-
-        } else {
-          resolve(urlToken);
-          browserRef.close();
-        }
-      });
+      } else if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.includes('?error')) {
+        browserRef.close();
+        this.closeEventBrowser();
+      }
     });
 
-    // It resolves Promise and it is create token request
-    flowAuth.then(async (res) => {
-        await this.getToken(res);
-
-    }).catch(async () => {
-      this.loading.create();
-      await this.navCtrl.pop();
-      this.loading.dismiss();
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false);
-
+    browserRef.addEventListener("exit", () => {
+      if (!!urlToken) {
+        this.getToken(urlToken);
+      } else {
+        this.closeEventBrowser();
+      }
     })
   }
 
+  closeEventBrowser() {
+    this.loading.create();
+    this.navCtrl.pop();
+    this.loading.dismiss();
+    this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
+  }
   /**
    * Method to create request to token
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}

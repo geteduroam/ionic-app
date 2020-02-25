@@ -6,7 +6,6 @@ const { WifiEapConfigurator, Network } = Plugins;
 
 @Injectable()
 export class ErrorServiceProvider {
-  showModal: boolean = false;
 
   constructor(private global:GlobalProvider) {
   }

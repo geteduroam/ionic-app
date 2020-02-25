@@ -18,13 +18,20 @@ export class ErrorHandlerProvider extends ErrorHandler {
    * @param isFinal: Boolean (Optional)
    * @param helpDeskUrl: String url to link (Optional)
    * @param method: String (Optional)
+   * @param showModal: Boolean (Optional)
+   *
    */
-  async handleError(errorText: string, isFinal?:boolean, helpDeskUrl?:string, method?:string) {
+  async handleError(errorText: string, isFinal?:boolean, helpDeskUrl?:string, method?:string, showModal?: boolean) {
 
     let localFinal: boolean = !!isFinal ? isFinal : false;
     let localUrl:string = !!helpDeskUrl ? helpDeskUrl : '';
     let localMethod:string = !!method ? method : '';
+
     let errorModal = this.modalCtrl.create(ErrorsPage, {error: errorText, isFinal: localFinal, link: localUrl, method: localMethod});
+
+    if (!!showModal) {
+      this.showModal = !showModal;
+    }
 
     if (!this.showModal) {
       this.showModal = true;
