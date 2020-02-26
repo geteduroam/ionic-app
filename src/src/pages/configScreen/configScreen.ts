@@ -203,7 +203,8 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewWillEnter() {
-    const secondResponse = await this.waitingSpinner(this.getEduroamServices.discovery());
+    const firstResponse = await this.getEduroamServices.discovery();
+    const secondResponse = await this.waitingSpinner(firstResponse);
     this.instances = secondResponse.instances;
   }
 

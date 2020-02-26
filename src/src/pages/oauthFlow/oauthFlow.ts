@@ -12,6 +12,7 @@ import {GlobalProvider} from "../../providers/global/global";
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import _ from 'lodash';
 
 declare var window: any;
 
@@ -76,7 +77,14 @@ export class OauthFlow extends BasePage{
 
         if (state !== undefined && code !== undefined) {
           // Header to get token
-          urlToken = `${token_endpoint}?client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}`;
+          urlToken = `client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}&redirect_uri=${oauth2Options.redirectUrl}`;
+          /*urlToken = {
+            'client_id': oauth2Options.client_id,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': oAuth.codeVerifier,
+            'redirect_uri': oauth2Options.redirectUrl
+          };*/
           browserRef.close();
           this.getToken(urlToken);
         }
@@ -99,6 +107,7 @@ export class OauthFlow extends BasePage{
     }
     this.loading.dismiss();
   }
+
   /**
    * Method to create request to token
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}
@@ -106,7 +115,17 @@ export class OauthFlow extends BasePage{
    */
   async getToken(res) {
     this.showSpinner();
-    const response = await this.http.get(res, {}, {});
+
+    const opts: any = {};
+    opts.method = 'post';
+    opts.data = res;
+    opts.serializer = 'urlencoded';
+    opts.headers = {
+      'content-type': 'application/x-www-form-urlencoded'
+    };
+    opts.responseType = 'json';
+    this.http.setDataSerializer('utf8');
+    const response = await this.http.post(this.profile.token_endpoint, res, {'Content-Type':'application/x-www-form-urlencoded'});//await this.http.sendRequest(this.profile.token_endpoint, opts);
 
     this.tokenURl = JSON.parse(response.data);
     this.profile.token = this.tokenURl.access_token;
