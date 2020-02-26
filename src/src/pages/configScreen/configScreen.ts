@@ -203,10 +203,16 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewWillEnter() {
-      const firstResponse = this.getEduroamServices.discovery();
-      const secondResponse = await this.waitingSpinner(firstResponse);
-      this.instances = secondResponse.instances;
-      this.removeSpinner();
-      this.showAll = true;
+    const secondResponse = await this.waitingSpinner(this.getEduroamServices.discovery());
+    this.instances = secondResponse.instances;
+  }
+
+  /**
+   * Lifecycle when entering a page, after it becomes the active page.
+   *  remove spinner loading and show view
+   */
+  ionViewDidEnter() {
+    this.removeSpinner();
+    this.showAll = true;
   }
 }
