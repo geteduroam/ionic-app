@@ -73,7 +73,7 @@ export class GeteduroamApp {
       this.rootPage = ConfigurationScreen;
     } else{
       this.rootPage = ReconfigurePage;
-      this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
+      this.getAssociation(isAssociated);
       this.global.setOverrideProfile(true);
     }
 
@@ -153,6 +153,13 @@ export class GeteduroamApp {
     }
   }
 
+  getAssociation(isAssociated) {
+    if (!!this.platform.is('android')) {
+      this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
+    } else {
+      this.rootParams = !isAssociated.success ? {'reconfigure': false} : {'reconfigure': true};
+    }
+  }
   /**
    * This method shown an error message when network is disconnect
    */
@@ -161,7 +168,8 @@ export class GeteduroamApp {
     this.rootPage = ReconfigurePage;
 
     const isAssociated = await this.isAssociatedNetwork();
-    this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
+    this.getAssociation(isAssociated);
+
 
     if (!isAssociated.success && !isAssociated.overridable) {
       this.removeAssociatedManually();
