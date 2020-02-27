@@ -36,6 +36,20 @@ public class WifiEapConfigurator: CAPPlugin {
         }
     }
     
+    func resetKeychain() {
+        deleteAllKeysForSecClass(kSecClassGenericPassword)
+        deleteAllKeysForSecClass(kSecClassInternetPassword)
+        deleteAllKeysForSecClass(kSecClassCertificate)
+        deleteAllKeysForSecClass(kSecClassKey)
+        deleteAllKeysForSecClass(kSecClassIdentity)
+    }
+
+    func deleteAllKeysForSecClass(_ secClass: CFTypeRef) {
+        let dict: [NSString : Any] = [kSecClass : secClass]
+        let result = SecItemDelete(dict as CFDictionary)
+        assert(result == noErr || result == errSecItemNotFound, "Error deleting keychain data (\(result))")
+    }
+    
     @objc func configureAP(_ call: CAPPluginCall) {
         guard let ssid = call.getString("ssid") else {
             return call.success([
@@ -51,6 +65,8 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
         
+        
+        resetKeychain()
         
         let eapSettings = NEHotspotEAPSettings()
         eapSettings.isTLSClientCertificateRequired = true
