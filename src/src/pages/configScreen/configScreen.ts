@@ -206,14 +206,9 @@ export class ConfigurationScreen extends BasePage{
     const firstResponse = await this.getEduroamServices.discovery();
     const secondResponse = await this.waitingSpinner(firstResponse);
     this.instances = secondResponse.instances;
-  }
-
-  /**
-   * Lifecycle when entering a page, after it becomes the active page.
-   *  remove spinner loading and show view
-   */
-  ionViewDidEnter() {
     this.removeSpinner();
     this.showAll = true;
   }
+
+
 }
