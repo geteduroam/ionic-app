@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">geteduroam</string>
     <string name="title_activity_main">geteduroam</string>
-    <string name="package_name">com.emergya.geteduroam</string>
-    <string name="custom_url_scheme">com.emergya.geteduroam</string>
+    <string name="package_name">org.eduroam.geteduroam</string>
+    <string name="custom_url_scheme">org.eduroam.geteduroam</string>
 </resources>

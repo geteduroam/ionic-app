@@ -126,7 +126,7 @@ export class OauthFlow extends BasePage{
     opts.responseType = 'json';
     this.http.setDataSerializer('utf8');
     const response = await this.http.post(this.profile.token_endpoint, res, {'Content-Type':'application/x-www-form-urlencoded'});//await this.http.sendRequest(this.profile.token_endpoint, opts);
-
+    console.log(response.data);
     this.tokenURl = JSON.parse(response.data);
     this.profile.token = this.tokenURl.access_token;
 

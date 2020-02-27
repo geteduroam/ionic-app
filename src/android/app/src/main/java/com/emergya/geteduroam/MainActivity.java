@@ -1,4 +1,4 @@
-package com.emergya.geteduroam;
+package org.eduroam.geteduroam;
 
 import android.content.Intent;
 import android.net.Uri;
