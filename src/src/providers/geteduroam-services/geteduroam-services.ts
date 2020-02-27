@@ -31,16 +31,14 @@ export class GeteduroamServices {
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
    */
   async discovery() {
-    // Emergya's generated discovery for testing purposes
-    //const url = 'https://drive.google.com/a/emergya.com/uc?authuser=0&id=1HbtpkGoB7Yc_rhnITYgXWJ8-gLzeMgoR&export=download';
     const url = 'https://discovery.geteduroam.no/discovery-v1.json';
     const params = {};
     const headers = {};
 
     try {
         const response = await this.http.get(url, params, headers);
-        return JSON.parse(response.data);
-
+        const data = JSON.parse(response.data);
+        return data.instances;
     } catch (e) {
         await this.errorHandler.handleError(e.error,false);
     }

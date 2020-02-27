@@ -157,7 +157,7 @@ export class GeteduroamApp {
     if (!!this.platform.is('android')) {
       this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
     } else {
-      this.rootParams = !isAssociated.success ? {'reconfigure': false} : {'reconfigure': true};
+      this.rootParams = isAssociated.message.includes('noNetworksFound') ? {'reconfigure': false} : {'reconfigure': true} ;
     }
   }
   /**
