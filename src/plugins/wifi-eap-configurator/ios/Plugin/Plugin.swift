@@ -189,6 +189,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     else {
                         // return call.success(addCertificate(certName: certName, certificate: caCertificateString) as! Dictionary<String, AnyObject>)
                     }
+                    index += 1
                 }
                 eapSettings.setTrustedServerCertificates(certificates)
             }
