@@ -75,7 +75,9 @@ public class WifiEapConfigurator: CAPPlugin {
         
         if let server = call.getString("servername"){
             if server != ""{
-                eapSettings.trustedServerNames = [server]
+                //eapSettings.trustedServerNames = [server]
+                // supporting multiple CN
+                eapSettings.trustedServerNames = server.components(separatedBy: ";")
             }
         }
         
@@ -164,21 +166,31 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         
         if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
-            if let certificate = call.getString("caCertificate") {
-                if (addCertificate(certName: "certCA" + ssid, certificate: certificate) as? Bool ?? false)
-                {
-                    let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                   kSecAttrLabel as String: "certCA" + ssid,
-                                                   kSecReturnRef as String: kCFBooleanTrue]
-                    var item: CFTypeRef?
-                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                    guard status == errSecSuccess else { return }
-                    let savedCert = item as! SecCertificate
-                    eapSettings.setTrustedServerCertificates([savedCert])
+            if let certificatesString = call.getString("caCertificate") {
+                // supporting multiple CAs
+                let certificatesStrings = certificatesString.components(separatedBy: ";")
+                let index = 0
+                let certificates = []
+                certificatesStrings.forEach { caCertificateString in
+                    // building the name for the cert that will be installed
+                    let certName = "getEduroamCertCA" + index;
+                    // adding the certificate
+                    if (addCertificate(certName: certName, certificate: caCertificateString) as? Bool ?? false)
+                    {
+                        let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                       kSecAttrLabel as String: "certCA" + ssid,
+                                                       kSecReturnRef as String: kCFBooleanTrue]
+                        var item: CFTypeRef?
+                        let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                        guard status == errSecSuccess else { return }
+                        let savedCert = item as! SecCertificate
+                        certificates.append(savedCert);
+                    }
+                    else {
+                        // return call.success(addCertificate(certName: certName, certificate: caCertificateString) as! Dictionary<String, AnyObject>)
+                    }
                 }
-                else {
-//                    return call.success(addCertificate(certName: "Certificate " + ssid, certificate: certificate) as! Dictionary<String, AnyObject>)
-                }
+                eapSettings.setTrustedServerCertificates(certificates)
             }
         }
         
