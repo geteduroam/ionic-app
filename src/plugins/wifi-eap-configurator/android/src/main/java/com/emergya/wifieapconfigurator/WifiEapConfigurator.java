@@ -183,11 +183,12 @@ public class WifiEapConfigurator extends Plugin {
 
         CertificateFactory certFactory = null;
         X509Certificate[] caCerts = null;
+        List<X509Certificate> certificates = new ArrayList<X509Certificate>();
         if (caCertificate != null && !caCertificate.equals("")) {
             // Multi CA-allowing
             String[] caCertificates = caCertificate.split(";");
             // building the certificates
-            for(String certString : caCertificate) {
+            for(String certString : caCertificates) {
                 byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
                 ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 
@@ -211,7 +212,7 @@ public class WifiEapConfigurator extends Plugin {
                 }
             }
             // Adding the certificates to the configuration
-            caCerts = caCertificates.toArray(new X509Certificate[caCertificates.size()]);
+            caCerts = certificates.toArray(new X509Certificate[certificates.size()]);
             enterpriseConfig.setCaCertificates(caCerts);
         }
 
