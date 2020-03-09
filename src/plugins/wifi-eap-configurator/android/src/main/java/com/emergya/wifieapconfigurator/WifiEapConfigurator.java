@@ -213,9 +213,6 @@ public class WifiEapConfigurator extends Plugin {
             }
             // Adding the certificates to the configuration
             caCerts = certificates.toArray(new X509Certificate[certificates.size()]);
-<<<<<<< HEAD
-            enterpriseConfig.setCaCertificates(caCerts);
-=======
             try {
                 enterpriseConfig.setCaCertificates(caCerts);
             } catch (IllegalArgumentException e) {
@@ -226,7 +223,6 @@ public class WifiEapConfigurator extends Plugin {
                 e.printStackTrace();
                 Log.e("error", e.getMessage());
             }
->>>>>>> 6a5ef29edd3ef337ea2d16842e57d50388ce2bf6
         }
 
         if((clientCertificate==null || clientCertificate.equals("")) && (passPhrase==null|| passPhrase.equals(""))){
