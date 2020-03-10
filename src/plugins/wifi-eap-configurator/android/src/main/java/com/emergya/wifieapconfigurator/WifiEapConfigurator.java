@@ -197,11 +197,6 @@ public class WifiEapConfigurator extends Plugin {
         if (caCertificate != null && !caCertificate.equals("")) {
             // Multi CA-allowing
             String[] caCertificates = caCertificate.split(";");
-            System.out.println("********************   caCertificates *****************************");
-            System.out.println(caCertificates);
-            System.out.println(caCertificates.length);
-            System.out.println("********************   caCertificate *****************************");
-            System.out.println(caCertificate);
             // building the certificates
             for(String certString : caCertificates) {
                 byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
@@ -211,7 +206,6 @@ public class WifiEapConfigurator extends Plugin {
                     certFactory = CertificateFactory.getInstance("X.509");
                     certificates.add((X509Certificate) certFactory.generateCertificate(b));
                 } catch (CertificateException e) {
-                    System.out.println("ENTRA POR EL 1º CATCH");
                     JSObject object = new JSObject();
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
@@ -219,7 +213,6 @@ public class WifiEapConfigurator extends Plugin {
                     e.printStackTrace();
                     Log.e("error", e.getMessage());
                 } catch (IllegalArgumentException e) {
-                    System.out.println("ENTRA POR EL 2º CATCH");
                     JSObject object = new JSObject();
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
@@ -233,7 +226,6 @@ public class WifiEapConfigurator extends Plugin {
             try {
                 enterpriseConfig.setCaCertificates(caCerts);
             } catch (IllegalArgumentException e) {
-                System.out.println("ENTRA POR EL 3º CATCH");
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
