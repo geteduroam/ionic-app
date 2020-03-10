@@ -180,7 +180,7 @@ public class WifiEapConfigurator extends Plugin {
                 for (int i = 0; i < servernames.length; i ++) {
                     servernames[i] = "DNS:" + servernames[i];
                 }
-                enterpriseConfig.setAltSubjectMatch(String.join(";", servernames););
+                enterpriseConfig.setAltSubjectMatch(String.join(";", servernames));
             }
         }
 
