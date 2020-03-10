@@ -174,7 +174,11 @@ public class WifiEapConfigurator extends Plugin {
         }
         if (servername != null && !servername.equals("")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                //enterpriseConfig.setDomainSuffixMatch(servername);
+                String longestCommonSuffix = null;
+                if (call.getString("longestCommonSuffix") != null && !call.getString("longestCommonSuffix").equals("")) {
+                    longestCommonSuffix = call.getString("longestCommonSuffix");
+                    enterpriseConfig.setDomainSuffixMatch(longestCommonSuffix);
+                }
                 // now we have to configure the DNS
                 String[] servernames = servername.split(";");
                 for (int i = 0; i < servernames.length; i ++) {
