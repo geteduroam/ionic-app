@@ -175,6 +175,12 @@ public class WifiEapConfigurator extends Plugin {
         if (servername != null && !servername.equals("")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 enterpriseConfig.setDomainSuffixMatch(servername);
+                // now we have to configure the DNS
+                String[] servernames = servername.split(";");
+                for (int i = 0; i < servernames.length; i ++) {
+                    servernames[i] = "DNS:" + servernames[i];
+                }
+                enterpriseConfig.setAltSubjectMatch(String.join(";", servernames););
             }
         }
 
