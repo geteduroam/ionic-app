@@ -175,7 +175,7 @@ public class WifiEapConfigurator extends Plugin {
         if (servername != null && !servername.equals("")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 String longestCommonSuffix = null;
-                if (call.getString("longestCommonSuffix") != null && !call.getString("longestCommonSuffix").equals("")) {
+                if (call.getString("longestCommonSuffix") != null && !call.getString("longestCommonSuffix").trim().equals("")) {
                     longestCommonSuffix = call.getString("longestCommonSuffix");
                     enterpriseConfig.setDomainSuffixMatch(longestCommonSuffix);
                 }
