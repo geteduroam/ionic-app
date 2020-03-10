@@ -244,15 +244,46 @@ export class ProfilePage extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
+    console.log('valid method', this.validMethod);
+    // return {
+    //   ssid: this.global.getSsid(),
+    //   username: this.provide.email,
+    //   password: this.provide.pass,
+    //   eap: parseInt(this.validMethod.eapMethod.type.toString()),
+    //   servername: this.validMethod.serverSideCredential.serverID,
+    //   auth: this.global.auth.MSCHAPv2,
+    //   anonymous: "",
+    //   caCertificate: this.validMethod.serverSideCredential.ca.content
+    // };
+    let certificates : string = '';
+    for (let entry of this.validMethod.serverSideCredential.ca){
+      let strAux : string = entry['content'];
+      certificates = certificates.concat(strAux ,';');
+    }
+    let serverIDs : string = '';
+    for (let entry of this.validMethod.serverSideCredential.serverID){
+      let strAux : string = entry;
+      serverIDs = serverIDs.concat(strAux ,';');
+    }
+    // If only one certificate, remove the ';'
+    if (this.validMethod.serverSideCredential.ca.length == 1){
+      certificates = certificates.slice(0, -1);
+    }
+    // If only one server ID, remove the ';'
+    if (this.validMethod.serverSideCredential.serverID.length == 1){
+      serverIDs = serverIDs.slice(0, -1);
+    }
+    console.log('certificates: ', certificates);
+    console.log('serverIDs: ', serverIDs);
     return {
       ssid: this.global.getSsid(),
       username: this.provide.email,
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: this.validMethod.serverSideCredential.serverID,
+      servername: "eduroam.uninett.no;eduroam2.uninett.no",
       auth: this.global.auth.MSCHAPv2,
       anonymous: "",
-      caCertificate: this.validMethod.serverSideCredential.ca.content
+      caCertificate: certificates
     };
   }
 }

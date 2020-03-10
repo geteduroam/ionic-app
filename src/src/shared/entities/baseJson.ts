@@ -15,7 +15,18 @@ export abstract class BaseJson {
     protected getSingleProperty(propertyValue: any, keyName: string, mandatory: boolean):any {
         let returnValue;
         if(!!isArray(propertyValue)){
-            if(propertyValue[0].hasOwnProperty(keyName)){
+            if(keyName == 'ServerID'){
+                let returnArray : any[] = [];
+                for(let entry of propertyValue){
+                    try{
+                        returnArray.push(entry[keyName]);
+                    } catch (e) {
+                        returnValue = null;
+                    }
+                    return returnArray;
+                }
+            }
+            else if(propertyValue[0].hasOwnProperty(keyName)){
                 try{
                     returnValue = propertyValue[0][keyName];
                 } catch (e) {
@@ -57,7 +68,16 @@ export abstract class BaseJson {
     protected assignComplexProperty<T extends BaseJson>(property: T, propertyName: string, propertyValue: any, keyName: string, mandatory: boolean):boolean {
         let returnValue: boolean;
         if (isArray(propertyValue)) {
-            if (propertyValue[0].hasOwnProperty(keyName)) {
+            if(keyName == 'CA'){
+                for(let entry of propertyValue){
+                    try {
+                        returnValue = property.fillEntity(entry[keyName]);
+                    } catch (e) {
+                        returnValue = false;
+                    }
+                }
+            }
+            else if (propertyValue[0].hasOwnProperty(keyName)) {
                 try {
                     returnValue = property.fillEntity(propertyValue[0][keyName]);
                 } catch (e) {
