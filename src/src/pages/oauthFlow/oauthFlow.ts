@@ -250,8 +250,6 @@ export class OauthFlow extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
-    console.log(this.validMethod.serverSideCredential);
-    console.log(this.validMethod.serverSideCredential.ca[0]['content'])
     return {
       ssid: this.global.getSsid(),
       username: '',

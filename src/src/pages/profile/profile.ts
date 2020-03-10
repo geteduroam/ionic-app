@@ -244,17 +244,6 @@ export class ProfilePage extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
-    console.log('valid method', this.validMethod);
-    // return {
-    //   ssid: this.global.getSsid(),
-    //   username: this.provide.email,
-    //   password: this.provide.pass,
-    //   eap: parseInt(this.validMethod.eapMethod.type.toString()),
-    //   servername: this.validMethod.serverSideCredential.serverID,
-    //   auth: this.global.auth.MSCHAPv2,
-    //   anonymous: "",
-    //   caCertificate: this.validMethod.serverSideCredential.ca.content
-    // };
     let certificates : string = '';
     for (let entry of this.validMethod.serverSideCredential.ca){
       let strAux : string = entry['content'];
@@ -269,21 +258,42 @@ export class ProfilePage extends BasePage{
     if (this.validMethod.serverSideCredential.ca.length == 1){
       certificates = certificates.slice(0, -1);
     }
-    // If only one server ID, remove the ';'
-    if (this.validMethod.serverSideCredential.serverID.length == 1){
-      serverIDs = serverIDs.slice(0, -1);
-    }
-    console.log('certificates: ', certificates);
-    console.log('serverIDs: ', serverIDs);
+    serverIDs = serverIDs.slice(0, -1);
     return {
       ssid: this.global.getSsid(),
       username: this.provide.email,
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: "eduroam.uninett.no;eduroam2.uninett.no",
+      servername: serverIDs,
       auth: this.global.auth.MSCHAPv2,
       anonymous: "",
-      caCertificate: certificates
+      caCertificate: certificates,
+      longestCommonSuffix: this.longestCommonSuffix(this.validMethod.serverSideCredential.serverID)
     };
+  }
+
+  private longestCommonSuffix(input){
+    let array = input.map(function(e) {
+      e = e.split("").reverse().join("");
+      return e;
+    });
+    let sortedArray = array.sort();
+    let first = sortedArray[0];
+    let last = sortedArray.pop();
+    let length = first.length;
+    let index = 0;
+    while(index<length && first[index] === last[index])
+      index++;
+    let candidate = first.substring(0, index).split("").reverse().join("");
+    if (!input.includes(candidate)) { // if this happens it is because is a common suffix
+      let parts = candidate.split('.');
+      if (parts.length > 2) {
+        parts.shift(); // removing the first one
+        candidate = parts.join('.');
+      } else {
+        candidate = '';
+      }
+    }
+    return candidate;
   }
 }
