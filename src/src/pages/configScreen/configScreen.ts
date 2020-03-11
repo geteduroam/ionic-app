@@ -16,6 +16,7 @@ const { Keyboard } = Plugins;
   selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
+
 export class ConfigurationScreen extends BasePage{
 
   showAll: boolean = false;
@@ -107,7 +108,6 @@ export class ConfigurationScreen extends BasePage{
       });
 
       return await searchModal.present();
-
   }
 
   /**
@@ -198,11 +198,16 @@ export class ConfigurationScreen extends BasePage{
     }
   }
 
+  /**
+   *  Lifecycle when entering a page, before it becomes the active one
+   *  Load the discovery data and show the spinner
+   */
   async ionViewWillEnter() {
-      const firstResponse = this.getEduroamServices.discovery();
-      const secondResponse = await this.waitingSpinner(firstResponse);
-      this.instances = secondResponse.instances;
-      this.removeSpinner();
-      this.showAll = true;
+    const firstResponse = await this.getEduroamServices.discovery();
+    this.instances = await this.waitingSpinner(firstResponse);
+    this.removeSpinner();
+    this.showAll = true;
   }
+
+
 }

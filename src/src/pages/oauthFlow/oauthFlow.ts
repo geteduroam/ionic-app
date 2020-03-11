@@ -12,6 +12,7 @@ import {GlobalProvider} from "../../providers/global/global";
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import _ from 'lodash';
 
 declare var window: any;
 
@@ -19,13 +20,29 @@ declare var window: any;
   selector: 'page-oauthFlow',
   templateUrl: 'oauthFlow.html',
 })
+
 export class OauthFlow extends BasePage{
 
   showAll: boolean = false;
+
+  /**
+   * Model Profile
+   */
   profile: ProfileModel;
+
+  /**
+   * This provide the url to get a token
+   */
   tokenURl: any;
+
+  /**
+   * Authentication method from a certificate
+   */
   validMethod: AuthenticationMethod = new AuthenticationMethod();
 
+  /**
+   * Provide info from a certificate
+   */
   providerInfo: ProviderInfo = new ProviderInfo();
 
   constructor(private http: HTTP, public navCtrl: NavController, public navParams: NavParams, protected loading: LoadingProvider,
@@ -35,106 +52,205 @@ export class OauthFlow extends BasePage{
 
   }
 
-  async navigateTo() {
-    this.showAll = false;
-    await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+  /**
+   * Method to open browser and initialize the oAuth flow
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#authorization-endpoint}
+   * @param oAuth is an object to request the authorized endpoint
+   * @param oauth2Options: oAuthModel
+   * @param token_endpoint: url token
+   */
+  buildFlowAuth(oAuth, oauth2Options: oAuthModel, token_endpoint) {
+    let urlToken;
+
+    let target = !!this.global.isAndroid() ? "": "_blank";
+    // Initialized browser inside app
+    let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, target, "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+
+    browserRef.addEventListener("loadstart", (event) => {
+
+      // Extract code and state to build authorized request
+      if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.indexOf("error") === -1 ) {
+        let urlData = event.url.split('code=')[1];
+        let arrayData = urlData.split('&state=');
+        let code = arrayData[0];
+        let state = arrayData[1];
+
+        if (state !== undefined && code !== undefined) {
+          // Header to get token
+          urlToken = `client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}&redirect_uri=${oauth2Options.redirectUrl}`;
+          /*urlToken = {
+            'client_id': oauth2Options.client_id,
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': oAuth.codeVerifier,
+            'redirect_uri': oauth2Options.redirectUrl
+          };*/
+          browserRef.close();
+          this.getToken(urlToken);
+        }
+      } else if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.includes('?error')) {
+        browserRef.close();
+        this.closeEventBrowser(event.url.includes('?error'));
+      }
+    });
+
+    browserRef.addEventListener("exit", (event) => {
+      this.closeEventBrowser();
+    })
+  }
+
+  closeEventBrowser(error?: boolean) {
+    this.loading.create();
+    this.navCtrl.pop();
+    if (!!error) {
+      this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
+    }
+    this.loading.dismiss();
   }
 
   /**
-   * Method executed when the class did enter, usually when swipe back from the next page
+   * Method to create request to token
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}
+   * @param res url to get token
    */
-  async ionViewDidEnter() {
-    this.loading.createAndPresent();
-    this.profile = this.navParams.get('profile');
+  async getToken(res) {
+    this.showSpinner();
 
-    await this.getData();
-    this.loading.dismiss();
-    this.showAll = true;
+    const opts: any = {};
+    opts.method = 'post';
+    opts.data = res;
+    opts.serializer = 'urlencoded';
+    opts.headers = {
+      'content-type': 'application/x-www-form-urlencoded'
+    };
+    opts.responseType = 'json';
+    this.http.setDataSerializer('utf8');
+    const response = await this.http.post(this.profile.token_endpoint, res, {'Content-Type':'application/x-www-form-urlencoded'});//await this.http.sendRequest(this.profile.token_endpoint, opts);
+    console.log(response.data);
+    this.tokenURl = JSON.parse(response.data);
+    this.profile.token = this.tokenURl.access_token;
+
+    const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
+    this.manageProfileValidation(validProfile);
+
   }
 
-// TODO: REFACTOR set global if necessary
-  async getData() {
-    const oauth2Options: oAuthModel = {
-      client_id: this.global.getClientId(),
-      oAuthUrl: this.profile.authorization_endpoint,
-      type: "code",
-      redirectUrl: 'http://localhost:8080/',
-      pkce: true,
-      scope: 'eap-metadata',
+  /**
+   * Method to check form, create connection with plugin WifiEapConfigurator and navigate.
+   */
+  async checkForm() {
+    let config = this.configConnection();
+    const checkRequest = this.getEduroamServices.connectProfile(config);
+    this.loading.dismiss();
 
-    };
+    if (!!checkRequest) {
+      this.navigateTo();
+    }
+  }
+
+  /**
+   * Method to manage validation profile
+   * @param validProfile check if profile is valid
+   */
+  async manageProfileValidation(validProfile: boolean) {
+    this.providerInfo = this.global.getProviderInfo();
+
+    if (validProfile) {
+      this.validMethod = this.global.getAuthenticationMethod();
+      this.checkForm();
+
+    } else {
+      await this.notValidProfile();
+    }
+  }
+
+  /**
+   * Method to check message when profile is not valid
+   */
+  async notValidProfile() {
+    if(!!this.providerInfo) {
+
+      let url = this.checkUrlInfoProvide();
+
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+
+    } else {
+
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
+    }
+    await this.navCtrl.pop();
+  }
+
+  /**
+   * Method to check if provider info contains links
+   * and show it on error page
+   */
+  checkUrlInfoProvide() {
+    return !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
+      !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
+  }
+
+  /**
+   * This method create object to get data from
+   * the oAuth flow and generate certificates
+   */
+  async getData() {
+    const oauth2Options: oAuthModel = this.oAuthModel();
 
     let oAuth = await this.getEduroamServices.generateOAuthFlow(oauth2Options);
 
     this.buildFlowAuth(oAuth, oauth2Options, this.profile.token_endpoint);
   }
 
-  buildFlowAuth(oAuth, oauth2Options, token_endpoint) {
-    let urlToken;
-    let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+  /**
+   * Navigation to the next view
+   */
+  async navigateTo() {
+    this.showAll = false;
 
-    const flowAuth = new Promise(function (resolve, reject) {
-
-      browserRef.addEventListener('loadstart', (event) => {
-
-        if (event.url.indexOf(oauth2Options.redirectUrl) === 0) {
-          let urlData = event.url.split('code=')[1];
-          let arrayData = urlData.split('&state=');
-          let code = arrayData[0];
-          let state = arrayData[1];
-
-          if (state !== undefined && code !== undefined) {
-
-            urlToken = `${token_endpoint}?client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${code}&code_verifier=${oAuth.codeVerifier}`;
-            resolve(urlToken);
-            let tokenRef = window.cordova.InAppBrowser.open(urlToken, "_blank", "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
-
-            tokenRef.addEventListener('beforeload', () => {
-              tokenRef.close();
-            });
-
-            browserRef.close();
-          }
-        }
-      });
-    });
-    flowAuth.then(async (res) => {
-      await this.getToken(urlToken);
-    });
-
+    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+        logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+      await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
   }
+
+  /**
+   * Lifecycle: Method executed when the class did enter, usually when swipe back from the next page
+   */
+  async ionViewDidEnter() {
+    this.loading.createAndPresent();
+    this.profile = this.navParams.get('profile');
+    await this.getData();
+    this.loading.dismiss();
+    this.showAll = true;
+  }
+
+  /**
+   * Method to build spinner loading
+   */
   showSpinner() {
     this.loading.createAndPresent();
   }
 
-  async getToken(res) {
-    this.showSpinner();
-    const response = await this.http.get(res, {}, {});
-
-    // TODO: POST -> CREATE BEARER AUTHORIZATION
-
-    this.tokenURl = JSON.parse(response.data);
-
-    // console.log(this.tokenURl.access_token);
-
-    let header = `'Authorization': '${this.tokenURl.token_type} ${this.tokenURl.access_token}'`;
-
-    this.profile.token = this.tokenURl.access_token;
-
-    const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
-
-    this.manageProfileValidation(validProfile);
-
+  /**
+   * Provided oAuth Model by the authorization-endpoint
+   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#token-endpoint}
+   */
+  private oAuthModel() {
+    return {
+      client_id: this.global.getClientId(),
+      oAuthUrl: this.profile.authorization_endpoint,
+      type: 'code',
+      redirectUrl: 'http://localhost:8080/',
+      pkce: true,
+      scope: 'eap-metadata',
+    };
   }
 
   /**
-   * Method to check form and navigate.
+   * Method to create configuration to plugin WifiEapConfigurator
    */
-  async checkForm() {
-
-    //TODO change the method once the plugin is adapted to oauth flow
-
-    let config = {
+  private configConnection() {
+    return {
       ssid: this.global.getSsid(),
       username: '',
       password: '',
@@ -142,32 +258,9 @@ export class OauthFlow extends BasePage{
       servername: '',
       auth: null,
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
-      caCertificate: this.validMethod.serverSideCredential.ca.content,
+      caCertificate: this.validMethod.serverSideCredential.ca[0]['content'],
       clientCertificate: this.validMethod.clientSideCredential.clientCertificate,
       passPhrase: this.validMethod.clientSideCredential.passphrase
     };
-
-    const checkRequest = this.getEduroamServices.connectProfile(config);
-    this.loading.dismiss();
-    if (!!checkRequest) {
-      this.navigateTo();
-    }
-  }
-
-  async manageProfileValidation(validProfile: boolean){
-    this.providerInfo = this.global.getProviderInfo();
-    if(validProfile){
-      this.validMethod = this.global.getAuthenticationMethod();
-      this.checkForm();
-    } else {
-      if(!!this.providerInfo){
-        let url = !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
-          !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-      } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
-      }
-      await this.navCtrl.pop();
-    }
   }
 }

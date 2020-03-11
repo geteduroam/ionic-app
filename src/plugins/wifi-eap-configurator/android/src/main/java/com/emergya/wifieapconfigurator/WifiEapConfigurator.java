@@ -44,6 +44,7 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -173,7 +174,17 @@ public class WifiEapConfigurator extends Plugin {
         }
         if (servername != null && !servername.equals("")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                enterpriseConfig.setDomainSuffixMatch(servername);
+                String longestCommonSuffix = null;
+                if (call.getString("longestCommonSuffix") != null && !call.getString("longestCommonSuffix").trim().equals("")) {
+                    longestCommonSuffix = call.getString("longestCommonSuffix");
+                    enterpriseConfig.setDomainSuffixMatch(longestCommonSuffix);
+                }
+                // now we have to configure the DNS
+                String[] servernames = servername.split(";");
+                for (int i = 0; i < servernames.length; i ++) {
+                    servernames[i] = "DNS:" + servernames[i];
+                }
+                enterpriseConfig.setAltSubjectMatch(String.join(";", servernames));
             }
         }
 
@@ -181,22 +192,39 @@ public class WifiEapConfigurator extends Plugin {
         enterpriseConfig.setEapMethod(eapMethod);
 
         CertificateFactory certFactory = null;
-        X509Certificate caCert = null;
+        X509Certificate[] caCerts = null;
+        List<X509Certificate> certificates = new ArrayList<X509Certificate>();
         if (caCertificate != null && !caCertificate.equals("")) {
-            byte[] bytes = Base64.decode(caCertificate, Base64.NO_WRAP);
-            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+            // Multi CA-allowing
+            String[] caCertificates = caCertificate.split(";");
+            // building the certificates
+            for(String certString : caCertificates) {
+                byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
+                ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 
+                try {
+                    certFactory = CertificateFactory.getInstance("X.509");
+                    certificates.add((X509Certificate) certFactory.generateCertificate(b));
+                } catch (CertificateException e) {
+                    JSObject object = new JSObject();
+                    object.put("success", false);
+                    object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
+                    call.success(object);
+                    e.printStackTrace();
+                    Log.e("error", e.getMessage());
+                } catch (IllegalArgumentException e) {
+                    JSObject object = new JSObject();
+                    object.put("success", false);
+                    object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
+                    call.success(object);
+                    e.printStackTrace();
+                    Log.e("error", e.getMessage());
+                }
+            }
+            // Adding the certificates to the configuration
+            caCerts = certificates.toArray(new X509Certificate[certificates.size()]);
             try {
-                certFactory = CertificateFactory.getInstance("X.509");
-                caCert = (X509Certificate) certFactory.generateCertificate(b);
-                enterpriseConfig.setCaCertificate(caCert);
-            } catch (CertificateException e) {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
-                call.success(object);
-                e.printStackTrace();
-                Log.e("error", e.getMessage());
+                enterpriseConfig.setCaCertificates(caCerts);
             } catch (IllegalArgumentException e) {
                 JSObject object = new JSObject();
                 object.put("success", false);

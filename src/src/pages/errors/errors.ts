@@ -16,9 +16,26 @@ const {Browser} = Plugins;
 })
 export class ErrorsPage extends BasePage{
 
+  /**
+   * Error text
+   */
   text: string;
+
+  /**
+   *  Link to external page
+   */
   link: string;
+
+  /**
+   * Method check, enabled access network or
+   * error when network is associated
+   */
   checkMethod : string;
+
+  /**
+   * It checks if the error page have permission
+   * to continue navigate or finish app
+   */
   public isFinal: boolean = false;
 
 
@@ -27,23 +44,24 @@ export class ErrorsPage extends BasePage{
               protected event: Events, protected global: GlobalProvider, private errorService: ErrorServiceProvider) {
     super(loading, dictionary, event, global);
 
-
     if (!!this.navParams.get('isFinal')) {
 
       this.link = this.navParams.get('link');
       this.text =  this.navParams.get('error');
-      this.isFinal = true;
+      this.isFinal = this.navParams.get('isFinal');
+
     } else {
+
       this.text = this.navParams.get('error');
       this.isFinal = false;
       this.checkMethod = this.navParams.get('method');
     }
-
-    // super.activeNavigation = this.navParams.get('navigation');
-
   }
 
-
+  /**
+   * This method close app.
+   * [ Only Android can closed app ]
+   */
   async exitApp() {
     if (!this.isFinal) {
       await this.viewCtrl.dismiss();
@@ -51,29 +69,32 @@ export class ErrorsPage extends BasePage{
     } else {
       this.platform.exitApp();
     }
-
   }
 
+  /**
+   * This method close error page on modal screen.
+   */
   async closeModal() {
-    // if(this.activeNavigation){
-    //   await this.viewCtrl.dismiss();
-    // } else{
-    //   this.alertConnectionDisabled();
-    // }
-    if (await this.errorService.checkAgain(this.checkMethod)){
+    if (await this.errorService.checkAgain(this.checkMethod, this.isFinal)) {
       await this.viewCtrl.dismiss();
     } else {
       this.showToast(this.text);
     }
   }
 
+  /**
+   * This method include link on button in error page
+   */
   async clickKnowMore() {
     if(!this.emptyLink()){
       await Browser.open({'url': this.link});
     }
-
   }
 
+  /**
+   * This method include link on button in error page when link is a mail
+   * When tapped button, it opens email page with a subject: Error
+   */
   getEmail(): string {
     if(!!this.link && this.isLinkEmail()){
       return 'mailto:'+this.link+'Subject=Error';
@@ -82,10 +103,16 @@ export class ErrorsPage extends BasePage{
     }
   }
 
+  /**
+   * This method fix button when not a linked
+   */
   emptyLink(): boolean{
     return !!this.link || this.link.length == 0;
   }
 
+  /**
+   * This method validate email when has a link
+   */
   isLinkEmail(): boolean {
     return this.validator.validateEmail(this.link);
   }

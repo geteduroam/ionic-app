@@ -23,3 +23,18 @@ page-errors {
     pointer-events: none;
   }
 }
+////---------------------------------------------
+//// Custom style to error page on iOS platform
+////---------------------------------------------
+@media only screen
+and (max-device-width: 812px)
+and (orientation: portrait) {
+
+  ion-app.platform-ios page-errors {
+    top: 20px !important;
+
+    ion-content div.scroll-content {
+      overflow-y: hidden !important;
+    }
+  }
+}

@@ -48,18 +48,19 @@ page-config-screen {
       }
     }
   }
+
   //---------------------------
   // ion-select custom style
   //---------------------------
   ion-select {
     min-width: 97%;
-    //height: 100%;
     border-radius: 4px;
     margin-left: 7px !important;
     border: 1px solid #CAD0D6 !important;
   }
 
 }
+
 //---------------------------
 // ion-item custom style
 //---------------------------
@@ -72,6 +73,7 @@ ion-item.item-profile {
     border-bottom: 0 !important;
   }
 }
+
 //---------------------------------
 // ion-list custom style
 //---------------------------------
