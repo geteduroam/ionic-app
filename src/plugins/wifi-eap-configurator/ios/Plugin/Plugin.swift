@@ -169,11 +169,11 @@ public class WifiEapConfigurator: CAPPlugin {
             if let certificatesString = call.getString("caCertificate") {
                 // supporting multiple CAs
                 let certificatesStrings = certificatesString.components(separatedBy: ";")
-                let index = 0
-                let certificates = []
+                var index: Int = 0
+                var certificates = [SecCertificate]();
                 certificatesStrings.forEach { caCertificateString in
                     // building the name for the cert that will be installed
-                    let certName = "getEduroamCertCA" + index;
+                    let certName: String = "getEduroamCertCA" + String(index);
                     // adding the certificate
                     if (addCertificate(certName: certName, certificate: caCertificateString) as? Bool ?? false)
                     {
