@@ -77,7 +77,8 @@ public class WifiEapConfigurator: CAPPlugin {
             if server != ""{
                 //eapSettings.trustedServerNames = [server]
                 // supporting multiple CN
-                eapSettings.trustedServerNames = server.components(separatedBy: ";")
+                var serverNames: [String]? = server.components(separatedBy: ";")
+                eapSettings.trustedServerNames = serverNames
             }
         }
         
