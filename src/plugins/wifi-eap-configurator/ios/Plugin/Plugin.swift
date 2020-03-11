@@ -192,7 +192,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     }
                     index += 1
                 }
-                eapSettings.setTrustedServerCertificates(certificates)
+                eapSettings.setTrustedServerCertificates(certificates!)
             }
         }
         
