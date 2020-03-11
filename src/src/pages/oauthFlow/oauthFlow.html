@@ -1,16 +1,14 @@
 <div *ngIf="showAll" class="container-content">
     <div class="header-content" margin-top padding-top>
         <img alt="setting" src="../../assets/icon/cog-outline.svg" />
-        <h1>eduroam configuration</h1>
+        <h1>{{getString('header', 'config')}}</h1>
     </div>
 
-    <div class="content" text-center>
-        <p class="copy" margin padding>
-           OAUTH EXTERNAL APP
-        </p>
+    <div class="content-form" margin-top padding-top text-center></div>
 
+    <div class="footer-form" text-center>
         <div class="content-button">
-            <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> Next </button>
+            <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> {{getString('button', 'next')}} </button>
         </div>
     </div>
 </div>

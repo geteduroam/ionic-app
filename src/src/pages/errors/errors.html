@@ -4,7 +4,6 @@
     <div class="bar-upped" margin></div>
     <div class="base-content" margin-bottom margin-end margin-left margin-right padding>
 
-
         <div class="header-content" margin-top padding-top>
             <img alt="setting" src="../../assets/icon/alert-outline.svg" />
             <h1>{{getString('header', 'error')}}</h1>
@@ -18,7 +17,7 @@
         </div>
         <div *ngIf="isFinal" class="footer-info" text-center>
 
-            <div  class="content-button">
+            <div class="content-button" *ngIf="!emptyLink()">
                 <button (click)="clickKnowMore()" *ngIf="!isLinkEmail()" class="button-control" ion-button text-capitalize>{{getString('button', 'more')}}</button>
                 <a *ngIf="isLinkEmail()" class="button-control" href="{{getEmail()}}" ion-button text-capitalize>{{getString('button', 'email')}}</a>
             </div>
@@ -27,6 +26,7 @@
                 <p class="text-down" padding-top text-center >{{getString('button', 'close')}}</p>
             </div>
         </div>
+
         <div *ngIf="!isFinal" class="footer-info" text-center>
 
             <div class="content-button">

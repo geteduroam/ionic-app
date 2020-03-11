@@ -1,9 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavParams, Platform, Searchbar, ViewController } from 'ionic-angular';
+import {Events, NavParams, Platform, Searchbar, ViewController} from 'ionic-angular';
 import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {GlobalProvider} from "../../providers/global/global";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -11,7 +12,12 @@ const { Keyboard } = Plugins;
   templateUrl: 'institutionSearch.html',
 })
 export class InstitutionSearch extends BasePage{
+
+  /**
+   * Institutions
+   */
   instances: any;
+
   /**
    * Set of institutions filtered by what is written in the search-bar
    */
@@ -36,17 +42,22 @@ export class InstitutionSearch extends BasePage{
    * Selected profile
    */
   profile: any;
+
   /**
    * Platform ios
    */
   ios: boolean = false;
 
+  /**
+   * Component SearchBar
+   */
   @ViewChild('searchBar') searchBar: Searchbar;
 
   constructor(public navParams: NavParams, private viewCtrl: ViewController,
               private platform: Platform, protected loading: LoadingProvider,
-              protected dictionary: DictionaryServiceProvider) {
-    super(loading, dictionary);
+              protected dictionary: DictionaryServiceProvider,
+              protected event: Events, protected global: GlobalProvider) {
+    super(loading, dictionary, event, global);
   }
 
   /**
@@ -56,13 +67,10 @@ export class InstitutionSearch extends BasePage{
    * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
    * @param {any} institution the selected institution.
    */
-  async selectInstitution(institution: any) {
+  selectInstitution(institution: any) {
     this.instances = institution;
-
-    Keyboard.addListener('keyboardDidHide', () => {
-      this.viewCtrl.dismiss(institution);
-    })
-
+    this.searchBar.setFocus();
+    this.viewCtrl.dismiss(institution);
   }
 
   /**
@@ -75,9 +83,12 @@ export class InstitutionSearch extends BasePage{
     const val = ev.target.value;
 
     this.filterInstances(val);
-
   }
 
+  /**
+   * Method to filter institutions
+   * @param stringAux Searched on search bar
+   */
   filterInstances(stringAux: string){
     if (stringAux && stringAux.trim() != '') {
 
@@ -98,6 +109,7 @@ export class InstitutionSearch extends BasePage{
     this.filteredInstances = this.instances;
 
   }
+
   /**
    * Method which clears the instance after pressing X in the search-bar.
    * This method updates the properties [showInstanceItems]{@link #showInstanceItems}, [instance]{@link #instance},
@@ -119,6 +131,10 @@ export class InstitutionSearch extends BasePage{
     this.selectedProfileId = '';
   }
 
+  /**
+   * Lifecycle when entering a page, after it becomes the active page.
+   *  this sets focus on search bar
+   */
   ionViewDidEnter() {
     this.platform.is('ios') ? this.ios = true : this.ios = false ;
     this.instances = this.navParams.get('instances');
@@ -130,7 +146,12 @@ export class InstitutionSearch extends BasePage{
     }, 10);
   }
 
-  async dismiss() {
-    await this.viewCtrl.dismiss();
+  /**
+   * Lifecycle when you leave a page,
+   * before it stops being the active one
+   */
+  ionViewWillLeave() {
+    Keyboard.hide();
   }
+
 }

@@ -1,41 +1,43 @@
-<div *ngIf="showAll" class="container-content">
+<div *ngIf="showAll" class="profile-content">
     <div class="header-content" margin-top padding-top>
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
         <h1>{{getString('header', 'profile')}}</h1>
     </div>
 
     <div class="content-form" margin-bottom text-center>
-     <form (ngSubmit)="checkForm()">
 
-        <div  class="content-profile" padding-top >
-            <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
+        <form (ngSubmit)="checkForm()">
 
-            <input [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
-                   !validEmail(provide.email) && suffixIdentity !== '' && !provide.email.includes(suffixIdentity) ?
-                   'error-validation' : ''"  class="input-profile" name="email" padding-left
-                   placeholder="{{getString('placeholder', 'example')}}" type="email"/>
+            <div  class="content-profile" padding-top >
+                <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
 
-            <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
-                {{getString('error', 'username')}} </p>
+                <input (focusout)="getEmail()" [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
+                       !validEmail(provide.email) && suffixIdentity !== '' && !provide.email.includes(suffixIdentity) ?
+                       'error-validation' : ''" [placeholder]="getPlaceholder()" autocomplete="on" class="input-profile" name="email"
+                       padding-left type="email"/>
 
-            <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
-                && !provide.email.includes(suffixIdentity)" class="error-msg">
-                {{getString('error', 'domain')}}{{suffixIdentity}} </p>
-        </div>
+                <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
+                    {{getString('error', 'username')}} </p>
 
-        <div class="content-profile" margin-top>
-            <ion-label class="label-conf" text-left>{{getString('label', 'password')}}</ion-label>
-            <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
-                   name="pass" padding-left type="password"/>
+                <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
+                    && !provide.email.includes(suffixIdentity)" class="error-msg">
+                    {{getString('error', 'domain')}}{{suffixIdentity}} </p>
+            </div>
 
-            <p *ngIf="errorPass" class="error-msg">{{getString('error', 'password')}}</p>
-        </div>
-        <div *ngIf="termsOfUse" class="content-terms" ion-row>
-            <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
-            <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}<a class="terms" href="{{termsUrl}}">{{getString('label', 'terms')}}</a></ion-label>
-        </div>
-     </form>
+            <div class="content-profile" margin-top>
+                <ion-label class="label-conf" text-left>{{getString('label', 'password')}}</ion-label>
+                <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
+                       name="pass" padding-left type="password"/>
 
+                <p *ngIf="errorPass" class="error-msg">{{getString('error', 'password')}}</p>
+            </div>
+
+            <!-- Terms of use -->
+            <div *ngIf="termsOfUse" class="content-terms" ion-row>
+                <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
+                <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}<a class="terms" href="{{termsUrl}}">{{getString('label', 'terms')}}</a></ion-label>
+            </div>
+        </form>
     </div>
 
     <div class="footer-form">

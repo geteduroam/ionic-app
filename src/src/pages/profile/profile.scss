@@ -1,5 +1,9 @@
 page-profile {
 
+  .profile-content {
+    background-color: white;
+  }
+
   .input-profile {
     border-radius: 4px;
     margin-left: 14px !important;
@@ -32,7 +36,6 @@ page-profile {
   .error-validation {
     border: solid 1px red !important;
   }
-
 }
 
 //---------------------------------//

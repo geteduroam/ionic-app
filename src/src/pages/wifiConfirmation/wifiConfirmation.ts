@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { NavParams, Platform } from 'ionic-angular';
+import {Events, NavParams, Platform} from 'ionic-angular';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {BasePage} from "../basePage";
@@ -15,21 +15,57 @@ export class WifiConfirmation extends BasePage implements OnInit {
 
   showAll: boolean = false;
 
+  /**
+   * It checks if provider has a logo
+   */
   logoProvider: any;
+
+  /**
+   * It checks if provider has a logo
+   */
   logo: boolean = false;
 
+  /**
+   * DOM Sanitizer
+   */
   converted_image: SafeResourceUrl;
 
+  /**
+   * Element to include logo
+   */
   @ViewChild('imgLogo') imgLogo: ElementRef;
 
   constructor(private navParams: NavParams, private platform: Platform,
               protected loading: LoadingProvider, private sanitizer: DomSanitizer,
-              protected dictionary:DictionaryServiceProvider, private global: GlobalProvider) {
-    super(loading, dictionary);
+              protected dictionary:DictionaryServiceProvider, protected global: GlobalProvider,
+              protected event: Events) {
+    super(loading, dictionary, event, global);
   }
 
+
+  isAndroid() {
+    return this.platform.is('android');
+  }
+
+  exitApp() {
+      this.platform.exitApp();
+  }
+
+  /**
+   *  Lifecycle when it is active
+   */
+  async ngOnInit(){
+    this.loading.createAndPresent();
+    this.loading.dismiss();
+    this.showAll = true;
+  }
+
+  /**
+   *  Lifecycle when entering a page, before it becomes the active one
+   *
+   */
   ionViewWillEnter() {
-    // TODO: EXIST LOGO ?
+
     this.logoProvider = this.navParams.get('logo');
 
     if (!!this.logoProvider) {
@@ -48,16 +84,4 @@ export class WifiConfirmation extends BasePage implements OnInit {
     }
 
   }
-  async ngOnInit(){
-    this.loading.createAndPresent();
-
-
-    this.loading.dismiss();
-    this.showAll = true;
-  }
-  // TODO: REMOVE THIS NAVIGATE, AFTER IMPLEMENTS NAVIGATION FROM PAGES
-  exitApp() {
-      this.platform.exitApp();
-  }
-
 }
