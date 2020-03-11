@@ -2,7 +2,7 @@
     <ion-toolbar *ngIf="ios">
         <ion-searchbar #searchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)"
                        [(ngModel)]="instanceName" placeholder="{{getString('placeholder', 'institution')}}"
-                       [showCancelButton]="true" (ionCancel)="dismiss()" cancelButtonText="{{getString('button', 'done')}}"></ion-searchbar>
+                       [showCancelButton]="true" cancelButtonText="{{getString('button', 'done')}}"></ion-searchbar>
     </ion-toolbar>
 
     <ion-toolbar *ngIf="!ios">

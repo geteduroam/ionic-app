@@ -15,7 +15,6 @@ export class ProviderInfo extends BaseJson {
     super();
   }
 
-  // TODO: create model and fillEntity ProviderInfo
   fillEntity(jsonAux: any):boolean {
 
     let returnValue: boolean = true;

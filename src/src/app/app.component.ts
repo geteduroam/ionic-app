@@ -73,7 +73,7 @@ export class GeteduroamApp {
       this.rootPage = ConfigurationScreen;
     } else{
       this.rootPage = ReconfigurePage;
-      this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
+      this.getAssociation(isAssociated);
       this.global.setOverrideProfile(true);
     }
 
@@ -91,7 +91,7 @@ export class GeteduroamApp {
       await this.errorHandler.handleError(
         this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
         this.dictionary.getTranslation('error', 'available2') +
-        this.global.getSsid() + '.', false, '', 'removeConnection');
+        this.global.getSsid() + '.', false, '', 'removeConnection', true);
 
     } else {
 
@@ -99,7 +99,7 @@ export class GeteduroamApp {
         this.dictionary.getTranslation('error', 'available1') +
         this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
         this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false, '', 'enableAccess');
+        this.global.getSsid() + '.', false, '', 'enableAccess', false);
     }
   }
 
@@ -136,7 +136,7 @@ export class GeteduroamApp {
       this.navigate(urlOpen.url);
     });
 
-    App.addListener('backButton', (data: AppUrlOpen) => {
+    App.addListener('backButton', () => {
       this.platform.backButton.observers.pop();
 
     });
@@ -153,6 +153,13 @@ export class GeteduroamApp {
     }
   }
 
+  getAssociation(isAssociated) {
+    if (!!this.platform.is('android')) {
+      this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
+    } else {
+      this.rootParams = isAssociated.message.includes('noNetworksFound') ? {'reconfigure': false} : {'reconfigure': true} ;
+    }
+  }
   /**
    * This method shown an error message when network is disconnect
    */
@@ -161,14 +168,15 @@ export class GeteduroamApp {
     this.rootPage = ReconfigurePage;
 
     const isAssociated = await this.isAssociatedNetwork();
-    this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
+    this.getAssociation(isAssociated);
+
 
     if (!isAssociated.success && !isAssociated.overridable) {
       this.removeAssociatedManually();
 
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false, '', 'enableAccess');
+        this.global.getSsid() + '.', false, '', 'enableAccess', true);
     }
   }
 
@@ -215,7 +223,7 @@ export class GeteduroamApp {
   /**
    * This method check status of connection
    */
-  private async statusConnection():Promise<NetworkStatus> {
+  private async statusConnection(): Promise<NetworkStatus> {
     return await Network.getStatus()
   }
 

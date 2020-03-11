@@ -18,14 +18,13 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
-			<string>Owner</string>
+			<string>Alternate</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.content</string>
 				<string>public.plain-text</string>
 				<string>public.xml</string>
-				<string>public.data</string>
-				<string>com.emergya.eduroam.eap-config</string>
+				<string>org.eduroam.geteduroam.eap-config</string>
 			</array>
 			<key>NSDocumentClass</key>
 			<string>ProfileModel</string>
@@ -42,14 +41,14 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.emergya.eduroam.eap-config</string>
+			<string>org.eduroam.geteduroam.eap-config</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>eduroam</string>
@@ -61,8 +60,6 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>
-	<key>UISupportsDocumentBrowser</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>To Take Photos and Video</string>
@@ -97,6 +94,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>UTExportedTypeDeclarations</key>
@@ -111,7 +110,7 @@
 			<key>UTTypeDescription</key>
 			<string>EAP - Config file</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.emergya.eduroam.eap-config</string>
+			<string>org.eduroam.geteduroam.eap-config</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>

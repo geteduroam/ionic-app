@@ -121,6 +121,10 @@ export class StoringProvider {
     });
   }
 
+  /**
+   * Method to read file when app is initialized by a eap-config file
+   * @param uri: String
+   */
   async readExtFile(uri){
 
     try {

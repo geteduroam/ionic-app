@@ -3,8 +3,7 @@ import {isArray, isObject} from "ionic-angular/util/util";
 export abstract class BaseJson {
 
 
-    protected constructor() {
-    }
+    protected constructor() {    }
 
     /**
      * Method which returns the value for basic-type properties form a json file
@@ -16,17 +15,25 @@ export abstract class BaseJson {
     protected getSingleProperty(propertyValue: any, keyName: string, mandatory: boolean):any {
         let returnValue;
         if(!!isArray(propertyValue)){
-            if(propertyValue[0].hasOwnProperty(keyName)){
+            if(keyName == 'ServerID'){
+                let returnArray : any[] = [];
+                for(let entry of propertyValue){
+                    try{
+                        returnArray.push(entry[keyName]);
+                    } catch (e) {
+                        returnValue = null;
+                    }
+                    return returnArray;
+                }
+            }
+            else if(propertyValue[0].hasOwnProperty(keyName)){
                 try{
                     returnValue = propertyValue[0][keyName];
                 } catch (e) {
-                    console.error('Error on assigning the value '+propertyValue[0][keyName], e);
                     returnValue = null;
                 }
             } else {
                 if (mandatory) {
-                    //TODO redirect to error vew when available
-                    console.error('The json does not contain a key ' + keyName, propertyValue);
                     returnValue = null;
                 }
             }
@@ -35,20 +42,15 @@ export abstract class BaseJson {
                 try{
                     returnValue = propertyValue[keyName];
                 }catch (e) {
-                    console.error('Error on assigning the value '+propertyValue[keyName], e);
                     returnValue = null;
                 }
 
             } else {
                 if (mandatory) {
-                    //TODO redirect to error vew when available
-                    console.error('The json does not contain a key ' + keyName, propertyValue);
                     returnValue = null;
                 }
             }
         } else{
-            //TODO redirect to error vew when available
-            console.error('Invalid json file', propertyValue);
             returnValue = null;
         }
 
@@ -66,17 +68,23 @@ export abstract class BaseJson {
     protected assignComplexProperty<T extends BaseJson>(property: T, propertyName: string, propertyValue: any, keyName: string, mandatory: boolean):boolean {
         let returnValue: boolean;
         if (isArray(propertyValue)) {
-            if (propertyValue[0].hasOwnProperty(keyName)) {
+            if(keyName == 'CA'){
+                for(let entry of propertyValue){
+                    try {
+                        returnValue = property.fillEntity(entry[keyName]);
+                    } catch (e) {
+                        returnValue = false;
+                    }
+                }
+            }
+            else if (propertyValue[0].hasOwnProperty(keyName)) {
                 try {
                     returnValue = property.fillEntity(propertyValue[0][keyName]);
                 } catch (e) {
-                    console.error('Error on assigning the value ' + propertyValue[0][keyName] + ' to the property ' + propertyName, e);
                     returnValue = false;
                 }
             } else {
                 if (mandatory){
-                    //TODO redirect to error vew when available
-                    console.error('The json does not contain a key ' + keyName, propertyValue);
                     returnValue = false;
                 }
             }
@@ -85,20 +93,15 @@ export abstract class BaseJson {
                 try {
                     returnValue = property.fillEntity(propertyValue[keyName]);
                 } catch (e) {
-                    console.error('Error on assigning the value ' + propertyValue[keyName] + ' to the property ' + propertyName, e);
                     returnValue = false;
                 }
 
             } else {
                 if (mandatory) {
-                    //TODO redirect to error vew when available
-                    console.error('The json does not contain a key ' + keyName, propertyValue);
                     returnValue = false;
                 }
             }
         } else {
-            //TODO redirect to error vew when available
-            console.error('Invalid json file', propertyValue);
             returnValue = false;
         }
         return returnValue;

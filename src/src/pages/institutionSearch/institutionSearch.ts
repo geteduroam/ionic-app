@@ -12,7 +12,12 @@ const { Keyboard } = Plugins;
   templateUrl: 'institutionSearch.html',
 })
 export class InstitutionSearch extends BasePage{
+
+  /**
+   * Institutions
+   */
   instances: any;
+
   /**
    * Set of institutions filtered by what is written in the search-bar
    */
@@ -37,11 +42,15 @@ export class InstitutionSearch extends BasePage{
    * Selected profile
    */
   profile: any;
+
   /**
    * Platform ios
    */
   ios: boolean = false;
 
+  /**
+   * Component SearchBar
+   */
   @ViewChild('searchBar') searchBar: Searchbar;
 
   constructor(public navParams: NavParams, private viewCtrl: ViewController,
@@ -64,9 +73,6 @@ export class InstitutionSearch extends BasePage{
     this.viewCtrl.dismiss(institution);
   }
 
-  ionViewWillLeave() {
-    Keyboard.hide();
-  }
   /**
    * Method which filters the institutions by the string introduced in the search-bar.
    * The filter is not case sensitive.
@@ -77,9 +83,12 @@ export class InstitutionSearch extends BasePage{
     const val = ev.target.value;
 
     this.filterInstances(val);
-
   }
 
+  /**
+   * Method to filter institutions
+   * @param stringAux Searched on search bar
+   */
   filterInstances(stringAux: string){
     if (stringAux && stringAux.trim() != '') {
 
@@ -91,7 +100,6 @@ export class InstitutionSearch extends BasePage{
     }
   }
 
-
   /**
    * Method which gets all the institutions.
    * Used after cleaning or first click on the search-bar.
@@ -101,6 +109,7 @@ export class InstitutionSearch extends BasePage{
     this.filteredInstances = this.instances;
 
   }
+
   /**
    * Method which clears the instance after pressing X in the search-bar.
    * This method updates the properties [showInstanceItems]{@link #showInstanceItems}, [instance]{@link #instance},
@@ -122,6 +131,10 @@ export class InstitutionSearch extends BasePage{
     this.selectedProfileId = '';
   }
 
+  /**
+   * Lifecycle when entering a page, after it becomes the active page.
+   *  this sets focus on search bar
+   */
   ionViewDidEnter() {
     this.platform.is('ios') ? this.ios = true : this.ios = false ;
     this.instances = this.navParams.get('instances');
@@ -131,6 +144,14 @@ export class InstitutionSearch extends BasePage{
     setTimeout(() => {
       this.searchBar.setFocus()
     }, 10);
+  }
+
+  /**
+   * Lifecycle when you leave a page,
+   * before it stops being the active one
+   */
+  ionViewWillLeave() {
+    Keyboard.hide();
   }
 
 }
