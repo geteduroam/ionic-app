@@ -76,4 +76,30 @@
                    - pod install -> Install dependencies with CocoaPods.
             ```       
   
+    - To fix Bounce on iOS:
+     
+      In folder Pods/ create a "New File", select "Objective-C File", select Next.
+      
+      Include name to the file and select Next.
+      
+      Select targets: Capacitor, Capacitor Cordova, CordovaPlugins and Pods-App
+      
+      Select Create and include:
+      
+      ```
+      #import <Foundation/Foundation.h>
+      
+      #import <UIKit/UIKit.h>
+  
+      @implementation UIScrollView (NoBounce)
+      
+      - (void)didMoveToWindow {
+      
+          [super didMoveToWindow];
+          
+          self.bounces = NO;
+      }
+      
+      @end
+      ``` 
    
