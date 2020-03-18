@@ -1,4 +1,4 @@
-package org.eduroam.geteduroam;
+package app.eduroam.geteduroam;
 
 import android.content.Intent;
 import android.net.Uri;

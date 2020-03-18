@@ -1,5 +1,5 @@
 {
-  "appId": "org.eduroam.geteduroam",
+  "appId": "app.eduroam.geteduroam",
   "appName": "geteduroam",
   "bundledWebRuntime": false,
   "npmClient": "npm",

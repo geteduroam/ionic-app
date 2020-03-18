@@ -24,7 +24,7 @@
 				<string>public.content</string>
 				<string>public.plain-text</string>
 				<string>public.xml</string>
-				<string>org.eduroam.geteduroam.eap-config</string>
+				<string>app.eduroam.geteduroam.eap-config</string>
 			</array>
 			<key>NSDocumentClass</key>
 			<string>ProfileModel</string>
@@ -48,7 +48,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>org.eduroam.geteduroam.eap-config</string>
+			<string>app.eduroam.geteduroam.eap-config</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>eduroam</string>
@@ -110,7 +110,7 @@
 			<key>UTTypeDescription</key>
 			<string>EAP - Config file</string>
 			<key>UTTypeIdentifier</key>
-			<string>org.eduroam.geteduroam.eap-config</string>
+			<string>app.eduroam.geteduroam.eap-config</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
