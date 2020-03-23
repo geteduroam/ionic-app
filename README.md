@@ -77,8 +77,8 @@
             ```       
      - To fix Bounce on iOS:
      
-     In folder Pods/ create a "New File", select "Objective-C File", select Next.
-     Include name to the file and select Next.
+     In the folder Pods/, create a "New File", select "Objective-C File", select Next.
+     Include the name to the file and select Next.
      Select targets: Capacitor, Capacitor Cordova, CordovaPlugins and Pods-App
      Select Create and include:
      ```
