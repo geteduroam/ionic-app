@@ -70,50 +70,51 @@ There are 2 options to build the app in Android: one automatic and another manua
       apksigner sign --ks /release-key.jks --ks-pass pass:KEY_PASSWORD --key-pass pass:KEY_PASSWORD --out geteduroam.apk app-debug-aligned.apk
       ```
  ## iOS
-
-    ** Binary creation**
-       * Requirements
-         * Java
-         * Node.js
-         * ionic
-         * capacitor
-       * Navigate to __src__ folder
-         * Install Dependencies and build (nodeJS dependencies)
+ 
+To create the iOS binary, there is only a way (manual) because it couldn't be dockerized.
+ * **Binary creation**
+    * Requirements
+      * Java
+      * Node.js
+      * ionic
+      * capacitor
+    * Navigate to __src__ folder
+      * Install Dependencies and build (nodeJS dependencies)
+      ```
+      npm i
+      npm run build
+      ```
+    * iOS specific requirements:
+      * Xcode
+      * CocoaPods
+    * Building the capacitor app:
          ```
-         npm i
-         npm run build
+         npx cap add ios -> Creates ios folder (if the ios folder doesn't exist under the src one)
+         npx cap sync ios -> Synchronyzes ios folder
+         npx cap open ios -> Opens xCode
          ```
-       * iOS specific requirements:
-         * Xcode
-         * CocoaPods
-       * Building the capacitor app:
-            ```
-            npx cap add ios -> Creates ios folder (if the ios folder doesn't exist under the src one)
-            npx cap sync ios -> Synchronyzes ios folder
-            npx cap open ios -> Opens xCode
-            ```
-       * Installing CocoaPods: Go to the folder src/ios/App, throw the command:
-            ```
-            pod install -> Installs dependencies with CocoaPods.
-            ```
-       * To fix Bounce on iOS (this step shoulnd't be needed but sometimes the Bounce.m is removed so it's needed). **Important**: If Bounce.m exists, skip this step:
-         * In the folder Pods/, create a "New File", select "Objective-C File", select Next.
-         * Include the name to the file and select Next.
-         * Select Target Support Files: Capacitor, Capacitor Cordova, CordovaPlugins and Pods-App
-         * Select Create and include:
+    * Installing CocoaPods: Go to the folder src/ios/App, throw the command:
          ```
-         #import <Foundation/Foundation.h>
-
-         #import <UIKit/UIKit.h>
-
-         @implementation UIScrollView (NoBounce)
-
-         - (void)didMoveToWindow {
-
-             [super didMoveToWindow];
-
-             self.bounces = NO;
-         }
-
-         @end
+         pod install -> Installs dependencies with CocoaPods.
          ```
+    * To fix Bounce on iOS (this step shoulnd't be needed but sometimes the Bounce.m is removed so it's needed). **Important**: If Bounce.m exists, skip this step:
+      * In the folder Pods/, create a "New File", select "Objective-C File", select Next.
+      * Include the name to the file and select Next.
+      * Select Target Support Files: Capacitor, Capacitor Cordova, CordovaPlugins and Pods-App
+      * Select Create and include:
+      ```
+      #import <Foundation/Foundation.h>
+
+      #import <UIKit/UIKit.h>
+
+      @implementation UIScrollView (NoBounce)
+
+      - (void)didMoveToWindow {
+
+          [super didMoveToWindow];
+
+          self.bounces = NO;
+      }
+
+      @end
+      ```
