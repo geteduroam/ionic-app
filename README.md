@@ -71,7 +71,7 @@ There are 2 options to build the app in Android: one automatic and another manua
       ```
  ## iOS
 
-    **Binary creation**
+    ** Binary creation**
        * Requirements
          * Java
          * Node.js
@@ -116,4 +116,4 @@ There are 2 options to build the app in Android: one automatic and another manua
          }
 
          @end
-         ```   
+         ```
