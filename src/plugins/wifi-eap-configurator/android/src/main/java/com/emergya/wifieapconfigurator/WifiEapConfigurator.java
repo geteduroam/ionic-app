@@ -19,7 +19,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiNetworkSpecifier;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 import android.os.Bundle;
@@ -304,7 +303,7 @@ public class WifiEapConfigurator extends Plugin {
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             wifiManager.setWifiEnabled(true);
         } else {
-            this.connectWifiAndroidQ(ssid, enterpriseConfig);
+            connectWifiAndroidQ(ssid, enterpriseConfig);
         }
 
         JSObject object = new JSObject();
@@ -315,37 +314,22 @@ public class WifiEapConfigurator extends Plugin {
 
     private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig) {
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
-            ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-            NetworkSpecifier wifiSpecifier = new WifiNetworkSpecifier.Builder()
-                    // TODO
-                    //.setSsid(ssid)
-                    //.setWpa2EnterpriseConfig(enterpriseConfig)
-                    .setSsid("AndroidWifi")
+            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
+
+            WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                    .setPriority(1)
+                    .setSsid(ssid)
+                    .setWpa2EnterpriseConfig(enterpriseConfig)
                     .build();
 
-            NetworkRequest networkRequest = new NetworkRequest.Builder()
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
-                    .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .setNetworkSpecifier(wifiSpecifier)
-                    .build();
+            sugestions.add(suggestion);
+            int status = wifiManager.addNetworkSuggestions(sugestions);
 
-            manager.requestNetwork(networkRequest, this.networkCallback);
-
-            //PendingIntent pIntent = PendingIntent.getService(getContext(), 0, new Intent(getContext(), WifiService.class), 0);
-            //manager.requestNetwork(networkRequest, pIntent);
-            
-            /*
-            WifiNetworkSuggestion suggestion = builder.build();
-
-            ArrayList<WifiNetworkSuggestion> list = new ArrayList<>();
-            list.add(suggestion);
-
-            int status = manager.addNetworkSuggestions(list);
-*/
-
+            if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+                Log.d("STATUS ERROR", "" + status);
+            }
         }
     }
 
@@ -357,24 +341,24 @@ public class WifiEapConfigurator extends Plugin {
         Log.e("error", e.getMessage());
     }
 
-    // TODO: Revisar en Q
     @PluginMethod
     public boolean removeNetwork(PluginCall call) {
         String ssid = null;
         boolean res = false;
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
-                ssid = call.getString("ssid");
-            } else {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
-                call.success(object);
-                return res;
-            }
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
+            ssid = call.getString("ssid");
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+            return res;
+        }
 
-            WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
             for (WifiConfiguration conf : configuredNetworks) {
                 if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
@@ -387,12 +371,19 @@ public class WifiEapConfigurator extends Plugin {
                     res = true;
                 }
             }
-            if (!res) {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.success.network.missing");
-                call.success(object);
-            }
+        } else {
+            WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder().setSsid(ssid).build();
+            ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
+            suggestions.add(suggestion);
+            wifi.removeNetworkSuggestions(suggestions);
+            res = true;
+        }
+
+        if (!res) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.success(object);
         }
 
         return res;
@@ -434,6 +425,7 @@ public class WifiEapConfigurator extends Plugin {
             }
 
             WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
             List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
             for (WifiConfiguration conf : configuredNetworks) {
                 if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
@@ -452,6 +444,7 @@ public class WifiEapConfigurator extends Plugin {
                     break;
                 }
             }
+
             if (!res) {
                 JSObject object = new JSObject();
                 object.put("success", true);
@@ -660,28 +653,5 @@ public class WifiEapConfigurator extends Plugin {
 
         return res;
     }
-
-    ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
-
-        @Override
-        public void onUnavailable() {
-            super.onUnavailable();
-            Log.d("NetworkCallback", "Network not found");
-        }
-
-        @Override
-        public void onAvailable(Network network) {
-            super.onAvailable(network);
-            Log.d("NetworkCallback", "Network avalilable");
-
-            ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-            manager.bindProcessToNetwork(network);
-
-            Log.d("NETWORK", network.toString());
-            Log.d("WIFI CONNECTED?", manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).toString());
-            Log.d("WIFI CONNECTED?", manager.isDefaultNetworkActive() ? "activa" : "inactiva");
-        }
-
-    };
 
 }
