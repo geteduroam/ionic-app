@@ -20,10 +20,12 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSpecifier;
+import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import android.util.Base64;
@@ -312,8 +314,8 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig) {
-        if(getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
-            ConnectivityManager service = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
+            ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
             NetworkSpecifier wifiSpecifier = new WifiNetworkSpecifier.Builder()
                     // TODO
@@ -324,14 +326,26 @@ public class WifiEapConfigurator extends Plugin {
 
             NetworkRequest networkRequest = new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
                     .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                     .setNetworkSpecifier(wifiSpecifier)
                     .build();
 
-            //service.requestNetwork(networkRequest, this.networkCallback);
+            manager.requestNetwork(networkRequest, this.networkCallback);
 
-            PendingIntent pIntent = PendingIntent.getService(getContext(), 0, new Intent(getContext(), WifiService.class), 0);
-            service.requestNetwork(networkRequest, pIntent);
+            //PendingIntent pIntent = PendingIntent.getService(getContext(), 0, new Intent(getContext(), WifiService.class), 0);
+            //manager.requestNetwork(networkRequest, pIntent);
+            
+            /*
+            WifiNetworkSuggestion suggestion = builder.build();
+
+            ArrayList<WifiNetworkSuggestion> list = new ArrayList<>();
+            list.add(suggestion);
+
+            int status = manager.addNetworkSuggestions(list);
+*/
+
         }
     }
 
@@ -659,7 +673,15 @@ public class WifiEapConfigurator extends Plugin {
         public void onAvailable(Network network) {
             super.onAvailable(network);
             Log.d("NetworkCallback", "Network avalilable");
+
+            ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            manager.bindProcessToNetwork(network);
+
+            Log.d("NETWORK", network.toString());
+            Log.d("WIFI CONNECTED?", manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).toString());
+            Log.d("WIFI CONNECTED?", manager.isDefaultNetworkActive() ? "activa" : "inactiva");
         }
+
     };
 
 }
