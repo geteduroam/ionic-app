@@ -404,10 +404,14 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
                 call.success(object);
             }
+        } else{
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
+            call.success(object);
         }
     }
 
-    // TODO: Revisar en Q
     @PluginMethod
     public boolean isNetworkAssociated(PluginCall call) {
         String ssid = null;
@@ -451,6 +455,12 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("message", "plugin.wifieapconfigurator.success.network.missing");
                 call.success(object);
             }
+        } else{
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+            return res;
         }
 
         return res;
@@ -552,8 +562,7 @@ public class WifiEapConfigurator extends Plugin {
         }
 
     }
-
-    // TODO: Revisar en Q
+    
     private boolean getNetworkAssociated(PluginCall call, String ssid) {
         boolean res = true, isOverridable = false;
 
