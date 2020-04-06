@@ -27,7 +27,7 @@
     "@capacitor/android": "^1.5.0",
     "@capacitor/cli": "^1.5.0",
     "@capacitor/core": "^1.5.0",
-    "@capacitor/ios": "^1.5.0",
+    "@capacitor/ios": "^2.0.0-beta.1",
     "@ionic-native/android-permissions": "^5.17.0",
     "@ionic-native/core": "~5.17.0",
     "@ionic-native/diagnostic": "^5.17.0",
