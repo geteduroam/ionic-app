@@ -31,7 +31,7 @@ export class GeteduroamServices {
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
    */
   async discovery() {
-    const url = 'https://discovery.geteduroam.no/discovery-v1.json';
+    const url = 'https://discovery.geteduroam.no/v1/discovery.json';
     const params = {};
     const headers = {};
 
