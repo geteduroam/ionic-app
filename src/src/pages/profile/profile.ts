@@ -300,33 +300,7 @@ export class ProfilePage extends BasePage{
       auth: this.global.auth.MSCHAPv2,
       anonymous: "",
       caCertificate: this.validMethod.serverSideCredential.ca,
-      longestCommonSuffix: this.longestCommonSuffix(this.validMethod.serverSideCredential.serverID)
     };
-  }
-
-  private longestCommonSuffix(input){
-    let array = input.map(function(e) {
-      e = e.split("").reverse().join("");
-      return e;
-    });
-    let sortedArray = array.sort();
-    let first = sortedArray[0];
-    let last = sortedArray.pop();
-    let length = first.length;
-    let index = 0;
-    while(index<length && first[index] === last[index])
-      index++;
-    let candidate = first.substring(0, index).split("").reverse().join("");
-    if (!input.includes(candidate)) { // if this happens it is because is a common suffix
-      let parts = candidate.split('.');
-      if (parts.length > 2) {
-        parts.shift(); // removing the first one
-        candidate = parts.join('.');
-      } else {
-        candidate = '';
-      }
-    }
-    return candidate;
   }
 
   goBack() {
