@@ -27,7 +27,7 @@ npm-debug.log*
 /dist
 /node_modules
 /platforms
-/plugins
+/plugins/wifi-eap-configurator/node_modules
 /www
 /tsconfig.spec.json
 /documentation
