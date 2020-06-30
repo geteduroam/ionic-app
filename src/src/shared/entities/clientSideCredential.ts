@@ -37,7 +37,7 @@ export class ClientSideCredential extends BaseJson{
         let returnValue: boolean = true;
         this.innerIdentitySuffix = this.getSingleProperty(jsonAux, 'InnerIdentitySuffix', false);
         this.innerIdentityHint = this.getSingleProperty(jsonAux, 'InnerIdentityHint', false);
-        this.anonymousIdentity = this.getSingleProperty(jsonAux, 'AnonymousIdentity', false);
+        this.anonymousIdentity = this.getSingleProperty(jsonAux, 'OuterIdentity', false);
         this.clientCertificate = this.getSingleProperty(jsonAux, 'ClientCertificate', false);
         this.passphrase = this.getSingleProperty(jsonAux, 'Passphrase', false);
         return returnValue;
