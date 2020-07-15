@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -z "$1" ]; then
+    exec "$@"
+fi
+
 cd /home/gradle/myApp
 
 echo "executing entrypoint.sh ..."
