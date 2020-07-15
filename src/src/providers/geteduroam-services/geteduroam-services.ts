@@ -27,11 +27,11 @@ export class GeteduroamServices {
               private global: GlobalProvider) {  }
 
   /**
-   * This discovery method retrieves all institutions and their profiles from a [json]{@link https://discovery.geteduroam.no/discovery-v1.json}:
+   * This discovery method retrieves all institutions and their profiles from a [json]{@link https://discovery.eduroam.app/v1/discovery.json}:
    * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md#discovery}
    */
   async discovery() {
-    const url = 'https://discovery.geteduroam.no/v1/discovery.json';
+    const url = 'https://discovery.eduroam.app/v1/discovery.json';
     const params = {};
     const headers = {};
 
