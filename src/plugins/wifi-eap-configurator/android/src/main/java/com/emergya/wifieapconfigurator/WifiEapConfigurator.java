@@ -124,6 +124,18 @@ public class WifiEapConfigurator extends Plugin {
         String username = null;
         String password = null;
         Integer auth = null;
+        String oid = null;
+        if (call.getBoolean("oid") != null && !call.getString("oid").equals("")) {
+            oid = call.getString("oid");
+        }
+        String id = null;
+        if (call.getString("id") != null && !call.getString("id").equals("")) {
+            id = call.getString("id");
+        }
+        String displayName = null;
+        if (call.getString("displayName") != null && !call.getString("displayName").equals("")) {
+            displayName = call.getString("displayName");
+        }
 
         if (clientCertificate == null && passPhrase == null) {
             if (call.getString("username") != null && !call.getString("username").equals("")) {
@@ -163,12 +175,12 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         if (res) {
-            connectAP(ssid, username, password, servername, caCertificate, clientCertificate, passPhrase, eap, auth, anonymousIdentity, call);
+            connectAP(ssid, username, password, servername, caCertificate, clientCertificate, passPhrase, eap, auth, anonymousIdentity, displayName, id, oid, call);
         }
     }
 
     void connectAP(String ssid, String username, String password, String servername, String caCertificate, String clientCertificate, String passPhrase,
-                   Integer eap, Integer auth, String anonymousIdentity, PluginCall call) {
+                   Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String oid, PluginCall call) {
 
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
 
@@ -292,6 +304,25 @@ public class WifiEapConfigurator extends Plugin {
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
             config.enterpriseConfig = enterpriseConfig;
+            // Passpoint (HS20) configuration
+            // https://github.com/geteduroam/ionic-app/issues/10#issuecomment-660946048 (if the oid is not missing, so it's a HS20 configuration)
+            if (oid != null) {
+                // oid can be a list with commas.
+                String[] consortiumOIDs = oid.split(",");
+                long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
+                int index = 0;
+                for(String roamingConsortiumOIDString : consortiumOIDs) {
+                    roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
+                    index++;
+                }
+                config.roamingConsortiumIds = roamingConsortiumOIDs;
+                if (displayName != null) {
+                    config.providerFriendlyName = displayName;
+                } else {
+                    config.providerFriendlyName = "geteduroam configured HS20";
+                }
+                config.FQDN = id;
+            }
 
             WifiManager myWifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
