@@ -15,6 +15,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
+import android.net.wifi.hotspot2.PasspointConfiguration
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
@@ -333,35 +334,64 @@ public class WifiEapConfigurator extends Plugin {
 
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             wifiManager.setWifiEnabled(true);
+            
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+            call.success(object);
         } else {
-            connectWifiAndroidQ(ssid, enterpriseConfig);
+            PasspointConfiguration passpointConfig = null;
+            // TODO: As soon as the API LEVEL 30 is released, the passpointConfig object should be properly created
+            if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+                call.success(object);
+            } else {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
+                call.success(object);
+                e.printStackTrace();
+            }
         }
-
-        JSObject object = new JSObject();
-        object.put("success", true);
-        object.put("message", "plugin.wifieapconfigurator.success.network.linked");
-        call.success(object);
     }
 
-    private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig) {
+    private boolean connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig) {
+        boolean configured = false;
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
-
-            WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
-                    .setPriority(1)
-                    .setSsid(ssid)
-                    .setWpa2EnterpriseConfig(enterpriseConfig)
-                    .build();
+            // TODO: Remove this comment block as soon as the API LEVEL 30 is released
+            /*
+            if (passpointConfig != null) {
+                WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                        .setPriority(1)
+                        .setSsid(ssid)
+                        .setWpa2EnterpriseConfig(enterpriseConfig)
+                        .setPasspointConfig(passpointConfig)
+                        .build();
+            } else {
+            */
+                WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                        .setPriority(1)
+                        .setSsid(ssid)
+                        .setWpa2EnterpriseConfig(enterpriseConfig)
+                        .build();
+            //}
 
             sugestions.add(suggestion);
             int status = wifiManager.addNetworkSuggestions(sugestions);
 
             if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
                 Log.d("STATUS ERROR", "" + status);
+                configured = false;
+            } else {
+                configured = true;
             }
         }
+        return configured;
     }
 
     private void sendClientCertificateError(Exception e, PluginCall call) {
