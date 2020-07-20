@@ -196,7 +196,9 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
         
-        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+        let config = nil
+        if 
+        config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 if error.code == 13 {
