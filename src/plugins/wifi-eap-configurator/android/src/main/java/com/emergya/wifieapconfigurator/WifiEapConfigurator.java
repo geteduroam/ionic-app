@@ -309,7 +309,7 @@ public class WifiEapConfigurator extends Plugin {
             // https://github.com/geteduroam/ionic-app/issues/10#issuecomment-660946048 (if the oid is not missing, so it's a HS20 configuration)
             if (oid != null) {
                 // oid can be a list with commas.
-                String[] consortiumOIDs = oid.split(",");
+                String[] consortiumOIDs = oid.split(";");
                 long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
                 int index = 0;
                 for(String roamingConsortiumOIDString : consortiumOIDs) {
