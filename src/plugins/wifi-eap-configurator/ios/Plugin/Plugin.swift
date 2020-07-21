@@ -195,10 +195,33 @@ public class WifiEapConfigurator: CAPPlugin {
                 eapSettings.setTrustedServerCertificates(certificates)
             }
         }
-        
-        let config = nil
-        if 
-        config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+
+        // HS20 support
+        var oid:String? = nil
+        var id:String? = nil
+        var displayName:String? = nil
+        if call.getString("oid") != nil && call.getString("oid") != ""{
+            oid = call.getString("oid")
+        }
+        if call.getString("id") != nil && call.getString("id") != ""{
+            id = call.getString("id")
+        }
+        if call.getString("displayName") != nil && call.getString("displayName") != ""{
+            displayName = call.getString("displayName")
+        }
+        var config:NEHotspotConfiguration? = nil
+        // If HS20 was enabled
+        if oid != nil {
+            let oidStrings = oid.components(separatedBy: ";")
+            // HS20 object settings
+            let hs20 = NEHotspotHS20Settings(
+                  domainName: id,
+                  roamingEnabled: false)
+            hs20.roamingConsortiumOIs = oidStrings;
+            config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
+        } else {
+            config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+        }
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 if error.code == 13 {
