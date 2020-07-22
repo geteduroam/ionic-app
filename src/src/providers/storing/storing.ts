@@ -97,7 +97,7 @@ export class StoringProvider {
    */
   async createFolder() {
     await Filesystem.mkdir({
-      createIntermediateDirectories: true,
+      //createIntermediateDirectories: true,
       path: 'certs',
       directory: FilesystemDirectory.Documents,
       recursive: true
