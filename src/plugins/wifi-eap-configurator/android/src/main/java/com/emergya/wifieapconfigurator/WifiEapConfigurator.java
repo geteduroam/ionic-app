@@ -15,7 +15,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
-import android.net.wifi.hotspot2.PasspointConfiguration
+import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
@@ -327,9 +327,9 @@ public class WifiEapConfigurator extends Plugin {
 
             WifiManager myWifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-            int id = myWifiManager.addNetwork(config);
+            int wifiIndex = myWifiManager.addNetwork(config);
             myWifiManager.disconnect();
-            myWifiManager.enableNetwork(id, true);
+            myWifiManager.enableNetwork(wifiIndex, true);
             myWifiManager.reconnect();
 
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -352,7 +352,6 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
                 call.success(object);
-                e.printStackTrace();
             }
         }
     }
