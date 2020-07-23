@@ -52,10 +52,14 @@ public class WifiEapConfigurator: CAPPlugin {
     
     @objc func configureAP(_ call: CAPPluginCall) {
         guard let ssid = call.getString("ssid") else {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.ssid.missing",
-                "success": false,
-            ])
+            if call.getString("oid") != nil && call.getString("oid") != ""{
+                ssid = "#Passpoint"
+            } else {
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                    "success": false,
+                ])
+            }
         }
         
         guard let eapType = call.get("eap", Int.self) else {
