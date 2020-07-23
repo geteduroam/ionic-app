@@ -84,10 +84,12 @@ export class GeteduroamServices {
    */
   async connectProfile(config) {
     if (this.global.getOverrideProfile()) {
+        /*
+        // Removing for: https://github.com/geteduroam/ionic-app/issues/24
         let config = {
             ssid: this.global.getSsid()
         };
-
+        */
         this.removeNetwork(config);
     }
     return await WifiEapConfigurator.configureAP(config);
@@ -113,7 +115,7 @@ export class GeteduroamServices {
 	} else {
 		url += "?";
     }
-    url += `client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}`
+    url += `client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}`;
     url += `&scope=${data.scope}&state=${CryptoUtil.generateRandomString(10)}`;
     let codeVerifier = CryptoUtil.generateRandomString(43);
     let codeChallenge = await CryptoUtil.deriveChallenge(codeVerifier);

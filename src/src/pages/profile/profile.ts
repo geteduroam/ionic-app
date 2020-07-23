@@ -260,6 +260,7 @@ export class ProfilePage extends BasePage{
     }
     serverIDs = serverIDs.slice(0, -1);
     return {
+      // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
       ssid: this.global.getSsid(),
       username: this.provide.email,
       password: this.provide.pass,

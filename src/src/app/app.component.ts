@@ -68,16 +68,20 @@ export class GeteduroamApp {
 
     const isAssociated = await this.isAssociatedNetwork();
 
-    if (!this.rootPage && !!isAssociated.success) {
+    if (!!isAssociated.success) {
       // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
       this.rootPage = ConfigurationScreen;
     } else{
-      this.rootPage = ReconfigurePage;
-      this.getAssociation(isAssociated);
-      this.global.setOverrideProfile(true);
-    }
+      if (!isAssociated.message.includes('alreadyAssociated')) {
+        this.rootPage = ConfigurationScreen;
+      } else {
+        this.rootPage = ReconfigurePage;
+        this.getAssociation(isAssociated);
+        this.global.setOverrideProfile(true);
 
-    !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+        !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+      }
+    }
   }
   /**
    * This method check if network is enabled and show a error message to user remove network already associated
