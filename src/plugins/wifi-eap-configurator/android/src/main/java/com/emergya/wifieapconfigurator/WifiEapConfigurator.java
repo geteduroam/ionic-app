@@ -68,21 +68,36 @@ import static java.lang.System.in;
 @NativePlugin()
 public class WifiEapConfigurator extends Plugin {
 
+    private static String passpointDefaultSSID = "#Passpoint";
+    
     List<ScanResult> results = null;
 
     @PluginMethod()
     public void configureAP(PluginCall call) {
         String ssid = null;
         boolean res = true;
+        
+        String oid = null;
+        if (call.getBoolean("oid") != null && !call.getString("oid").equals("")) {
+            oid = call.getString("oid");
+        }
+        
         if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
             ssid = call.getString("ssid");
 
         } else {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
-            call.success(object);
-            res = false;
+            // ssid OR oid are mandatory 
+            if (oid == null) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+                call.success(object);
+                res = false;
+            } else {
+                // According to #24 (https://github.com/geteduroam/ionic-app/issues/24)
+                // Android needs a SSID by default
+                ssid =  passpointDefaultSSID; 
+            }
         }
 
         String clientCertificate = null;
@@ -125,10 +140,7 @@ public class WifiEapConfigurator extends Plugin {
         String username = null;
         String password = null;
         Integer auth = null;
-        String oid = null;
-        if (call.getBoolean("oid") != null && !call.getString("oid").equals("")) {
-            oid = call.getString("oid");
-        }
+       
         String id = null;
         if (call.getString("id") != null && !call.getString("id").equals("")) {
             id = call.getString("id");
@@ -184,6 +196,10 @@ public class WifiEapConfigurator extends Plugin {
                    Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String oid, PluginCall call) {
 
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
+        
+        if (finalSSID == null && oid != null ) {
+            oid = 
+        }
 
         if (anonymousIdentity != null && !anonymousIdentity.equals("")) {
             enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
@@ -520,7 +536,6 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
             call.success(object);
-            return res;
         }
 
         return res;
