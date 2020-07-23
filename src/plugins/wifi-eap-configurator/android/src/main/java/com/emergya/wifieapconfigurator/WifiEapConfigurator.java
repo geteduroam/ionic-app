@@ -386,6 +386,8 @@ public class WifiEapConfigurator extends Plugin {
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
                         .setPasspointConfig(passpointConfig)
+                        .setIsInitialAutojoinEnabled(true)
+                        .setIsAppInteractionRequired(true)
                         .build();
             } else {
             */
@@ -393,6 +395,8 @@ public class WifiEapConfigurator extends Plugin {
                         .setPriority(1)
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
+                        .setIsInitialAutojoinEnabled(true)
+                        .setIsAppInteractionRequired(true)
                         .build();
             //}
 
