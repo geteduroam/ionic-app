@@ -3,6 +3,7 @@ import {ProfileModel} from "../../shared/models/profile-model";
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import { Platform } from 'ionic-angular';
+import {CredentialApplicability} from "../../shared/entities/credentialApplicability";
 
 @Injectable()
 export class GlobalProvider {
@@ -26,6 +27,7 @@ export class GlobalProvider {
   private dictionary: any;
   private authenticationMethod: AuthenticationMethod;
   private providerInfo: ProviderInfo;
+  private credentialApplicability: CredentialApplicability;
 
   private clientId : string = 'f817fbcc-e8f4-459e-af75-0822d86ff47a';
 
@@ -103,5 +105,13 @@ export class GlobalProvider {
    */
   setOverrideProfile(profile: boolean){
     this.overrideProfile = profile;
+  }
+
+  getCredentialApplicability(){
+    return this.credentialApplicability;
+  }
+
+  setCredentialApplicability(credentialApplicability: CredentialApplicability){
+    this.credentialApplicability = credentialApplicability;
   }
 }

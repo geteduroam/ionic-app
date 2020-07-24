@@ -6,6 +6,7 @@ import { StoringProvider } from '../storing/storing';
 import {ProfileModel} from "../../shared/models/profile-model";
 import {ValidatorProvider} from "../validator/validator";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
+import {CredentialApplicability} from "../../shared/entities/credentialApplicability"
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {DictionaryServiceProvider} from "../dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../global/global";
@@ -161,6 +162,7 @@ export class GeteduroamServices {
     let eapConfigFile: any;
     let authenticationMethods:AuthenticationMethod[] = [];
     let providerInfo:ProviderInfo= new ProviderInfo();
+    let credentialApplicability:CredentialApplicability= new CredentialApplicability();
 
     if (!!profile.oauth && !!profile.token) {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint+'?format=eap-metadata', profile.token);
@@ -169,10 +171,11 @@ export class GeteduroamServices {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
     }
 
-    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo);
+    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability);
 
     if (validEap) {
         this.global.setProviderInfo(providerInfo);
+        this.global.setCredentialApplicability(credentialApplicability)
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
         if (!!authenticationMethod) {
@@ -185,6 +188,7 @@ export class GeteduroamServices {
 
     } else {
         this.global.setProviderInfo(null);
+        this.global.setCredentialApplicability(null);
         return false;
     }
   }
@@ -193,7 +197,7 @@ export class GeteduroamServices {
    * Method to validate the eapconfig file and obtain its elements.
    * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
    */
-  validateEapconfig(eapConfig: any, authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo): boolean {
+  validateEapconfig(eapConfig: any, authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo, credentialApplicability: CredentialApplicability): boolean {
     let returnValue:boolean = true;
     let jsonAux = eapConfig;
     let keys = [
@@ -211,7 +215,7 @@ export class GeteduroamServices {
 
           jsonAux = this.readJson(jsonAux, key);
 
-          if ( jsonAux == null ) {
+          if (jsonAux == null) {
             returnValue = false;
 
           } else if (key === 'EAPIdentityProvider') {
@@ -220,17 +224,30 @@ export class GeteduroamServices {
             //----------------
             let providerInfoAux = this.readJson(jsonAux, 'ProviderInfo');
 
-              if (providerInfoAux != null) {
-                if ( isArray(providerInfoAux) ) {
-                  returnValue = returnValue && providerInfo.fillEntity(providerInfoAux[0]);
+            if (providerInfoAux != null) {
+              if (isArray(providerInfoAux)) {
+                returnValue = returnValue && providerInfo.fillEntity(providerInfoAux[0]);
 
-                } else if (isObject(providerInfoAux)) {
-                  returnValue = returnValue && providerInfo.fillEntity(providerInfoAux);
-                }
+              } else if (isObject(providerInfoAux)) {
+                returnValue = returnValue && providerInfo.fillEntity(providerInfoAux);
+              }
+            }
+            //----------------
+            // CredentialApplicability
+            //----------------
+            let credentialApplicabilityAux = this.readJson(jsonAux, 'CredentialApplicability');
+
+            if (credentialApplicabilityAux != null) {
+              if (isArray(credentialApplicabilityAux)) {
+                returnValue = returnValue && credentialApplicability.fillEntity(credentialApplicabilityAux[0]);
+
+              } else if (isObject(providerInfoAux)) {
+                returnValue = returnValue && credentialApplicability.fillEntity(credentialApplicabilityAux);
               }
             }
           }
         }
+      }
         //------------------------
         // AUTHENTICATION METHODS
         //------------------------
@@ -245,8 +262,8 @@ export class GeteduroamServices {
               try {
                 returnValue = returnValue && authenticationMethodAux.fillEntity(jsonAux[i]);
 
-                if(returnValue){
-                    authenticationMethods.push(authenticationMethodAux);
+                if (returnValue) {
+                  authenticationMethods.push(authenticationMethodAux);
                 }
               } catch (e) {
                 returnValue = false;

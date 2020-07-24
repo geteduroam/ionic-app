@@ -66,7 +66,12 @@ import static androidx.core.content.ContextCompat.startActivity;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static java.lang.System.in;
 
-@NativePlugin()
+@NativePlugin(
+        permissions={
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.CHANGE_WIFI_STATE,
+                Manifest.permission.ACCESS_FINE_LOCATION
+        })
 public class WifiEapConfigurator extends Plugin {
 
     private static String passpointDefaultSSID = "#Passpoint";
@@ -393,11 +398,11 @@ public class WifiEapConfigurator extends Plugin {
                         .setPriority(1)
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
-                        .setIsInitialAutojoinEnabled(true)
-                        //.setIsAppInteractionRequired(true)
+                        //.setIsInitialAutojoinEnabled(true)
+                        .setIsAppInteractionRequired(true)
                         .build();
             //}
-            /* 
+
             // WifiNetworkSuggestion approach
             sugestions.add(suggestion);
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -409,39 +414,40 @@ public class WifiEapConfigurator extends Plugin {
             } else {
                 configured = true;
             }
-            */
-            try {    
-                WifiNetworkSpecifier wifiNetworkSpecifier = WifiNetworkSpecifier.Builder()
-                        .setSsid(ssid)
-                        .setWpa2EnterpriseConfig(enterpriseConfig)
-                        .build();
-                    
-                NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-                networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-                networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
-    
-                NetworkRequest networkRequest = networkRequestBuilder.build();
-                ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                
-                ConnectivityManager.NetworkCallback networkCallback = new 
-                        ConnectivityManager.NetworkCallback() {
-                    @Override
-                    public void onAvailable(Network network) {
-                        super.onAvailable(network);
-                        Log.d("INFO", "Connected to:" + network);
-                        cm.bindProcessToNetwork(network);
-                    }
-                });
-                cm.requestNetwork(networkRequest, networkCallback);
-                configured = true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e("error", e.getMessage());
-                configured = false;
-            }
-            
+
+//            try {
+//                WifiNetworkSpecifier wifiNetworkSpecifier = new WifiNetworkSpecifier.Builder()
+//                        .setSsid(ssid)
+//                        .setWpa2EnterpriseConfig(enterpriseConfig)
+//                        .build();
+//
+//                NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+//                networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+////                networkRequestBuilder.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+////                networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+//                networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
+//
+//                NetworkRequest networkRequest = networkRequestBuilder.build();
+//                final ConnectivityManager cm = (ConnectivityManager) getContext().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+//
+//                ConnectivityManager.NetworkCallback networkCallback = new
+//                        ConnectivityManager.NetworkCallback() {
+//                    @Override
+//                    public void onAvailable(Network network) {
+//                        super.onAvailable(network);
+//                        Log.d("INFO", "Connected to:" + network);
+//                        cm.bindProcessToNetwork(network);
+//                    }
+//                };
+//                cm.requestNetwork(networkRequest, networkCallback);
+//                configured = true;
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                Log.e("error", e.getMessage());
+//                configured = false;
+//            }
+//
         }
-        configured = true;
         return configured;
     }
 
@@ -484,10 +490,7 @@ public class WifiEapConfigurator extends Plugin {
                 }
             }
         } else {
-            WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder().setSsid(ssid).build();
-            ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-            suggestions.add(suggestion);
-            wifi.removeNetworkSuggestions(suggestions);
+            wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
             res = true;
         }
 
