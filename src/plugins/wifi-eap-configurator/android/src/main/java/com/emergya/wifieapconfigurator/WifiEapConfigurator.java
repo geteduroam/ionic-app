@@ -410,31 +410,38 @@ public class WifiEapConfigurator extends Plugin {
                 configured = true;
             }
             */
-            WifiNetworkSpecifier wifiNetworkSpecifier = WifiNetworkSpecifier.Builder()
-                    .setSsid(ssid)
-                    .setWpa2EnterpriseConfig(enterpriseConfig)
-                    .build();
+            try {    
+                WifiNetworkSpecifier wifiNetworkSpecifier = WifiNetworkSpecifier.Builder()
+                        .setSsid(ssid)
+                        .setWpa2EnterpriseConfig(enterpriseConfig)
+                        .build();
+                    
+                NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+                networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+                networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
+    
+                NetworkRequest networkRequest = networkRequestBuilder.build();
+                ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
                 
-            NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-            networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
-
-            NetworkRequest networkRequest = networkRequestBuilder.build();
-            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            
-            ConnectivityManager.NetworkCallback networkCallback = new 
-                    ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(Network network) {
-                    super.onAvailable(network);
-                    Log.d("INFO", "Connected to:" + network);
-                    cm.bindProcessToNetwork(network);
-                }
-            });
-            cm.requestNetwork(networkRequest, networkCallback);
-            
+                ConnectivityManager.NetworkCallback networkCallback = new 
+                        ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(Network network) {
+                        super.onAvailable(network);
+                        Log.d("INFO", "Connected to:" + network);
+                        cm.bindProcessToNetwork(network);
+                    }
+                });
+                cm.requestNetwork(networkRequest, networkCallback);
+                configured = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("error", e.getMessage());
+                configured = false;
+            }
             
         }
+        configured = true;
         return configured;
     }
 
