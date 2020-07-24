@@ -21,6 +21,7 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
+import android.net.wifi.WifiNetworkSpecifier; 
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -196,10 +197,6 @@ public class WifiEapConfigurator extends Plugin {
                    Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String oid, PluginCall call) {
 
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
-        
-        if (finalSSID == null && oid != null ) {
-            oid = 
-        }
 
         if (anonymousIdentity != null && !anonymousIdentity.equals("")) {
             enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
@@ -376,7 +373,6 @@ public class WifiEapConfigurator extends Plugin {
         boolean configured = false;
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
-            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
             // TODO: Remove this comment block as soon as the API LEVEL 30 is released
             /*
@@ -387,8 +383,10 @@ public class WifiEapConfigurator extends Plugin {
                         .setWpa2EnterpriseConfig(enterpriseConfig)
                         .setPasspointConfig(passpointConfig)
                         .setIsInitialAutojoinEnabled(true)
-                        .setIsAppInteractionRequired(true)
+                        // API 30
+                        //.setIsAppInteractionRequired(true)
                         .build();
+                        
             } else {
             */
                 WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
@@ -396,11 +394,13 @@ public class WifiEapConfigurator extends Plugin {
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
                         .setIsInitialAutojoinEnabled(true)
-                        .setIsAppInteractionRequired(true)
+                        //.setIsAppInteractionRequired(true)
                         .build();
             //}
-
+            /* 
+            // WifiNetworkSuggestion approach
             sugestions.add(suggestion);
+            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             int status = wifiManager.addNetworkSuggestions(sugestions);
 
             if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
@@ -409,6 +409,31 @@ public class WifiEapConfigurator extends Plugin {
             } else {
                 configured = true;
             }
+            */
+            WifiNetworkSpecifier wifiNetworkSpecifier = WifiNetworkSpecifier.Builder()
+                    .setSsid(ssid)
+                    .setWpa2EnterpriseConfig(enterpriseConfig)
+                    .build();
+                
+            NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
+
+            NetworkRequest networkRequest = networkRequestBuilder.build();
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            
+            ConnectivityManager.NetworkCallback networkCallback = new 
+                    ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(Network network) {
+                    super.onAvailable(network);
+                    Log.d("INFO", "Connected to:" + network);
+                    cm.bindProcessToNetwork(network);
+                }
+            });
+            cm.requestNetwork(networkRequest, networkCallback);
+            
+            
         }
         return configured;
     }
