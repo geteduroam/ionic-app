@@ -13,6 +13,7 @@ import {GlobalProvider} from "../global/global";
 import {isArray, isObject} from "ionic-angular/util/util";
 import { oAuthModel } from '../../shared/models/oauth-model';
 import { CryptoUtil } from '../util/crypto-util';
+import {IEEE80211} from "../../shared/entities/iEEE80211";
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
@@ -84,23 +85,103 @@ export class GeteduroamServices {
    * @param config Configuration object
    */
   async connectProfile(config) {
-    if (this.global.getOverrideProfile()) {
-        /*
-        // Removing for: https://github.com/geteduroam/ionic-app/issues/24
-        let config = {
-            ssid: this.global.getSsid()
-        };
-        */
-        this.removeNetwork(config);
+    let resultantProfiles = null;
+    if (this.global.getCredentialApplicability() && this.global.getCredentialApplicability().iEEE80211.length > 0) {
+      // If there is a CredentialApplicability defined in the eap-config file,
+      // loop over CredentialApplicability to take possible SSID's and OID's
+      // to be removed before being configured
+      resultantProfiles = this.getSSID_OID(this.global.getCredentialApplicability());
     }
-    return await WifiEapConfigurator.configureAP(config);
+    if (this.global.getOverrideProfile()) {
+      /*
+      // Removing for: https://github.com/geteduroam/ionic-app/issues/24
+      let config = {
+          ssid: this.global.getSsid()
+      };
+      */
+      if (resultantProfiles) {
+        // If there is a CredentialApplicability defined in the eap-config file,
+        // loop over CredentialApplicability to take possible SSID's and OID's
+        // to be removed before being configured
+        // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
+        for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
+          let config = {
+            ssid: resultantProfiles['ssid'][i][0]
+          };
+          await this.removeNetwork(config);
+        }
+      } else {
+        // If there is no CredentialApplicability in the eap-config file,
+        // the default case will take 'eduroam' for the SSID
+        // to be removed before adding any profile
+        let config = {
+          ssid: this.global.getSsid()
+        };
+        await this.removeNetwork(config);
+      }
+    }
+    let returnValue = true
+    if (resultantProfiles) {
+      for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
+        if(resultantProfiles['ssid'][i][0] != '#Passpoint'){
+          config['ssid'] = resultantProfiles['ssid'][i][0];
+          config['oid'] = '';
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }
+      }
+      if (resultantProfiles['oid'].length > 0) {
+        config['oid'] = resultantProfiles['oidConcat'][0];
+        config['ssid'] = '#Passpoint';
+        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+      }
+    } else {
+      // If there is no CredentialApplicability in the eap-config file,
+      // the default case will take 'eduroam' for the SSID
+      return await WifiEapConfigurator.configureAP(config);
+    }
+    return returnValue;
   }
+
+  /**
+   * Method to get all SSID's and OID's from an eap-config file
+   * @param config
+   */
+  getSSID_OID(credentialApplicabilityAux: CredentialApplicability):Object{
+      let result:Object = {};
+      let ssidAux = [];
+      let oidAux = [];
+      let oidConcat = '';
+      for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
+        let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
+        if(iEEE80211Aux['ConsortiumOID']){
+          if(oidConcat.length > 0){
+            oidConcat = oidConcat + ';' + iEEE80211Aux['ConsortiumOID'];
+          } else{
+            oidConcat = iEEE80211Aux['ConsortiumOID'];
+          }
+          oidAux.push(iEEE80211Aux['ConsortiumOID']);
+          if(iEEE80211Aux['SSID']) {
+            ssidAux.push(iEEE80211Aux['SSID']);
+          } else {
+            ssidAux.push(['#Passpoint']);
+          }
+        } else {
+          ssidAux.push(iEEE80211Aux['SSID']);
+          oidAux.push(iEEE80211Aux['']);
+        }
+      }
+      result['ssid'] = ssidAux;
+      result['oid'] = oidAux;
+      result['oidConcat'] = oidConcat;
+      return result;
+  }
+
 
   /**
    * Method to remove network if is overridable
    * @param config
    */
-  async removeNetwork(config) {
+  async removeNetwork(config){
       return await WifiEapConfigurator.removeNetwork(config);
   }
 
