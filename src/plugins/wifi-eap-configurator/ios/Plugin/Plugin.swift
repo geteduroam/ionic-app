@@ -51,16 +51,17 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func configureAP(_ call: CAPPluginCall) {
-        guard let ssid = call.getString("ssid") else {
-            if call.getString("oid") != nil && call.getString("oid") != ""{
-                ssid = "#Passpoint"
+        let ssid = call.getString("ssid")
+            if call.getString("oid") != nil && call.getString("oid") != "" {
+                // ssid = "#Passpoint"
+                // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
             } else {
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.ssid.missing",
                     "success": false,
                 ])
             }
-        }
+   
         
         guard let eapType = call.get("eap", Int.self) else {
             return call.success([
@@ -122,7 +123,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     
                     eapSettings.setTrustedServerCertificates(certificates!)
                 }
-                if let identity = addClientCertificate(certName: "client" + ssid, certificate: clientCertificate, password: passPhrase)
+                if let identity = addClientCertificate(certName: "client" + ssid!, certificate: clientCertificate, password: passPhrase)
                 {
                     let id = identity as! SecIdentity
                     eapSettings.setIdentity(id)
@@ -216,17 +217,18 @@ public class WifiEapConfigurator: CAPPlugin {
         var config:NEHotspotConfiguration? = nil
         // If HS20 was enabled
         if oid != nil {
-            let oidStrings = oid.components(separatedBy: ";")
+            let oidStrings = oid!.components(separatedBy: ";")
             // HS20 object settings
             let hs20 = NEHotspotHS20Settings(
-                  domainName: id,
-                  roamingEnabled: false)
+                domainName: id ?? "",
+                roamingEnabled: false)
             hs20.roamingConsortiumOIs = oidStrings;
             config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
         } else {
-            config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+            config = NEHotspotConfiguration(ssid: ssid!, eapSettings: eapSettings)
         }
-        NEHotspotConfigurationManager.shared.apply(config) { (error) in
+       
+        NEHotspotConfigurationManager.shared.apply(config!) { (error) in
             if let error = error {
                 if error.code == 13 {
                     call.success([
@@ -256,7 +258,7 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
     }
-    
+
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
@@ -402,8 +404,8 @@ public class WifiEapConfigurator: CAPPlugin {
         guard statusImport == errSecSuccess else { return false }
         let items = rawItems! as! Array<Dictionary<String, Any>>
         let firstItem = items[0]
-        let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
-        let trust = firstItem[kSecImportItemTrust as String] as! SecTrust?
+        let _ = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
+        let _ = firstItem[kSecImportItemTrust as String] as! SecTrust?
         if let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]? {
             var certificateQueries : [[String: Any]] = []
             
@@ -489,7 +491,7 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func isConnectedSSID(_ call: CAPPluginCall) {
-        guard let ssidToCheck = call.getString("ssid") else {
+        guard call.getString("ssid") != nil else {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.ssid.missing",
                 "success": false,
@@ -510,7 +512,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     "isConnected": false
                 ])
             }
-            guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
+            guard (info[kCNNetworkInfoKeySSID as String] as? String) != nil else {
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.network.notConnected",
                     "success": false,
