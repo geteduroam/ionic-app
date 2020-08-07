@@ -405,8 +405,8 @@ public class WifiEapConfigurator: CAPPlugin {
         guard statusImport == errSecSuccess else { return false }
         let items = rawItems! as! Array<Dictionary<String, Any>>
         let firstItem = items[0]
-        let _ = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
-        let _ = firstItem[kSecImportItemTrust as String] as! SecTrust?
+        let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
+        let trust = firstItem[kSecImportItemTrust as String] as! SecTrust?
         if let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]? {
             var certificateQueries : [[String: Any]] = []
             
