@@ -51,9 +51,9 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func configureAP(_ call: CAPPluginCall) {
-        let ssid = call.getString("ssid")
+        var ssid = call.getString("ssid")
             if call.getString("oid") != nil && call.getString("oid") != "" {
-                // ssid = "#Passpoint"
+                ssid = ""
                 // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
             } else {
                 return call.success([
@@ -202,8 +202,9 @@ public class WifiEapConfigurator: CAPPlugin {
         }
 
         // HS20 support
-        var oid:String? = nil
-        var id:String? = nil
+        var oid = call.getString("oid")
+        var id = call.getString("id")
+
         var displayName:String? = nil
         if call.getString("oid") != nil && call.getString("oid") != ""{
             oid = call.getString("oid")
@@ -214,21 +215,21 @@ public class WifiEapConfigurator: CAPPlugin {
         if call.getString("displayName") != nil && call.getString("displayName") != ""{
             displayName = call.getString("displayName")
         }
-        var config:NEHotspotConfiguration? = nil
+        var config:NEHotspotConfiguration
         // If HS20 was enabled
         if oid != nil {
-            let oidStrings = oid!.components(separatedBy: ";")
+            let oidStrings = oid?.components(separatedBy: ";")
             // HS20 object settings
             let hs20 = NEHotspotHS20Settings(
-                domainName: id ?? "",
+                domainName: id ?? "nil",
                 roamingEnabled: false)
-            hs20.roamingConsortiumOIs = oidStrings;
+            hs20.roamingConsortiumOIs = oidStrings ?? [""];
             config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
         } else {
-            config = NEHotspotConfiguration(ssid: ssid!, eapSettings: eapSettings)
+            config = NEHotspotConfiguration(ssid: ssid ?? "", eapSettings: eapSettings)
         }
        
-        NEHotspotConfigurationManager.shared.apply(config!) { (error) in
+        NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 if error.code == 13 {
                     call.success([
