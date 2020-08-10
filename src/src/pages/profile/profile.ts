@@ -104,8 +104,6 @@ export class ProfilePage extends BasePage{
       let config = this.configConnection();
       const checkRequest = this.getEduroamServices.connectProfile(config);
 
-      console.log(checkRequest);
-
       if (!!checkRequest) {
         this.navigateTo();
       }
