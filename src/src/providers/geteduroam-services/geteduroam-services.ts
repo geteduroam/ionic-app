@@ -23,6 +23,7 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
  */
 @Injectable()
 export class GeteduroamServices {
+  protected id: string;
 
   constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider,
               private validator: ValidatorProvider, private dictionary: DictionaryServiceProvider,
@@ -120,7 +121,8 @@ export class GeteduroamServices {
         await this.removeNetwork(config);
       }
     }
-    let returnValue = true
+    let returnValue = true;
+    config['id'] = this.id;
     if (resultantProfiles) {
       for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
         if(resultantProfiles['ssid'][i][0] != '#Passpoint'){
@@ -144,7 +146,7 @@ export class GeteduroamServices {
 
   /**
    * Method to get all SSID's and OID's from an eap-config file
-   * @param config
+   * @param credentialApplicabilityAux
    */
   getSSID_OID(credentialApplicabilityAux: CredentialApplicability):Object{
       let result:Object = {};
@@ -252,18 +254,17 @@ export class GeteduroamServices {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
     }
 
-    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability);
+    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability, profile);
 
     if (validEap) {
         this.global.setProviderInfo(providerInfo);
-        this.global.setCredentialApplicability(credentialApplicability)
+        this.global.setCredentialApplicability(credentialApplicability);
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
         if (!!authenticationMethod) {
             this.global.setAuthenticationMethod(authenticationMethod);
             return true;
         } else {
-
             return false;
         }
 
@@ -278,7 +279,7 @@ export class GeteduroamServices {
    * Method to validate the eapconfig file and obtain its elements.
    * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
    */
-  validateEapconfig(eapConfig: any, authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo, credentialApplicability: CredentialApplicability): boolean {
+  validateEapconfig(eapConfig: any, authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo, credentialApplicability: CredentialApplicability, profile: ProfileModel): boolean {
     let returnValue:boolean = true;
     let jsonAux = eapConfig;
     let keys = [
@@ -300,6 +301,7 @@ export class GeteduroamServices {
             returnValue = false;
 
           } else if (key === 'EAPIdentityProvider') {
+            this.id = jsonAux[0]['$']['ID'];
             //----------------
             // Provider Info
             //----------------
