@@ -218,7 +218,8 @@ public class WifiEapConfigurator: CAPPlugin {
         var config:NEHotspotConfiguration
         // If HS20 was enabled
         if oid != nil {
-            let oidStrings = oid?.components(separatedBy: ";")
+            var oidStrings: [String]?
+            oidStrings = oid?.components(separatedBy: ";")
             // HS20 object settings
             let hs20 = NEHotspotHS20Settings(
                 domainName: id ?? "",
