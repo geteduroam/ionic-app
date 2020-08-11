@@ -132,7 +132,7 @@ export class GeteduroamServices {
         }
       }
       if (resultantProfiles['oid'].length > 0) {
-        config['oid'] = resultantProfiles['oidConcat'][0];
+        config['oid'] = resultantProfiles['oidConcat'];
         config['ssid'] = '#Passpoint';
         returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
       }
