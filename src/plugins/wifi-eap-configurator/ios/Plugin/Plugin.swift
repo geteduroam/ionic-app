@@ -229,6 +229,8 @@ public class WifiEapConfigurator: CAPPlugin {
         } else {
             config = NEHotspotConfiguration(ssid: ssid ?? "", eapSettings: eapSettings)
         }
+        // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
+        config.joinOnce = false
        
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
