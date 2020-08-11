@@ -56,10 +56,12 @@ public class WifiEapConfigurator: CAPPlugin {
                 ssid = ""
                 // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
             } else {
-                return call.success([
-                    "message": "plugin.wifieapconfigurator.error.ssid.missing",
-                    "success": false,
-                ])
+                if ssid == nil || ssid == "" {
+                    return call.success([
+                        "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                        "success": false,
+                    ])
+                }
             }
    
         
