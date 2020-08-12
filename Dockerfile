@@ -1,7 +1,7 @@
 FROM cangol/android-gradle
 
 ARG NODE_VERSION=12.13.0
-ARG IONIC_VERSION=5.17.1
+ARG IONIC_VERSION=6.11.0
 ARG ANDROID_SDK_VERSION=24.4.1
 ARG ANDROID_HOME=/opt/android-sdk-linux
 ARG GRADLE_VERSION=6.0
@@ -32,7 +32,7 @@ RUN apt-get update &&  \
     curl --retry 3 -SLO "http://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" && \
     tar -xzf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 && \
     rm "node-v$NODE_VERSION-linux-x64.tar.gz" && \
-    npm install -g ionic@"$IONIC_VERSION"
+    npm install -g @ionic/cli@"$IONIC_VERSION"
 
 # Setup environment
 ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/tools:/opt/gradle/gradle-"$GRADLE_VERSION"/bin
