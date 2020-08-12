@@ -250,15 +250,22 @@ public class WifiEapConfigurator: CAPPlugin {
                     ])
                 }
             } else {
-                if self.currentSSIDs().first == ssid {
+                if ssid != nil && ssid != "" {
+                    if self.currentSSIDs().first == ssid {
+                        call.success([
+                            "message": "plugin.wifieapconfigurator.success.network.linked",
+                            "success": true,
+                        ])
+                    } else {
+                        call.success([
+                            "message": "plugin.wifieapconfigurator.error.network.notLinked",
+                            "success": false,
+                        ])
+                    }
+                } else { //HS2.0
                     call.success([
                         "message": "plugin.wifieapconfigurator.success.network.linked",
                         "success": true,
-                    ])
-                } else {
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.error.network.notLinked",
-                        "success": false,
                     ])
                 }
             }
