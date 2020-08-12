@@ -358,7 +358,7 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.success.network.linked");
             call.success(object);
         } else {
-            PasspointConfiguration passpointConfig = null;
+            PasspointConfiguration passpointConfig =  new PasspointConfiguration();
             // TODO: As soon as the API LEVEL 30 is released, the passpointConfig object should be properly created
             if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
                 JSObject object = new JSObject();
@@ -380,25 +380,22 @@ public class WifiEapConfigurator extends Plugin {
 
             ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
             // TODO: Remove this comment block as soon as the API LEVEL 30 is released
-            /*
             if (passpointConfig != null) {
+                /*
                 WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                         .setPriority(1)
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
-                        .setPasspointConfig(passpointConfig)
-                        .setIsInitialAutojoinEnabled(true)
                         // API 30
-                        //.setIsAppInteractionRequired(true)
+                        //.setPasspointConfig(passpointConfig)
+                        //.setIsInitialAutojoinEnabled(true)
                         .build();
-                        
-            } else {
-            */
+                */
+            } else if (!ssid.equals(passpointDefaultSSID)) {
                 WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                         .setPriority(1)
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
-                        //.setIsInitialAutojoinEnabled(true)
                         .setIsAppInteractionRequired(true)
                         .build();
             //}
@@ -414,39 +411,6 @@ public class WifiEapConfigurator extends Plugin {
             } else {
                 configured = true;
             }
-
-//            try {
-//                WifiNetworkSpecifier wifiNetworkSpecifier = new WifiNetworkSpecifier.Builder()
-//                        .setSsid(ssid)
-//                        .setWpa2EnterpriseConfig(enterpriseConfig)
-//                        .build();
-//
-//                NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-//                networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-////                networkRequestBuilder.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-////                networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-//                networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
-//
-//                NetworkRequest networkRequest = networkRequestBuilder.build();
-//                final ConnectivityManager cm = (ConnectivityManager) getContext().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-//
-//                ConnectivityManager.NetworkCallback networkCallback = new
-//                        ConnectivityManager.NetworkCallback() {
-//                    @Override
-//                    public void onAvailable(Network network) {
-//                        super.onAvailable(network);
-//                        Log.d("INFO", "Connected to:" + network);
-//                        cm.bindProcessToNetwork(network);
-//                    }
-//                };
-//                cm.requestNetwork(networkRequest, networkCallback);
-//                configured = true;
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Log.e("error", e.getMessage());
-//                configured = false;
-//            }
-//
         }
         return configured;
     }
