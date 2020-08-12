@@ -403,12 +403,12 @@ public class WifiEapConfigurator extends Plugin {
 
             ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
             WifiNetworkSuggestion suggestion;
-            // TODO: Remove this comment block as soon as the API LEVEL 30 is released
             if (passpointConfig != null) {
                 suggestion = new WifiNetworkSuggestion.Builder()
                         .setPriority(1)
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
+                        // TODO: Remove this comment block as soon as the API LEVEL 30 is released
                         // API 30
                         //.setPasspointConfig(passpointConfig)
                         //.setIsInitialAutojoinEnabled(true)
