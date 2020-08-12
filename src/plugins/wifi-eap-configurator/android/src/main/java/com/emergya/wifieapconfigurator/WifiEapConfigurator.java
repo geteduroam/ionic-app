@@ -16,6 +16,7 @@ import android.net.NetworkSpecifier;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
@@ -358,7 +359,29 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.success.network.linked");
             call.success(object);
         } else {
-            PasspointConfiguration passpointConfig =  new PasspointConfiguration();
+            PasspointConfiguration passpointConfig =  null;
+            if (oid != null) {
+                passpointConfig = new PasspointConfiguration();
+
+                HomeSp homeSp = new HomeSp();
+                if (displayName != null) {
+                    homeSp.setFriendlyName(displayName);
+                } else {
+                    homeSp.setFriendlyName("geteduroam configured HS20");
+                }
+                homeSp.setFqdn(id);
+                // oid can be a list with commas.
+                String[] consortiumOIDs = oid.split(";");
+                long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
+                int index = 0;
+                for(String roamingConsortiumOIDString : consortiumOIDs) {
+                    roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
+                    index++;
+                }
+                homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
+                passpointConfig.setHomeSp(homeSp);
+            }
+
             // TODO: As soon as the API LEVEL 30 is released, the passpointConfig object should be properly created
             if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
                 JSObject object = new JSObject();
@@ -379,10 +402,10 @@ public class WifiEapConfigurator extends Plugin {
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
             ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
+            WifiNetworkSuggestion suggestion;
             // TODO: Remove this comment block as soon as the API LEVEL 30 is released
             if (passpointConfig != null) {
-                /*
-                WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                suggestion = new WifiNetworkSuggestion.Builder()
                         .setPriority(1)
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
@@ -390,27 +413,25 @@ public class WifiEapConfigurator extends Plugin {
                         //.setPasspointConfig(passpointConfig)
                         //.setIsInitialAutojoinEnabled(true)
                         .build();
-                */
-            } else if (!ssid.equals(passpointDefaultSSID)) {
-                WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+            } else {
+                suggestion = new WifiNetworkSuggestion.Builder()
                         .setPriority(1)
                         .setSsid(ssid)
                         .setWpa2EnterpriseConfig(enterpriseConfig)
-                        .setIsAppInteractionRequired(true)
+                        //.setIsAppInteractionRequired(true)
                         .build();
+            }
 
+            // WifiNetworkSuggestion approach
+            sugestions.add(suggestion);
+            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            int status = wifiManager.addNetworkSuggestions(sugestions);
 
-                // WifiNetworkSuggestion approach
-                sugestions.add(suggestion);
-                WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                int status = wifiManager.addNetworkSuggestions(sugestions);
-
-                if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
-                    Log.d("STATUS ERROR", "" + status);
-                    configured = false;
-                } else {
-                    configured = true;
-                }
+            if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+                Log.d("STATUS ERROR", "" + status);
+                configured = false;
+            } else {
+                configured = true;
             }
         }
         return configured;
@@ -456,6 +477,10 @@ public class WifiEapConfigurator extends Plugin {
             }
         } else {
             wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.removed");
+            call.success(object);
             res = true;
         }
 
