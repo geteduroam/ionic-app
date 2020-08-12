@@ -410,8 +410,8 @@ public class WifiEapConfigurator extends Plugin {
                         .setWpa2EnterpriseConfig(enterpriseConfig)
                         // TODO: Remove this comment block as soon as the API LEVEL 30 is released
                         // API 30
-                        //.setPasspointConfig(passpointConfig)
-                        //.setIsInitialAutojoinEnabled(true)
+                        .setPasspointConfig(passpointConfig)
+                        .setIsInitialAutojoinEnabled(true)
                         .build();
             } else {
                 suggestion = new WifiNetworkSuggestion.Builder()
