@@ -401,7 +401,7 @@ public class WifiEapConfigurator extends Plugin {
         boolean configured = false;
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
-            ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
+            ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
             WifiNetworkSuggestion suggestion;
             if (passpointConfig != null) {
                 suggestion = new WifiNetworkSuggestion.Builder()
@@ -423,9 +423,9 @@ public class WifiEapConfigurator extends Plugin {
             }
 
             // WifiNetworkSuggestion approach
-            sugestions.add(suggestion);
+            suggestions.add(suggestion);
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            int status = wifiManager.addNetworkSuggestions(sugestions);
+            int status = wifiManager.addNetworkSuggestions(suggestions);
 
             if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
                 Log.d("STATUS ERROR", "" + status);
