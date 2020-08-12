@@ -398,7 +398,7 @@ public class WifiEapConfigurator extends Plugin {
                         .setWpa2EnterpriseConfig(enterpriseConfig)
                         .setIsAppInteractionRequired(true)
                         .build();
-            //}
+            }
 
             // WifiNetworkSuggestion approach
             sugestions.add(suggestion);
