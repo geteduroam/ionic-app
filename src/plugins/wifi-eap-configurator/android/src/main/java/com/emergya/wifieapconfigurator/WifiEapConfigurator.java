@@ -398,18 +398,19 @@ public class WifiEapConfigurator extends Plugin {
                         .setWpa2EnterpriseConfig(enterpriseConfig)
                         .setIsAppInteractionRequired(true)
                         .build();
-            }
 
-            // WifiNetworkSuggestion approach
-            sugestions.add(suggestion);
-            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            int status = wifiManager.addNetworkSuggestions(sugestions);
 
-            if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
-                Log.d("STATUS ERROR", "" + status);
-                configured = false;
-            } else {
-                configured = true;
+                // WifiNetworkSuggestion approach
+                sugestions.add(suggestion);
+                WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                int status = wifiManager.addNetworkSuggestions(sugestions);
+
+                if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+                    Log.d("STATUS ERROR", "" + status);
+                    configured = false;
+                } else {
+                    configured = true;
+                }
             }
         }
         return configured;
