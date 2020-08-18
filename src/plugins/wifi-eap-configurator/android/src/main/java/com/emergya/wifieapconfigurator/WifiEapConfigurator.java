@@ -382,7 +382,6 @@ public class WifiEapConfigurator extends Plugin {
                 passpointConfig.setHomeSp(homeSp);
             }
 
-            // TODO: As soon as the API LEVEL 30 is released, the passpointConfig object should be properly created
             if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
                 JSObject object = new JSObject();
                 object.put("success", true);
@@ -402,25 +401,15 @@ public class WifiEapConfigurator extends Plugin {
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
             ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-            WifiNetworkSuggestion suggestion;
+            WifiNetworkSuggestion.Builder suggestionBuilder =  new WifiNetworkSuggestion.Builder();
+
+            suggestionBuilder.setSsid(ssid);
+            suggestionBuilder.setWpa2EnterpriseConfig(enterpriseConfig);
+
             if (passpointConfig != null) {
-                suggestion = new WifiNetworkSuggestion.Builder()
-                        .setPriority(1)
-                        .setSsid(ssid)
-                        .setWpa2EnterpriseConfig(enterpriseConfig)
-                        // TODO: Remove this comment block as soon as the API LEVEL 30 is released
-                        // API 30
-                        .setPasspointConfig(passpointConfig)
-                        .setIsInitialAutojoinEnabled(true)
-                        .build();
-            } else {
-                suggestion = new WifiNetworkSuggestion.Builder()
-                        .setPriority(1)
-                        .setSsid(ssid)
-                        .setWpa2EnterpriseConfig(enterpriseConfig)
-                        //.setIsAppInteractionRequired(true)
-                        .build();
+                suggestionBuilder.setPasspointConfig(passpointConfig);
             }
+            final WifiNetworkSuggestion suggestion = suggestionBuilder.build();
 
             // WifiNetworkSuggestion approach
             suggestions.add(suggestion);
