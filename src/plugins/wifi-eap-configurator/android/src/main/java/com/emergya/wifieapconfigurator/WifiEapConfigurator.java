@@ -416,11 +416,11 @@ public class WifiEapConfigurator extends Plugin {
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             int status = wifiManager.addNetworkSuggestions(suggestions);
 
-            if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+            if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+                configured = true;
+            } else {
                 Log.d("STATUS ERROR", "" + status);
                 configured = false;
-            } else {
-                configured = true;
             }
         }
         return configured;
