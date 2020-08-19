@@ -3,9 +3,11 @@ package com.emergya.wifieapconfigurator;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -22,7 +24,7 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
-import android.net.wifi.WifiNetworkSpecifier; 
+import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -417,6 +419,21 @@ public class WifiEapConfigurator extends Plugin {
             int status = wifiManager.addNetworkSuggestions(suggestions);
 
             if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+
+                final IntentFilter intentFilter =
+                        new IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
+
+                final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (!intent.getAction().equals(
+                                WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
+                            return;
+                        }
+                    }
+                };
+                getContext().registerReceiver(broadcastReceiver, intentFilter);
+
                 configured = true;
             } else {
                 Log.d("STATUS ERROR", "" + status);
