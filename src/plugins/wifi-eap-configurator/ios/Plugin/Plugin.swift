@@ -227,8 +227,10 @@ public class WifiEapConfigurator: CAPPlugin {
                 domainName: id ?? "",
                 roamingEnabled: true)
             hs20.roamingConsortiumOIs = oidStrings ?? [""];
+            CAPLog.print("Test 2: domainName: ", hs20.domainName, "oidString: ", oidStrings)
             config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
         } else {
+            CAPLog.print("Test 2: SSID: ", ssid)
             config = NEHotspotConfiguration(ssid: ssid ?? "", eapSettings: eapSettings)
         }
         // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
