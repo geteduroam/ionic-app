@@ -318,7 +318,7 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             WifiConfiguration config = new WifiConfiguration();
             config.SSID = "\"" + ssid + "\"";
             config.priority = 1;
@@ -360,7 +360,7 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.linked");
             call.success(object);
-        } else {
+        /*} else {
             PasspointConfiguration passpointConfig =  null;
             if (oid != null) {
                 passpointConfig = new PasspointConfiguration();
@@ -395,7 +395,7 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
                 call.success(object);
             }
-        }
+        }*/
     }
 
     private boolean connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig) {
@@ -468,7 +468,7 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
             for (WifiConfiguration conf : configuredNetworks) {
                 if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
@@ -481,14 +481,14 @@ public class WifiEapConfigurator extends Plugin {
                     res = true;
                 }
             }
-        } else {
+        } else { */
             wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.removed");
             call.success(object);
             res = true;
-        }
+        //}
 
         if (!res) {
             JSObject object = new JSObject();
