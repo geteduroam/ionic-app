@@ -6,12 +6,14 @@ import { StoringProvider } from '../storing/storing';
 import {ProfileModel} from "../../shared/models/profile-model";
 import {ValidatorProvider} from "../validator/validator";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
+import {CredentialApplicability} from "../../shared/entities/credentialApplicability"
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {DictionaryServiceProvider} from "../dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../global/global";
 import {isArray, isObject} from "ionic-angular/util/util";
 import { oAuthModel } from '../../shared/models/oauth-model';
 import { CryptoUtil } from '../util/crypto-util';
+import {IEEE80211} from "../../shared/entities/iEEE80211";
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
@@ -21,6 +23,7 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
  */
 @Injectable()
 export class GeteduroamServices {
+  protected id: string;
 
   constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider,
               private validator: ValidatorProvider, private dictionary: DictionaryServiceProvider,
@@ -83,21 +86,104 @@ export class GeteduroamServices {
    * @param config Configuration object
    */
   async connectProfile(config) {
-    if (this.global.getOverrideProfile()) {
-        let config = {
-            ssid: this.global.getSsid()
-        };
-
-        this.removeNetwork(config);
+    let resultantProfiles = null;
+    if (this.global.getCredentialApplicability() && this.global.getCredentialApplicability().iEEE80211.length > 0) {
+      // If there is a CredentialApplicability defined in the eap-config file,
+      // loop over CredentialApplicability to take possible SSID's and OID's
+      // to be removed before being configured
+      resultantProfiles = this.getSSID_OID(this.global.getCredentialApplicability());
     }
-    return await WifiEapConfigurator.configureAP(config);
+    if (this.global.getOverrideProfile()) {
+      /*
+      // Removing for: https://github.com/geteduroam/ionic-app/issues/24
+      let config = {
+          ssid: this.global.getSsid()
+      };
+      */
+      if (resultantProfiles) {
+        // If there is a CredentialApplicability defined in the eap-config file,
+        // loop over CredentialApplicability to take possible SSID's and OID's
+        // to be removed before being configured
+        // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
+        for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
+          let config = {
+            ssid: resultantProfiles['ssid'][i][0]
+          };
+          await this.removeNetwork(config);
+        }
+      } else {
+        // If there is no CredentialApplicability in the eap-config file,
+        // the default case will take 'eduroam' for the SSID
+        // to be removed before adding any profile
+        let config = {
+          ssid: this.global.getSsid()
+        };
+        await this.removeNetwork(config);
+      }
+    }
+    let returnValue = true;
+    config['id'] = this.id;
+    if (resultantProfiles) {
+      for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
+        if(resultantProfiles['ssid'][i][0] != '#Passpoint'){
+          config['ssid'] = resultantProfiles['ssid'][i][0];
+          config['oid'] = '';
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }
+      }
+      if (resultantProfiles['oid'].length > 0) {
+        config['oid'] = resultantProfiles['oidConcat'];
+        config['ssid'] = '#Passpoint';
+        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+      }
+    } else {
+      // If there is no CredentialApplicability in the eap-config file,
+      // the default case will take 'eduroam' for the SSID
+      return await WifiEapConfigurator.configureAP(config);
+    }
+    return returnValue;
   }
+
+  /**
+   * Method to get all SSID's and OID's from an eap-config file
+   * @param credentialApplicabilityAux
+   */
+  getSSID_OID(credentialApplicabilityAux: CredentialApplicability):Object{
+      let result:Object = {};
+      let ssidAux = [];
+      let oidAux = [];
+      let oidConcat = '';
+      for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
+        let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
+        if(iEEE80211Aux['ConsortiumOID']){
+          if(oidConcat.length > 0){
+            oidConcat = oidConcat + ';' + iEEE80211Aux['ConsortiumOID'];
+          } else{
+            oidConcat = iEEE80211Aux['ConsortiumOID'];
+          }
+          oidAux.push(iEEE80211Aux['ConsortiumOID']);
+          if(iEEE80211Aux['SSID']) {
+            ssidAux.push(iEEE80211Aux['SSID']);
+          } else {
+            ssidAux.push(['#Passpoint']);
+          }
+        } else {
+          ssidAux.push(iEEE80211Aux['SSID']);
+          oidAux.push(iEEE80211Aux['']);
+        }
+      }
+      result['ssid'] = ssidAux;
+      result['oid'] = oidAux;
+      result['oidConcat'] = oidConcat;
+      return result;
+  }
+
 
   /**
    * Method to remove network if is overridable
    * @param config
    */
-  async removeNetwork(config) {
+  async removeNetwork(config){
       return await WifiEapConfigurator.removeNetwork(config);
   }
 
@@ -113,7 +199,7 @@ export class GeteduroamServices {
 	} else {
 		url += "?";
     }
-    url += `client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}`
+    url += `client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}`;
     url += `&scope=${data.scope}&state=${CryptoUtil.generateRandomString(10)}`;
     let codeVerifier = CryptoUtil.generateRandomString(43);
     let codeChallenge = await CryptoUtil.deriveChallenge(codeVerifier);
@@ -159,6 +245,7 @@ export class GeteduroamServices {
     let eapConfigFile: any;
     let authenticationMethods:AuthenticationMethod[] = [];
     let providerInfo:ProviderInfo= new ProviderInfo();
+    let credentialApplicability:CredentialApplicability= new CredentialApplicability();
 
     if (!!profile.oauth && !!profile.token) {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint+'?format=eap-metadata', profile.token);
@@ -167,22 +254,23 @@ export class GeteduroamServices {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
     }
 
-    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo);
+    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability, profile);
 
     if (validEap) {
         this.global.setProviderInfo(providerInfo);
+        this.global.setCredentialApplicability(credentialApplicability);
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
         if (!!authenticationMethod) {
             this.global.setAuthenticationMethod(authenticationMethod);
             return true;
         } else {
-
             return false;
         }
 
     } else {
         this.global.setProviderInfo(null);
+        this.global.setCredentialApplicability(null);
         return false;
     }
   }
@@ -191,7 +279,7 @@ export class GeteduroamServices {
    * Method to validate the eapconfig file and obtain its elements.
    * This method validates and updates the property [authenticationMethods]{@link #authenticationMethods}
    */
-  validateEapconfig(eapConfig: any, authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo): boolean {
+  validateEapconfig(eapConfig: any, authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo, credentialApplicability: CredentialApplicability, profile: ProfileModel): boolean {
     let returnValue:boolean = true;
     let jsonAux = eapConfig;
     let keys = [
@@ -209,26 +297,40 @@ export class GeteduroamServices {
 
           jsonAux = this.readJson(jsonAux, key);
 
-          if ( jsonAux == null ) {
+          if (jsonAux == null) {
             returnValue = false;
 
           } else if (key === 'EAPIdentityProvider') {
+            this.id = jsonAux[0]['$']['ID'];
             //----------------
             // Provider Info
             //----------------
             let providerInfoAux = this.readJson(jsonAux, 'ProviderInfo');
 
-              if (providerInfoAux != null) {
-                if ( isArray(providerInfoAux) ) {
-                  returnValue = returnValue && providerInfo.fillEntity(providerInfoAux[0]);
+            if (providerInfoAux != null) {
+              if (isArray(providerInfoAux)) {
+                returnValue = returnValue && providerInfo.fillEntity(providerInfoAux[0]);
 
-                } else if (isObject(providerInfoAux)) {
-                  returnValue = returnValue && providerInfo.fillEntity(providerInfoAux);
-                }
+              } else if (isObject(providerInfoAux)) {
+                returnValue = returnValue && providerInfo.fillEntity(providerInfoAux);
+              }
+            }
+            //----------------
+            // CredentialApplicability
+            //----------------
+            let credentialApplicabilityAux = this.readJson(jsonAux, 'CredentialApplicability');
+
+            if (credentialApplicabilityAux != null) {
+              if (isArray(credentialApplicabilityAux)) {
+                returnValue = returnValue && credentialApplicability.fillEntity(credentialApplicabilityAux[0]);
+
+              } else if (isObject(providerInfoAux)) {
+                returnValue = returnValue && credentialApplicability.fillEntity(credentialApplicabilityAux);
               }
             }
           }
         }
+      }
         //------------------------
         // AUTHENTICATION METHODS
         //------------------------
@@ -243,8 +345,8 @@ export class GeteduroamServices {
               try {
                 returnValue = returnValue && authenticationMethodAux.fillEntity(jsonAux[i]);
 
-                if(returnValue){
-                    authenticationMethods.push(authenticationMethodAux);
+                if (returnValue) {
+                  authenticationMethods.push(authenticationMethodAux);
                 }
               } catch (e) {
                 returnValue = false;

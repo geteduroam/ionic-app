@@ -3,9 +3,11 @@ package com.emergya.wifieapconfigurator;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -15,11 +17,14 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
+import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
+import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -64,24 +69,44 @@ import static androidx.core.content.ContextCompat.startActivity;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 import static java.lang.System.in;
 
-@NativePlugin()
+@NativePlugin(
+        permissions={
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.CHANGE_WIFI_STATE,
+                Manifest.permission.ACCESS_FINE_LOCATION
+        })
 public class WifiEapConfigurator extends Plugin {
 
+    private static String passpointDefaultSSID = "#Passpoint";
+    
     List<ScanResult> results = null;
 
     @PluginMethod()
     public void configureAP(PluginCall call) {
         String ssid = null;
         boolean res = true;
+        
+        String oid = null;
+        if (call.getBoolean("oid") != null && !call.getString("oid").equals("")) {
+            oid = call.getString("oid");
+        }
+        
         if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
             ssid = call.getString("ssid");
 
         } else {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
-            call.success(object);
-            res = false;
+            // ssid OR oid are mandatory 
+            if (oid == null) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+                call.success(object);
+                res = false;
+            } else {
+                // According to #24 (https://github.com/geteduroam/ionic-app/issues/24)
+                // Android needs a SSID by default
+                ssid =  passpointDefaultSSID; 
+            }
         }
 
         String clientCertificate = null;
@@ -124,6 +149,15 @@ public class WifiEapConfigurator extends Plugin {
         String username = null;
         String password = null;
         Integer auth = null;
+       
+        String id = null;
+        if (call.getString("id") != null && !call.getString("id").equals("")) {
+            id = call.getString("id");
+        }
+        String displayName = null;
+        if (call.getString("displayName") != null && !call.getString("displayName").equals("")) {
+            displayName = call.getString("displayName");
+        }
 
         if (clientCertificate == null && passPhrase == null) {
             if (call.getString("username") != null && !call.getString("username").equals("")) {
@@ -163,12 +197,12 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         if (res) {
-            connectAP(ssid, username, password, servername, caCertificate, clientCertificate, passPhrase, eap, auth, anonymousIdentity, call);
+            connectAP(ssid, username, password, servername, caCertificate, clientCertificate, passPhrase, eap, auth, anonymousIdentity, displayName, id, oid, call);
         }
     }
 
     void connectAP(String ssid, String username, String password, String servername, String caCertificate, String clientCertificate, String passPhrase,
-                   Integer eap, Integer auth, String anonymousIdentity, PluginCall call) {
+                   Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String oid, PluginCall call) {
 
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
 
@@ -284,7 +318,7 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             WifiConfiguration config = new WifiConfiguration();
             config.SSID = "\"" + ssid + "\"";
             config.priority = 1;
@@ -292,45 +326,121 @@ public class WifiEapConfigurator extends Plugin {
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
             config.enterpriseConfig = enterpriseConfig;
+            // Passpoint (HS20) configuration
+            // https://github.com/geteduroam/ionic-app/issues/10#issuecomment-660946048 (if the oid is not missing, so it's a HS20 configuration)
+            if (oid != null) {
+                // oid can be a list with commas.
+                String[] consortiumOIDs = oid.split(";");
+                long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
+                int index = 0;
+                for(String roamingConsortiumOIDString : consortiumOIDs) {
+                    roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
+                    index++;
+                }
+                config.roamingConsortiumIds = roamingConsortiumOIDs;
+                if (displayName != null) {
+                    config.providerFriendlyName = displayName;
+                } else {
+                    config.providerFriendlyName = "geteduroam configured HS20";
+                }
+                config.FQDN = id;
+            }
 
             WifiManager myWifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-            int id = myWifiManager.addNetwork(config);
+            int wifiIndex = myWifiManager.addNetwork(config);
             myWifiManager.disconnect();
-            myWifiManager.enableNetwork(id, true);
+            myWifiManager.enableNetwork(wifiIndex, true);
             myWifiManager.reconnect();
 
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             wifiManager.setWifiEnabled(true);
-        } else {
-            connectWifiAndroidQ(ssid, enterpriseConfig);
-        }
+            
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+            call.success(object);
+        /*} else {
+            PasspointConfiguration passpointConfig =  null;
+            if (oid != null) {
+                passpointConfig = new PasspointConfiguration();
 
-        JSObject object = new JSObject();
-        object.put("success", true);
-        object.put("message", "plugin.wifieapconfigurator.success.network.linked");
-        call.success(object);
+                HomeSp homeSp = new HomeSp();
+                if (displayName != null) {
+                    homeSp.setFriendlyName(displayName);
+                } else {
+                    homeSp.setFriendlyName("geteduroam configured HS20");
+                }
+                homeSp.setFqdn(id);
+                // oid can be a list with commas.
+                String[] consortiumOIDs = oid.split(";");
+                long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
+                int index = 0;
+                for(String roamingConsortiumOIDString : consortiumOIDs) {
+                    roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
+                    index++;
+                }
+                homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
+                passpointConfig.setHomeSp(homeSp);
+            }
+
+            if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+                call.success(object);
+            } else {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
+                call.success(object);
+            }
+        }*/
     }
 
-    private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig) {
+    private boolean connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig) {
+        boolean configured = false;
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
+            ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
+            WifiNetworkSuggestion.Builder suggestionBuilder =  new WifiNetworkSuggestion.Builder();
+
+            suggestionBuilder.setSsid(ssid);
+            suggestionBuilder.setWpa2EnterpriseConfig(enterpriseConfig);
+
+            if (passpointConfig != null) {
+                suggestionBuilder.setPasspointConfig(passpointConfig);
+            }
+            final WifiNetworkSuggestion suggestion = suggestionBuilder.build();
+
+            // WifiNetworkSuggestion approach
+            suggestions.add(suggestion);
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            ArrayList<WifiNetworkSuggestion> sugestions = new ArrayList<>();
+            int status = wifiManager.addNetworkSuggestions(suggestions);
 
-            WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
-                    .setPriority(1)
-                    .setSsid(ssid)
-                    .setWpa2EnterpriseConfig(enterpriseConfig)
-                    .build();
+            if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
 
-            sugestions.add(suggestion);
-            int status = wifiManager.addNetworkSuggestions(sugestions);
+                final IntentFilter intentFilter =
+                        new IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
 
-            if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+                final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (!intent.getAction().equals(
+                                WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
+                            return;
+                        }
+                    }
+                };
+                getContext().registerReceiver(broadcastReceiver, intentFilter);
+
+                configured = true;
+            } else {
                 Log.d("STATUS ERROR", "" + status);
+                configured = false;
             }
         }
+        return configured;
     }
 
     private void sendClientCertificateError(Exception e, PluginCall call) {
@@ -358,7 +468,7 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
             List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
             for (WifiConfiguration conf : configuredNetworks) {
                 if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
@@ -371,13 +481,14 @@ public class WifiEapConfigurator extends Plugin {
                     res = true;
                 }
             }
-        } else {
-            WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder().setSsid(ssid).build();
-            ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-            suggestions.add(suggestion);
-            wifi.removeNetworkSuggestions(suggestions);
+        /*} else {
+            wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.removed");
+            call.success(object);
             res = true;
-        }
+        }*/
 
         if (!res) {
             JSObject object = new JSObject();
@@ -460,7 +571,6 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
             call.success(object);
-            return res;
         }
 
         return res;

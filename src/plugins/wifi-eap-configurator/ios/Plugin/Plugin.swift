@@ -51,12 +51,19 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func configureAP(_ call: CAPPluginCall) {
-        guard let ssid = call.getString("ssid") else {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.ssid.missing",
-                "success": false,
-            ])
-        }
+        var ssid = call.getString("ssid")
+            if call.getString("oid") != nil && call.getString("oid") != "" {
+                ssid = ""
+                // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
+            } else {
+                if ssid == nil || ssid == "" {
+                    return call.success([
+                        "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                        "success": false,
+                    ])
+                }
+            }
+   
         
         guard let eapType = call.get("eap", Int.self) else {
             return call.success([
@@ -118,7 +125,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     
                     eapSettings.setTrustedServerCertificates(certificates!)
                 }
-                if let identity = addClientCertificate(certName: "client" + ssid, certificate: clientCertificate, password: passPhrase)
+                if let identity = addClientCertificate(certName: "client" + ssid!, certificate: clientCertificate, password: passPhrase)
                 {
                     let id = identity as! SecIdentity
                     eapSettings.setIdentity(id)
@@ -195,8 +202,38 @@ public class WifiEapConfigurator: CAPPlugin {
                 eapSettings.setTrustedServerCertificates(certificates)
             }
         }
-        
-        let config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+
+        // HS20 support
+        var oid = call.getString("oid")
+        var id = call.getString("id")
+
+        var displayName:String? = nil
+        if call.getString("oid") != nil && call.getString("oid") != ""{
+            oid = call.getString("oid")
+        }
+        if call.getString("id") != nil && call.getString("id") != ""{
+            id = call.getString("id")
+        }
+        if call.getString("displayName") != nil && call.getString("displayName") != ""{
+            displayName = call.getString("displayName")
+        }
+        var config:NEHotspotConfiguration
+        // If HS20 was enabled
+        if oid != nil && oid != ""{
+            var oidStrings: [String]?
+            oidStrings = oid?.components(separatedBy: ";")
+            // HS20 object settings
+            let hs20 = NEHotspotHS20Settings(
+                domainName: id ?? "",
+                roamingEnabled: true)
+            hs20.roamingConsortiumOIs = oidStrings ?? [""];
+            config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
+        } else {
+            config = NEHotspotConfiguration(ssid: ssid ?? "", eapSettings: eapSettings)
+        }
+        // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
+        config.joinOnce = false
+       
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 if error.code == 13 {
@@ -213,21 +250,28 @@ public class WifiEapConfigurator: CAPPlugin {
                     ])
                 }
             } else {
-                if self.currentSSIDs().first == ssid {
+                if ssid != nil && ssid != "" {
+                    if self.currentSSIDs().first == ssid {
+                        call.success([
+                            "message": "plugin.wifieapconfigurator.success.network.linked",
+                            "success": true,
+                        ])
+                    } else {
+                        call.success([
+                            "message": "plugin.wifieapconfigurator.error.network.notLinked",
+                            "success": false,
+                        ])
+                    }
+                } else { //HS2.0
                     call.success([
                         "message": "plugin.wifieapconfigurator.success.network.linked",
                         "success": true,
-                    ])
-                } else {
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.error.network.notLinked",
-                        "success": false,
                     ])
                 }
             }
         }
     }
-    
+
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
             return call.success([
@@ -460,7 +504,7 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func isConnectedSSID(_ call: CAPPluginCall) {
-        guard let ssidToCheck = call.getString("ssid") else {
+        guard call.getString("ssid") != nil else {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.ssid.missing",
                 "success": false,
@@ -481,7 +525,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     "isConnected": false
                 ])
             }
-            guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
+            guard (info[kCNNetworkInfoKeySSID as String] as? String) != nil else {
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.network.notConnected",
                     "success": false,
