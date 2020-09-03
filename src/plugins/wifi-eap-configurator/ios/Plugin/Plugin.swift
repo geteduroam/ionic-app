@@ -236,14 +236,14 @@ public class WifiEapConfigurator: CAPPlugin {
        
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
-                if error.code == 13 {
+                if error.code == NEHotspotConfigurationError.alreadyAssociated /* 13 */ {
                     call.success([
                         "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
                         "success": false,
                     ])
                 }
                 
-                if error.code == 7 {
+                if error.code == NEHotspotConfigurationError.userDenied /* 7 */ {
                     call.success([
                         "message": "plugin.wifieapconfigurator.error.network.userCancelled",
                         "success": false,
