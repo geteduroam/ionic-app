@@ -33,6 +33,8 @@ export class GlobalProvider {
 
   private overrideProfile: boolean = false;
 
+  private externalOpen: boolean = false;
+
   constructor(public platform: Platform) {}
 
   /**
@@ -113,5 +115,13 @@ export class GlobalProvider {
 
   setCredentialApplicability(credentialApplicability: CredentialApplicability){
     this.credentialApplicability = credentialApplicability;
+  }
+
+  setExternalOpen() {
+    this.externalOpen = !this.externalOpen;
+  }
+
+  getExternalOpen() {
+    return this.externalOpen;
   }
 }

@@ -32,6 +32,8 @@ export class GeteduroamApp {
   rootParams = {};
 
   profile: ProfileModel;
+
+  protected checkExtFile: boolean = false;
   /**
    * @constructor
    *
@@ -49,6 +51,8 @@ export class GeteduroamApp {
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
+      // Listener to get external file
+      await this.checkExternalOpen();
       // Listener to get status connection, apply when change status network
       await this.checkConnection();
       // Plugin wifiEAPConfigurator associatedNetwork
@@ -65,23 +69,31 @@ export class GeteduroamApp {
     if (this.platform.is('android')) {
       this.enableWifi();
     }
+    if (!this.checkExtFile) {
+      const isAssociated = await this.isAssociatedNetwork();
 
-    const isAssociated = await this.isAssociatedNetwork();
-
-    if (!!isAssociated.success) {
-      // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
-      this.rootPage = ConfigurationScreen;
-    } else{
-      if (!isAssociated.message.includes('alreadyAssociated')) {
+      if (!!isAssociated.success) {
+        // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
         this.rootPage = ConfigurationScreen;
-      } else {
-        this.rootPage = ReconfigurePage;
-        this.getAssociation(isAssociated);
-        this.global.setOverrideProfile(true);
+      } else{
+        if (!isAssociated.message.includes('alreadyAssociated')) {
+          this.rootPage = ConfigurationScreen;
+        } else {
+          this.rootPage = ReconfigurePage;
+          this.getAssociation(isAssociated);
+          this.global.setOverrideProfile(true);
 
-        !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+          !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+        }
       }
     }
+  }
+  async checkExternalOpen() {
+    // Listening to open app when open from a file
+    App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
+      this.global.setExternalOpen();
+      this.navigate(urlOpen.url);
+    });
   }
   /**
    * This method check if network is enabled and show a error message to user remove network already associated
@@ -110,7 +122,7 @@ export class GeteduroamApp {
   /**
    * This method throw the app when is opened from a file
    */
-  async handleOpenUrl(uri: string | any) {
+  handleOpenUrl(uri: string | any) {
     this.profile = new ProfileModel();
     this.profile.eapconfig_endpoint = !!uri.url ? uri.url : uri;
     this.profile.oauth = false;
@@ -126,18 +138,14 @@ export class GeteduroamApp {
     // Listening to changes in network states, it show toast message when status changed
     Network.addListener('networkStatusChange', async () => {
       let connectionStatus: NetworkStatus = await this.statusConnection();
+      if (!this.checkExtFile) {
+        this.connectionEvent(connectionStatus);
 
-      this.connectionEvent(connectionStatus);
-
-      !connectionStatus.connected ?
+        !connectionStatus.connected ?
           this.alertConnection(this.dictionary.getTranslation('error', 'turn-on') +
             this.global.getSsid() + '.') :
           this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
-    });
-
-    // Listening to open app when open from a file
-    App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
-      this.navigate(urlOpen.url);
+      }
     });
 
     App.addListener('backButton', () => {
@@ -152,7 +160,8 @@ export class GeteduroamApp {
    */
   async navigate(uri: string) {
     if (!!uri.includes('.eap-config') || !!uri.includes('file')) {
-      await this.handleOpenUrl(uri);
+      this.handleOpenUrl(uri);
+      this.checkExtFile = this.global.getExternalOpen();
       this.rootPage = ProfilePage;
     }
   }
@@ -168,19 +177,20 @@ export class GeteduroamApp {
    * This method shown an error message when network is disconnect
    */
   async notConnectionNetwork() {
+    if (!this.checkExtFile) {
+      this.rootPage = ReconfigurePage;
 
-    this.rootPage = ReconfigurePage;
-
-    const isAssociated = await this.isAssociatedNetwork();
-    this.getAssociation(isAssociated);
+      const isAssociated = await this.isAssociatedNetwork();
+      this.getAssociation(isAssociated);
 
 
-    if (!isAssociated.success && !isAssociated.overridable) {
-      this.removeAssociatedManually();
+      if (!isAssociated.success && !isAssociated.overridable) {
+        this.removeAssociatedManually();
 
-    } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false, '', 'enableAccess', true);
+      } else {
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
+          this.global.getSsid() + '.', false, '', 'enableAccess', true);
+      }
     }
   }
 
@@ -198,13 +208,13 @@ export class GeteduroamApp {
    */
   private async checkConnection() {
     let connectionStatus = await this.statusConnection();
+    if (!this.checkExtFile) {
+      this.connectionEvent(connectionStatus);
 
-    this.connectionEvent(connectionStatus);
-
-    if (!connectionStatus.connected){
-      this.notConnectionNetwork();
+      if (!connectionStatus.connected){
+        this.notConnectionNetwork();
+      }
     }
-
   }
 
   /**
