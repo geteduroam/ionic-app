@@ -42,10 +42,6 @@ export class OauthConfProvider {
     }
   }
 
-  print() {
-    console.log('Testing');
-  }
-
   /**
    * Method to check form, create connection with plugin WifiEapConfigurator and navigate.
    */
