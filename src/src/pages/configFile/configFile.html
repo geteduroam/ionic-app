@@ -1,0 +1,17 @@
+<div *ngIf="showAll" class="container-content">
+  <div class="header-content" margin-top padding-top>
+    <img alt="setting" src="../../assets/icon/cog-outline.svg" />
+    <h1>{{getString('header', 'config')}}</h1>
+  </div>
+
+  <div class="footer-form">
+    <div class="content-button" margin *ngIf="!!configured">
+      <button (click)="configure($event)" value="configure" class="button-control" ion-button text-capitalize>{{getString('button', 'reconfigure')}}</button>
+    </div>
+
+    <div class="content-button" margin *ngIf="!configured">
+      <button (click)="configure($event)" value="configure" class="button-control" ion-button text-capitalize>{{getString('button', 'configure')}}</button>
+    </div>
+  </div>
+
+</div>

@@ -25,13 +25,13 @@
                 <data android:scheme="@string/custom_url_scheme" />
             </intent-filter>
             <!-- MIME Type registration -->
-            <intent-filter>
+            <!-- <intent-filter>
                 <data android:scheme="content" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:host="*" />
-                <data android:pathPattern=".*\\.eap-config" />
+                <data android:pathPattern="*.eap-config" />
                 <data android:mimeType="application/eap-config" />
                 <data android:mimeType="application/mac-binary" />
                 <data android:mimeType="application/octet-stream" />
@@ -50,7 +50,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:host="*" />
-                <data android:pathPattern=".*\\.eap-config" />
+                <data android:pathPattern="*.eap-config" />
                 <data android:mimeType="application/eap-config" />
             </intent-filter>
             <intent-filter>
@@ -59,7 +59,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:host="*" />
-                <data android:pathPattern=".*\\.eap-config" />
+                <data android:pathPattern="*.eap-config" />
                 <data android:mimeType="application/eap-config" />
             </intent-filter>
             <intent-filter>
@@ -75,6 +75,16 @@
                       android:scheme="content" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter> -->
+            <intent-filter>
+                <data android:scheme="content"
+                      android:mimeType="*/*"
+                      android:pathPattern=".*\\.eap-config"/>
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
         <provider

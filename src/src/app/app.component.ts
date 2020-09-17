@@ -1,5 +1,5 @@
 import {Config, Events, Platform} from 'ionic-angular';
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
@@ -12,6 +12,8 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
+import {ConfigFilePage} from "../pages/configFile/configFile";
+import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
 
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
@@ -27,6 +29,7 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
  *
  **/
 export class GeteduroamApp {
+
   rootPage;
 
   rootParams = {};
@@ -41,7 +44,7 @@ export class GeteduroamApp {
   constructor(private platform: Platform, private config: Config,
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
               private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryServiceProvider,
-              public event: Events) {
+              public event: Events, private getEduroamServices: GeteduroamServices) {
 
     this.platform.ready().then(async () => {
       // Transition provider, to navigate between pages
@@ -120,18 +123,6 @@ export class GeteduroamApp {
   }
 
   /**
-   * This method throw the app when is opened from a file
-   */
-  handleOpenUrl(uri: string | any) {
-    this.profile = new ProfileModel();
-    this.profile.eapconfig_endpoint = !!uri.url ? uri.url : uri;
-    this.profile.oauth = false;
-    this.profile.id = "FileEap";
-    this.profile.name = "FileEap";
-    this.global.setProfile(this.profile);
-  }
-
-  /**
    * This method add listeners needed to app
    */
   addListeners() {
@@ -158,11 +149,18 @@ export class GeteduroamApp {
    * This method open ProfilePage when the app is initialize from an eap-config file
    * @param uri
    */
-  async navigate(uri: string) {
-    if (!!uri.includes('.eap-config') || !!uri.includes('file')) {
-      this.handleOpenUrl(uri);
+  async navigate(uri: string | any) {
+    if (!!uri.includes('.eap-config') || !!uri.includes('file') || !!uri.includes('document') || !!uri.includes('octet-stream')) {
       this.checkExtFile = this.global.getExternalOpen();
-      this.rootPage = ProfilePage;
+      this.profile = new ProfileModel();
+      this.profile.eapconfig_endpoint = !!uri.url ? uri.url : uri;
+      this.global.setProfile(this.profile);
+      const method = await this.getEduroamServices.eapValidation(this.profile);
+      if (method) {
+        this.profile.oauth = Number(this.global.getAuthenticationMethod().eapMethod.type) === 13;
+      }
+      //this.global.setSsid(this.global.getCredentialApplicability().iEEE80211[0].ssid[0])
+      this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
     }
   }
 
@@ -199,7 +197,7 @@ export class GeteduroamApp {
    *
    */
   async isAssociatedNetwork() {
-    return await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+    return await WifiEapConfigurator.isNetworkAssociated({'ssid': 'eduroam'});
   }
 
   /**

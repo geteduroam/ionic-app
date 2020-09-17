@@ -11,6 +11,7 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { InstitutionSearch } from './institutionSearch/institutionSearch';
 import { ValidatorProvider } from '../providers/validator/validator';
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
+import {ConfigFilePage} from "./configFile/configFile";
 
 const Pages = [
   ReconfigurePage,
@@ -19,7 +20,8 @@ const Pages = [
   OauthFlow,
   InstitutionSearch,
   ConfigurationScreen,
-  WifiConfirmation
+  WifiConfirmation,
+  ConfigFilePage
 ];
 
 @NgModule({
