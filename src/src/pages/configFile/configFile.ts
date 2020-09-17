@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {Events, NavController, NavParams} from 'ionic-angular';
+import {Events, NavController, NavParams, Platform} from 'ionic-angular';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
@@ -31,9 +31,14 @@ export class ConfigFilePage extends BasePage{
 
   showAll: boolean = false;
 
+  /**
+   * Variable to know if the platform is Android
+   */
+  isAndroid: boolean;
+
   constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider, private getEduroamServices: GeteduroamServices,
-              private errorHandler: ErrorHandlerProvider, private navCtrl: NavController) {
+              private errorHandler: ErrorHandlerProvider, private navCtrl: NavController, private platform: Platform) {
     super(loading, dictionary, event, global);
   }
 
@@ -42,14 +47,26 @@ export class ConfigFilePage extends BasePage{
    */
   async ionViewDidEnter() {
     this.configured = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+    this.isAndroid = this.platform.is('android');
     await this.waitingSpinner(this.configured);
     this.removeSpinner();
     this.showAll = true;
   }
 
-  async configure(event: any){
+  /**
+   * This method create a object OauthConfProvider and invoke to his method for configure the network
+   */
+  async configure(){
     const oauthConf: OauthConfProvider = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
     oauthConf.manageProfileValidation(true, this.global.getProviderInfo())
+  }
+
+  /**
+   * This method close app.
+   * [ Only Android can closed app ]
+   */
+  exitApp() {
+    this.platform.exitApp();
   }
 
 }
