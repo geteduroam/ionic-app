@@ -11,22 +11,20 @@
             <div  class="content-profile" padding-top >
                 <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
 
-                <input (focusout)="getEmail()" [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
-                       !validEmail(provide.email) && suffixIdentity !== '' && !provide.email.includes(suffixIdentity) ?
-                       'error-validation' : ''" [placeholder]="getPlaceholder()" autocomplete="on" class="input-profile" name="email"
-                       padding-left type="email"/>
+                <input (blur)="blur()" [(ngModel)]="provide.email"
+                       [ngClass]="!validSuffix && !validMail ? 'error-validation' : ''" [placeholder]="getPlaceholder()"
+                       autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
 
-                <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
+                <p *ngIf="!validMail" class="error-msg">
                     {{getString('error', 'username')}} </p>
 
-                <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
-                    && !provide.email.includes(suffixIdentity)" class="error-msg">
+                <p *ngIf="!validSuffix" class="error-msg">
                     {{getString('error', 'domain')}}{{suffixIdentity}} </p>
             </div>
 
             <div class="content-profile" margin-top>
                 <ion-label class="label-conf" text-left>{{getString('label', 'password')}}</ion-label>
-                <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
+                <input (blur)="validateForm()" (ngModelChange)="validateForm()" [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
                        name="pass" padding-left type="password"/>
 
                 <p *ngIf="errorPass" class="error-msg">{{getString('error', 'password')}}</p>
@@ -43,7 +41,7 @@
     <div class="footer-form">
         <form (ngSubmit)="checkForm()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [ngClass]="!validateForm() ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
+                <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
             </div>
         </form>
     </div>

@@ -67,6 +67,26 @@ export class ProfilePage extends BasePage{
    */
   suffixIdentity: string = '';
 
+  /**
+   * This say if we must give him some hint about the identity
+   */
+  hintIdentity: boolean;
+
+  /**
+   * Used in the view to check error message if the email is not valid
+   */
+  validMail: boolean = true;
+
+  /**
+   * Show if the username include the valid suffix
+   */
+  validSuffix: boolean = true;
+
+  /**
+   * Enable button next
+   */
+  enableButton: boolean = false;
+
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
@@ -88,8 +108,10 @@ export class ProfilePage extends BasePage{
    * Method to get dynamically placeholder on input
    */
   getPlaceholder() {
-    if (this.suffixIdentity !== '') {
+    if (this.suffixIdentity !== '' && !!this.hintIdentity) {
       return `username@${this.suffixIdentity}`;
+    } else if (this.suffixIdentity !== '' && !this.hintIdentity) {
+      return `username@[optionalPrefix.]${this.suffixIdentity}`;
     } else {
       return this.getString('placeholder', 'example');
     }
@@ -99,7 +121,7 @@ export class ProfilePage extends BasePage{
    * Method to check form and navigate.
    */
   async checkForm() {
-    if (!!this.validateForm()) {
+    if (!!this.enableButton) {
 
       let config = this.configConnection();
       const checkRequest = this.getEduroamServices.connectProfile(config);
@@ -146,10 +168,14 @@ export class ProfilePage extends BasePage{
    * Method to validate form.
    * @return {boolean}
    */
-  validateForm(): boolean {
+  validateForm(): void {
     const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
-
-    return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
+    if (!!this.suffixIdentity) {
+      this.validEmail(this.provide.email);
+      this.enableButton = this.validMail && this.provide.pass !== '' && validateTerms;
+    } else {
+      this.enableButton = this.provide.email !== '' && this.provide.pass !== '' && validateTerms;
+    }
   }
 
   /**
@@ -157,7 +183,29 @@ export class ProfilePage extends BasePage{
    * @return {boolean}
    */
   validEmail(email: string) {
-    return this.validator.validateEmail(email, this.suffixIdentity);
+    if (!!this.suffixIdentity && email !== '') {
+      this.validMail = this.validator.validateEmail(email, this.suffixIdentity);
+    }
+  }
+
+  /**
+   * Check if the email include the suffix and it's correct
+   * @param email
+   */
+  checkSuffix(email: string) {
+    if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
+        email !== '' && !!this.hintIdentity && this.hintIdentity === true) {
+      this.validSuffix = email.includes('@' + this.suffixIdentity);
+    }else if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
+        email !== '' && !this.hintIdentity) {
+      this.validSuffix = email.includes(this.suffixIdentity);
+    }
+  }
+
+  blur() {
+    //this.getEmail();
+    this.checkSuffix(this.provide.email);
+    this.validateForm();
   }
 
   /**
@@ -173,6 +221,10 @@ export class ProfilePage extends BasePage{
 
       if (!!this.validMethod.clientSideCredential.innerIdentitySuffix) {
         this.suffixIdentity = this.validMethod.clientSideCredential.innerIdentitySuffix;
+      }
+
+      if (!!this.validMethod.clientSideCredential.innerIdentityHint) {
+        this.hintIdentity = (this.validMethod.clientSideCredential.innerIdentityHint === 'true');
       }
 
     } else {
