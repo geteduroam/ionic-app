@@ -40,8 +40,10 @@ ion-content {
 
       .arrow-btn {
         background-color: transparent;
-        padding: 20px;
+        padding: 5px;
         height: 100%;
+        box-shadow: none;
+        margin: 10px 0 0 0;
 
         span {
           padding: 5px 0 0 15px;
