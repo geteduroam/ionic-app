@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {Events, ModalController, NavController} from 'ionic-angular';
+import {Events, ModalController, NavController, ViewController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -82,7 +82,7 @@ export class ConfigurationScreen extends BasePage{
    * */
   constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
               protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, protected global: GlobalProvider) {
+              protected event: Events, protected global: GlobalProvider, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
   }
 

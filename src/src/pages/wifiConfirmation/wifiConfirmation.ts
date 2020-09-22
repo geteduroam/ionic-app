@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import {Events, NavParams, Platform} from 'ionic-angular';
+import {Events, NavParams, Platform, ViewController} from 'ionic-angular';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {BasePage} from "../basePage";
@@ -38,7 +38,7 @@ export class WifiConfirmation extends BasePage implements OnInit {
   constructor(private navParams: NavParams, private platform: Platform,
               protected loading: LoadingProvider, private sanitizer: DomSanitizer,
               protected dictionary:DictionaryServiceProvider, protected global: GlobalProvider,
-              protected event: Events) {
+              protected event: Events, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
   }
 
