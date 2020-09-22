@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="app.eduroam.geteduroam">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="app.eduroam.geteduroam">
     <application
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
@@ -100,6 +101,9 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.NETWORK_SETTINGS" android:protectionLevel="signature" />
+
     <!--  API 29: NetworkRequest.requestNetwork -->
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 </manifest>
