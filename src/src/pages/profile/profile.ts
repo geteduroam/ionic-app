@@ -98,8 +98,8 @@ export class ProfilePage extends BasePage{
   /**
    * Method to show dynamically identity institution on email input
    */
-  getEmail() {
-    if (!!this.provide.email && !this.provide.email.includes('@') && !!this.suffixIdentity) {
+  getRealmEmail() {
+    if (!!this.provide.email && !this.provide.email.includes('@') && !!this.suffixIdentity && !!this.hintIdentity) {
       this.provide.email = `${this.provide.email}@${this.suffixIdentity}`;
     }
   }
@@ -193,17 +193,15 @@ export class ProfilePage extends BasePage{
    * @param email
    */
   checkSuffix(email: string) {
-    if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
-        email !== '' && !!this.hintIdentity && this.hintIdentity === true) {
-      this.validSuffix = email.includes('@' + this.suffixIdentity);
-    }else if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
-        email !== '' && !this.hintIdentity) {
+    if (!!this.suffixIdentity && this.suffixIdentity !== '' &&  email !== '' && !!this.hintIdentity) {
+      this.validSuffix = email.includes(`@${this.suffixIdentity}`);
+    } else if (!!this.suffixIdentity && this.suffixIdentity !== '' && email !== '' && !this.hintIdentity) {
       this.validSuffix = email.includes(this.suffixIdentity);
     }
   }
 
   blur() {
-    //this.getEmail();
+    this.getRealmEmail();
     this.checkSuffix(this.provide.email);
     this.validateForm();
   }
@@ -225,6 +223,8 @@ export class ProfilePage extends BasePage{
 
       if (!!this.validMethod.clientSideCredential.innerIdentityHint) {
         this.hintIdentity = (this.validMethod.clientSideCredential.innerIdentityHint === 'true');
+      } else {
+        this.hintIdentity = false;
       }
 
     } else {
