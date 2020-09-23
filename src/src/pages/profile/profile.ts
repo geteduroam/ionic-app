@@ -185,6 +185,8 @@ export class ProfilePage extends BasePage{
   validEmail(email: string) {
     if (!!this.suffixIdentity && email !== '') {
       this.validMail = this.validator.validateEmail(email, this.suffixIdentity);
+    } else if (this.suffixIdentity === '' && email !== '') {
+      this.validMail = this.validator.validateEmail(email);
     }
   }
 
@@ -193,17 +195,15 @@ export class ProfilePage extends BasePage{
    * @param email
    */
   checkSuffix(email: string) {
-    if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
-        email !== '' && !!this.hintIdentity && this.hintIdentity === true) {
+    if (!!this.suffixIdentity && this.suffixIdentity !== '' && email !== '' && !!this.hintIdentity) {
       this.validSuffix = email.includes('@' + this.suffixIdentity);
-    }else if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
-        email !== '' && !this.hintIdentity) {
+    }else if (!!this.suffixIdentity && this.suffixIdentity !== '' && email !== '' && !this.hintIdentity) {
       this.validSuffix = email.includes(this.suffixIdentity);
     }
   }
 
   blur() {
-    //this.getEmail();
+    // this.getEmail();
     this.checkSuffix(this.provide.email);
     this.validateForm();
   }
