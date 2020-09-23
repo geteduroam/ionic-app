@@ -7,7 +7,7 @@
 -->
 <div *ngIf="showAll" class="container-content">
     <div class="header-content" margin-top padding-top>
-        <img alt="setting" src="../../assets/icon/cog-outline.svg" />
+        <img *ngIf="showAll" alt="setting" src="../../assets/icon/cog-outline.svg" />
         <h1>{{getString('header', 'config')}}</h1>
     </div>
 

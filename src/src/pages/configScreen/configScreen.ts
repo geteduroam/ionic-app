@@ -211,8 +211,11 @@ export class ConfigurationScreen extends BasePage{
     const firstResponse = await this.getEduroamServices.discovery();
     this.instances = await this.waitingSpinner(firstResponse);
     this.removeSpinner();
-    this.showAll = true;
+
   }
 
+  ionViewDidEnter() {
+    this.showAll = true;
+  }
 
 }
