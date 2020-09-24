@@ -180,7 +180,7 @@ export class ProfilePage extends BasePage{
 
   /**
    * Method to validate email.
-   * @return {boolean}
+   * @return {git boolean}
    */
   validEmail(email: string) {
     if (!!this.suffixIdentity && email !== '') {
