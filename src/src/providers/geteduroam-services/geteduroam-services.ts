@@ -131,11 +131,11 @@ export class GeteduroamServices {
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
         }
       }
-      if (resultantProfiles['oid'].length > 0) {
-        config['oid'] = resultantProfiles['oidConcat'];
-        config['ssid'] = '#Passpoint';
-        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-      }
+      //if (resultantProfiles['oid'].length > 0) {
+      //  config['oid'] = resultantProfiles['oidConcat'];
+      //  config['ssid'] = '#Passpoint';
+      //  returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+      //}
     } else {
       // If there is no CredentialApplicability in the eap-config file,
       // the default case will take 'eduroam' for the SSID
