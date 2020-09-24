@@ -12,7 +12,9 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
+import { Plugins } from '@capacitor/core';
 
+const { Keyboard } = Plugins;
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
@@ -87,11 +89,21 @@ export class ProfilePage extends BasePage{
    */
   enableButton: boolean = false;
 
+  hiddenIcon: boolean = true;
+
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
+
+    Keyboard.addListener('keyboardWillShow', () => {
+      this.hiddenIcon = false;
+    });
+
+    Keyboard.addListener('keyboardWillHide', () => {
+      this.hiddenIcon = true;
+    });
 
   }
 

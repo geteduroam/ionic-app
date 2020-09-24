@@ -33,10 +33,14 @@ ion-content {
     margin-top: 0;
     border-top: none;
 
+    .arrow-back-hidden {
+      display: none;
+    }
+
     .arrow-back {
+      display: block;
       text-align: left;
       background-color: transparent !important;
-      height: 10%;
 
       .arrow-btn {
         background-color: transparent;
