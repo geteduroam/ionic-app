@@ -32,7 +32,7 @@
   },
   "error": {
     "username": "El usuario es incorrecto",
-    "domain": "El dominio del email debe incluir ",
+    "domain": "El nombre de usuario debe terminar en ",
     "password": "Contraseña errónea",
     "turn-on": "Por favor, active los datos móviles para configurar ",
     "available1": "Una conexión de red llamada ",
