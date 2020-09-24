@@ -38,3 +38,9 @@ and (orientation: portrait) {
     }
   }
 }
+
+@media only screen and (max-device-width: 1940px) {
+  .base-content {
+    height: 87% !important;
+  }
+}

@@ -10,6 +10,7 @@ import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
+import {c} from "@angular/core/src/render3";
 const { Keyboard } = Plugins;
 
 @Component({
@@ -211,7 +212,6 @@ export class ConfigurationScreen extends BasePage{
     const firstResponse = await this.getEduroamServices.discovery();
     this.instances = await this.waitingSpinner(firstResponse);
     this.removeSpinner();
-
   }
 
   ionViewDidEnter() {

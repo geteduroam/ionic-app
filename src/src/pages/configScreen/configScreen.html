@@ -14,14 +14,14 @@
     <div class="content-form" margin-top padding-top text-center>
         <ion-label class="label-conf" no-margin padding-top text-left>{{getString('label', 'institution')}}</ion-label>
 
-        <div class="row" padding-top>
+        <div *ngIf="this.instances" class="row" padding-top>
 
             <ion-searchbar (click)="showModal()" [(ngModel)]="instanceName" cancelButtonText
                            class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">
 
             </ion-searchbar>
         </div>
-        <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" no-margin padding-top text-left >{{getString('label', 'profile')}}</ion-label>
+        <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" margin-top padding-top text-left >{{getString('label', 'profile')}}</ion-label>
         <div class="row" margin-top>
 
             <ion-item *ngIf="!!profiles && profiles.length > 1" class="item-profile" no-margin no-padding>

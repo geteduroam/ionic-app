@@ -83,11 +83,9 @@ ion-content {
     }
 
     .content-info {
-      height: calc(50% - 20px);
+      padding-top: 0 !important;
 
       .info-text {
-        height: 100%;
-        padding-top: 10%;
 
         .copy {
           font-family: Helvetica, sans-serif;

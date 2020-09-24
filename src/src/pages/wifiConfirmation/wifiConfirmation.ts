@@ -84,4 +84,13 @@ export class WifiConfirmation extends BasePage implements OnInit {
     }
 
   }
+
+  async backToConfig() {
+    await this.statusConnection();
+    if (!!this.activeNavigation) {
+      await this.viewCtrl.dismiss()
+    } else {
+      await this.alertConnectionDisabled();
+    }
+  }
 }
