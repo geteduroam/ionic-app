@@ -66,8 +66,6 @@ ion-content {
 
     .header-content {
 
-      // height: 22%;
-
       img {
         width: 57px;
         height: 65px;
@@ -83,9 +81,11 @@ ion-content {
     }
 
     .content-info {
-      padding-top: 0 !important;
+      height: calc(50% - 20px);
 
       .info-text {
+        height: 100%;
+        padding-top: 10%;
 
         .copy {
           font-family: Helvetica, sans-serif;
@@ -209,3 +209,20 @@ ion-app, ion-alert div:last-child {
 }
 
 
+////---------------------------------------------
+//// Specific style to error page on Android Moto G
+////---------------------------------------------
+@media only screen and (max-device-width: 1940px) {
+  .base-content {
+
+    .content-info {
+      height: inherit;
+      padding-top: 0 !important;
+
+      .info-text {
+        height: inherit;
+        padding-top: unset;
+      }
+    }
+  }
+}
