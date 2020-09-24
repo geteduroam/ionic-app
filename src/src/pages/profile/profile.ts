@@ -111,7 +111,7 @@ export class ProfilePage extends BasePage{
     if (this.suffixIdentity !== '' && !!this.hintIdentity) {
       return `username@${this.suffixIdentity}`;
     } else if (this.suffixIdentity !== '' && !this.hintIdentity) {
-      return `username@[optionalPrefix.]${this.suffixIdentity}`;
+      return `username@${this.suffixIdentity}`;
     } else {
       return this.getString('placeholder', 'example');
     }
