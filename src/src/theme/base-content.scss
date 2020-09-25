@@ -207,22 +207,3 @@ ion-app, ion-alert div:last-child {
 .nav-decor {
   display: none !important;
 }
-
-
-////---------------------------------------------
-//// Specific style to error page on Android Moto G
-////---------------------------------------------
-@media only screen and (max-device-width: 1940px) {
-  .base-content {
-
-    .content-info {
-      height: inherit;
-      padding-top: 0 !important;
-
-      .info-text {
-        height: inherit;
-        padding-top: unset;
-      }
-    }
-  }
-}
