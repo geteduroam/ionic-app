@@ -16,7 +16,7 @@
                        autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
 
                 <p *ngIf="!validMail" class="error-msg">
-                    {{getString('error', 'username')}} </p>
+                    {{getString('error', 'username')}}{{getPlaceholder()}} </p>
 
                 <p *ngIf="!validSuffix" class="error-msg">
                     {{getString('error', 'domain')}}{{suffixIdentity}} </p>

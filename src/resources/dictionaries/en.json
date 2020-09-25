@@ -31,7 +31,7 @@
     "close": "Close"
   },
   "error": {
-    "username": "The username is incorrect",
+    "username": "The username is incorrect, must follow the pattern ",
     "domain": "The username must end with ",
     "password": "Password is incorrect",
     "turn-on": "Please, turn on mobile data to configure ",
