@@ -7,7 +7,9 @@ import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ErrorServiceProvider} from "../../providers/error-service/error-service";
-const {Browser} = Plugins;
+const {Browser, Network} = Plugins;
+declare var Capacitor;
+const { WifiEapConfigurator } = Capacitor.Plugins;
 
 
 @Component({
@@ -118,5 +120,9 @@ export class ErrorsPage extends BasePage{
    */
   isLinkEmail(): boolean {
     return this.validator.validateEmail(this.link);
+  }
+
+  async checkWifi(): Promise<boolean> {
+    return await WifiEapConfigurator.checkEnabledWifi();
   }
 }
