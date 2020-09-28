@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import {Events, NavParams, Platform, ViewController} from "ionic-angular";
 import {Plugins} from "@capacitor/core";
 import {ValidatorProvider} from "../../providers/validator/validator";
@@ -7,9 +7,7 @@ import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ErrorServiceProvider} from "../../providers/error-service/error-service";
-const {Browser, Network} = Plugins;
-declare var Capacitor;
-const { WifiEapConfigurator } = Capacitor.Plugins;
+const {Browser, Network } = Plugins;
 
 
 @Component({
@@ -34,6 +32,8 @@ export class ErrorsPage extends BasePage{
    */
   checkMethod : string;
 
+  enabledButton: boolean;
+
   /**
    * It checks if the error page have permission
    * to continue navigate or finish app
@@ -41,10 +41,12 @@ export class ErrorsPage extends BasePage{
   public isFinal: boolean = false;
 
 
-  constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController,
+  constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController, private ngZone: NgZone,
               private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider, private errorService: ErrorServiceProvider) {
     super(loading, dictionary, event, global);
+
+    this.checkConnection();
 
     if (!!this.navParams.get('isFinal')) {
 
@@ -58,6 +60,13 @@ export class ErrorsPage extends BasePage{
       this.isFinal = false;
       this.checkMethod = this.navParams.get('method');
     }
+
+    this.event.subscribe('connection', (data) => {
+      this.ngZone.run(() => {
+        this.enabledButton = data == 'connected';
+      });
+
+    });
   }
 
   /**
@@ -122,7 +131,9 @@ export class ErrorsPage extends BasePage{
     return this.validator.validateEmail(this.link);
   }
 
-  async checkWifi(): Promise<boolean> {
-    return await WifiEapConfigurator.checkEnabledWifi();
+   async checkConnection(){
+     let connect = await Network.getStatus();
+     this.enabledButton = connect.connected;
+
   }
 }

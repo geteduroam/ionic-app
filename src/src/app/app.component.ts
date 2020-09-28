@@ -1,5 +1,5 @@
 import {Config, Events, ModalController, Platform} from 'ionic-angular';
-import {Component} from '@angular/core';
+import { Component } from '@angular/core';
 import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
@@ -18,6 +18,8 @@ import {ErrorsPage} from "../pages/errors/errors";
 const { Toast, Network, App, Device } = Plugins;
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
+
+
 @Component({
   templateUrl: 'app.html'
 })
@@ -65,7 +67,8 @@ export class GeteduroamApp {
   async associatedNetwork() {
     if (!this.checkExtFile) {
       const isAssociated = await this.isAssociatedNetwork();
-      if (!isAssociated.success) {
+      if (!!this.platform.is('android') && !isAssociated.success ||
+        !!this.platform.is('ios') && !!isAssociated.success) {
         if (!!isAssociated.overridable) {
           this.rootPage = ReconfigurePage;
           this.getAssociation(isAssociated);
@@ -125,6 +128,7 @@ export class GeteduroamApp {
     // Listening to changes in network states, it show toast message when status changed
     Network.addListener('networkStatusChange', async () => {
       let connectionStatus: NetworkStatus = await this.statusConnection();
+
       if (!this.checkExtFile) {
         this.connectionEvent(connectionStatus);
         !connectionStatus.connected ?
@@ -133,6 +137,7 @@ export class GeteduroamApp {
             this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
       }
     });
+
     App.addListener('backButton', () => {
       this.platform.backButton.observers.pop();
     });
@@ -218,10 +223,10 @@ export class GeteduroamApp {
    * This method throw an event to disabled button when network is disconnected.
    * @param connectionStatus
    */
-  protected connectionEvent(connectionStatus: NetworkStatus){
+  protected connectionEvent(connectionStatus: NetworkStatus) {
     connectionStatus.connected ? this.event.publish('connection', 'connected') :
         this.event.publish('connection', 'disconnected');
-  }
+  };
   /**
    * This method check status of connection
    */
