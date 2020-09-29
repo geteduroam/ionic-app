@@ -8,7 +8,7 @@
 
     <div class="footer-form" text-center>
         <div class="content-button">
-            <button (click)="navigateTo()" class="button-control" ion-button text-capitalize> {{getString('button', 'next')}} </button>
+            <button (click)="navigateTo()" [disabled]="enabledButton" class="button-control" ion-button text-capitalize> {{getString('button', 'next')}} </button>
         </div>
     </div>
 </div>

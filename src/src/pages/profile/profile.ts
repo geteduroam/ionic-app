@@ -12,6 +12,7 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
+import { ConfigurationScreen } from '../configScreen/configScreen';
 
 @Component({
   selector: 'page-profile',
@@ -102,10 +103,16 @@ export class ProfilePage extends BasePage{
     if (!!this.validateForm()) {
 
       let config = this.configConnection();
-      const checkRequest = this.getEduroamServices.connectProfile(config);
+      const checkRequest = await this.getEduroamServices.connectProfile(config);
 
-      if (!!checkRequest) {
+      if (!!checkRequest.success || !!checkRequest.message.includes('notLinked')) {
         this.navigateTo();
+      } else {
+        await this.errorHandler.handleError(
+          this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
+          this.dictionary.getTranslation('error', 'available2') +
+          this.global.getSsid() + '.', false, '', 'connection', true);
+        await this.navCtrl.setRoot(ConfigurationScreen, {}, {animation: 'transition'});
       }
     }
   }

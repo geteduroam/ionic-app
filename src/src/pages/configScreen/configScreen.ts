@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import {Events, ModalController, NavController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
@@ -80,7 +80,7 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Constructor
    * */
-  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
+  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices, private ngZone: NgZone,
               protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider) {
     super(loading, dictionary, event, global);
@@ -189,7 +189,7 @@ export class ConfigurationScreen extends BasePage{
   async navigateTo(profile:ProfileModel) {
     if (!!this.activeNavigation) {
       this.showAll = false;
-
+      this.resetValues();
       let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
       await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
 
@@ -206,8 +206,19 @@ export class ConfigurationScreen extends BasePage{
     const firstResponse = await this.getEduroamServices.discovery();
     this.instances = await this.waitingSpinner(firstResponse);
     this.removeSpinner();
-    this.showAll = true;
   }
 
-
+  ionViewDidEnter() {
+    this.showAll = true;
+  }
+  /**
+   *  Method to reset values
+   */
+  resetValues() {
+    this.ngZone.run(() => {
+      this.profiles = null;
+      this.clearProfile();
+      this.instanceName = '';
+    });
+  }
 }

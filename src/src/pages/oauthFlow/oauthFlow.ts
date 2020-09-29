@@ -12,7 +12,7 @@ import {GlobalProvider} from "../../providers/global/global";
 import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
-import _ from 'lodash';
+import { ConfigurationScreen } from '../configScreen/configScreen';
 
 declare var window: any;
 
@@ -44,6 +44,8 @@ export class OauthFlow extends BasePage{
    * Provide info from a certificate
    */
   providerInfo: ProviderInfo = new ProviderInfo();
+
+  enabledButton: boolean = true;
 
   constructor(private http: HTTP, public navCtrl: NavController, public navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, protected dictionary: DictionaryServiceProvider, protected event: Events,
@@ -140,11 +142,16 @@ export class OauthFlow extends BasePage{
    */
   async checkForm() {
     let config = this.configConnection();
-    const checkRequest = this.getEduroamServices.connectProfile(config);
-    this.loading.dismiss();
+    const checkRequest = await this.getEduroamServices.connectProfile(config);
 
-    if (!!checkRequest) {
+    if (!!checkRequest.success || !!checkRequest.message.includes('notLinked')) {
       this.navigateTo();
+    } else {
+      await this.errorHandler.handleError(
+        this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
+        this.dictionary.getTranslation('error', 'available2') +
+        this.global.getSsid() + '.', false, '', 'connection', true);
+      await this.navCtrl.setRoot(ConfigurationScreen, {}, {animation: 'transition'});
     }
   }
 
