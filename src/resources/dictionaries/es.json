@@ -31,8 +31,8 @@
     "close": "Cerrar"
   },
   "error": {
-    "username": "El usuario es incorrecto",
-    "domain": "El dominio del email debe incluir ",
+    "username": "El usuario debe seguir el patron ",
+    "domain": "El nombre de usuario debe terminar en ",
     "password": "Contraseña errónea",
     "turn-on": "Por favor, active los datos móviles para configurar ",
     "available1": "Una conexión de red llamada ",

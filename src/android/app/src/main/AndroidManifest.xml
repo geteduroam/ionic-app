@@ -27,55 +27,14 @@
             </intent-filter>
             <!-- MIME Type registration -->
             <intent-filter>
-                <data android:scheme="content" />
+                <data android:scheme="content"
+                      android:mimeType="*/*"
+                      android:pathPattern=".*\\.eap-config"/>
+
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" />
-                <data android:pathPattern=".*\\.eap-config" />
-                <data android:mimeType="application/eap-config" />
-                <data android:mimeType="application/mac-binary" />
-                <data android:mimeType="application/octet-stream" />
-                <data android:mimeType="application/x-binary" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="app.eduroam.geteduroam.SHOW_CURRENT" />
-                <action android:name="app.eduroam.geteduroam.SHOW_RECENT" />
-                <action android:name="app.eduroam.geteduroam.SHOW_PENDING" />
-                <data android:mimeType="text/xml" />
-            </intent-filter>
-            <intent-filter>
-                <data android:scheme="file" />
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" />
-                <data android:pathPattern=".*\\.eap-config" />
-                <data android:mimeType="application/eap-config" />
-            </intent-filter>
-            <intent-filter>
-                <data android:scheme="http" />
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" />
-                <data android:pathPattern=".*\\.eap-config" />
-                <data android:mimeType="application/eap-config" />
-            </intent-filter>
-            <intent-filter>
-                <data android:scheme="https" />
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" />
-                <data android:mimeType="application/eap-config" />
-            </intent-filter>
-            <intent-filter>
-                <data android:mimeType="application/eap-config"
-                      android:scheme="content" />
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <provider

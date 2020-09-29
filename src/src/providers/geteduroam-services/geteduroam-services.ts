@@ -64,7 +64,7 @@ export class GeteduroamServices {
     }
 
     // It checks the url if app is opened from a file
-    if (url.includes('eap-config') && !url.includes('https')) {
+    if ((url.includes('eap-config') || url.includes('document') || url.includes('octet-stream')) && !url.includes('https')) {
 
       response = await this.store.readExtFile(url);
       response.data = atob(response.data);
@@ -240,7 +240,7 @@ export class GeteduroamServices {
     let eapConfigFile: any;
     let authenticationMethods:AuthenticationMethod[] = [];
     let providerInfo:ProviderInfo= new ProviderInfo();
-    let credentialApplicability:CredentialApplicability= new CredentialApplicability();
+    let credentialApplicability:CredentialApplicability= new CredentialApplicability(this.global);
 
     if (!!profile.oauth && !!profile.token) {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint+'?format=eap-metadata', profile.token);
@@ -318,7 +318,6 @@ export class GeteduroamServices {
             if (credentialApplicabilityAux != null) {
               if (isArray(credentialApplicabilityAux)) {
                 returnValue = returnValue && credentialApplicability.fillEntity(credentialApplicabilityAux[0]);
-
               } else if (isObject(providerInfoAux)) {
                 returnValue = returnValue && credentialApplicability.fillEntity(credentialApplicabilityAux);
               }
