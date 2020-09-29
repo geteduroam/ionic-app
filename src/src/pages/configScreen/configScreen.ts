@@ -180,13 +180,18 @@ export class ConfigurationScreen extends BasePage{
       }
     }
   }
-
+  navigateAndroid(e: Event) {
+    setTimeout(async () => {
+      await this.navigateTo(this.profile, e);
+    }, 1200);
+  }
   /**
    * Method which navigates to the following view.
    * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
-  async navigateTo(profile:ProfileModel) {
+  async navigateTo(profile:ProfileModel, e: Event) {
+    e.preventDefault();
     if (!!this.activeNavigation) {
       this.showAll = false;
 
@@ -194,7 +199,7 @@ export class ConfigurationScreen extends BasePage{
       await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
 
     } else{
-      await this.alertConnectionDisabled();
+     await this.alertConnectionDisabled();
     }
   }
 

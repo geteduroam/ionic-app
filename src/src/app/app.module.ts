@@ -18,6 +18,7 @@ import { StoringProvider } from '../providers/storing/storing';
 import { GlobalProvider } from '../providers/global/global';
 import { CryptoUtil } from '../providers/util/crypto-util';
 import { ErrorServiceProvider } from "../providers/error-service/error-service";
+import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { ErrorServiceProvider } from "../providers/error-service/error-service";
     StoringProvider,
     GlobalProvider,
     CryptoUtil,
+    OauthConfProvider,
     ErrorServiceProvider
   ],
   exports:[]

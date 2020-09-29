@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import {Events, NavController, NavParams} from 'ionic-angular';
-import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { ProfileModel } from '../../shared/models/profile-model';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
@@ -9,10 +8,9 @@ import { HTTP } from '@ionic-native/http/ngx';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
-import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
-import _ from 'lodash';
+import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
 
 declare var window: any;
 
@@ -34,11 +32,6 @@ export class OauthFlow extends BasePage{
    * This provide the url to get a token
    */
   tokenURl: any;
-
-  /**
-   * Authentication method from a certificate
-   */
-  validMethod: AuthenticationMethod = new AuthenticationMethod();
 
   /**
    * Provide info from a certificate
@@ -131,63 +124,10 @@ export class OauthFlow extends BasePage{
     this.profile.token = this.tokenURl.access_token;
 
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
-    this.manageProfileValidation(validProfile);
-
-  }
-
-  /**
-   * Method to check form, create connection with plugin WifiEapConfigurator and navigate.
-   */
-  async checkForm() {
-    let config = this.configConnection();
-    const checkRequest = this.getEduroamServices.connectProfile(config);
-    this.loading.dismiss();
-
-    if (!!checkRequest) {
-      this.navigateTo();
-    }
-  }
-
-  /**
-   * Method to manage validation profile
-   * @param validProfile check if profile is valid
-   */
-  async manageProfileValidation(validProfile: boolean) {
+    const oauthConf: OauthConfProvider = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
     this.providerInfo = this.global.getProviderInfo();
+    oauthConf.manageProfileValidation(validProfile, this.providerInfo);
 
-    if (validProfile) {
-      this.validMethod = this.global.getAuthenticationMethod();
-      this.checkForm();
-
-    } else {
-      await this.notValidProfile();
-    }
-  }
-
-  /**
-   * Method to check message when profile is not valid
-   */
-  async notValidProfile() {
-    if(!!this.providerInfo) {
-
-      let url = this.checkUrlInfoProvide();
-
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-
-    } else {
-
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
-    }
-    await this.navCtrl.pop();
-  }
-
-  /**
-   * Method to check if provider info contains links
-   * and show it on error page
-   */
-  checkUrlInfoProvide() {
-    return !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
-      !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
   }
 
   /**
@@ -200,17 +140,6 @@ export class OauthFlow extends BasePage{
     let oAuth = await this.getEduroamServices.generateOAuthFlow(oauth2Options);
 
     this.buildFlowAuth(oAuth, oauth2Options, this.profile.token_endpoint);
-  }
-
-  /**
-   * Navigation to the next view
-   */
-  async navigateTo() {
-    this.showAll = false;
-
-    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
-        logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-      await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
   }
 
   /**
@@ -243,24 +172,6 @@ export class OauthFlow extends BasePage{
       redirectUrl: 'http://localhost:8080/',
       pkce: true,
       scope: 'eap-metadata',
-    };
-  }
-
-  /**
-   * Method to create configuration to plugin WifiEapConfigurator
-   */
-  private configConnection() {
-    return {
-      ssid: this.global.getSsid(),
-      username: '',
-      password: '',
-      eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: '',
-      auth: null,
-      anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
-      caCertificate: this.validMethod.serverSideCredential.ca[0]['content'],
-      clientCertificate: this.validMethod.clientSideCredential.clientCertificate,
-      passPhrase: this.validMethod.clientSideCredential.passphrase
     };
   }
 }

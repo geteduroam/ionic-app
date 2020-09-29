@@ -31,8 +31,8 @@
     "close": "Close"
   },
   "error": {
-    "username": "The username is incorrect",
-    "domain": "The email domain must include ",
+    "username": "The username must follow the pattern ",
+    "domain": "The username must end with ",
     "password": "Password is incorrect",
     "turn-on": "Please, turn on mobile data to configure ",
     "available1": "A network connection called ",
