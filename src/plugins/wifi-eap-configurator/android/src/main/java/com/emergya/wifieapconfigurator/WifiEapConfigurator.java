@@ -424,22 +424,12 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
             call.success(object);
-        }catch (IllegalArgumentException e){
-            //this.connectWifiBySsid(wifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
-            if (createSuggestion(wifiManager, null, enterpriseConfig, passpointConfig)) {
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-                call.success(object);
-            } else {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.success.passpoint.notConfigured");
-                call.success(object);}
-            }
+        } catch (IllegalArgumentException e){
+            this.connectWifiBySsid(wifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
+        }
     }
 
-    private boolean createSuggestion(WifiManager wifiManager, String, ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig){
+    private boolean createSuggestion(WifiManager wifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig){
             boolean configured = false;
             if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
@@ -451,14 +441,14 @@ public class WifiEapConfigurator extends Plugin {
                 }
                 suggestionBuilder.setWpa2EnterpriseConfig(enterpriseConfig);
 
-                if (passpointConfig != null) {
+                if (passpointConfig != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
                     suggestionBuilder.setPasspointConfig(passpointConfig);
                 }
                 final WifiNetworkSuggestion suggestion = suggestionBuilder.build();
 
                 // WifiNetworkSuggestion approach
                 suggestions.add(suggestion);
-                WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+               
                 wifiManager.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
                 int status = wifiManager.addNetworkSuggestions(suggestions);
 
