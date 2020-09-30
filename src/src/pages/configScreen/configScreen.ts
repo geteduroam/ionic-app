@@ -1,5 +1,5 @@
 import { Component, NgZone } from '@angular/core';
-import {Events, ModalController, NavController} from 'ionic-angular';
+import {Events, ModalController, NavController, ViewController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -10,6 +10,7 @@ import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
+
 const { Keyboard } = Plugins;
 
 @Component({
@@ -82,32 +83,43 @@ export class ConfigurationScreen extends BasePage{
    * */
   constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices, private ngZone: NgZone,
               protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, protected global: GlobalProvider) {
+              protected event: Events, protected global: GlobalProvider, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
+
   }
 
   /**
    * Method executes when the search bar is tapped.
    * */
-  async showModal() {
+  async showModal(e: any) {
+    e.preventDefault();
     await Keyboard.hide();
+    if (!!this.instances) {
+     this.openModal();
+    } else {
+      await this.getDiscovery();
+      this.showModal(e);
+    }
+  }
+
+  openModal() {
     let searchModal = this.modalCtrl.create(InstitutionSearch, {
       instances: this.instances,
       instanceName: this.instanceName}
-      );
+    );
 
     searchModal.onDidDismiss((data) => {
 
-        if (data !== undefined) {
-          this.instance = data;
-          this.instanceName = data.name;
+      if (data !== undefined) {
+        this.instance = data;
+        this.instanceName = data.name;
 
-          this.initializeProfiles(this.instance);
+        this.initializeProfiles(this.instance);
 
-        }
-      });
+      }
+    });
 
-      return await searchModal.present();
+    return searchModal.present();
   }
 
   /**
@@ -180,21 +192,26 @@ export class ConfigurationScreen extends BasePage{
       }
     }
   }
-
+  navigateAndroid(e: Event) {
+    setTimeout(async () => {
+      await this.navigateTo(this.profile, e);
+    }, 1200);
+  }
   /**
    * Method which navigates to the following view.
    * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
-  async navigateTo(profile:ProfileModel) {
+  async navigateTo(profile:ProfileModel, e: Event) {
+    e.preventDefault();
     if (!!this.activeNavigation) {
       this.showAll = false;
-      this.resetValues();
+
       let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
       await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
 
     } else{
-      await this.alertConnectionDisabled();
+     await this.alertConnectionDisabled();
     }
   }
 
@@ -202,23 +219,15 @@ export class ConfigurationScreen extends BasePage{
    *  Lifecycle when entering a page, before it becomes the active one
    *  Load the discovery data and show the spinner
    */
-  async ionViewWillEnter() {
-    const firstResponse = await this.getEduroamServices.discovery();
-    this.instances = await this.waitingSpinner(firstResponse);
+  async ionViewDidEnter() {
+    await this.getDiscovery();
     this.removeSpinner();
-  }
-
-  ionViewDidEnter() {
     this.showAll = true;
   }
-  /**
-   *  Method to reset values
-   */
-  resetValues() {
-    this.ngZone.run(() => {
-      this.profiles = null;
-      this.clearProfile();
-      this.instanceName = '';
-    });
+
+  async getDiscovery() {
+    const firstResponse = await this.getEduroamServices.discovery();
+    this.instances = await this.waitingSpinner(firstResponse);
   }
+
 }

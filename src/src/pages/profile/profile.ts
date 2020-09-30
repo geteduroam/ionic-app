@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Events, NavController, NavParams } from 'ionic-angular';
+import {Events, NavController, NavParams, ViewController} from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
@@ -12,8 +12,9 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
-import { ConfigurationScreen } from '../configScreen/configScreen';
+import { Plugins } from '@capacitor/core';
 
+const { Keyboard } = Plugins;
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
@@ -68,11 +69,41 @@ export class ProfilePage extends BasePage{
    */
   suffixIdentity: string = '';
 
+  /**
+   * This say if we must give him some hint about the identity
+   */
+  hintIdentity: boolean;
+
+  /**
+   * Used in the view to check error message if the email is not valid
+   */
+  validMail: boolean = true;
+
+  /**
+   * Show if the username include the valid suffix
+   */
+  validSuffix: boolean = true;
+
+  /**
+   * Enable button next
+   */
+  enableButton: boolean = false;
+
+  hiddenIcon: boolean = true;
+
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events) {
+              protected event: Events, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
+
+    Keyboard.addListener('keyboardWillShow', () => {
+      this.hiddenIcon = false;
+    });
+
+    Keyboard.addListener('keyboardWillHide', () => {
+      this.hiddenIcon = true;
+    });
 
   }
 
@@ -89,8 +120,10 @@ export class ProfilePage extends BasePage{
    * Method to get dynamically placeholder on input
    */
   getPlaceholder() {
-    if (this.suffixIdentity !== '') {
+    if (this.suffixIdentity !== '' && !!this.hintIdentity) {
       return `username@${this.suffixIdentity}`;
+    } else if (this.suffixIdentity !== '' && !this.hintIdentity) {
+      return `username@[optionalPrefix.]${this.suffixIdentity}`;
     } else {
       return this.getString('placeholder', 'example');
     }
@@ -100,19 +133,13 @@ export class ProfilePage extends BasePage{
    * Method to check form and navigate.
    */
   async checkForm() {
-    if (!!this.validateForm()) {
+    if (!!this.enableButton) {
 
       let config = this.configConnection();
-      const checkRequest = await this.getEduroamServices.connectProfile(config);
+      const checkRequest = this.getEduroamServices.connectProfile(config);
 
-      if (!!checkRequest.success || !!checkRequest.message.includes('notLinked')) {
+      if (!!checkRequest) {
         this.navigateTo();
-      } else {
-        await this.errorHandler.handleError(
-          this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
-          this.dictionary.getTranslation('error', 'available2') +
-          this.global.getSsid() + '.', false, '', 'connection', true);
-        await this.navCtrl.setRoot(ConfigurationScreen, {}, {animation: 'transition'});
       }
     }
   }
@@ -124,9 +151,9 @@ export class ProfilePage extends BasePage{
     if (this.activeNavigation) {
       this.showAll = false;
 
-      !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+      !!this.providerInfo.providerLogo ? await this.navCtrl.push(WifiConfirmation, {
           logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-        await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+        await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
     } else {
       await this.alertConnectionDisabled();
     }
@@ -153,10 +180,14 @@ export class ProfilePage extends BasePage{
    * Method to validate form.
    * @return {boolean}
    */
-  validateForm(): boolean {
+  validateForm(): void {
     const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
-
-    return this.validEmail(this.provide.email) && this.provide.pass !== '' && validateTerms;
+    if (!!this.suffixIdentity) {
+      this.validEmail(this.provide.email);
+      this.enableButton = this.validMail && this.provide.pass !== '' && validateTerms;
+    } else {
+      this.enableButton = this.provide.email !== '' && this.provide.pass !== '' && validateTerms;
+    }
   }
 
   /**
@@ -164,7 +195,29 @@ export class ProfilePage extends BasePage{
    * @return {boolean}
    */
   validEmail(email: string) {
-    return this.validator.validateEmail(email, this.suffixIdentity);
+    if (!!this.suffixIdentity && email !== '') {
+      this.validMail = this.validator.validateEmail(email, this.suffixIdentity);
+    }
+  }
+
+  /**
+   * Check if the email include the suffix and it's correct
+   * @param email
+   */
+  checkSuffix(email: string) {
+    if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
+        email !== '' && !!this.hintIdentity && this.hintIdentity === true) {
+      this.validSuffix = email.includes('@' + this.suffixIdentity);
+    }else if (!!this.suffixIdentity && this.suffixIdentity !== '' &&
+        email !== '' && !this.hintIdentity) {
+      this.validSuffix = email.includes(this.suffixIdentity);
+    }
+  }
+
+  blur() {
+    //this.getEmail();
+    this.checkSuffix(this.provide.email);
+    this.validateForm();
   }
 
   /**
@@ -180,6 +233,10 @@ export class ProfilePage extends BasePage{
 
       if (!!this.validMethod.clientSideCredential.innerIdentitySuffix) {
         this.suffixIdentity = this.validMethod.clientSideCredential.innerIdentitySuffix;
+      }
+
+      if (!!this.validMethod.clientSideCredential.innerIdentityHint) {
+        this.hintIdentity = (this.validMethod.clientSideCredential.innerIdentityHint === 'true');
       }
 
     } else {

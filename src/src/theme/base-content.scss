@@ -33,14 +33,38 @@ ion-content {
     margin-top: 0;
     border-top: none;
 
+    .arrow-back-hidden {
+      visibility: hidden;
+    }
+
+    .arrow-back {
+      display: block;
+      text-align: left;
+      background-color: transparent !important;
+
+      .arrow-btn {
+        background-color: transparent;
+        padding: 5px;
+        height: 100%;
+        box-shadow: none;
+        margin: 10px 0 0 0;
+
+        span {
+          padding: 5px 0 0 15px;
+
+          img{
+            height: 50px;
+          }
+        }
+      }
+    }
+
     .container-content {
       background: #FFFFFF;
-      height: 95%;
+      height: calc(100% - 26%);
     }
 
     .header-content {
-
-      height: 22%;
 
       img {
         width: 57px;
@@ -183,5 +207,3 @@ ion-app, ion-alert div:last-child {
 .nav-decor {
   display: none !important;
 }
-
-

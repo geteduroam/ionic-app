@@ -1,5 +1,10 @@
+<div *ngIf="showAll" class="arrow-back" [ngClass]="!viewCtrl.enableBack() ? 'arrow-back-hidden' : ''"   >
+    <button ion-button class="arrow-btn"  (click)="viewCtrl.dismiss()" [ngClass]="!!hiddenIcon ? 'arrow-btn' : 'arrow-back-hidden'">
+        <img alt="back" src="../../assets/icon/flecha.svg" />
+    </button>
+</div>
 <div *ngIf="showAll" class="profile-content">
-    <div class="header-content" margin-top padding-top>
+    <div class="header-content">
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
         <h1>{{getString('header', 'profile')}}</h1>
     </div>
@@ -11,22 +16,21 @@
             <div  class="content-profile" padding-top >
                 <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
 
-                <input (focusout)="getEmail()" [(ngModel)]="provide.email" [ngClass]="provide.email !== '' && provide.email.length > 12 &&
-                       !validEmail(provide.email) && suffixIdentity !== '' && !provide.email.includes(suffixIdentity) ?
-                       'error-validation' : ''" [placeholder]="getPlaceholder()" autocomplete="on" class="input-profile" name="email"
-                       padding-left type="email"/>
+                <input (blur)="blur()" [(ngModel)]="provide.email"
+                       [ngClass]="!validSuffix && !validMail ? 'error-validation' : ''" [placeholder]="getPlaceholder()"
+                       autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
 
-                <p *ngIf="provide.email !== '' && provide.email.length > 12 && !validEmail(provide.email)" class="error-msg">
+                <p *ngIf="!validMail" class="error-msg">
                     {{getString('error', 'username')}} </p>
 
-                <p *ngIf="provide.email !== '' && provide.email.length > 12 && suffixIdentity !== ''
-                    && !provide.email.includes(suffixIdentity)" class="error-msg">
+                <p *ngIf="!validSuffix" class="error-msg">
                     {{getString('error', 'domain')}}{{suffixIdentity}} </p>
             </div>
 
             <div class="content-profile" margin-top>
                 <ion-label class="label-conf" text-left>{{getString('label', 'password')}}</ion-label>
-                <input [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
+                <input (blur)="validateForm()" (ngModelChange)="validateForm()" [(ngModel)]="provide.pass"
+                       [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
                        name="pass" padding-left type="password"/>
 
                 <p *ngIf="errorPass" class="error-msg">{{getString('error', 'password')}}</p>
@@ -35,7 +39,9 @@
             <!-- Terms of use -->
             <div *ngIf="termsOfUse" class="content-terms" ion-row>
                 <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
-                <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}<a class="terms" href="{{termsUrl}}">{{getString('label', 'terms')}}</a></ion-label>
+                <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}
+                    <a class="terms" href="{{termsUrl}}">{{getString('label', 'terms')}}</a>
+                </ion-label>
             </div>
         </form>
     </div>
@@ -43,7 +49,7 @@
     <div class="footer-form">
         <form (ngSubmit)="checkForm()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [ngClass]="!validateForm() ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
+                <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
             </div>
         </form>
     </div>

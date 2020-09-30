@@ -1,6 +1,6 @@
 import {Config, Events, Platform} from 'ionic-angular';
 import { Component } from '@angular/core';
-import { ReconfigurePage } from '../pages/welcome/reconfigure';
+
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
@@ -51,38 +51,12 @@ export class GeteduroamApp {
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
       // Listener to get status connection, apply when change status network
       await this.checkConnection();
-      // Plugin wifiEAPConfigurator associatedNetwork
-      await this.associatedNetwork();
+
       // Add listeners to app
       await this.addListeners();
     });
   }
-  /**
-   * This method check if network is associated and flow to initialize app
-   */
-  async associatedNetwork() {
 
-    if (this.platform.is('android')) {
-      this.enableWifi();
-    }
-
-    const isAssociated = await this.isAssociatedNetwork();
-
-    if (!!isAssociated.success) {
-      // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
-      this.rootPage = ConfigurationScreen;
-    } else{
-      if (!isAssociated.message.includes('alreadyAssociated')) {
-        this.rootPage = ConfigurationScreen;
-      } else {
-        this.rootPage = ReconfigurePage;
-        this.getAssociation(isAssociated);
-        this.global.setOverrideProfile(true);
-
-        !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
-      }
-    }
-  }
   /**
    * This method check if network is enabled and show a error message to user remove network already associated
    * manually
@@ -157,39 +131,12 @@ export class GeteduroamApp {
     }
   }
 
-  getAssociation(isAssociated) {
-    if (!!this.platform.is('android')) {
-      this.rootParams = !isAssociated.success && !!isAssociated.overridable ? {'reconfigure': true} : {'reconfigure': false};
-    } else {
-      this.rootParams = isAssociated.message.includes('noNetworksFound') ? {'reconfigure': false} : {'reconfigure': true} ;
-    }
-  }
   /**
    * This method shown an error message when network is disconnect
    */
   async notConnectionNetwork() {
-
-    this.rootPage = ReconfigurePage;
-
-    const isAssociated = await this.isAssociatedNetwork();
-    this.getAssociation(isAssociated);
-
-
-    if (!isAssociated.success && !isAssociated.overridable) {
-      this.removeAssociatedManually();
-
-    } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
         this.global.getSsid() + '.', false, '', 'enableAccess', true);
-    }
-  }
-
-  /**
-   *  This method call to the plugin and return if network if just associated
-   *
-   */
-  async isAssociatedNetwork() {
-    return await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
   }
 
   /**
@@ -197,6 +144,7 @@ export class GeteduroamApp {
    * and show Toast message
    */
   private async checkConnection() {
+    this.rootPage = ConfigurationScreen;
     let connectionStatus = await this.statusConnection();
 
     this.connectionEvent(connectionStatus);
@@ -204,7 +152,6 @@ export class GeteduroamApp {
     if (!connectionStatus.connected){
       this.notConnectionNetwork();
     }
-
   }
 
   /**

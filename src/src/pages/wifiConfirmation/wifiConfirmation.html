@@ -1,3 +1,8 @@
+<div *ngIf="viewCtrl.enableBack() && showAll" class="arrow-back">
+    <button ion-button class="arrow-btn" (click)="backToConfig()">
+        <img alt="back" src="../../assets/icon/flecha.svg" />
+    </button>
+</div>
 <div *ngIf="showAll" class="container-content">
     <div class="header-content" margin padding-top>
         <img #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
