@@ -3,5 +3,6 @@
       package="com.emergya.wifieapconfigurator.wifieapconfigurator">
 
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
   </manifest>
   
