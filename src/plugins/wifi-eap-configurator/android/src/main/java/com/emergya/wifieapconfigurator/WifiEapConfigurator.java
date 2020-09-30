@@ -418,26 +418,6 @@ public class WifiEapConfigurator extends Plugin {
         homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
         passpointConfig.setHomeSp(homeSp);
 
-
-        String BasicBase64format= java.util.Base64.getMimeEncoder().encodeToString(enterpriseConfig.getPassword().getBytes());
-
-        Credential.UserCredential userCredential = new Credential.UserCredential();
-        userCredential.setEapType(21);
-        userCredential.setPassword(BasicBase64format);
-        userCredential.setUsername(enterpriseConfig.getIdentity());
-        userCredential.setNonEapInnerMethod("MS-CHAP-V2");
-
-        Credential credential = new Credential();
-        credential.setRealm(enterpriseConfig.getDomainSuffixMatch());
-        credential.setUserCredential(userCredential);
-        credential.setCertCredential(null);
-        credential.setCaCertificate(enterpriseConfig.getCaCertificate());
-        credential.setClientPrivateKey(null);
-        credential.setClientCertificateChain(null);
-
-        passpointConfig.setCredential(credential);
-        passpointConfig.setHomeSp(homeSp);
-
         try{
             wifiManager.addOrUpdatePasspointConfiguration(passpointConfig);
             JSObject object = new JSObject();
@@ -445,8 +425,67 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
             call.success(object);
         }catch (IllegalArgumentException e){
-            this.connectWifiBySsid(wifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
-        }
+            //this.connectWifiBySsid(wifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
+            if (createSuggestion(wifiManager, null, enterpriseConfig, passpointConfig)) {
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
+                call.success(object);
+            } else {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.success.passpoint.notConfigured");
+                call.success(object);}
+            }
+    }
+
+    private boolean createSuggestion(WifiManager wifiManager, String, ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig){
+            boolean configured = false;
+            if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
+
+                ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
+                WifiNetworkSuggestion.Builder suggestionBuilder =  new WifiNetworkSuggestion.Builder();
+
+                if (ssid != null) {
+                    suggestionBuilder.setSsid(ssid);
+                }
+                suggestionBuilder.setWpa2EnterpriseConfig(enterpriseConfig);
+
+                if (passpointConfig != null) {
+                    suggestionBuilder.setPasspointConfig(passpointConfig);
+                }
+                final WifiNetworkSuggestion suggestion = suggestionBuilder.build();
+
+                // WifiNetworkSuggestion approach
+                suggestions.add(suggestion);
+                WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                wifiManager.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
+                int status = wifiManager.addNetworkSuggestions(suggestions);
+
+                if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+
+                    final IntentFilter intentFilter =
+                            new IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
+
+                    final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            if (!intent.getAction().equals(
+                                    WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
+                                return;
+                            }
+                        }
+                    };
+                    getContext().registerReceiver(broadcastReceiver, intentFilter);
+
+                    configured = true;
+                } else {
+                    Log.d("STATUS ERROR", "" + status);
+                    configured = false;
+                }
+            }
+            return configured;
+
     }
 
     private void connectWifiBySsid(WifiManager myWifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String displayName, String oid, String id) {
