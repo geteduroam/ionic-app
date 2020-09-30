@@ -1,6 +1,5 @@
 import {Config, Events, ModalController, Platform} from 'ionic-angular';
 import { Component } from '@angular/core';
-import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
@@ -66,23 +65,7 @@ export class GeteduroamApp {
    */
   async associatedNetwork() {
     if (!this.checkExtFile) {
-      const isAssociated = await this.isAssociatedNetwork();
-      if (!!this.platform.is('android') && !isAssociated.success ||
-        !!this.platform.is('ios') && !!isAssociated.success) {
-        if (!!isAssociated.overridable) {
-          this.rootPage = ReconfigurePage;
-          this.getAssociation(isAssociated);
-          this.global.setOverrideProfile(true);
-        } else {
-          this.versionAndroid = true;
-          this.removeAssociatedManually();
-        }
-        //this.rootPage = !!isAssociated.overridable ? ConfigurationScreen : ReconfigurePage;
-      } else{
-        this.rootPage = ConfigurationScreen;
-        // this.getAssociation(isAssociated);
-        // this.global.setOverrideProfile(true);
-      }
+      this.rootPage = ConfigurationScreen;
     }
   }
   async checkExternalOpen() {
@@ -167,28 +150,7 @@ export class GeteduroamApp {
       this.rootParams = isAssociated.message.includes('noNetworksFound') ? {'reconfigure': false} : {'reconfigure': true} ;
     }
   }
-  /**
-   * This method shown an error message when network is disconnect
-   */
-  async notConnectionNetwork() {
-    if (!this.checkExtFile) {
-      const isAssociated = await this.isAssociatedNetwork();
-      this.getAssociation(isAssociated);
-      if (!isAssociated.success && !isAssociated.overridable) {
-        this.removeAssociatedManually();
-      } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-            this.global.getSsid() + '.', false, '', 'enableAccess', true);
-      }
-    }
-  }
-  /**
-   *  This method call to the plugin and return if network if just associated
-   *
-   */
-  async isAssociatedNetwork() {
-    return await WifiEapConfigurator.isNetworkAssociated({'ssid': 'eduroam'});
-  }
+
   /**
    * This method check connection to initialized app
    * and show Toast message
@@ -198,17 +160,8 @@ export class GeteduroamApp {
     if (!this.checkExtFile) {
       this.connectionEvent(connectionStatus);
       if (!connectionStatus.connected) {
-        if (this.platform.is('android')) {
-          await this.enableWifi();
-          const connected = await this.statusConnection();
-          const info = await Device.getInfo();
-          if (!connected.connected && parseInt(info.osVersion) < 10) {
-            await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-                this.global.getSsid() + '.', false, '', 'enableAccess', true);
-          }
-        } else {
-          this.notConnectionNetwork();
-        }
+          await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
+            this.global.getSsid() + '.', false, '', 'enableAccess', true);
       }
     }
   }

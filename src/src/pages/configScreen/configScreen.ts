@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import {Events, ModalController, NavController, ViewController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
@@ -10,7 +10,7 @@ import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
-import {c} from "@angular/core/src/render3";
+
 const { Keyboard } = Plugins;
 
 @Component({
@@ -81,34 +81,45 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Constructor
    * */
-  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
+  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices, private ngZone: NgZone,
               protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
+
   }
 
   /**
    * Method executes when the search bar is tapped.
    * */
-  async showModal() {
+  async showModal(e: any) {
+    e.preventDefault();
     await Keyboard.hide();
+    if (!!this.instances) {
+     this.openModal();
+    } else {
+      await this.getDiscovery();
+      this.showModal(e);
+    }
+  }
+
+  openModal() {
     let searchModal = this.modalCtrl.create(InstitutionSearch, {
       instances: this.instances,
       instanceName: this.instanceName}
-      );
+    );
 
     searchModal.onDidDismiss((data) => {
 
-        if (data !== undefined) {
-          this.instance = data;
-          this.instanceName = data.name;
+      if (data !== undefined) {
+        this.instance = data;
+        this.instanceName = data.name;
 
-          this.initializeProfiles(this.instance);
+        this.initializeProfiles(this.instance);
 
-        }
-      });
+      }
+    });
 
-      return await searchModal.present();
+    return searchModal.present();
   }
 
   /**
@@ -208,14 +219,15 @@ export class ConfigurationScreen extends BasePage{
    *  Lifecycle when entering a page, before it becomes the active one
    *  Load the discovery data and show the spinner
    */
-  async ionViewWillEnter() {
-    const firstResponse = await this.getEduroamServices.discovery();
-    this.instances = await this.waitingSpinner(firstResponse);
+  async ionViewDidEnter() {
+    await this.getDiscovery();
     this.removeSpinner();
+    this.showAll = true;
   }
 
-  ionViewDidEnter() {
-    this.showAll = true;
+  async getDiscovery() {
+    const firstResponse = await this.getEduroamServices.discovery();
+    this.instances = await this.waitingSpinner(firstResponse);
   }
 
 }
