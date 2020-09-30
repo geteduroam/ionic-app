@@ -318,17 +318,25 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiManager myWifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        if (oid != null) {
-            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                removePasspoint(myWifiManager, id);
-            }*/
-            connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call);
-        }
-
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         if(ssid != null) {
-            connectWifiBySsid(myWifiManager, ssid, enterpriseConfig, call);
+            connectWifiBySsid(myWifiManager, ssid, enterpriseConfig, call, displayName, null, null);
         }
+
+        final PackageManager packageManager = getContext().getPackageManager();
+        FeatureInfo[] hard = packageManager.getSystemAvailableFeatures();
+
+        if (oid != null) {
+            if (packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI_PASSPOINT)) {
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    removePasspoint(myWifiManager, id);
+                }
+                connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call);
+            } else {
+                this.connectWifiBySsid(myWifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
+            }
+        }
+
         /*} else {
             PasspointConfiguration passpointConfig =  null;
             if (oid != null) {
@@ -368,35 +376,26 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     private void removePasspoint(WifiManager wifiManager, String id) {
-        /*List passpointsConfigurated = new ArrayList();
-        passpointsConfigurated = wifiManager.getPasspointConfigurations();
-        int pos = 0;
-        boolean enc = false;
-        while(passpointsConfigurated.size() > pos && !enc){
-            if((passpointsConfigurated.get(pos)).equals(id)){
-                enc = true;
-            }else{
-                pos++;
+        List passpointsConfigurated = new ArrayList();
+        try {
+            passpointsConfigurated = wifiManager.getPasspointConfigurations();
+            int pos = 0;
+            boolean enc = false;
+            while(passpointsConfigurated.size() > pos && !enc){
+                if((passpointsConfigurated.get(pos)).equals(id)){
+                    enc = true;
+                }else{
+                    pos++;
+                }
             }
-        }
-        if(enc){*/
-            try{
+            if(enc){
                 wifiManager.removePasspointConfiguration(id);
-            }catch (IllegalArgumentException e){}
-        //}
+            }
+        } catch (IllegalArgumentException e) {}
     }
 
     private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call){
         PasspointConfiguration passpointConfig = new PasspointConfiguration();
-
-        final PackageManager packageManager = getContext().getPackageManager();
-        FeatureInfo[] hard = packageManager.getSystemAvailableFeatures();
-
-        if(packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI_PASSPOINT)){
-            System.out.println("true");
-        }else{
-            System.out.println("false");
-        }
 
         HomeSp homeSp = new HomeSp();
         if (displayName != null) {
@@ -419,21 +418,25 @@ public class WifiEapConfigurator extends Plugin {
         homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
         passpointConfig.setHomeSp(homeSp);
 
-        /*Credential credential = new Credential();
-        credential.setRealm(enterpriseConfig.getRealm());
-        Credential.UserCredential userCredential = new Credential.UserCredential();
-        userCredential.setUsername(enterpriseConfig.getIdentity());
-        userCredential.setPassword(enterpriseConfig.getPassword());
-        userCredential.setEapType(21);
-        userCredential.setNonEapInnerMethod("MS-CHAP-V2");
-        credential.setUserCredential(userCredential);
-        Credential.CertificateCredential certCredential = new Credential.CertificateCredential();
-        certCredential.setCertType("X.509");
-        certCredential.setCertSha256Fingerprint(new byte[32]);
-        Arrays.fill(certCredential.getCertSha256Fingerprint(), (byte)0x1f);
-        credential.setCertCredential(certCredential);
 
-        passpointConfig.setCredential(credential);*/
+        String BasicBase64format= java.util.Base64.getMimeEncoder().encodeToString(enterpriseConfig.getPassword().getBytes());
+
+        Credential.UserCredential userCredential = new Credential.UserCredential();
+        userCredential.setEapType(21);
+        userCredential.setPassword(BasicBase64format);
+        userCredential.setUsername(enterpriseConfig.getIdentity());
+        userCredential.setNonEapInnerMethod("MS-CHAP-V2");
+
+        Credential credential = new Credential();
+        credential.setRealm(enterpriseConfig.getDomainSuffixMatch());
+        credential.setUserCredential(userCredential);
+        credential.setCertCredential(null);
+        credential.setCaCertificate(enterpriseConfig.getCaCertificate());
+        credential.setClientPrivateKey(null);
+        credential.setClientCertificateChain(null);
+
+        passpointConfig.setCredential(credential);
+        passpointConfig.setHomeSp(homeSp);
 
         try{
             wifiManager.addOrUpdatePasspointConfiguration(passpointConfig);
@@ -442,16 +445,11 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
             call.success(object);
         }catch (IllegalArgumentException e){
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
-            call.success(object);
-            e.printStackTrace();
-            Log.e("error", String.valueOf(e.getCause()));
+            this.connectWifiBySsid(wifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
         }
     }
 
-    private void connectWifiBySsid(WifiManager myWifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call) {
+    private void connectWifiBySsid(WifiManager myWifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String displayName, String oid, String id) {
         WifiConfiguration config = new WifiConfiguration();
         config.SSID = "\"" + ssid + "\"";
         config.priority = 1;
@@ -460,7 +458,25 @@ public class WifiEapConfigurator extends Plugin {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
         config.enterpriseConfig = enterpriseConfig;
 
-        // WifiManager myWifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if(oid != null){
+            String[] consortiumOIDs = oid.split(";");
+            long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
+            int index = 0;
+            for(String roamingConsortiumOIDString : consortiumOIDs) {
+                if ( !roamingConsortiumOIDString.startsWith("0x")) {
+                    roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
+                }
+                roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
+                index++;
+            }
+            config.roamingConsortiumIds = roamingConsortiumOIDs;
+            if (displayName != null) {
+                config.providerFriendlyName = displayName;
+            } else {
+                config.providerFriendlyName = "geteduroam configured HS20";
+            }
+            config.FQDN = id;
+        }
 
         try {
             int wifiIndex = myWifiManager.addNetwork(config);
