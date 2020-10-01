@@ -1,6 +1,7 @@
 import {IEEE80211} from "./iEEE80211";
 import {BaseJson} from "./baseJson";
 import {isArray, isObject} from "ionic-angular/util/util";
+import {GlobalProvider} from "../../providers/global/global";
 
 
 export class CredentialApplicability extends BaseJson{
@@ -9,7 +10,7 @@ export class CredentialApplicability extends BaseJson{
    */
   iEEE80211 : IEEE80211[];
 
-  constructor() {
+  constructor(private global: GlobalProvider) {
     super();
   }
 
@@ -33,6 +34,7 @@ export class CredentialApplicability extends BaseJson{
     console.log(propertyValue);
     try {
       this.iEEE80211 = propertyValue['IEEE80211'];
+      this.global.setSsid(this.iEEE80211[0]['SSID'][0])
     } catch (e) {
       returnValue = false;
     }

@@ -1,5 +1,5 @@
 import {Config, Events, Platform} from 'ionic-angular';
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
@@ -12,6 +12,8 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
+import {ConfigFilePage} from "../pages/configFile/configFile";
+import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
 
 const { Toast, Network, App } = Plugins;
 declare var Capacitor;
@@ -27,11 +29,14 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
  *
  **/
 export class GeteduroamApp {
+
   rootPage;
 
   rootParams = {};
 
   profile: ProfileModel;
+
+  protected checkExtFile: boolean = false;
   /**
    * @constructor
    *
@@ -39,7 +44,7 @@ export class GeteduroamApp {
   constructor(private platform: Platform, private config: Config,
               private screenOrientation: ScreenOrientation, public errorHandler: ErrorHandlerProvider,
               private networkInterface: NetworkInterface, private global: GlobalProvider, private dictionary: DictionaryServiceProvider,
-              public event: Events) {
+              public event: Events, private getEduroamServices: GeteduroamServices) {
 
     this.platform.ready().then(async () => {
       // Transition provider, to navigate between pages
@@ -49,6 +54,8 @@ export class GeteduroamApp {
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
+      // Listener to get external file
+      await this.checkExternalOpen();
       // Listener to get status connection, apply when change status network
       await this.checkConnection();
       // Plugin wifiEAPConfigurator associatedNetwork
@@ -65,23 +72,31 @@ export class GeteduroamApp {
     if (this.platform.is('android')) {
       this.enableWifi();
     }
+    if (!this.checkExtFile) {
+      const isAssociated = await this.isAssociatedNetwork();
 
-    const isAssociated = await this.isAssociatedNetwork();
-
-    if (!!isAssociated.success) {
-      // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
-      this.rootPage = ConfigurationScreen;
-    } else{
-      if (!isAssociated.message.includes('alreadyAssociated')) {
+      if (!!isAssociated.success) {
+        // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
         this.rootPage = ConfigurationScreen;
-      } else {
-        this.rootPage = ReconfigurePage;
-        this.getAssociation(isAssociated);
-        this.global.setOverrideProfile(true);
+      } else{
+        if (!isAssociated.message.includes('alreadyAssociated')) {
+          this.rootPage = ConfigurationScreen;
+        } else {
+          this.rootPage = ReconfigurePage;
+          this.getAssociation(isAssociated);
+          this.global.setOverrideProfile(true);
 
-        !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+          !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
+        }
       }
     }
+  }
+  async checkExternalOpen() {
+    // Listening to open app when open from a file
+    App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
+      this.global.setExternalOpen();
+      this.navigate(urlOpen.url);
+    });
   }
   /**
    * This method check if network is enabled and show a error message to user remove network already associated
@@ -108,36 +123,20 @@ export class GeteduroamApp {
   }
 
   /**
-   * This method throw the app when is opened from a file
-   */
-  async handleOpenUrl(uri: string | any) {
-    this.profile = new ProfileModel();
-    this.profile.eapconfig_endpoint = !!uri.url ? uri.url : uri;
-    this.profile.oauth = false;
-    this.profile.id = "FileEap";
-    this.profile.name = "FileEap";
-    this.global.setProfile(this.profile);
-  }
-
-  /**
    * This method add listeners needed to app
    */
   addListeners() {
     // Listening to changes in network states, it show toast message when status changed
     Network.addListener('networkStatusChange', async () => {
       let connectionStatus: NetworkStatus = await this.statusConnection();
+      if (!this.checkExtFile) {
+        this.connectionEvent(connectionStatus);
 
-      this.connectionEvent(connectionStatus);
-
-      !connectionStatus.connected ?
+        !connectionStatus.connected ?
           this.alertConnection(this.dictionary.getTranslation('error', 'turn-on') +
             this.global.getSsid() + '.') :
           this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
-    });
-
-    // Listening to open app when open from a file
-    App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
-      this.navigate(urlOpen.url);
+      }
     });
 
     App.addListener('backButton', () => {
@@ -150,10 +149,18 @@ export class GeteduroamApp {
    * This method open ProfilePage when the app is initialize from an eap-config file
    * @param uri
    */
-  async navigate(uri: string) {
-    if (!!uri.includes('.eap-config') || !!uri.includes('file')) {
-      await this.handleOpenUrl(uri);
-      this.rootPage = ProfilePage;
+  async navigate(uri: string | any) {
+    if (!!uri.includes('.eap-config') || !!uri.includes('file') || !!uri.includes('document') || !!uri.includes('octet-stream')) {
+      this.checkExtFile = this.global.getExternalOpen();
+      this.profile = new ProfileModel();
+      this.profile.eapconfig_endpoint = !!uri.url ? uri.url : uri;
+      this.global.setProfile(this.profile);
+      const method = await this.getEduroamServices.eapValidation(this.profile);
+      if (method) {
+        this.profile.oauth = Number(this.global.getAuthenticationMethod().eapMethod.type) === 13;
+      }
+      //this.global.setSsid(this.global.getCredentialApplicability().iEEE80211[0].ssid[0])
+      this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
     }
   }
 
@@ -168,19 +175,20 @@ export class GeteduroamApp {
    * This method shown an error message when network is disconnect
    */
   async notConnectionNetwork() {
+    if (!this.checkExtFile) {
+      this.rootPage = ReconfigurePage;
 
-    this.rootPage = ReconfigurePage;
-
-    const isAssociated = await this.isAssociatedNetwork();
-    this.getAssociation(isAssociated);
+      const isAssociated = await this.isAssociatedNetwork();
+      this.getAssociation(isAssociated);
 
 
-    if (!isAssociated.success && !isAssociated.overridable) {
-      this.removeAssociatedManually();
+      if (!isAssociated.success && !isAssociated.overridable) {
+        this.removeAssociatedManually();
 
-    } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false, '', 'enableAccess', true);
+      } else {
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
+          this.global.getSsid() + '.', false, '', 'enableAccess', true);
+      }
     }
   }
 
@@ -189,7 +197,7 @@ export class GeteduroamApp {
    *
    */
   async isAssociatedNetwork() {
-    return await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+    return await WifiEapConfigurator.isNetworkAssociated({'ssid': 'eduroam'});
   }
 
   /**
@@ -198,13 +206,13 @@ export class GeteduroamApp {
    */
   private async checkConnection() {
     let connectionStatus = await this.statusConnection();
+    if (!this.checkExtFile) {
+      this.connectionEvent(connectionStatus);
 
-    this.connectionEvent(connectionStatus);
-
-    if (!connectionStatus.connected){
-      this.notConnectionNetwork();
+      if (!connectionStatus.connected){
+        this.notConnectionNetwork();
+      }
     }
-
   }
 
   /**
