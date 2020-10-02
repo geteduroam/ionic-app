@@ -1,23 +1,11 @@
 package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.app.UiAutomation;
-import android.content.BroadcastReceiver;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
-import android.net.NetworkSpecifier;
-import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.hotspot2.ConfigParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -30,38 +18,38 @@ import android.net.wifi.WifiManager;
 //import android.net.wifi.WifiNetworkSuggestion;
 //import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
-import android.os.Bundle;
-import android.provider.Settings;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
-import com.getcapacitor.PluginResult;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -69,12 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
-import static androidx.core.content.ContextCompat.startActivity;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
-import static java.lang.System.in;
 
 @NativePlugin(
         permissions={
@@ -274,6 +257,9 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
+        X509Certificate cert = null;
+        PrivateKey key = null;
+
         if ((clientCertificate == null || clientCertificate.equals("")) && (passPhrase == null || passPhrase.equals(""))) {
             enterpriseConfig.setIdentity(username);
             enterpriseConfig.setPassword(password);
@@ -296,8 +282,8 @@ public class WifiEapConfigurator extends Plugin {
 
                 while (aliases.hasMoreElements()) {
                     String alias = aliases.nextElement();
-                    X509Certificate cert = (X509Certificate) pkcs12ks.getCertificate(alias);
-                    PrivateKey key = (PrivateKey) pkcs12ks.getKey(alias, passPhrase.toCharArray());
+                    cert = (X509Certificate) pkcs12ks.getCertificate(alias);
+                    key = (PrivateKey) pkcs12ks.getKey(alias, passPhrase.toCharArray());
                     enterpriseConfig.setClientKeyEntry(key, cert);
                 }
 
@@ -321,7 +307,11 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiManager myWifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
 
-        this.testPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call);
+        /*try {
+            this.testPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, key, cert);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }*/
 
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         if(ssid != null) {
@@ -337,8 +327,6 @@ public class WifiEapConfigurator extends Plugin {
                     removePasspoint(myWifiManager, id);
                 }
                 connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call);
-            } else {
-                this.connectWifiBySsid(myWifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
             }
         }
 
@@ -399,41 +387,64 @@ public class WifiEapConfigurator extends Plugin {
         } catch (IllegalArgumentException e) {}
     }
 
-    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call){
-        PasspointConfiguration passpointConfig = new PasspointConfiguration();
+    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call) {
+        PasspointConfiguration config = new PasspointConfiguration();
+
+        /*
+         * THIS CONFIGURATION BY USERCREDENTIAL FAIL WHEN TRY CONFIGURE PASSPOINT
+         * */
 
         HomeSp homeSp = new HomeSp();
+        homeSp.setFqdn(id);
+
+        byte[] data = new byte[0];
+        try {
+            data = enterpriseConfig.getPassword().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+
         if (displayName != null) {
             homeSp.setFriendlyName(displayName);
         } else {
-            homeSp.setFriendlyName("geteduroam configured HS20");
+            homeSp.setFriendlyName("geteduroam HS20");
         }
-        homeSp.setFqdn(id);
-        // oid can be a list with commas.
         String[] consortiumOIDs = oid.split(";");
         long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
         int index = 0;
-        for(String roamingConsortiumOIDString : consortiumOIDs) {
-            if ( !roamingConsortiumOIDString.startsWith("0x")) {
+        for (String roamingConsortiumOIDString : consortiumOIDs) {
+            if (!roamingConsortiumOIDString.startsWith("0x")) {
                 roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
             }
             roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
             index++;
         }
         homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
-        passpointConfig.setHomeSp(homeSp);
-
-        Credential.SimCredential simCred = new Credential.SimCredential();
-
+        config.setHomeSp(homeSp);
+        Credential cred = new Credential();
+        cred.setRealm(id);
+        Credential.UserCredential us = new Credential.UserCredential();
+        us.setUsername(enterpriseConfig.getIdentity());
+        us.setPassword(base64);
+        us.setEapType(this.getEapType(enterpriseConfig.getEapMethod(), call));
+        us.setNonEapInnerMethod(this.getAuthType(enterpriseConfig.getPhase2Method(), call));
+        cred.setUserCredential(us);
+        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
+        config.setCredential(cred);
 
         try{
-            wifiManager.addOrUpdatePasspointConfiguration(passpointConfig);
+            wifiManager.addOrUpdatePasspointConfiguration(config);
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-            call.success(object);
         } catch (IllegalArgumentException e){
-            this.connectWifiBySsid(wifiManager, "#Passpoint", enterpriseConfig, call, displayName, oid, id);
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
+            call.success(object);
+            e.printStackTrace();
+            Log.e("PasspointConfiguration", e.getMessage());
         }
     }
 
@@ -496,7 +507,7 @@ public class WifiEapConfigurator extends Plugin {
         config.enterpriseConfig = enterpriseConfig;
 
         if(oid != null){
-            /*String[] consortiumOIDs = oid.split(";");
+            String[] consortiumOIDs = oid.split(";");
             long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
             int index = 0;
             for(String roamingConsortiumOIDString : consortiumOIDs) {
@@ -506,7 +517,7 @@ public class WifiEapConfigurator extends Plugin {
                 roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
                 index++;
             }
-            config.roamingConsortiumIds = roamingConsortiumOIDs;*/
+            config.roamingConsortiumIds = roamingConsortiumOIDs;
             if (displayName != null) {
                 config.providerFriendlyName = displayName;
             } else {
@@ -937,16 +948,46 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-    public void testPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call) {
-        // TelephonyManager telephonyManager = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
-        // String imsi = telephonyManager.getSubscriberId();
+    private String getAuthType(Integer auth, PluginCall call) {
+        String res = null;
+        switch (auth) {
+            case 2:
+                res = "AUTH_METHOD_MSCHAP";
+                break;
+            case 3:
+                res = "MS-CHAP-V2";
+                break;
+            case 1:
+                res = "AUTH_METHOD_PAP";
+                break;
+            default:
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.auth.invalid");
+                call.success(object);
+                res = "0";
+                break;
+        }
+        return res;
+    }
+
+    public void testPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PrivateKey key, X509Certificate cert) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         PasspointConfiguration config = new PasspointConfiguration();
+
+        /*
+        * THIS CONFIGURATION BY USERCREDENTIAL FAIL WHEN TRY CONFIGURE PASSPOINT
+        * */
+
         HomeSp homeSp = new HomeSp();
         homeSp.setFqdn(id);
+
+        byte[] data = enterpriseConfig.getPassword().getBytes("UTF-8");
+        String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+
         if (displayName != null) {
             homeSp.setFriendlyName(displayName);
         } else {
-            homeSp.setFriendlyName("geteduroam configured HS20");
+            homeSp.setFriendlyName("geteduroam HS20");
         }
         String[] consortiumOIDs = oid.split(";");
         long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
@@ -960,29 +1001,108 @@ public class WifiEapConfigurator extends Plugin {
         }
         homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
         config.setHomeSp(homeSp);
-        Credential.SimCredential simCred = new Credential.SimCredential();
-        simCred.setImsi("123456*");
-        simCred.setEapType(21);
         Credential cred = new Credential();
-        cred.setRealm("realm");
-        cred.setSimCredential(simCred);
+        cred.setRealm(id);
+        Credential.UserCredential us = new Credential.UserCredential();
+        us.setUsername(enterpriseConfig.getIdentity());
+        us.setPassword(base64);
+        us.setEapType(this.getEapType(enterpriseConfig.getEapMethod(), call));
+        us.setNonEapInnerMethod(this.getAuthType(enterpriseConfig.getPhase2Method(), call));
+        cred.setUserCredential(us);
+        /*cred.setClientPrivateKey(key);
+        X509Certificate[] certificatesArray = new X509Certificate[1];
+        certificatesArray[0] = cert;
+        cred.setClientCertificateChain(certificatesArray);
+        X509Certificate[] x509Certificates = enterpriseConfig.getCaCertificates();
+        try {
+            KeyStore ks = KeyStore.getInstance("BKS");
+            char[] password = "some password".toCharArray();
+            ks.load(null, password);
+            String alias = String.format("%s%s_%d", "HS2_", 0, 0);
+            ks.setCertificateEntry(alias, x509Certificates[0]);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
         config.setCredential(cred);
 
+        /*X509Certificate x509Certificates = config.getCredential().getCaCertificate();
+        try {
+            verifyCaCert(x509Certificates);
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+
+
+        /*
+        * THIS CONFIGURATION BY SIMCREDENTIAL, CONFIURE THE PASSPOINT SUCCESFULLY
+        * */
+
+        /*HomeSp homeSp = new HomeSp();
+        homeSp.setFqdn(id);
+        if (displayName != null) {
+            homeSp.setFriendlyName(displayName);
+        } else {
+            homeSp.setFriendlyName("geteduroam HS20");
+        }
+        String[] consortiumOIDs = oid.split(";");
+        long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
+        int index = 0;
+        for(String roamingConsortiumOIDString : consortiumOIDs) {
+            if ( !roamingConsortiumOIDString.startsWith("0x")) {
+                roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
+            }
+            roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
+            index++;
+        }
+        homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
+        config.setHomeSp(homeSp);
+        Credential cred = new Credential();
+        cred.setRealm(id);
+        Credential.SimCredential simCred = new Credential.SimCredential();
+        simCred.setImsi("123456*");
+        simCred.setEapType(23);
+        cred.setSimCredential(simCred);
+        config.setCredential(cred);*/
+
         // Create and install a Passpoint configuration
-        PasspointConfiguration passpointConfiguration = config;
+        //PasspointConfiguration passpointConfiguration = config;
         try{
-            wifiManager.addOrUpdatePasspointConfiguration(passpointConfiguration);
+            wifiManager.addOrUpdatePasspointConfiguration(config);
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
         } catch (IllegalArgumentException e){
             JSObject object = new JSObject();
             object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
             call.success(object);
             e.printStackTrace();
-            Log.e("error", e.getMessage());
+            Log.e("PasspointConfiguration", e.getMessage());
         }
+    }
+
+    private void verifyCaCert(X509Certificate caCert)
+            throws GeneralSecurityException, IOException {
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        CertPathValidator validator =
+                CertPathValidator.getInstance(CertPathValidator.getDefaultType());
+        CertPath path = factory.generateCertPath(Arrays.asList(caCert));
+        KeyStore ks = KeyStore.getInstance("AndroidCAStore");
+        ks.load(null, null);
+        PKIXParameters params = new PKIXParameters(ks);
+        params.setRevocationEnabled(false);
+        validator.validate(path, params);
     }
 
 }
