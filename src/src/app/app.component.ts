@@ -1,6 +1,5 @@
 import {Config, Events, ModalController, Platform} from 'ionic-angular';
 import { Component } from '@angular/core';
-import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
@@ -66,23 +65,9 @@ export class GeteduroamApp {
    */
   async associatedNetwork() {
     if (!this.checkExtFile) {
-      const isAssociated = await this.isAssociatedNetwork();
-      if (!!this.platform.is('android') && !isAssociated.success ||
-        !!this.platform.is('ios') && !!isAssociated.success) {
-        if (!!isAssociated.overridable) {
-          this.rootPage = ReconfigurePage;
-          this.getAssociation(isAssociated);
-          this.global.setOverrideProfile(true);
-        } else {
-          this.versionAndroid = true;
-          this.removeAssociatedManually();
-        }
-        //this.rootPage = !!isAssociated.overridable ? ConfigurationScreen : ReconfigurePage;
-      } else{
-        this.rootPage = ConfigurationScreen;
-        // this.getAssociation(isAssociated);
-        // this.global.setOverrideProfile(true);
-      }
+      this.rootPage = ConfigurationScreen;
+      const list = this.getEduroamServices.discovery();
+      this.global.setDiscovery(list);
     }
   }
   async checkExternalOpen() {
@@ -101,8 +86,8 @@ export class GeteduroamApp {
     if (!!this.versionAndroid) {
       let errorModal = this.modalCtrl.create(ErrorsPage, {
         error: this.dictionary.getTranslation('error', 'available1') +
-            this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
-            this.global.getSsid() + '.', isFinal: false, link: '', method: 'removeConnection'
+          this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
+          this.global.getSsid() + '.', isFinal: false, link: '', method: 'removeConnection'
       });
       errorModal.onDidDismiss(() => {
         this.rootPage = ConfigurationScreen;
@@ -110,15 +95,15 @@ export class GeteduroamApp {
       await errorModal.present();
     } else if (connect.connected) {
       await this.errorHandler.handleError(
-          this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
-          this.dictionary.getTranslation('error', 'available2') +
-          this.global.getSsid() + '.', false, '', 'removeConnection', true);
+        this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
+        this.dictionary.getTranslation('error', 'available2') +
+        this.global.getSsid() + '.', false, '', 'removeConnection', true);
     } else {
-        await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'available1') +
-            this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
-            this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
-            this.global.getSsid() + '.', false, '', 'enableAccess', false);
+      await this.errorHandler.handleError(
+        this.dictionary.getTranslation('error', 'available1') +
+        this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
+        this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
+        this.global.getSsid() + '.', false, '', 'enableAccess', false);
     }
   }
   /**
@@ -132,9 +117,9 @@ export class GeteduroamApp {
       if (!this.checkExtFile) {
         this.connectionEvent(connectionStatus);
         !connectionStatus.connected ?
-            this.alertConnection(this.dictionary.getTranslation('error', 'turn-on') +
-                this.global.getSsid() + '.') :
-            this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
+          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on') +
+            this.global.getSsid() + '.') :
+          this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
       }
     });
 
@@ -167,28 +152,7 @@ export class GeteduroamApp {
       this.rootParams = isAssociated.message.includes('noNetworksFound') ? {'reconfigure': false} : {'reconfigure': true} ;
     }
   }
-  /**
-   * This method shown an error message when network is disconnect
-   */
-  async notConnectionNetwork() {
-    if (!this.checkExtFile) {
-      const isAssociated = await this.isAssociatedNetwork();
-      this.getAssociation(isAssociated);
-      if (!isAssociated.success && !isAssociated.overridable) {
-        this.removeAssociatedManually();
-      } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-            this.global.getSsid() + '.', false, '', 'enableAccess', true);
-      }
-    }
-  }
-  /**
-   *  This method call to the plugin and return if network if just associated
-   *
-   */
-  async isAssociatedNetwork() {
-    return await WifiEapConfigurator.isNetworkAssociated({'ssid': 'eduroam'});
-  }
+
   /**
    * This method check connection to initialized app
    * and show Toast message
@@ -198,17 +162,8 @@ export class GeteduroamApp {
     if (!this.checkExtFile) {
       this.connectionEvent(connectionStatus);
       if (!connectionStatus.connected) {
-        if (this.platform.is('android')) {
-          await this.enableWifi();
-          const connected = await this.statusConnection();
-          const info = await Device.getInfo();
-          if (!connected.connected && parseInt(info.osVersion) < 10) {
-            await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-                this.global.getSsid() + '.', false, '', 'enableAccess', true);
-          }
-        } else {
-          this.notConnectionNetwork();
-        }
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
+          this.global.getSsid() + '.', false, '', 'enableAccess', true);
       }
     }
   }
@@ -225,7 +180,7 @@ export class GeteduroamApp {
    */
   protected connectionEvent(connectionStatus: NetworkStatus) {
     connectionStatus.connected ? this.event.publish('connection', 'connected') :
-        this.event.publish('connection', 'disconnected');
+      this.event.publish('connection', 'disconnected');
   };
   /**
    * This method check status of connection

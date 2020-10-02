@@ -31,9 +31,12 @@ export class GlobalProvider {
 
   private clientId : string = 'f817fbcc-e8f4-459e-af75-0822d86ff47a';
 
+
   private overrideProfile: boolean = false;
 
   private externalOpen: boolean = false;
+
+  discovery: any;
 
   constructor(public platform: Platform) {}
 
@@ -127,5 +130,13 @@ export class GlobalProvider {
 
   getExternalOpen() {
     return this.externalOpen;
+  }
+
+  getDiscovery() {
+    return this.discovery;
+  }
+
+  setDiscovery(list: any) {
+    this.discovery = list;
   }
 }
