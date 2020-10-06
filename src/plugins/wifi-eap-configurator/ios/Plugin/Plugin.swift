@@ -3,8 +3,8 @@ import Capacitor
 import NetworkExtension
 import SystemConfiguration.CaptiveNetwork
 import UIKit
+import CoreLocation
 
-@available(iOS 13.0, *)
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
     
@@ -51,12 +51,13 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func configureAP(_ call: CAPPluginCall) {
+        let networkInfo = SSID.fetchNetworkInfo()
         var ssid = call.getString("ssid")
             if call.getString("oid") != nil && call.getString("oid") != "" {
                 ssid = ""
                 // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
             } else {
-                if ssid == nil || ssid == "" {
+                if networkInfo?.first?.ssid == "" {
                     return call.success([
                         "message": "plugin.wifieapconfigurator.error.ssid.missing",
                         "success": false,
@@ -233,7 +234,7 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
         config.joinOnce = false
-       
+        let infoNetwork = SSID.fetchNetworkInfo()
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 if error.code == 13 {
@@ -251,7 +252,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 }
             } else {
                 if ssid != nil && ssid != "" {
-                    if self.currentSSIDs().first == ssid {
+                    if infoNetwork?.first?.ssid == ssid {
                         call.success([
                             "message": "plugin.wifieapconfigurator.success.network.linked",
                             "success": true,
@@ -504,7 +505,8 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func isConnectedSSID(_ call: CAPPluginCall) {
-        guard call.getString("ssid") != nil else {
+        let infoNetwork = SSID.fetchNetworkInfo()
+        guard infoNetwork?.first?.ssid != "" else {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.ssid.missing",
                 "success": false,
@@ -517,15 +519,17 @@ public class WifiEapConfigurator: CAPPlugin {
                 "isConnected": false
             ])
         }
+        
         for i in 0...interfaceNames.count {
-            guard let info = CNCopyCurrentNetworkInfo(interfaceNames[i] as CFString) as? [String: AnyObject] else {
+            let test = interfaceNames[i] as String;
+            guard (test == infoNetwork?.first?.ssid)  else {
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.network.notConnected",
                     "success": false,
                     "isConnected": false
                 ])
             }
-            guard (info[kCNNetworkInfoKeySSID as String] as? String) != nil else {
+            guard (test != infoNetwork?.first?.ssid) else {
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.network.notConnected",
                     "success": false,
@@ -537,20 +541,6 @@ public class WifiEapConfigurator: CAPPlugin {
                 "success": true,
                 "isConnected": true
             ])
-        }
-    }
-    func currentSSIDs() -> [String] {
-        guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
-            return []
-        }
-        return interfaceNames.compactMap { name in
-            guard let info = CNCopyCurrentNetworkInfo(name as CFString) as? [String:AnyObject] else {
-                return nil
-            }
-            guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
-                return nil
-            }
-            return ssid
         }
     }
 }
@@ -569,4 +559,84 @@ extension String {
         guard let data = Data(base64Encoded: self) else { return nil }
         return String(data: data, encoding: .utf8)
     }
+}
+
+class ViewController: UIViewController, CLLocationManagerDelegate {
+    
+    var locationManager = CLLocationManager()
+    var currentNetworkInfos: Array<NetworkInfo>? {
+        get {
+            return SSID.fetchNetworkInfo()
+        }
+    }
+    @IBOutlet weak var ssidLabel: UILabel!
+    @IBOutlet weak var bssidLabel: UILabel!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        if #available(iOS 13.0, *) {
+            let status = CLLocationManager.authorizationStatus()
+            if status == .authorizedWhenInUse {
+                updateWiFi()
+            } else {
+                locationManager.delegate = self
+                locationManager.requestWhenInUseAuthorization()
+            }
+        } else {
+            updateWiFi()
+        }
+    }
+    func getSSID() -> String {
+        return String(currentNetworkInfos?.first?.ssid ?? "")
+    }
+    
+    func getBSSID() -> String {
+        return String(currentNetworkInfos?.first?.bssid ?? "")
+    }
+    
+    func updateWiFi() -> NetworkInfo? {
+
+        // ssidLabel.text = currentNetworkInfos?.first?.ssid
+        // bssidLabel.text = currentNetworkInfos?.first?.bssid
+        return currentNetworkInfos?.first
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedWhenInUse {
+            updateWiFi()
+        }
+    }
+    
+}
+
+public class SSID {
+    class func fetchNetworkInfo() -> [NetworkInfo]? {
+        if let interfaces: NSArray = CNCopySupportedInterfaces() {
+            var networkInfos = [NetworkInfo]()
+            for interface in interfaces {
+                let interfaceName = interface as! String
+                var networkInfo = NetworkInfo(interface: interfaceName,
+                                              success: false,
+                                              ssid: nil,
+                                              bssid: nil)
+                if let dict = CNCopyCurrentNetworkInfo(interfaceName as CFString) as NSDictionary? {
+                    networkInfo.success = true
+                    networkInfo.ssid = dict[kCNNetworkInfoKeySSID as String] as? String
+                    networkInfo.bssid = dict[kCNNetworkInfoKeyBSSID as String] as? String
+                }
+                networkInfos.append(networkInfo)
+            }
+            return networkInfos
+        }
+        return nil
+    }
+}
+
+
+struct NetworkInfo {
+    var interface: String
+    var success: Bool = false
+    var ssid: String?
+    var bssid: String?
 }
