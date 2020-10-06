@@ -74,10 +74,10 @@ There are 2 options to build the app in Android: one automatic and another manua
 To create the iOS binary, there is only a way (manual) because it couldn't be dockerized.
  * **Binary creation**
     * Requirements
-      * Java
-      * Node.js
-      * ionic
-      * capacitor
+      * XCode (App Store, or beta if on beta MacOS)
+      * Commandline tools from XCode (`sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer`)
+      * Node.js (LTS from https://nodejs.org/en/)
+      * CocoaPods (`sudo gem install cocoapods`)
     * Navigate to __src__ folder
       * Install Dependencies and build (nodeJS dependencies)
       ```
@@ -89,11 +89,11 @@ To create the iOS binary, there is only a way (manual) because it couldn't be do
       * CocoaPods
     * Building the capacitor app:
          ```
-         npx cap add ios -> Creates ios folder (if the ios folder doesn't exist under the src one)
+         npx cap add ios -> Only if ios folder doesn't exist yet, creates it
          npx cap sync ios -> Synchronyzes ios folder
          npx cap open ios -> Opens xCode
          ```
-    * Installing CocoaPods: Go to the folder src/ios/App, throw the command:
+    * Installing dependencies with CocoaPods: Go to the folder src/ios/App, throw the command:
          ```
          pod install -> Installs dependencies with CocoaPods.
          ```
