@@ -127,13 +127,13 @@ export class GeteduroamServices {
       for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oid'].length; i++) {
         if(!!resultantProfiles['ssid'][i][0] && !!resultantProfiles['oid'][i][0]){
           config['ssid'] = resultantProfiles['ssid'][i][0];
-          config['oid'] = resultantProfiles['oid'][i][0];
+          config['oid'] = resultantProfiles['oidConcat'];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
         }else if(!!resultantProfiles['ssid'][i][0] && !resultantProfiles['oid'][i][0]){
           config['ssid'] = resultantProfiles['ssid'][i][0];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
         }else {
-          config['oid'] = resultantProfiles['oid'][i][0];
+          config['oid'] = resultantProfiles['oidConcat'];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
         }
       }

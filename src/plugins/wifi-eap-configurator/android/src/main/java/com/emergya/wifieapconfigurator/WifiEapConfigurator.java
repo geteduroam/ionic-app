@@ -2,7 +2,9 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -20,7 +22,9 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
 
@@ -31,6 +35,7 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,8 +43,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -47,10 +54,13 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -60,25 +70,25 @@ import java.util.ArrayList;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 @NativePlugin(
-        permissions={
+        permissions = {
                 Manifest.permission.ACCESS_WIFI_STATE,
                 Manifest.permission.CHANGE_WIFI_STATE,
                 Manifest.permission.ACCESS_FINE_LOCATION
         })
 public class WifiEapConfigurator extends Plugin {
-    
+
     List<ScanResult> results = null;
 
     @PluginMethod()
     public void configureAP(PluginCall call) {
         String ssid = null;
         boolean res = true;
-        
+
         String oid = null;
         if (call.getString("oid") != null && !call.getString("oid").equals("")) {
             oid = call.getString("oid");
         }
-        
+
         if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
             ssid = call.getString("ssid");
 
@@ -133,7 +143,7 @@ public class WifiEapConfigurator extends Plugin {
         String username = null;
         String password = null;
         Integer auth = null;
-       
+
         String id = null;
         if (call.getString("id") != null && !call.getString("id").equals("")) {
             id = call.getString("id");
@@ -307,15 +317,9 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiManager myWifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
 
-        /*try {
-            this.testPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, key, cert);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
-
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        if(ssid != null) {
-            connectWifiBySsid(myWifiManager, ssid, enterpriseConfig, call, displayName, null, null);
+        if (ssid != null) {
+            connectWifiBySsid(myWifiManager, ssid, enterpriseConfig, call, displayName);
         }
 
         final PackageManager packageManager = getContext().getPackageManager();
@@ -326,45 +330,20 @@ public class WifiEapConfigurator extends Plugin {
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                     removePasspoint(myWifiManager, id);
                 }
-                connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call);
+                connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, caCertificate);
             }
         }
 
-        /*} else {
-            PasspointConfiguration passpointConfig =  null;
-            if (oid != null) {
-                passpointConfig = new PasspointConfiguration();
-
-                HomeSp homeSp = new HomeSp();
-                if (displayName != null) {
-                    homeSp.setFriendlyName(displayName);
-                } else {
-                    homeSp.setFriendlyName("geteduroam configured HS20");
-                }
-                homeSp.setFqdn(id);
-                // oid can be a list with commas.
-                String[] consortiumOIDs = oid.split(";");
-                long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
-                int index = 0;
-                for(String roamingConsortiumOIDString : consortiumOIDs) {
-                    roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
-                    index++;
-                }
-                homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
-                passpointConfig.setHomeSp(homeSp);
-            }
-
-            if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.network.linked");
-                call.success(object);
-            } else {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
-                call.success(object);
-            }
+        /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+            call.success(object);
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
+            call.success(object);
         }*/
     }
 
@@ -374,25 +353,23 @@ public class WifiEapConfigurator extends Plugin {
             passpointsConfigurated = wifiManager.getPasspointConfigurations();
             int pos = 0;
             boolean enc = false;
-            while(passpointsConfigurated.size() > pos && !enc){
-                if((passpointsConfigurated.get(pos)).equals(id)){
+            while (passpointsConfigurated.size() > pos && !enc) {
+                if ((passpointsConfigurated.get(pos)).equals(id)) {
                     enc = true;
-                }else{
+                } else {
                     pos++;
                 }
             }
-            if(enc){
+            if (enc) {
                 wifiManager.removePasspointConfiguration(id);
             }
-        } catch (IllegalArgumentException e) {}
+        } catch (IllegalArgumentException e) {
+        }
     }
 
-    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call) {
-        PasspointConfiguration config = new PasspointConfiguration();
+    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String cert) {
 
-        /*
-         * THIS CONFIGURATION BY USERCREDENTIAL FAIL WHEN TRY CONFIGURE PASSPOINT
-         * */
+        PasspointConfiguration config = new PasspointConfiguration();
 
         HomeSp homeSp = new HomeSp();
         homeSp.setFqdn(id);
@@ -408,7 +385,7 @@ public class WifiEapConfigurator extends Plugin {
         if (displayName != null) {
             homeSp.setFriendlyName(displayName);
         } else {
-            homeSp.setFriendlyName("geteduroam HS20");
+            homeSp.setFriendlyName("#Passpoint");
         }
         String[] consortiumOIDs = oid.split(";");
         long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
@@ -424,27 +401,64 @@ public class WifiEapConfigurator extends Plugin {
         config.setHomeSp(homeSp);
         Credential cred = new Credential();
         cred.setRealm(id);
-        Credential.UserCredential us = new Credential.UserCredential();
-        us.setUsername(enterpriseConfig.getIdentity());
-        us.setPassword(base64);
-        us.setEapType(this.getEapType(enterpriseConfig.getEapMethod(), call));
-        us.setNonEapInnerMethod(this.getAuthType(enterpriseConfig.getPhase2Method(), call));
-        cred.setUserCredential(us);
-        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
-        config.setCredential(cred);
 
-        try{
+        if(this.getEapType(enterpriseConfig.getEapMethod(), call) == 13) {
+
+        } else {
+            Credential.UserCredential us = new Credential.UserCredential();
+            us.setUsername(enterpriseConfig.getIdentity());
+            us.setPassword(base64);
+            us.setEapType(21);
+            us.setNonEapInnerMethod("MS-CHAP-V2");
+            cred.setUserCredential(us);
+            cred.setCaCertificate(enterpriseConfig.getCaCertificate());
+            config.setCredential(cred);
+        }
+
+        try {
             wifiManager.addOrUpdatePasspointConfiguration(config);
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
             call.success(object);
             e.printStackTrace();
             Log.e("PasspointConfiguration", e.getMessage());
+        }
+    }
+
+    private void connectWifiBySsid(WifiManager myWifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String displayName) {
+        WifiConfiguration config = new WifiConfiguration();
+        config.SSID = "\"" + ssid + "\"";
+        config.priority = 1;
+        config.status = WifiConfiguration.Status.ENABLED;
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+        config.enterpriseConfig = enterpriseConfig;
+
+        try {
+            int wifiIndex = myWifiManager.addNetwork(config);
+            myWifiManager.disconnect();
+            myWifiManager.enableNetwork(wifiIndex, true);
+            myWifiManager.reconnect();
+
+            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            wifiManager.setWifiEnabled(true);
+
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+            call.success(object);
+        } catch (java.lang.SecurityException e) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.network.linked");
+            call.success(object);
+            e.printStackTrace();
+            Log.e("error", e.getMessage());
         }
     }
 
@@ -467,7 +481,7 @@ public class WifiEapConfigurator extends Plugin {
 
                 // WifiNetworkSuggestion approach
                 suggestions.add(suggestion);
-               
+
                 wifiManager.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
                 int status = wifiManager.addNetworkSuggestions(suggestions);
 
@@ -496,58 +510,6 @@ public class WifiEapConfigurator extends Plugin {
             return configured;
 
     }*/
-
-    private void connectWifiBySsid(WifiManager myWifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String displayName, String oid, String id) {
-        WifiConfiguration config = new WifiConfiguration();
-        config.SSID = "\"" + ssid + "\"";
-        config.priority = 1;
-        config.status = WifiConfiguration.Status.ENABLED;
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-        config.enterpriseConfig = enterpriseConfig;
-
-        if(oid != null){
-            String[] consortiumOIDs = oid.split(";");
-            long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
-            int index = 0;
-            for(String roamingConsortiumOIDString : consortiumOIDs) {
-                if ( !roamingConsortiumOIDString.startsWith("0x")) {
-                    roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
-                }
-                roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
-                index++;
-            }
-            config.roamingConsortiumIds = roamingConsortiumOIDs;
-            if (displayName != null) {
-                config.providerFriendlyName = displayName;
-            } else {
-                config.providerFriendlyName = "geteduroam configured HS20";
-            }
-            config.FQDN = id;
-        }
-
-        try {
-            int wifiIndex = myWifiManager.addNetwork(config);
-            myWifiManager.disconnect();
-            myWifiManager.enableNetwork(wifiIndex, true);
-            myWifiManager.reconnect();
-
-            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            wifiManager.setWifiEnabled(true);
-
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.network.linked");
-            call.success(object);
-        } catch (java.lang.SecurityException e) {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.network.linked");
-            call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
-        }
-    }
 
     /*
     private boolean connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig) {
@@ -621,18 +583,18 @@ public class WifiEapConfigurator extends Plugin {
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
-            List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
-            for (WifiConfiguration conf : configuredNetworks) {
-                if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
-                    wifi.removeNetwork(conf.networkId);
-                    wifi.saveConfiguration();
-                    JSObject object = new JSObject();
-                    object.put("success", true);
-                    object.put("message", "plugin.wifieapconfigurator.success.network.removed");
-                    call.success(object);
-                    res = true;
-                }
+        List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
+        for (WifiConfiguration conf : configuredNetworks) {
+            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+                wifi.removeNetwork(conf.networkId);
+                wifi.saveConfiguration();
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.network.removed");
+                call.success(object);
+                res = true;
             }
+        }
         /*} else {
             wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
             JSObject object = new JSObject();
@@ -655,18 +617,18 @@ public class WifiEapConfigurator extends Plugin {
     @PluginMethod
     public void enableWifi(PluginCall call) {
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            if (wifiManager.setWifiEnabled(true)) {
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.wifi.enabled");
-                call.success(object);
-            } else {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
-                call.success(object);
-            }
+        WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager.setWifiEnabled(true)) {
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.wifi.enabled");
+            call.success(object);
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
+            call.success(object);
+        }
         /*} else{
             JSObject object = new JSObject();
             object.put("success", false);
@@ -681,43 +643,43 @@ public class WifiEapConfigurator extends Plugin {
         boolean res = false, isOverridable = false;
 
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
-                ssid = call.getString("ssid");
-            } else {
+        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
+            ssid = call.getString("ssid");
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+            return res;
+        }
+
+        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
+        for (WifiConfiguration conf : configuredNetworks) {
+            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+
+                String packageName = getContext().getPackageName();
+                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
+                    isOverridable = true;
+                }
+
                 JSObject object = new JSObject();
                 object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+                object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
+                object.put("overridable", isOverridable);
                 call.success(object);
-                return res;
+                res = true;
+                break;
             }
+        }
 
-            WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-            List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
-            for (WifiConfiguration conf : configuredNetworks) {
-                if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
-
-                    String packageName = getContext().getPackageName();
-                    if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
-                        isOverridable = true;
-                    }
-
-                    JSObject object = new JSObject();
-                    object.put("success", false);
-                    object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
-                    object.put("overridable", isOverridable);
-                    call.success(object);
-                    res = true;
-                    break;
-                }
-            }
-
-            if (!res) {
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.network.missing");
-                call.success(object);
-            }
+        if (!res) {
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.success(object);
+        }
         /*} else{
             JSObject object = new JSObject();
             object.put("success", false);
@@ -824,30 +786,30 @@ public class WifiEapConfigurator extends Plugin {
         }
 
     }
-    
+
     private boolean getNetworkAssociated(PluginCall call, String ssid) {
         boolean res = true, isOverridable = false;
 
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
+        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
 
-            for (WifiConfiguration conf : configuredNetworks) {
-                if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
-                    String packageName = getContext().getPackageName();
-                    if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
-                        isOverridable = true;
-                    }
-
-                    JSObject object = new JSObject();
-                    object.put("success", false);
-                    object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
-                    object.put("overridable", isOverridable);
-                    call.success(object);
-                    res = false;
-                    break;
+        for (WifiConfiguration conf : configuredNetworks) {
+            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+                String packageName = getContext().getPackageName();
+                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
+                    isOverridable = true;
                 }
+
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
+                object.put("overridable", isOverridable);
+                call.success(object);
+                res = false;
+                break;
             }
+        }
         //}
         return res;
     }
@@ -969,127 +931,6 @@ public class WifiEapConfigurator extends Plugin {
                 break;
         }
         return res;
-    }
-
-    public void testPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PrivateKey key, X509Certificate cert) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        PasspointConfiguration config = new PasspointConfiguration();
-
-        /*
-        * THIS CONFIGURATION BY USERCREDENTIAL FAIL WHEN TRY CONFIGURE PASSPOINT
-        * */
-
-        HomeSp homeSp = new HomeSp();
-        homeSp.setFqdn(id);
-
-        byte[] data = enterpriseConfig.getPassword().getBytes("UTF-8");
-        String base64 = Base64.encodeToString(data, Base64.DEFAULT);
-
-        if (displayName != null) {
-            homeSp.setFriendlyName(displayName);
-        } else {
-            homeSp.setFriendlyName("geteduroam HS20");
-        }
-        String[] consortiumOIDs = oid.split(";");
-        long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
-        int index = 0;
-        for(String roamingConsortiumOIDString : consortiumOIDs) {
-            if ( !roamingConsortiumOIDString.startsWith("0x")) {
-                roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
-            }
-            roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
-            index++;
-        }
-        homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
-        config.setHomeSp(homeSp);
-        Credential cred = new Credential();
-        cred.setRealm(id);
-        Credential.UserCredential us = new Credential.UserCredential();
-        us.setUsername(enterpriseConfig.getIdentity());
-        us.setPassword(base64);
-        us.setEapType(this.getEapType(enterpriseConfig.getEapMethod(), call));
-        us.setNonEapInnerMethod(this.getAuthType(enterpriseConfig.getPhase2Method(), call));
-        cred.setUserCredential(us);
-        /*cred.setClientPrivateKey(key);
-        X509Certificate[] certificatesArray = new X509Certificate[1];
-        certificatesArray[0] = cert;
-        cred.setClientCertificateChain(certificatesArray);
-        X509Certificate[] x509Certificates = enterpriseConfig.getCaCertificates();
-        try {
-            KeyStore ks = KeyStore.getInstance("BKS");
-            char[] password = "some password".toCharArray();
-            ks.load(null, password);
-            String alias = String.format("%s%s_%d", "HS2_", 0, 0);
-            ks.setCertificateEntry(alias, x509Certificates[0]);
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
-        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
-        config.setCredential(cred);
-
-        /*X509Certificate x509Certificates = config.getCredential().getCaCertificate();
-        try {
-            verifyCaCert(x509Certificates);
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
-
-
-        /*
-        * THIS CONFIGURATION BY SIMCREDENTIAL, CONFIURE THE PASSPOINT SUCCESFULLY
-        * */
-
-        /*HomeSp homeSp = new HomeSp();
-        homeSp.setFqdn(id);
-        if (displayName != null) {
-            homeSp.setFriendlyName(displayName);
-        } else {
-            homeSp.setFriendlyName("geteduroam HS20");
-        }
-        String[] consortiumOIDs = oid.split(";");
-        long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
-        int index = 0;
-        for(String roamingConsortiumOIDString : consortiumOIDs) {
-            if ( !roamingConsortiumOIDString.startsWith("0x")) {
-                roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
-            }
-            roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
-            index++;
-        }
-        homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
-        config.setHomeSp(homeSp);
-        Credential cred = new Credential();
-        cred.setRealm(id);
-        Credential.SimCredential simCred = new Credential.SimCredential();
-        simCred.setImsi("123456*");
-        simCred.setEapType(23);
-        cred.setSimCredential(simCred);
-        config.setCredential(cred);*/
-
-        // Create and install a Passpoint configuration
-        //PasspointConfiguration passpointConfiguration = config;
-        try{
-            wifiManager.addOrUpdatePasspointConfiguration(config);
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-        } catch (IllegalArgumentException e){
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
-            call.success(object);
-            e.printStackTrace();
-            Log.e("PasspointConfiguration", e.getMessage());
-        }
     }
 
     private void verifyCaCert(X509Certificate caCert)
