@@ -206,8 +206,8 @@ public class WifiEapConfigurator: CAPPlugin {
         // HS20 support
         var oid = call.getString("oid")
         var id = call.getString("id")
-
-        var displayName:String? = nil
+        var displayName = call.getString("displayName")
+        
         if call.getString("oid") != nil && call.getString("oid") != ""{
             oid = call.getString("oid")
         }
@@ -233,44 +233,70 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
         config.joinOnce = false
-        
-        NEHotspotConfigurationManager.shared.apply(config) { (error) in
-            if let error = error {
-                if error.code == 13 {
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
-                        "success": false,
-                    ])
-                }
-                
-                if error.code == 7 {
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.error.network.userCancelled",
-                        "success": false,
-                    ])
-                }
-            } else {
-                if ssid != nil && ssid != "" {
-                    if self.currentSSIDs().first == ssid {
-                        call.success([
-                            "message": "plugin.wifieapconfigurator.success.network.linked",
-                            "success": true,
-                        ])
-                    } else {
-                        call.success([
-                            "message": "plugin.wifieapconfigurator.error.network.notLinked",
-                            "success": false,
-                        ])
-                    }
-                } else { //HS2.0
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.success.network.linked",
-                        "success": true,
-                    ])
-                }
-            }
+        config.lifeTimeInDays = NSNumber(integerLiteral: 825)
+
+        let options: [String: NSObject] = [kNEHotspotHelperOptionDisplayName : "Join our WIFI" as NSObject]
+        let queue: DispatchQueue = DispatchQueue(label: "com.emergya.eduroam", attributes: DispatchQueue.Attributes.concurrent)
+
+        NSLog("Started wifi list scanning.")
+
+        NEHotspotHelper.register(options: options, queue: queue) { (cmd: NEHotspotHelperCommand) in
+          NSLog("Received command: \(cmd.commandType.rawValue)")
         }
-    }
+        NEHotspotConfigurationManager.shared.apply(config) { [weak self] (error) in
+                    print("error is \(String(describing: error))")
+                    if let error = error {
+                        let nsError = error as NSError
+                        if nsError.domain == "NEHotspotConfigurationErrorDomain" {
+                            if let configError = NEHotspotConfigurationError(rawValue: nsError.code) {
+                                switch configError {
+                                case .invalidWPAPassphrase:
+                                    print("password error: \(error.localizedDescription)")
+                                case .invalid, .invalidSSID, .invalidWEPPassphrase,
+                                     .invalidEAPSettings, .invalidHS20Settings, .invalidHS20DomainName, .userDenied, .pending, .systemConfiguration, .unknown, .joinOnceNotSupported, .alreadyAssociated, .applicationIsNotInForeground, .internal:
+                                    print("other error: \(error.localizedDescription)")
+                                @unknown default:
+                                    print("later added error: \(error.localizedDescription)")
+                                }
+                            }
+                        } else {
+                            print("some other error: \(error.localizedDescription)")
+                        }
+                    } else {
+                        print("perhaps connected")
+
+                        self?.printWifiInfo()
+                    }
+                }
+
+            }
+
+            @IBAction func onInfo(_ sender: Any) {
+                self.printWifiInfo()
+            }
+
+            private func printWifiInfo() {
+                print("printWifiInfo:")
+                if let wifi = self.getConnectedWifiInfo() {
+                    if let connectedSSID = wifi["SSID"] {
+                        print("we are currently connected with \(connectedSSID)")
+                    }
+                    print("further info:")
+                    for (k, v) in wifi {
+                        print(".  \(k) \(v)")
+                    }
+                }
+                print()
+            }
+
+            private func getConnectedWifiInfo() -> [AnyHashable: Any]? {
+                if let ifs = CFBridgingRetain( CNCopySupportedInterfaces()) as? [String],
+                    let ifName = ifs.first as CFString?,
+                    let info = CFBridgingRetain( CNCopyCurrentNetworkInfo((ifName))) as? [AnyHashable: Any] {
+                        return info
+                    }
+                return nil
+            }
 
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {
@@ -383,7 +409,15 @@ public class WifiEapConfigurator: CAPPlugin {
     
     func addCertificate(certName: String, certificate: String) -> Any? {
         let certBase64 = certificate
-        if let data = Data(base64Encoded: certBase64) {
+        var error: Unmanaged<CFError>?
+        let attributesRSAPub: [String:Any] = [
+            kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
+            kSecAttrKeyClass as String: kSecAttrKeyClassPublic,
+            kSecAttrKeySizeInBits as String: 2048,
+            kSecAttrIsPermanent as String: false
+        ]
+        if var data = Data(base64Encoded: certBase64, options: Data.Base64DecodingOptions.ignoreUnknownCharacters) {
+            let publicKeySec = SecKeyCreateWithData(data as CFData, attributesRSAPub as CFDictionary, &error)
             if let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) {
                 let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                kSecValueRef as String: certRef,
