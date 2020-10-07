@@ -51,13 +51,12 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func configureAP(_ call: CAPPluginCall) {
-        let networkInfo = SSID.fetchNetworkInfo()
         var ssid = call.getString("ssid")
             if call.getString("oid") != nil && call.getString("oid") != "" {
                 ssid = ""
                 // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
             } else {
-                if networkInfo?.first?.ssid == "" {
+                if self.currentSSIDs().first == "" {
                     return call.success([
                         "message": "plugin.wifieapconfigurator.error.ssid.missing",
                         "success": false,
@@ -234,7 +233,7 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
         config.joinOnce = false
-        let infoNetwork = SSID.fetchNetworkInfo()
+        
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                 if error.code == 13 {
@@ -252,7 +251,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 }
             } else {
                 if ssid != nil && ssid != "" {
-                    if infoNetwork?.first?.ssid == ssid {
+                    if self.currentSSIDs().first == ssid {
                         call.success([
                             "message": "plugin.wifieapconfigurator.success.network.linked",
                             "success": true,
@@ -355,6 +354,21 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         
     }
+    
+    func currentSSIDs() -> [String] {
+         guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
+             return []
+         }
+         return interfaceNames.compactMap { name in
+             guard let info = CNCopyCurrentNetworkInfo(name as CFString) as? [String:AnyObject] else {
+                 return nil
+             }
+             guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
+                 return nil
+             }
+            return ssid
+         }
+     }
     
     func cleanCertificate(certificate: String) -> String{
         let certDirty = certificate
