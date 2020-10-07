@@ -331,21 +331,15 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiManager myWifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
 
-        //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         if (ssid != null) {
             connectWifiBySsid(myWifiManager, ssid, enterpriseConfig, call, displayName);
         }
 
-        final PackageManager packageManager = getContext().getPackageManager();
-        FeatureInfo[] hard = packageManager.getSystemAvailableFeatures();
-
         if (oid != null) {
-            //if (packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI_PASSPOINT)) {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                removePasspoint(myWifiManager, id);
+                removePasspoint(myWifiManager, id, call);
             }
             connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, caCertificate, key);
-            //}
         }
 
         /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
@@ -361,7 +355,7 @@ public class WifiEapConfigurator extends Plugin {
         }*/
     }
 
-    private void removePasspoint(WifiManager wifiManager, String id) {
+    private void removePasspoint(WifiManager wifiManager, String id, PluginCall call) {
         List passpointsConfigurated = new ArrayList();
         try {
             passpointsConfigurated = wifiManager.getPasspointConfigurations();
@@ -378,6 +372,19 @@ public class WifiEapConfigurator extends Plugin {
                 wifiManager.removePasspointConfiguration(id);
             }
         } catch (IllegalArgumentException e) {
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.remove");
+            call.success(object);
+            e.printStackTrace();
+            Log.e("error", e.getMessage());
+        } catch (Exception e) {
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
+            call.success(object);
+            e.printStackTrace();
+            Log.e("PasspointConfiguration", e.getMessage());
         }
     }
 
@@ -387,14 +394,6 @@ public class WifiEapConfigurator extends Plugin {
 
         HomeSp homeSp = new HomeSp();
         homeSp.setFqdn(id);
-
-        byte[] data = new byte[0];
-        try {
-            data = enterpriseConfig.getPassword().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        String base64 = Base64.encodeToString(data, Base64.DEFAULT);
 
         if (displayName != null) {
             homeSp.setFriendlyName(displayName);
@@ -446,7 +445,14 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
             call.success(object);
             e.printStackTrace();
-            Log.e("PasspointConfiguration", e.getMessage());
+            Log.e("error", e.getMessage());
+        } catch (Exception e){
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
+            call.success(object);
+            e.printStackTrace();
+            Log.e("error", e.getMessage());
         }
     }
 
@@ -967,30 +973,6 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     private byte[] getFingerprint(X509Certificate certChain) {
-
-        // cert = "-----BEGIN CERTIFICATE-----" + cert + "-----END CERTIFICATE-----";
-
-        /*String certificate = "";
-
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] publicKey = new byte[0];
-            if (c != null) {
-                publicKey = md.digest(c.getEncoded());
-            }
-
-
-            StringBuilder hexString = new StringBuilder();
-            for (byte aPublicKeybyte : publicKey) {
-                String appendString = Integer.toHexString(0xFF & aPublicKeybyte);
-                if (appendString.length() == 1) hexString.append("0");
-                hexString.append(appendString);
-            }
-
-            certificate = hexString.toString();
-        } catch (NoSuchAlgorithmException | CertificateEncodingException e1) {
-            e1.printStackTrace();
-        }*/
 
         MessageDigest digester = null;
         byte[] fingerprint = null;
