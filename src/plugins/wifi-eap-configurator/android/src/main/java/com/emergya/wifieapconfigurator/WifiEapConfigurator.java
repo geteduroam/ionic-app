@@ -34,6 +34,8 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 
+import org.json.JSONException;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -49,12 +51,14 @@ import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
@@ -87,6 +91,16 @@ public class WifiEapConfigurator extends Plugin {
         String oid = null;
         if (call.getString("oid") != null && !call.getString("oid").equals("")) {
             oid = call.getString("oid");
+        }
+
+        try {
+            if (!call.getArray("oid").toList().isEmpty() && !call.getArray("oid").toList().get(0).equals("")) {
+                List aux = new ArrayList();
+                aux = call.getArray("oid").toList();
+                oid = aux.get(0).toString();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
@@ -326,12 +340,12 @@ public class WifiEapConfigurator extends Plugin {
         FeatureInfo[] hard = packageManager.getSystemAvailableFeatures();
 
         if (oid != null) {
-            if (packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI_PASSPOINT)) {
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                    removePasspoint(myWifiManager, id);
-                }
-                connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, caCertificate);
+            //if (packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI_PASSPOINT)) {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                removePasspoint(myWifiManager, id);
             }
+            connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, caCertificate, key);
+            //}
         }
 
         /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
@@ -367,7 +381,7 @@ public class WifiEapConfigurator extends Plugin {
         }
     }
 
-    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String cert) {
+    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String cert, PrivateKey key) {
 
         PasspointConfiguration config = new PasspointConfiguration();
 
@@ -402,18 +416,24 @@ public class WifiEapConfigurator extends Plugin {
         Credential cred = new Credential();
         cred.setRealm(id);
 
-        if(this.getEapType(enterpriseConfig.getEapMethod(), call) == 13) {
-
+        if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13) {
+            Credential.CertificateCredential certCred = new Credential.CertificateCredential();
+            certCred.setCertType("x509v3");
+            cred.setClientCertificateChain(enterpriseConfig.getClientCertificateChain());
+            cred.setClientPrivateKey(key);
+            certCred.setCertSha256Fingerprint(getFingerprint(enterpriseConfig.getClientCertificateChain()[0]));
+            cred.setCertCredential(certCred);
         } else {
             Credential.UserCredential us = new Credential.UserCredential();
             us.setUsername(enterpriseConfig.getIdentity());
-            us.setPassword(base64);
+            us.setPassword(enterpriseConfig.getPassword());
             us.setEapType(21);
             us.setNonEapInnerMethod("MS-CHAP-V2");
             cred.setUserCredential(us);
-            cred.setCaCertificate(enterpriseConfig.getCaCertificate());
-            config.setCredential(cred);
         }
+
+        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
+        config.setCredential(cred);
 
         try {
             wifiManager.addOrUpdatePasspointConfiguration(config);
@@ -944,6 +964,44 @@ public class WifiEapConfigurator extends Plugin {
         PKIXParameters params = new PKIXParameters(ks);
         params.setRevocationEnabled(false);
         validator.validate(path, params);
+    }
+
+    private byte[] getFingerprint(X509Certificate certChain) {
+
+        // cert = "-----BEGIN CERTIFICATE-----" + cert + "-----END CERTIFICATE-----";
+
+        /*String certificate = "";
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] publicKey = new byte[0];
+            if (c != null) {
+                publicKey = md.digest(c.getEncoded());
+            }
+
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte aPublicKeybyte : publicKey) {
+                String appendString = Integer.toHexString(0xFF & aPublicKeybyte);
+                if (appendString.length() == 1) hexString.append("0");
+                hexString.append(appendString);
+            }
+
+            certificate = hexString.toString();
+        } catch (NoSuchAlgorithmException | CertificateEncodingException e1) {
+            e1.printStackTrace();
+        }*/
+
+        MessageDigest digester = null;
+        byte[] fingerprint = null;
+        try {
+            digester = MessageDigest.getInstance("SHA-256");
+            digester.reset();
+            fingerprint = digester.digest(certChain.getEncoded());
+        } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
+            e.printStackTrace();
+        }
+        return fingerprint;
     }
 
 }
