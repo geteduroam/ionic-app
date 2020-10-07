@@ -150,7 +150,7 @@ export class GeteduroamApp {
    * @param uri
    */
   async navigate(uri: string | any) {
-    if (!!uri.includes('.eap-config') || !!uri.includes('file') || !!uri.includes('document') || !!uri.includes('octet-stream')) {
+    if (!!uri.includes('.eap-config') || !!uri.includes('file') || !!uri.includes('external') || !!uri.includes('document') || !!uri.includes('octet-stream')) {
       this.checkExtFile = this.global.getExternalOpen();
       this.profile = new ProfileModel();
       this.profile.eapconfig_endpoint = !!uri.url ? uri.url : uri;

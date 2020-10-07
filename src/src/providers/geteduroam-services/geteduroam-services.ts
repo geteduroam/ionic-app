@@ -64,7 +64,7 @@ export class GeteduroamServices {
     }
 
     // It checks the url if app is opened from a file
-    if ((url.includes('eap-config') || url.includes('document') || url.includes('octet-stream')) && !url.includes('https')) {
+    if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
 
       response = await this.store.readExtFile(url);
       response.data = atob(response.data);
