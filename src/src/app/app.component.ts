@@ -1,5 +1,5 @@
-import {Config, Events, Platform} from 'ionic-angular';
-import {Component} from '@angular/core';
+import {Config, Events, Nav, Platform} from 'ionic-angular';
+import {Component, ViewChild} from '@angular/core';
 import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
@@ -29,6 +29,8 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
  *
  **/
 export class GeteduroamApp {
+
+  @ViewChild(Nav) navCtrl: Nav;
 
   rootPage;
 
@@ -159,8 +161,11 @@ export class GeteduroamApp {
       if (method) {
         this.profile.oauth = Number(this.global.getAuthenticationMethod().eapMethod.type) === 13;
       }
-      //this.global.setSsid(this.global.getCredentialApplicability().iEEE80211[0].ssid[0])
-      this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
+      if (!this.rootPage) {
+        this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
+      } else {
+        await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
+      }
     }
   }
 
