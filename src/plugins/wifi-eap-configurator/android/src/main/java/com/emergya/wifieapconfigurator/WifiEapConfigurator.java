@@ -289,7 +289,16 @@ public class WifiEapConfigurator extends Plugin {
                 byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
                 ByteArrayInputStream b = new ByteArrayInputStream(bytes);
                 InputStream in = new BufferedInputStream(b);
-                pkcs12ks.load(in, passPhrase.toCharArray());
+                try {
+                    pkcs12ks.load(in, passPhrase.toCharArray());
+                } catch(Exception e) {
+                    JSObject object = new JSObject();
+                    object.put("success", false);
+                    object.put("message", "plugin.wifieapconfigurator.error.passphrase.null");
+                    call.success(object);
+                    e.printStackTrace();
+                    Log.e("error", e.getMessage());
+                }
 
                 Enumeration<String> aliases = pkcs12ks.aliases();
 
@@ -301,12 +310,6 @@ public class WifiEapConfigurator extends Plugin {
                 }
 
             } catch (KeyStoreException e) {
-                sendClientCertificateError(e, call);
-                e.printStackTrace();
-            } catch (CertificateException e) {
-                sendClientCertificateError(e, call);
-                e.printStackTrace();
-            } catch (IOException e) {
                 sendClientCertificateError(e, call);
                 e.printStackTrace();
             } catch (NoSuchAlgorithmException e) {

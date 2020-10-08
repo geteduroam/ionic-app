@@ -262,6 +262,10 @@ export class GeteduroamServices {
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
         if (!!authenticationMethod) {
+            authenticationMethod.clientSideCredential.clientCertificate = typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ? authenticationMethod.clientSideCredential.clientCertificate["_"] : authenticationMethod.clientSideCredential.clientCertificate;
+            /*for ( let i = 0 ; i < authenticationMethod.serverSideCredential.ca.length ; i++ ){
+              authenticationMethod.serverSideCredential.ca[i] = typeof authenticationMethod.serverSideCredential.ca[i] === 'object' ? authenticationMethod.serverSideCredential.ca[i].content : authenticationMethod.serverSideCredential.ca[i];
+            }*/
             this.global.setAuthenticationMethod(authenticationMethod);
             return true;
         } else {
@@ -389,5 +393,13 @@ export class GeteduroamServices {
     }
 
     return returnedJson;
+  }
+
+  isBase64(str) {
+    try {
+      return btoa(atob(str)) == str;
+    } catch (err) {
+      return false;
+    }
   }
 }
