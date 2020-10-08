@@ -209,7 +209,7 @@ export class ConfigurationScreen extends BasePage{
 
       let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
       await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
-
+      this.resetValues();
     } else{
      await this.alertConnectionDisabled();
     }
@@ -228,6 +228,18 @@ export class ConfigurationScreen extends BasePage{
   async getDiscovery() {
     const firstResponse = await this.getEduroamServices.discovery();
     this.instances = await this.waitingSpinner(firstResponse);
+  }
+
+  resetValues() {
+    this.ngZone.run(() => {
+      this.profiles = null;
+      this.selectedProfileId =  null;
+      this.defaultProfile = null;
+      this.profileName = null;
+      this.instanceName = null;
+      this.showAll = true;
+    });
+
   }
 
 }
