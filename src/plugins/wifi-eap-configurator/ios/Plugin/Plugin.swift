@@ -246,13 +246,26 @@ public class WifiEapConfigurator: CAPPlugin {
         NEHotspotConfigurationManager.shared.apply(config) { [weak self] (error) in
                     print("error is \(String(describing: error))")
                     if let error = error {
+                     if error.code == 13 {
+                            call.success([
+                                "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                                "success": false,
+                            ])
+                        }
+                        
+                        if error.code == 7 {
+                            call.success([
+                                "message": "plugin.wifieapconfigurator.error.network.userCancelled",
+                                "success": false,
+                            ])
+                        }
                         let nsError = error as NSError
                         if nsError.domain == "NEHotspotConfigurationErrorDomain" {
                             if let configError = NEHotspotConfigurationError(rawValue: nsError.code) {
                                 switch configError {
                                 case .invalidWPAPassphrase:
                                     print("password error: \(error.localizedDescription)")
-                                case .invalid, .invalidSSID, .invalidWEPPassphrase,
+                                case .invalid, .invalidSSIDPrefix, .invalidSSID, .invalidWEPPassphrase,
                                      .invalidEAPSettings, .invalidHS20Settings, .invalidHS20DomainName, .userDenied, .pending, .systemConfiguration, .unknown, .joinOnceNotSupported, .alreadyAssociated, .applicationIsNotInForeground, .internal:
                                     print("other error: \(error.localizedDescription)")
                                 @unknown default:
@@ -263,8 +276,25 @@ public class WifiEapConfigurator: CAPPlugin {
                             print("some other error: \(error.localizedDescription)")
                         }
                     } else {
+                        if ssid != nil && ssid != "" {
+                            if self?.currentSSIDs().first == ssid {
+                                call.success([
+                                    "message": "plugin.wifieapconfigurator.success.network.linked",
+                                    "success": true,
+                                ])
+                            } else {
+                                call.success([
+                                    "message": "plugin.wifieapconfigurator.error.network.notLinked",
+                                    "success": false,
+                                ])
+                            }
+                        } else { //HS2.0
+                            call.success([
+                                "message": "plugin.wifieapconfigurator.success.network.linked",
+                                "success": true,
+                            ])
+                        }
                         print("perhaps connected")
-
                         self?.printWifiInfo()
                     }
                 }
@@ -410,6 +440,7 @@ public class WifiEapConfigurator: CAPPlugin {
     func addCertificate(certName: String, certificate: String) -> Any? {
         let certBase64 = certificate
         var error: Unmanaged<CFError>?
+        
         let attributesRSAPub: [String:Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
             kSecAttrKeyClass as String: kSecAttrKeyClassPublic,
@@ -609,54 +640,6 @@ extension String {
     }
 }
 
-class ViewController: UIViewController, CLLocationManagerDelegate {
-    
-    var locationManager = CLLocationManager()
-    var currentNetworkInfos: Array<NetworkInfo>? {
-        get {
-            return SSID.fetchNetworkInfo()
-        }
-    }
-    @IBOutlet weak var ssidLabel: UILabel!
-    @IBOutlet weak var bssidLabel: UILabel!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        if #available(iOS 13.0, *) {
-            let status = CLLocationManager.authorizationStatus()
-            if status == .authorizedWhenInUse {
-                updateWiFi()
-            } else {
-                locationManager.delegate = self
-                locationManager.requestWhenInUseAuthorization()
-            }
-        } else {
-            updateWiFi()
-        }
-    }
-    func getSSID() -> String {
-        return String(currentNetworkInfos?.first?.ssid ?? "")
-    }
-    
-    func getBSSID() -> String {
-        return String(currentNetworkInfos?.first?.bssid ?? "")
-    }
-    
-    func updateWiFi() -> NetworkInfo? {
-
-        // ssidLabel.text = currentNetworkInfos?.first?.ssid
-        // bssidLabel.text = currentNetworkInfos?.first?.bssid
-        return currentNetworkInfos?.first
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedWhenInUse {
-            updateWiFi()
-        }
-    }
-    
-}
 
 public class SSID {
     class func fetchNetworkInfo() -> [NetworkInfo]? {
