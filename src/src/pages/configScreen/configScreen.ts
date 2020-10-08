@@ -202,20 +202,20 @@ export class ConfigurationScreen extends BasePage{
     e.preventDefault();
     if (!!this.activeNavigation) {
       this.showAll = false;
-
       if (!this.profile.redirect) {
         let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
         await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
 
       } else {
         window.cordova.InAppBrowser.open(this.profile.redirect, '_system',"location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
-        this.resetValues();
-        App.exitApp();
+        !!this.global.isAndroid() ? App.exitApp() : this.showAll = true
+
       }
 
     } else{
      await this.alertConnectionDisabled();
     }
+    this.resetValues();
   }
 
   /**u
@@ -235,11 +235,13 @@ export class ConfigurationScreen extends BasePage{
 
   resetValues() {
     this.ngZone.run(() => {
+      delete this.profiles;
       this.profile = null;
       this.defaultProfile = null;
-      this.profileName = '';
+      this.selectedProfileId = null;
+      this.profileName = null;
       this.instanceName = '';
-      this.showAll = true;
+
     });
 
   }
