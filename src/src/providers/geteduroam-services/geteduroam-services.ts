@@ -69,7 +69,7 @@ export class GeteduroamServices {
     }
 
     // It checks the url if app is opened from a file
-    if ((url.includes('eap-config') || url.includes('document') || url.includes('octet-stream')) && !url.includes('https')) {
+    if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
 
       response = await this.store.readExtFile(url);
       response.data = atob(response.data);
@@ -121,7 +121,7 @@ export class GeteduroamServices {
         // the default case will take 'eduroam' for the SSID
         // to be removed before adding any profile
         let config = {
-          ssid: this.global.getSsid()
+          ssid: 'eduroam'
         };
         await this.removeNetwork(config);
       }
@@ -129,17 +129,18 @@ export class GeteduroamServices {
     let returnValue = true;
     config['id'] = this.id;
     if (resultantProfiles) {
-      for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
-        if(resultantProfiles['ssid'][i][0] != '#Passpoint'){
+      for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oid'].length; i++) {
+        if(!!resultantProfiles['ssid'][i][0] && !!resultantProfiles['oid'][i][0]){
           config['ssid'] = resultantProfiles['ssid'][i][0];
-          config['oid'] = '';
+          config['oid'] = resultantProfiles['oidConcat'];
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }else if(!!resultantProfiles['ssid'][i][0] && !resultantProfiles['oid'][i][0]){
+          config['ssid'] = resultantProfiles['ssid'][i][0];
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }else {
+          config['oid'] = resultantProfiles['oidConcat'];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
         }
-      }
-      if (resultantProfiles['oid'].length > 0) {
-        config['oid'] = resultantProfiles['oidConcat'];
-        config['ssid'] = '#Passpoint';
-        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
       }
     } else {
       // If there is no CredentialApplicability in the eap-config file,
@@ -167,14 +168,8 @@ export class GeteduroamServices {
             oidConcat = iEEE80211Aux['ConsortiumOID'];
           }
           oidAux.push(iEEE80211Aux['ConsortiumOID']);
-          if(iEEE80211Aux['SSID']) {
-            ssidAux.push(iEEE80211Aux['SSID']);
-          } else {
-            ssidAux.push(['#Passpoint']);
-          }
-        } else {
+        } else if(iEEE80211Aux['SSID']){
           ssidAux.push(iEEE80211Aux['SSID']);
-          oidAux.push(iEEE80211Aux['']);
         }
       }
       result['ssid'] = ssidAux;
