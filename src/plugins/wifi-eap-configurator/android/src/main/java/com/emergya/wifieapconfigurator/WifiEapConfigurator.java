@@ -335,12 +335,12 @@ public class WifiEapConfigurator extends Plugin {
             connectWifiBySsid(myWifiManager, ssid, enterpriseConfig, call, displayName);
         }
 
-        if (oid != null) {
+        /*if (oid != null) {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 removePasspoint(myWifiManager, id, call);
             }
             connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, caCertificate, key);
-        }
+        }*/
 
         /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
             JSObject object = new JSObject();
