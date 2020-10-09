@@ -9,4 +9,5 @@ export class ProfileModel {
   token_endpoint?: string;
   authorization_endpoint?: string;
   token?: string;
+  redirect?: string;
 }
