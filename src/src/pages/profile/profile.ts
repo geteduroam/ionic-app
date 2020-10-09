@@ -124,10 +124,17 @@ export class ProfilePage extends BasePage{
     if (!!this.enableButton) {
 
       let config = this.configConnection();
-      const checkRequest = this.getEduroamServices.connectProfile(config);
+      const checkRequest = await this.getEduroamServices.connectProfile(config);
 
-      if (!!checkRequest) {
-        this.navigateTo();
+      if (checkRequest.message.includes('success')) {
+        await this.navigateTo();
+      }else if (checkRequest.message.includes('error.network.linked')) {
+        await this.errorHandler.handleError(
+            this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
+            this.dictionary.getTranslation('error', 'available2') +
+            this.global.getSsid() + '.', false, '', 'removeConnection', true);
+      } else {
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
       }
     }
   }
@@ -265,7 +272,7 @@ export class ProfilePage extends BasePage{
     const profile = await this.getProfile();
     this.profile = await this.waitingSpinner(profile);
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
-    this.manageProfileValidation(validProfile);
+    await this.manageProfileValidation(validProfile);
   }
 
   /**
@@ -296,19 +303,10 @@ export class ProfilePage extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
-    let certificates : string = '';
-    for (let entry of this.validMethod.serverSideCredential.ca){
-      let strAux : string = entry['content'];
-      certificates = certificates.concat(strAux ,';');
-    }
     let serverIDs : string = '';
     for (let entry of this.validMethod.serverSideCredential.serverID){
       let strAux : string = entry;
       serverIDs = serverIDs.concat(strAux ,';');
-    }
-    // If only one certificate, remove the ';'
-    if (this.validMethod.serverSideCredential.ca.length == 1){
-      certificates = certificates.slice(0, -1);
     }
     serverIDs = serverIDs.slice(0, -1);
     return {
@@ -320,7 +318,7 @@ export class ProfilePage extends BasePage{
       servername: serverIDs,
       auth: this.global.auth.MSCHAPv2,
       anonymous: "",
-      caCertificate: certificates,
+      caCertificate: this.validMethod.serverSideCredential.ca,
       longestCommonSuffix: this.longestCommonSuffix(this.validMethod.serverSideCredential.serverID)
     };
   }

@@ -59,7 +59,7 @@ export class OauthFlow extends BasePage{
     // Initialized browser inside app
     let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, target, "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
 
-    browserRef.addEventListener("loadstart", (event) => {
+    browserRef.addEventListener("loadstart", async (event) => {
 
       // Extract code and state to build authorized request
       if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.indexOf("error") === -1 ) {
@@ -78,8 +78,8 @@ export class OauthFlow extends BasePage{
             'code_verifier': oAuth.codeVerifier,
             'redirect_uri': oauth2Options.redirectUrl
           };*/
-          browserRef.close();
-          this.getToken(urlToken);
+          await browserRef.close();
+          await this.getToken(urlToken);
         }
       } else if (event.url.indexOf(oauth2Options.redirectUrl) === 0 && event.url.includes('?error')) {
         browserRef.close();
@@ -126,7 +126,7 @@ export class OauthFlow extends BasePage{
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
     const oauthConf: OauthConfProvider = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
     this.providerInfo = this.global.getProviderInfo();
-    oauthConf.manageProfileValidation(validProfile, this.providerInfo);
+    await oauthConf.manageProfileValidation(validProfile, this.providerInfo);
 
   }
 
@@ -169,7 +169,7 @@ export class OauthFlow extends BasePage{
       client_id: this.global.getClientId(),
       oAuthUrl: this.profile.authorization_endpoint,
       type: 'code',
-      redirectUrl: 'http://localhost:8080/',
+      redirectUrl: 'http://127.0.0.1:8080/',
       pkce: true,
       scope: 'eap-metadata',
     };
