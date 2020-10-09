@@ -41,7 +41,12 @@ export class GeteduroamServices {
     try {
         const response = await this.http.get(url, params, headers);
         const data = JSON.parse(response.data);
-        return data.instances;
+        if (data.instances) {
+          return data.instances;
+        } else {
+          await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-institution'), false);
+        }
+
     } catch (e) {
         await this.errorHandler.handleError(e.error,false);
     }

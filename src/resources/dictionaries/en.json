@@ -40,7 +40,8 @@
     "invalid-eap": "Invalid selected profile, if the error persists, contact with the admin please",
     "invalid-method": "No valid authentication method available from the selected profile",
     "invalid-profile": "The selected profile is wrong",
-    "invalid-oauth": "You have to authorize the app to be able to configure the WiFi connection"
+    "invalid-oauth": "You have to authorize the app to be able to configure the WiFi connection",
+    "invalid-institution": "This institution is not supported"
   },
   "text": {
     "configured": " is now configured on your device.",

@@ -40,7 +40,9 @@
     "invalid-eap": "El perfil seleccionado es erróneo",
     "invalid-method": "Ningún método válido de autenticación en el perfil seleccionado",
     "invalid-profile": "El perfil seleccionado es erróneo",
-    "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión WiFi"
+    "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión WiFi",
+    "invalid-institution": "Esta institución no está soportada"
+
   },
   "text": {
     "configured": " ya está cinfugurada en tu dispositivo.",
