@@ -258,6 +258,7 @@ public class WifiEapConfigurator extends Plugin {
                     call.success(object);
                     e.printStackTrace();
                     Log.e("error", e.getMessage());
+                    return;
                 } catch (IllegalArgumentException e) {
                     JSObject object = new JSObject();
                     object.put("success", false);
@@ -265,6 +266,7 @@ public class WifiEapConfigurator extends Plugin {
                     call.success(object);
                     e.printStackTrace();
                     Log.e("error", e.getMessage());
+                    return;
                 }
             }
             // Adding the certificates to the configuration
@@ -278,6 +280,7 @@ public class WifiEapConfigurator extends Plugin {
                 call.success(object);
                 e.printStackTrace();
                 Log.e("error", e.getMessage());
+                return;
             }
         }
 
@@ -309,6 +312,7 @@ public class WifiEapConfigurator extends Plugin {
                     call.success(object);
                     e.printStackTrace();
                     Log.e("error", e.getMessage());
+                    return;
                 }
 
                 Enumeration<String> aliases = pkcs12ks.aliases();
