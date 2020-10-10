@@ -218,7 +218,7 @@ export class ConfigurationScreen extends BasePage{
     this.resetValues();
   }
 
-  /**u
+  /**
    *  Lifecycle when entering a page, before it becomes the active one
    *  Load the discovery data and show the spinner
    */
