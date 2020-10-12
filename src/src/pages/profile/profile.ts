@@ -126,13 +126,15 @@ export class ProfilePage extends BasePage{
       let config = this.configConnection();
       const checkRequest = await this.getEduroamServices.connectProfile(config);
 
-      if (checkRequest.message.includes('success')) {
+      if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.notLinked')) {
         await this.navigateTo();
-      }else if (checkRequest.message.includes('error.network.linked')) {
+      }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
             this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
             this.dictionary.getTranslation('error', 'available2') +
-            this.global.getSsid() + '.', false, '', 'removeConnection', true);
+            this.global.getSsid() + '.', false, '', '', true);
+      } else if (checkRequest.message.includes('error.network.userCancelled')) {
+        this.showAll = true;
       } else {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
       }
