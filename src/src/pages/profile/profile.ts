@@ -361,4 +361,9 @@ export class ProfilePage extends BasePage{
     }
     return candidate;
   }
+
+  goBack() {
+    document.getElementById('back-arrow').style.opacity = '0.75';
+    this.viewCtrl.dismiss();
+  }
 }

@@ -1,9 +1,9 @@
 <div *ngIf="viewCtrl.enableBack() && showAll " class="arrow-back" >
-    <button ion-button class="arrow-btn" (click)="viewCtrl.dismiss()" [ngClass]="!!hiddenIcon ? 'arrow-btn' : 'arrow-back-hidden'">
+    <button ion-button class="arrow-btn" (click)="goBack()" [ngClass]="!!hiddenIcon ? 'arrow-btn' : 'arrow-back-hidden'">
         <img alt="back" src="../../assets/icon/flecha.svg" />
     </button>
 </div>
-<div *ngIf="showAll" class="profile-content">
+<div *ngIf="showAll" class="profile-content" id="back-arrow">
     <div class="header-content">
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
         <h1>{{getString('header', 'profile')}}</h1>
