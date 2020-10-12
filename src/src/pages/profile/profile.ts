@@ -132,7 +132,7 @@ export class ProfilePage extends BasePage{
         await this.errorHandler.handleError(
             this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
             this.dictionary.getTranslation('error', 'available2') +
-            this.global.getSsid() + '.', false, '', 'removeConnection', true);
+            this.global.getSsid() + '.', false, '', '', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
