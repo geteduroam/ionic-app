@@ -31,8 +31,6 @@ export class GlobalProvider {
 
   private clientId : string = 'app.geteduroam.ionic';
 
-  private overrideProfile: boolean = false;
-
   private externalOpen: boolean = false;
 
   constructor(public platform: Platform) {}
@@ -96,21 +94,6 @@ export class GlobalProvider {
    */
   getClientId(){
     return this.clientId;
-  }
-
-  /**
-   * Method to get profile if is overridable
-   */
-  getOverrideProfile(){
-    return this.overrideProfile;
-  }
-
-  /**
-   * Method to setting profile if is overridable
-   * @param profile
-   */
-  setOverrideProfile(profile: boolean){
-    this.overrideProfile = profile;
   }
 
   getCredentialApplicability(){

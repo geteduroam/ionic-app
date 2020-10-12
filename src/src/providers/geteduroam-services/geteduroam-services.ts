@@ -98,35 +98,23 @@ export class GeteduroamServices {
       // to be removed before being configured
       resultantProfiles = this.getSSID_OID(this.global.getCredentialApplicability());
     }
-    if (this.global.getOverrideProfile()) {
-      /*
-      // Removing for: https://github.com/geteduroam/ionic-app/issues/24
-      let config = {
-          ssid: this.global.getSsid()
-      };
-      */
-      if (resultantProfiles) {
-        // If there is a CredentialApplicability defined in the eap-config file,
-        // loop over CredentialApplicability to take possible SSID's and OID's
-        // to be removed before being configured
-        // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
-        for (let i in resultantProfiles['ssid']) {
-          let config = {
-            ssid: resultantProfiles['ssid'][i]
-          };
-          await this.removeNetwork(config);
-        }
-      } else {
-        // If there is no CredentialApplicability in the eap-config file,
-        // the default case will take 'eduroam' for the SSID
-        // to be removed before adding any profile
+    if (resultantProfiles) {
+      // If there is a CredentialApplicability defined in the eap-config file,
+      // loop over CredentialApplicability to take possible SSID's and OID's
+      // to be removed before being configured
+      // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
+      for (let i in resultantProfiles['ssid']) {
         let config = {
-          ssid: 'eduroam'
+          ssid: resultantProfiles['ssid'][i]
         };
         await this.removeNetwork(config);
       }
+    } else {
+    // TODO if this happens it's a huge bug
+      return {message: 'No CredentialApplicability configured?!', success: false};
     }
-    let returnValue = {message: 'No CredentialApplicability configured?!', success: false};
+    // TODO if this falls through, it's a huge bug
+    let returnValue = {message: 'No SSID/OID configured?!', success: false};
     config['id'] = this.id;
     delete config['ssid'];
     if (resultantProfiles['oid'].length > 0) {
