@@ -129,22 +129,14 @@ export class GeteduroamServices {
     let returnValue = true;
     config['id'] = this.id;
     if (resultantProfiles) {
-      for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oid'].length; i++) {
-        delete config['ssid'];
-        delete config['oid'];
-        if(!!resultantProfiles['ssid'][i][0] && !!resultantProfiles['oid'][i][0]){
-          config['ssid'] = resultantProfiles['ssid'][i][0];
-          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-          delete config['ssid'];
+      if (!!resultantProfiles['oidConcat']) {
           config['oid'] = resultantProfiles['oidConcat'];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-        }else if(!!resultantProfiles['ssid'][i][0] && !resultantProfiles['oid'][i][0]){
+      }
+      delete config['oid'];
+      for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
           config['ssid'] = resultantProfiles['ssid'][i][0];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-        }else {
-          config['oid'] = resultantProfiles['oidConcat'];
-          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-        }
       }
     } else {
       // If there is no CredentialApplicability in the eap-config file,
