@@ -22,6 +22,14 @@ export class ClientSideCredential extends BaseJson{
      * The Passphrase of the client side credentials (oauth)
      */
     passphrase: string;
+    /**
+     * The username of the client side credentials (cat)
+     */
+    username: string;
+    /**
+     * The password of the client side credentials (cat)
+     */
+    password: string;
 
     constructor() {
         super();
@@ -40,6 +48,8 @@ export class ClientSideCredential extends BaseJson{
         this.anonymousIdentity = this.getSingleProperty(jsonAux, 'OuterIdentity', false);
         this.clientCertificate = this.getSingleProperty(jsonAux, 'ClientCertificate', false);
         this.passphrase = this.getSingleProperty(jsonAux, 'Passphrase', false);
+        this.username = this.getSingleProperty(jsonAux, 'Username', false);
+        this.password = this.getSingleProperty(jsonAux, 'Password', false);
         return returnValue;
     }
 }
