@@ -129,9 +129,20 @@ export class GeteduroamServices {
     let returnValue = true;
     config['id'] = this.id;
     if (resultantProfiles) {
-      for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
-        if(!!resultantProfiles['ssid'][i][0]){
+      for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oid'].length; i++) {
+        delete config['ssid'];
+        delete config['oid'];
+        if(!!resultantProfiles['ssid'][i][0] && !!resultantProfiles['oid'][i][0]){
           config['ssid'] = resultantProfiles['ssid'][i][0];
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+          delete config['ssid'];
+          config['oid'] = resultantProfiles['oidConcat'];
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }else if(!!resultantProfiles['ssid'][i][0] && !resultantProfiles['oid'][i][0]){
+          config['ssid'] = resultantProfiles['ssid'][i][0];
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }else {
+          config['oid'] = resultantProfiles['oidConcat'];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
         }
       }
