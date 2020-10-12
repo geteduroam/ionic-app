@@ -50,13 +50,15 @@ export class OauthConfProvider {
     const checkRequest = await this.getEduroamServices.connectProfile(config);
     this.loading.dismiss();
 
-    if (checkRequest.message.includes('success')) {
+    if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
       await this.navigateTo();
-    }else if (checkRequest.message.includes('error.network.linked')) {
+    }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
       await this.errorHandler.handleError(
           this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
           this.dictionary.getTranslation('error', 'available2') +
           this.global.getSsid() + '.', false, '', 'removeConnection', true);
+    } else if (checkRequest.message.includes('error.network.userCancelled')) {
+      await this.navCtrl.pop();
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
     }
@@ -110,7 +112,6 @@ export class OauthConfProvider {
    * Navigation to the next view
    */
   async navigateTo() {
-    //this.showAll = false;
 
     !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
           logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
