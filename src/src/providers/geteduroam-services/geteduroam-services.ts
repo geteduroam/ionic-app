@@ -110,9 +110,9 @@ export class GeteduroamServices {
         // loop over CredentialApplicability to take possible SSID's and OID's
         // to be removed before being configured
         // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
-        for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
+        for (let i in resultantProfiles['ssid']) {
           let config = {
-            ssid: resultantProfiles['ssid'][i][0]
+            ssid: resultantProfiles['ssid'][i]
           };
           await this.removeNetwork(config);
         }
@@ -126,22 +126,17 @@ export class GeteduroamServices {
         await this.removeNetwork(config);
       }
     }
-    let returnValue = true;
+    let returnValue = {message: 'No CredentialApplicability configured?!', success: false};
     config['id'] = this.id;
-    if (resultantProfiles) {
-      if (!!resultantProfiles['oidConcat']) {
-          config['oid'] = resultantProfiles['oidConcat'];
-          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-      }
-      delete config['oid'];
-      for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
-          config['ssid'] = resultantProfiles['ssid'][i][0];
-          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-      }
-    } else {
-      // If there is no CredentialApplicability in the eap-config file,
-      // the default case will take 'eduroam' for the SSID
-      return await WifiEapConfigurator.configureAP(config);
+    delete config['ssid'];
+    if (resultantProfiles['oid'].length > 0) {
+        config['oid'] = resultantProfiles['oid'].join(';');
+        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+    }
+    delete config['oid'];
+    for (let i in resultantProfiles['ssid']) {
+        config['ssid'] = resultantProfiles['ssid'][i];
+        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
     }
     return returnValue;
   }
@@ -154,23 +149,16 @@ export class GeteduroamServices {
       let result:Object = {};
       let ssidAux = [];
       let oidAux = [];
-      let oidConcat = '';
       for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
         let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
         if(iEEE80211Aux['ConsortiumOID']){
-          if(oidConcat.length > 0){
-            oidConcat = oidConcat + ';' + iEEE80211Aux['ConsortiumOID'];
-          } else{
-            oidConcat = iEEE80211Aux['ConsortiumOID'];
-          }
-          oidAux.push(iEEE80211Aux['ConsortiumOID']);
+          oidAux = oidAux.concat(iEEE80211Aux['ConsortiumOID']);
         } else if(iEEE80211Aux['SSID']){
-          ssidAux.push(iEEE80211Aux['SSID']);
+          ssidAux = ssidAux.concat(iEEE80211Aux['SSID']);
         }
       }
       result['ssid'] = ssidAux;
       result['oid'] = oidAux;
-      result['oidConcat'] = oidConcat;
       return result;
   }
 

@@ -51,20 +51,17 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     @objc func configureAP(_ call: CAPPluginCall) {
-        var ssid = call.getString("ssid")
-            if call.getString("oid") != nil && call.getString("oid") != "" {
-                ssid = ""
-                // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
-            } else {
-                if ssid == nil || ssid == "" {
-                    return call.success([
-                        "message": "plugin.wifieapconfigurator.error.ssid.missing",
-                        "success": false,
-                    ])
-                }
-            }
-   
-        
+        let id = call.getString("id")!
+        let ssid = call.getString("ssid") ?? ""
+        let oid = call.getString("oid") ?? ""
+
+        if (oid == "") && (ssid == "") {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                "success": false,
+            ])
+        }
+
         guard let eapType = call.get("eap", Int.self) else {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.auth.invalid",
@@ -84,7 +81,7 @@ public class WifiEapConfigurator: CAPPlugin {
             if server != ""{
                 //eapSettings.trustedServerNames = [server]
                 // supporting multiple CN
-                var serverNames: [String]? = server.components(separatedBy: ";")
+                let serverNames: [String]? = server.components(separatedBy: ";")
                 eapSettings.trustedServerNames = serverNames!
             }
         }
@@ -105,7 +102,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 if let queries = addServerCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
                     certificates = []
                     
-                    for (index, query) in ((queries as? [[String: Any]])?.enumerated())! {
+                    for (_, query) in ((queries as? [[String: Any]])?.enumerated())! {
                         
                         var item: CFTypeRef?
                         let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
@@ -125,7 +122,9 @@ public class WifiEapConfigurator: CAPPlugin {
                     
                     eapSettings.setTrustedServerCertificates(certificates!)
                 }
-                if let identity = addClientCertificate(certName: "client" + ssid!, certificate: clientCertificate, password: passPhrase)
+                // TODO certName should be the CN of the certificate,
+                // but this works as long as we have only one (which we currently do)
+                if let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: clientCertificate, password: passPhrase)
                 {
                     let id = identity as! SecIdentity
                     eapSettings.setIdentity(id)
@@ -203,35 +202,22 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
 
-        // HS20 support
-        var oid = call.getString("oid")
-        var id = call.getString("id")
-
-        var displayName:String? = nil
-        if call.getString("oid") != nil && call.getString("oid") != ""{
-            oid = call.getString("oid")
-        }
-        if call.getString("id") != nil && call.getString("id") != ""{
-            id = call.getString("id")
-        }
-        if call.getString("displayName") != nil && call.getString("displayName") != ""{
-            displayName = call.getString("displayName")
-        }
         var config:NEHotspotConfiguration
         // If HS20 was enabled
-        if oid != nil && oid != ""{
+        if oid != "" {
             var oidStrings: [String]?
-            oidStrings = oid?.components(separatedBy: ";")
+            oidStrings = oid.components(separatedBy: ";")
             // HS20 object settings
             let hs20 = NEHotspotHS20Settings(
-                domainName: id ?? "",
+                domainName: id,
                 roamingEnabled: true)
             hs20.roamingConsortiumOIs = oidStrings ?? [""];
             config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
         } else {
-            config = NEHotspotConfiguration(ssid: ssid ?? "", eapSettings: eapSettings)
+            config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
         }
         // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
+        // https://developer.apple.com/documentation/networkextension/nehotspotconfiguration/2887518-joinonce
         config.joinOnce = false
        
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
