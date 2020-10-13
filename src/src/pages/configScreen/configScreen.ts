@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import {Events, ModalController, NavController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
@@ -10,7 +10,9 @@ import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
-const { Keyboard } = Plugins;
+
+const { Keyboard, App } = Plugins;
+declare var window;
 
 @Component({
   selector: 'page-config-screen',
@@ -80,23 +82,25 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Constructor
    * */
-  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices,
-              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, protected global: GlobalProvider) {
+  constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices, private ngZone: NgZone,
+              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected event: Events,
+              protected dictionary: DictionaryServiceProvider, protected global: GlobalProvider) {
     super(loading, dictionary, event, global);
   }
 
   /**
    * Method executes when the search bar is tapped.
    * */
-  async showModal() {
+  async showModal(e: any) {
+    e.preventDefault();
     await Keyboard.hide();
-    let searchModal = this.modalCtrl.create(InstitutionSearch, {
-      instances: this.instances,
-      instanceName: this.instanceName}
+    if (!!this.instances) {
+      let searchModal = this.modalCtrl.create(InstitutionSearch, {
+        instances: this.instances,
+        instanceName: this.instanceName}
       );
 
-    searchModal.onDidDismiss((data) => {
+      searchModal.onDidDismiss((data) => {
 
         if (data !== undefined) {
           this.instance = data;
@@ -108,6 +112,10 @@ export class ConfigurationScreen extends BasePage{
       });
 
       return await searchModal.present();
+    } else {
+      await this.getDiscovery();
+      this.showModal(e);
+    }
   }
 
   /**
@@ -194,25 +202,48 @@ export class ConfigurationScreen extends BasePage{
     e.preventDefault();
     if (!!this.activeNavigation) {
       this.showAll = false;
+      if (!this.profile.redirect) {
+        let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
+        await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
 
-      let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
-      await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
+      } else {
+        window.cordova.InAppBrowser.open(this.profile.redirect, '_system',"location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+        !!this.global.isAndroid() ? App.exitApp() : this.showAll = true
+
+      }
 
     } else{
      await this.alertConnectionDisabled();
     }
+    this.resetValues();
   }
 
   /**
    *  Lifecycle when entering a page, before it becomes the active one
    *  Load the discovery data and show the spinner
    */
-  async ionViewWillEnter() {
-    const firstResponse = await this.getEduroamServices.discovery();
-    this.instances = await this.waitingSpinner(firstResponse);
+  async ionViewDidEnter() {
+    await this.getDiscovery();
     this.removeSpinner();
     this.showAll = true;
   }
 
+  async getDiscovery() {
+    const firstResponse = await this.getEduroamServices.discovery();
+    this.instances = await this.waitingSpinner(firstResponse);
+  }
+
+  resetValues() {
+    this.ngZone.run(() => {
+      delete this.profiles;
+      this.profile = null;
+      this.defaultProfile = null;
+      this.selectedProfileId = null;
+      this.profileName = null;
+      this.instanceName = '';
+
+    });
+
+  }
 
 }
