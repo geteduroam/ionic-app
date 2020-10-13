@@ -98,54 +98,33 @@ export class GeteduroamServices {
       // to be removed before being configured
       resultantProfiles = this.getSSID_OID(this.global.getCredentialApplicability());
     }
-    if (this.global.getOverrideProfile()) {
-      /*
-      // Removing for: https://github.com/geteduroam/ionic-app/issues/24
-      let config = {
-          ssid: this.global.getSsid()
-      };
-      */
-      if (resultantProfiles) {
-        // If there is a CredentialApplicability defined in the eap-config file,
-        // loop over CredentialApplicability to take possible SSID's and OID's
-        // to be removed before being configured
-        // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
-        for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
-          let config = {
-            ssid: resultantProfiles['ssid'][i][0]
-          };
-          await this.removeNetwork(config);
-        }
-      } else {
-        // If there is no CredentialApplicability in the eap-config file,
-        // the default case will take 'eduroam' for the SSID
-        // to be removed before adding any profile
+    if (resultantProfiles) {
+      // If there is a CredentialApplicability defined in the eap-config file,
+      // loop over CredentialApplicability to take possible SSID's and OID's
+      // to be removed before being configured
+      // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
+      for (let i in resultantProfiles['ssid']) {
         let config = {
-          ssid: 'eduroam'
+          ssid: resultantProfiles['ssid'][i]
         };
         await this.removeNetwork(config);
       }
-    }
-    let returnValue = true;
-    config['id'] = this.id;
-    if (resultantProfiles) {
-      for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oid'].length; i++) {
-        if(!!resultantProfiles['ssid'][i][0] && !!resultantProfiles['oid'][i][0]){
-          config['ssid'] = resultantProfiles['ssid'][i][0];
-          config['oid'] = resultantProfiles['oidConcat'];
-          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-        }else if(!!resultantProfiles['ssid'][i][0] && !resultantProfiles['oid'][i][0]){
-          config['ssid'] = resultantProfiles['ssid'][i][0];
-          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-        }else {
-          config['oid'] = resultantProfiles['oidConcat'];
-          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-        }
-      }
     } else {
-      // If there is no CredentialApplicability in the eap-config file,
-      // the default case will take 'eduroam' for the SSID
-      return await WifiEapConfigurator.configureAP(config);
+    // TODO if this happens it's a huge bug
+      return {message: 'No CredentialApplicability configured?!', success: false};
+    }
+    // TODO if this falls through, it's a huge bug
+    let returnValue = {message: 'No SSID/OID configured?!', success: false};
+    config['id'] = this.id;
+    config['ssid'] = "";
+    if (resultantProfiles['oid'].length > 0) {
+        config['oid'] = resultantProfiles['oid'].join(';');
+        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+    }
+    config['oid'] = "";
+    for (let i in resultantProfiles['ssid']) {
+        config['ssid'] = resultantProfiles['ssid'][i];
+        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
     }
     return returnValue;
   }
@@ -158,23 +137,16 @@ export class GeteduroamServices {
       let result:Object = {};
       let ssidAux = [];
       let oidAux = [];
-      let oidConcat = '';
       for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
         let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
         if(iEEE80211Aux['ConsortiumOID']){
-          if(oidConcat.length > 0){
-            oidConcat = oidConcat + ';' + iEEE80211Aux['ConsortiumOID'];
-          } else{
-            oidConcat = iEEE80211Aux['ConsortiumOID'];
-          }
-          oidAux.push(iEEE80211Aux['ConsortiumOID']);
+          oidAux = oidAux.concat(iEEE80211Aux['ConsortiumOID']);
         } else if(iEEE80211Aux['SSID']){
-          ssidAux.push(iEEE80211Aux['SSID']);
+          ssidAux = ssidAux.concat(iEEE80211Aux['SSID']);
         }
       }
       result['ssid'] = ssidAux;
       result['oid'] = oidAux;
-      result['oidConcat'] = oidConcat;
       return result;
   }
 
@@ -262,6 +234,7 @@ export class GeteduroamServices {
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
         if (!!authenticationMethod) {
+            authenticationMethod = this.sanitize(authenticationMethod);
             this.global.setAuthenticationMethod(authenticationMethod);
             return true;
         } else {
@@ -389,5 +362,27 @@ export class GeteduroamServices {
     }
 
     return returnedJson;
+  }
+
+  isBase64(str) {
+    try {
+      return btoa(atob(str)) == str;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
+   * This method clean the certificates saving only the base64 string.
+   * @param authenticationMethod
+   */
+  sanitize(authenticationMethod) {
+    let certificates = [];
+    authenticationMethod.clientSideCredential.clientCertificate = typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ? authenticationMethod.clientSideCredential.clientCertificate["_"] : authenticationMethod.clientSideCredential.clientCertificate;
+    for ( let i = 0 ; i < authenticationMethod.serverSideCredential.ca.length ; i++ ){
+      certificates[i] = typeof authenticationMethod.serverSideCredential.ca[i] === 'object' ? authenticationMethod.serverSideCredential.ca[i].content : authenticationMethod.serverSideCredential.ca[i];
+    }
+    authenticationMethod.serverSideCredential.ca = certificates.join(';');
+    return authenticationMethod;
   }
 }
