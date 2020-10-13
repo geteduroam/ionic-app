@@ -51,19 +51,16 @@ public class WifiEapConfigurator: CAPPlugin {
     }
 
     @objc func configureAP(_ call: CAPPluginCall) {
-        var ssid = call.getString("ssid")
-            if call.getString("oid") != nil && call.getString("oid") != "" {
-                ssid = ""
-                // Do nothing, in iOS the ssid is not mandatory like in Android when HS20 configuration exists
-            } else {
-                if self.currentSSIDs().first == "" {
-                    return call.success([
-                        "message": "plugin.wifieapconfigurator.error.ssid.missing",
-                        "success": false,
-                    ])
-                }
-            }
+        let id = call.getString("id")!
+        let ssid = call.getString("ssid") ?? ""
+        let oid = call.getString("oid") ?? ""
 
+        if (oid == "") && (ssid == "") {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.ssid.missing",
+                "success": false,
+            ])
+        }
 
         guard let eapType = call.get("eap", Int.self) else {
             return call.success([
@@ -84,7 +81,7 @@ public class WifiEapConfigurator: CAPPlugin {
             if server != ""{
                 //eapSettings.trustedServerNames = [server]
                 // supporting multiple CN
-                var serverNames: [String]? = server.components(separatedBy: ";")
+                let serverNames: [String]? = server.components(separatedBy: ";")
                 eapSettings.trustedServerNames = serverNames!
             }
         }
@@ -105,7 +102,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 if let queries = addServerCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
                     certificates = []
 
-                    for (index, query) in ((queries as? [[String: Any]])?.enumerated())! {
+                    for (_, query) in ((queries as? [[String: Any]])?.enumerated())! {
 
                         var item: CFTypeRef?
                         let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
@@ -125,7 +122,9 @@ public class WifiEapConfigurator: CAPPlugin {
 
                     eapSettings.setTrustedServerCertificates(certificates!)
                 }
-                if let identity = addClientCertificate(certName: "client" + ssid!, certificate: clientCertificate, password: passPhrase)
+                // TODO certName should be the CN of the certificate,
+                // but this works as long as we have only one (which we currently do)
+                if let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: clientCertificate, password: passPhrase)
                 {
                     let id = identity as! SecIdentity
                     eapSettings.setIdentity(id)
@@ -203,48 +202,35 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
 
-        // HS20 support
-        var oid = call.getString("oid")
-        var id = call.getString("id")
-        var displayName = call.getString("displayName")
+         var config:NEHotspotConfiguration
+                // If HS20 was enabled
+                if oid != "" {
+                    var oidStrings: [String]?
+                    oidStrings = oid.components(separatedBy: ";")
+                    // HS20 object settings
+                    let hs20 = NEHotspotHS20Settings(
+                        domainName: id,
+                        roamingEnabled: true)
+                    hs20.roamingConsortiumOIs = oidStrings ?? [""];
+                    config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
+                } else {
+                    config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+                }
+                // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
+                // https://developer.apple.com/documentation/networkextension/nehotspotconfiguration/2887518-joinonce
+                config.joinOnce = false
+                config.lifeTimeInDays = NSNumber(integerLiteral: 825)
 
-        if call.getString("oid") != nil && call.getString("oid") != ""{
-            oid = call.getString("oid")
-        }
-        if call.getString("id") != nil && call.getString("id") != ""{
-            id = call.getString("id")
-        }
-        if call.getString("displayName") != nil && call.getString("displayName") != ""{
-            displayName = call.getString("displayName")
-        }
-        var config:NEHotspotConfiguration
-        // If HS20 was enabled
-        if oid != nil && oid != ""{
-            var oidStrings: [String]?
-            oidStrings = oid?.components(separatedBy: ";")
-            // HS20 object settings
-            let hs20 = NEHotspotHS20Settings(
-                domainName: id ?? "",
-                roamingEnabled: true)
-            hs20.roamingConsortiumOIs = oidStrings ?? [""];
-            config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
-        } else {
-            config = NEHotspotConfiguration(ssid: ssid ?? "", eapSettings: eapSettings)
-        }
-        // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
-        config.joinOnce = false
-        config.lifeTimeInDays = NSNumber(integerLiteral: 825)
+               let options: [String: NSObject] = [kNEHotspotHelperOptionDisplayName : "Join our WIFI" as NSObject]
+               let queue: DispatchQueue = DispatchQueue(label: "app.eduroam.geteduroam", attributes: DispatchQueue.Attributes.concurrent)
 
-        let options: [String: NSObject] = [kNEHotspotHelperOptionDisplayName : "Join our WIFI" as NSObject]
-        let queue: DispatchQueue = DispatchQueue(label: "com.emergya.eduroam", attributes: DispatchQueue.Attributes.concurrent)
+               NSLog("Started wifi list scanning.")
 
-        NSLog("Started wifi list scanning.")
+               NEHotspotHelper.register(options: options, queue: queue) { (cmd: NEHotspotHelperCommand) in
+                 NSLog("Received command: \(cmd.commandType.rawValue)")
+               }
 
-        NEHotspotHelper.register(options: options, queue: queue) { (cmd: NEHotspotHelperCommand) in
-          NSLog("Received command: \(cmd.commandType.rawValue)")
-        }
-        NEHotspotConfigurationManager.shared.apply(config) { [weak self] (error) in
-                    print("error is \(String(describing: error))")
+                NEHotspotConfigurationManager.shared.apply(config) { (error) in
                     if let error = error {
                      if error.code == 13 {
                             call.success([
@@ -276,56 +262,12 @@ public class WifiEapConfigurator: CAPPlugin {
                             print("some other error: \(error.localizedDescription)")
                         }
                     } else {
-                        if ssid != nil && ssid != "" {
-                            if self?.currentSSIDs().first == ssid {
-                                call.success([
-                                    "message": "plugin.wifieapconfigurator.success.network.linked",
-                                    "success": true,
-                                ])
-                            } else {
-                                call.success([
-                                    "message": "plugin.wifieapconfigurator.error.network.notLinked",
-                                    "success": false,
-                                ])
-                            }
-                        } else { //HS2.0
                             call.success([
                                 "message": "plugin.wifieapconfigurator.success.network.linked",
                                 "success": true,
                             ])
-                        }
-                        print("perhaps connected")
-                        self?.printWifiInfo()
                     }
                 }
-
-            }
-
-            @IBAction func onInfo(_ sender: Any) {
-                self.printWifiInfo()
-            }
-
-            private func printWifiInfo() {
-                print("printWifiInfo:")
-                if let wifi = self.getConnectedWifiInfo() {
-                    if let connectedSSID = wifi["SSID"] {
-                        print("we are currently connected with \(connectedSSID)")
-                    }
-                    print("further info:")
-                    for (k, v) in wifi {
-                        print(".  \(k) \(v)")
-                    }
-                }
-                print()
-            }
-
-            private func getConnectedWifiInfo() -> [AnyHashable: Any]? {
-                if let ifs = CFBridgingRetain( CNCopySupportedInterfaces()) as? [String],
-                    let ifName = ifs.first as CFString?,
-                    let info = CFBridgingRetain( CNCopyCurrentNetworkInfo((ifName))) as? [AnyHashable: Any] {
-                        return info
-                    }
-                return nil
             }
 
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
@@ -411,22 +353,13 @@ public class WifiEapConfigurator: CAPPlugin {
 
     }
 
-    func currentSSIDs() -> [String] {
-         guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
-             return []
-         }
-         return interfaceNames.compactMap { name in
-             guard let info = CNCopyCurrentNetworkInfo(name as CFString) as? [String:AnyObject] else {
-                 return nil
-             }
-             guard let ssid = info[kCNNetworkInfoKeySSID as String] as? String else {
-                 return nil
-             }
-            return ssid
-         }
-     }
-
     func cleanCertificate(certificate: String) -> String{
+        // This function cleans up certificates that are base64-encoded PEM files,
+        // so the ----BEGIN stanza was base64 encoded.  The PoC geteduroam server did this.
+        // CAT doesn't, and the new geteduroam server doesn't either,
+        // but keep this code here because it is valid (abeit not a good idea)
+        // to present certificates this way, so let's keep supporting it.
+
         let certDirty = certificate
 
         let certWithoutHeader = certDirty.replacingOccurrences(of: "-----BEGIN CERTIFICATE-----\n", with: "")
@@ -584,8 +517,7 @@ public class WifiEapConfigurator: CAPPlugin {
     }
 
     @objc func isConnectedSSID(_ call: CAPPluginCall) {
-        let infoNetwork = SSID.fetchNetworkInfo()
-        guard infoNetwork?.first?.ssid != "" else {
+        guard call.getString("ssid") != nil else {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.ssid.missing",
                 "success": false,
@@ -598,9 +530,9 @@ public class WifiEapConfigurator: CAPPlugin {
                 "isConnected": false
             ])
         }
-
+        let infoNetwork = SSID.fetchNetworkInfo()
         for i in 0...interfaceNames.count {
-            let test = interfaceNames[i] as String;
+        let test = interfaceNames[i] as String;
             guard (test == infoNetwork?.first?.ssid)  else {
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.network.notConnected",
@@ -622,6 +554,21 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
     }
+    func currentSSIDs() -> [String] {
+        guard let interfaceNames = CNCopySupportedInterfaces() as? [String] else {
+            return []
+        }
+        let networkInfo = SSID.fetchNetworkInfo()
+        return interfaceNames.compactMap { name in
+            guard (networkInfo?.first?.ssid) != nil else {
+                return nil
+            }
+            guard let ssid = networkInfo?.first?.ssid else {
+                return nil
+            }
+            return ssid
+        }
+    }
 }
 
 extension Error {
@@ -639,8 +586,6 @@ extension String {
         return String(data: data, encoding: .utf8)
     }
 }
-
-
 public class SSID {
     class func fetchNetworkInfo() -> [NetworkInfo]? {
         if let interfaces: NSArray = CNCopySupportedInterfaces() {
