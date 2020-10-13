@@ -73,12 +73,12 @@ public class WifiEapConfigurator: CAPPlugin {
         resetKeychain()
         
         let eapSettings = NEHotspotEAPSettings()
-        eapSettings.isTLSClientCertificateRequired = true
+        eapSettings.isTLSClientCertificateRequired = false
         eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
         
         
         if let server = call.getString("servername"){
-            if server != ""{
+            if server != "" {
                 //eapSettings.trustedServerNames = [server]
                 // supporting multiple CN
                 let serverNames: [String]? = server.components(separatedBy: ";")
@@ -87,7 +87,7 @@ public class WifiEapConfigurator: CAPPlugin {
         }
         
         if let anonymous = call.getString("anonymous") {
-            if anonymous != ""{
+            if anonymous != "" {
                 eapSettings.outerIdentity = anonymous
             }
         }
@@ -95,40 +95,55 @@ public class WifiEapConfigurator: CAPPlugin {
         var username:String? = nil
         var password:String? = nil
         var authType:Int? = nil
-        
-        var certificates: [SecCertificate]? = nil
+
+        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
+            if let certificatesString = call.getString("caCertificate") {
+                // supporting multiple CAs
+                let certificatesStrings = certificatesString.components(separatedBy: ";")
+                var index: Int = 0
+                var certificates = [SecCertificate]();
+                certificatesStrings.forEach { caCertificateString in
+                    // building the name for the cert that will be installed
+                    let certName: String = "getEduroamCertCA" + String(index);
+                    // adding the certificate
+                    if (addCertificate(certName: certName, certificate: caCertificateString) as? Bool ?? false)
+                    {
+                        let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
+                                                       kSecAttrLabel as String: certName,
+                                                       kSecReturnRef as String: kCFBooleanTrue]
+                        var item: CFTypeRef?
+                        let status = SecItemCopyMatching(getquery as CFDictionary, &item)
+                        guard status == errSecSuccess else { return }
+                        let savedCert = item as! SecCertificate
+                        certificates.append(savedCert);
+                    }
+                    else {
+                        // return call.success(addCertificate(certName: certName, certificate: caCertificateString) as! Dictionary<String, AnyObject>)
+                    }
+                    index += 1
+                }
+                if (!eapSettings.setTrustedServerCertificates(certificates)) {
+                    return call.success([
+                        "message": "plugin.wifieapconfigurator.error.serverCaTrust.refused",
+                        "success": false,
+                    ]);
+                }
+            }
+        }
+
         if let clientCertificate = call.getString("clientCertificate"){
             if let passPhrase = call.getString("passPhrase"){
-                if let queries = addServerCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
-                    certificates = []
-                    
-                    for (_, query) in ((queries as? [[String: Any]])?.enumerated())! {
-                        
-                        var item: CFTypeRef?
-                        let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
-                        
-                        guard statusCertificate == errSecSuccess else {
-                            return call.success([
-                                "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
-                                "success": false,
-                            ])
-                        }
-                        
-                        let certificate = item as! SecCertificate
-                        
-                        certificates?.append(certificate)
-                        
-                    }
-                    
-                    eapSettings.setTrustedServerCertificates(certificates!)
-                }
                 // TODO certName should be the CN of the certificate,
                 // but this works as long as we have only one (which we currently do)
                 if let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: clientCertificate, password: passPhrase)
                 {
                     let id = identity as! SecIdentity
-                    eapSettings.setIdentity(id)
-                    eapSettings.isTLSClientCertificateRequired = true
+                    if (!eapSettings.setIdentity(id)) {
+                        return call.success([
+                            "message": "plugin.wifieapconfigurator.error.clientCert.refused",
+                            "success": false,
+                        ])
+                    }
                 }
             }else{
                 return call.success([
@@ -172,41 +187,11 @@ public class WifiEapConfigurator: CAPPlugin {
             eapSettings.ttlsInnerAuthenticationType = self.getAuthType(authType: authType ?? 0)!
         }
         
-        if call.getString("caCertificate") != nil && call.getString("caCertificate") != "" {
-            if let certificatesString = call.getString("caCertificate") {
-                // supporting multiple CAs
-                let certificatesStrings = certificatesString.components(separatedBy: ";")
-                var index: Int = 0
-                var certificates = [SecCertificate]();
-                certificatesStrings.forEach { caCertificateString in
-                    // building the name for the cert that will be installed
-                    let certName: String = "getEduroamCertCA" + String(index);
-                    // adding the certificate
-                    if (addCertificate(certName: certName, certificate: caCertificateString) as? Bool ?? false)
-                    {
-                        let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                       kSecAttrLabel as String: certName,
-                                                       kSecReturnRef as String: kCFBooleanTrue]
-                        var item: CFTypeRef?
-                        let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                        guard status == errSecSuccess else { return }
-                        let savedCert = item as! SecCertificate
-                        certificates.append(savedCert);
-                    }
-                    else {
-                        // return call.success(addCertificate(certName: certName, certificate: caCertificateString) as! Dictionary<String, AnyObject>)
-                    }
-                    index += 1
-                }
-                eapSettings.setTrustedServerCertificates(certificates)
-            }
-        }
-
         var config:NEHotspotConfiguration
         // If HS20 was enabled
         if oid != "" {
             var oidStrings: [String]?
-            oidStrings = oid.components(separatedBy: ";")
+            oidStrings = oid.uppercased().components(separatedBy: ";")
             // HS20 object settings
             let hs20 = NEHotspotHS20Settings(
                 domainName: id,
@@ -221,26 +206,30 @@ public class WifiEapConfigurator: CAPPlugin {
         config.joinOnce = false
        
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
-            if let error = error {
-                if error.code == NEHotspotConfigurationError.alreadyAssociated.rawValue /* 13 */ {
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
-                        "success": false,
-                    ])
-                }
-                
-                if error.code == NEHotspotConfigurationError.userDenied.rawValue /* 7 */ {
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.error.network.userCancelled",
-                        "success": false,
-                    ])
-                }
-            } else {
-                    call.success([
-                        "message": "plugin.wifieapconfigurator.success.network.linked",
-                        "success": true,
-                    ])
+            if error == nil {
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.success.network.linked",
+                    "success": true,
+                ])
             }
+            if error!.code == NEHotspotConfigurationError.alreadyAssociated.rawValue /* 13 */ {
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                    "success": false,
+                ])
+            }
+            
+            if error!.code == NEHotspotConfigurationError.userDenied.rawValue /* 7 */ {
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.network.userCancelled",
+                    "success": false,
+                ])
+            }
+            
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.network.unknown",
+                "success": false,
+            ])
         }
     }
 
@@ -365,12 +354,7 @@ public class WifiEapConfigurator: CAPPlugin {
                     return false
                 }
                 
-                if status == errSecSuccess {
-                    return true
-                }
-                else {
-                    return false
-                }
+                return true
             } else {
                 return [
                     "message": "plugin.wifieapconfigurator.error.network.certificateRefConvertionFailed",
