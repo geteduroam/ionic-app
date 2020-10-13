@@ -86,7 +86,6 @@ export class GeteduroamApp {
         } else {
           this.rootPage = ReconfigurePage;
           this.getAssociation(isAssociated);
-          this.global.setOverrideProfile(true);
 
           !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
         }

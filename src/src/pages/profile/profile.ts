@@ -126,7 +126,7 @@ export class ProfilePage extends BasePage{
       let config = this.configConnection();
       const checkRequest = await this.getEduroamServices.connectProfile(config);
 
-      if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
+      if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.notLinked')) {
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(

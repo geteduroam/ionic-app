@@ -73,12 +73,12 @@ public class WifiEapConfigurator: CAPPlugin {
         resetKeychain()
 
         let eapSettings = NEHotspotEAPSettings()
-        eapSettings.isTLSClientCertificateRequired = true
+        eapSettings.isTLSClientCertificateRequired = false
         eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
 
 
         if let server = call.getString("servername"){
-            if server != ""{
+            if server != "" {
                 //eapSettings.trustedServerNames = [server]
                 // supporting multiple CN
                 let serverNames: [String]? = server.components(separatedBy: ";")
@@ -87,7 +87,7 @@ public class WifiEapConfigurator: CAPPlugin {
         }
 
         if let anonymous = call.getString("anonymous") {
-            if anonymous != ""{
+            if anonymous != "" {
                 eapSettings.outerIdentity = anonymous
             }
         }
@@ -127,8 +127,12 @@ public class WifiEapConfigurator: CAPPlugin {
                 if let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: clientCertificate, password: passPhrase)
                 {
                     let id = identity as! SecIdentity
-                    eapSettings.setIdentity(id)
-                    eapSettings.isTLSClientCertificateRequired = true
+                    if (!eapSettings.setIdentity(id)) {
+                        return call.success([
+                            "message": "plugin.wifieapconfigurator.error.clientCert.refused",
+                            "success": false,
+                        ])
+                    }
                 }
             }else{
                 return call.success([
