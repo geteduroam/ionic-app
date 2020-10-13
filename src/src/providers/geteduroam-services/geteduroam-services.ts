@@ -233,7 +233,11 @@ export class GeteduroamServices {
         this.global.setCredentialApplicability(credentialApplicability);
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
-        if (!!authenticationMethod) {
+        if (!!authenticationMethod &&
+            (parseInt(authenticationMethod.eapMethod.type.toString()) === 13 &&
+                typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ||
+                parseInt(authenticationMethod.eapMethod.type.toString()) !== 13)
+        ) {
             authenticationMethod = this.sanitize(authenticationMethod);
             this.global.setAuthenticationMethod(authenticationMethod);
             return true;

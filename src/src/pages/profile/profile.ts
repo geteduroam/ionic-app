@@ -122,12 +122,21 @@ export class ProfilePage extends BasePage{
    */
   async checkForm() {
     if (!!this.enableButton) {
-
+      this.showAll = false;
       let config = this.configConnection();
-      const checkRequest = this.getEduroamServices.connectProfile(config);
+      const checkRequest = await this.getEduroamServices.connectProfile(config);
 
-      if (!!checkRequest) {
-        this.navigateTo();
+      if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
+        await this.navigateTo();
+      }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
+        await this.errorHandler.handleError(
+            this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
+            this.dictionary.getTranslation('error', 'available2') +
+            this.global.getSsid() + '.', false, '', '', true);
+      } else if (checkRequest.message.includes('error.network.userCancelled')) {
+        this.showAll = true;
+      } else {
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
       }
     }
   }
@@ -136,25 +145,20 @@ export class ProfilePage extends BasePage{
    * Navigation and check if navigation is active
    */
   async navigateTo() {
-    if (this.activeNavigation) {
-      this.showAll = false;
+    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+      logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+    await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
 
-      !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
-          logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-        await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
-    } else {
-      await this.alertConnectionDisabled();
-    }
   }
 
   /**
    * Check profile selected
    */
-  async getProfile() {
+  /*async getProfile() {
     let profileAux = this.navParams.get('profile');
     this.profile = !!profileAux && profileAux ? this.navParams.get('profile') : this.global.getProfile();
     return this.profile;
-  }
+  }*/
 
   /**
    * Method which returns the eap institutionSearch endpoint
@@ -210,32 +214,26 @@ export class ProfilePage extends BasePage{
    * Method to manage validation profile
    * @param validProfile check if profile is valid
    */
-  async manageProfileValidation(validProfile: boolean){
+  async manageProfileValidation(){
     this.providerInfo = this.global.getProviderInfo();
 
-    if (validProfile) {
+    this.validMethod = this.global.getAuthenticationMethod();
 
-      this.validMethod = this.global.getAuthenticationMethod();
+    if (!!this.validMethod.clientSideCredential.innerIdentitySuffix) {
+      this.suffixIdentity = this.validMethod.clientSideCredential.innerIdentitySuffix;
+    }
 
-      if (!!this.validMethod.clientSideCredential.innerIdentitySuffix) {
-        this.suffixIdentity = this.validMethod.clientSideCredential.innerIdentitySuffix;
-      }
-
-      if (!!this.validMethod.clientSideCredential.innerIdentityHint) {
-        this.hintIdentity = (this.validMethod.clientSideCredential.innerIdentityHint === 'true');
-      } else {
-        this.hintIdentity = false;
-      }
-
+    if (!!this.validMethod.clientSideCredential.innerIdentityHint) {
+      this.hintIdentity = (this.validMethod.clientSideCredential.innerIdentityHint === 'true');
     } else {
-      await this.notValidProfile();
+      this.hintIdentity = false;
     }
   }
 
   /**
    * Method to check message when profile is not valid
    */
-  async notValidProfile() {
+  /*async notValidProfile() {
     if(!!this.providerInfo){
 
       let url = this.checkUrlInfoProvide();
@@ -247,33 +245,29 @@ export class ProfilePage extends BasePage{
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
     }
     await this.navCtrl.pop();
-  }
-
-  /**
-   * Method to check if provider info contains links
-   * and show it on error page
-   */
-  checkUrlInfoProvide() {
-    return !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
-      !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
-  }
+  }*/
 
   /**
    *  Lifecycle method executed when the class did load
    */
   async ionViewDidLoad() {
-    const profile = await this.getProfile();
-    this.profile = await this.waitingSpinner(profile);
-    const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
-    this.manageProfileValidation(validProfile);
+    this.loading.createAndPresent();
+    await this.manageProfileValidation();
   }
 
   /**
    *  Lifecycle method executed when the class did enter
    */
   async ionViewDidEnter() {
-    this.removeSpinner();
-    this.showAll = true;
+    if (this.validMethod.clientSideCredential.username && this.validMethod.clientSideCredential.password) {
+      this.provide.email = this.validMethod.clientSideCredential.username;
+      this.provide.pass = this.validMethod.clientSideCredential.password;
+      this.enableButton = true;
+      await this.checkForm();
+    } else {
+      this.removeSpinner();
+      this.showAll = true;
+    }
   }
 
   /**
@@ -296,19 +290,10 @@ export class ProfilePage extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
-    let certificates : string = '';
-    for (let entry of this.validMethod.serverSideCredential.ca){
-      let strAux : string = entry['content'];
-      certificates = certificates.concat(strAux ,';');
-    }
     let serverIDs : string = '';
     for (let entry of this.validMethod.serverSideCredential.serverID){
       let strAux : string = entry;
       serverIDs = serverIDs.concat(strAux ,';');
-    }
-    // If only one certificate, remove the ';'
-    if (this.validMethod.serverSideCredential.ca.length == 1){
-      certificates = certificates.slice(0, -1);
     }
     serverIDs = serverIDs.slice(0, -1);
     return {
@@ -320,7 +305,7 @@ export class ProfilePage extends BasePage{
       servername: serverIDs,
       auth: this.global.auth.MSCHAPv2,
       anonymous: "",
-      caCertificate: certificates,
+      caCertificate: this.validMethod.serverSideCredential.ca,
       longestCommonSuffix: this.longestCommonSuffix(this.validMethod.serverSideCredential.serverID)
     };
   }

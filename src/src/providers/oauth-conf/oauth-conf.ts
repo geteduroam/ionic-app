@@ -47,11 +47,20 @@ export class OauthConfProvider {
    */
   async checkForm() {
     let config = this.configConnection();
-    const checkRequest = this.getEduroamServices.connectProfile(config);
+    const checkRequest = await this.getEduroamServices.connectProfile(config);
     this.loading.dismiss();
 
-    if (!!checkRequest) {
+    if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
       await this.navigateTo();
+    }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
+      await this.errorHandler.handleError(
+          this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
+          this.dictionary.getTranslation('error', 'available2') +
+          this.global.getSsid() + '.', false, '', '', true);
+    } else if (checkRequest.message.includes('error.network.userCancelled')) {
+      await this.navCtrl.pop();
+    } else {
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
     }
   }
 
@@ -73,7 +82,7 @@ export class OauthConfProvider {
       servername: serverIDs,
       auth: null,
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
-      caCertificate: this.validMethod.serverSideCredential.ca[0]['content'],
+      caCertificate: this.validMethod.serverSideCredential.ca,
       clientCertificate: this.validMethod.clientSideCredential.clientCertificate,
       passPhrase: this.validMethod.clientSideCredential.passphrase
     };
@@ -109,7 +118,6 @@ export class OauthConfProvider {
    * Navigation to the next view
    */
   async navigateTo() {
-    //this.showAll = false;
 
     !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
           logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
