@@ -19,7 +19,9 @@
 
   <div class="footer-form">
     <form (ngSubmit)="sendPassphrase()">
-      <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
+        <div class="content-button">
+        <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
+        </div>
     </form>
   </div>
 </div>

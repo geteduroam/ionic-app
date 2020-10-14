@@ -51,7 +51,7 @@ export class OauthConfProvider {
   /**
    * Method to check form, create connection with plugin WifiEapConfigurator and navigate.
    */
-  async checkForm(passphrase ?: string) {
+  async checkForm(passphrase? : string) {
     if (typeof passphrase !== 'undefined') {
       this.validMethod = this.global.getAuthenticationMethod();
       this.providerInfo = this.global.getProviderInfo();
