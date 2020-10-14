@@ -192,8 +192,16 @@ ion-content {
 #btn-back .button-inner {
   color: #276fbf;
   position: relative;
-  top: -2.7em;
-  left: -1.6em;
+  /* for Android, back button disappears outside the frame */
+  top: -.8em;
+  left: -1.4em;
+}
+@supports (-webkit-touch-callout: none) {
+  /* for iOS, back button can be outside the frame */
+  #btn-back .button-inner {
+    left: -1.6em;
+    top: -2.7em;
+  }
 }
 #btn-back .button-inner .caret {
   transform: rotate(-90deg);
