@@ -186,6 +186,24 @@ ion-content {
 
 }
 
+////------------------------------
+//// Custom style for back button
+////------------------------------
+#btn-back .button-inner {
+  color: #276fbf;
+  position: relative;
+  top: -2.7em;
+  left: -1.6em;
+}
+#btn-back .button-inner .caret {
+  transform: rotate(-90deg);
+  display: inline-block;
+  position: relative;
+  top: .35em;
+  left: .3em;
+  font-size: 1.5em;
+}
+
 ////---------------------------------
 //// Change background to black on dark mode
 ////---------------------------------
