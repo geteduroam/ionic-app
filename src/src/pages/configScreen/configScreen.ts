@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgModule, NgZone } from '@angular/core';
 import {Events, ModalController, NavController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
@@ -12,6 +12,7 @@ import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {ConfigFilePage} from "../configFile/configFile";
+import { CommonModule } from '@angular/common';
 
 const { Keyboard, App } = Plugins;
 declare var window;
@@ -20,7 +21,6 @@ declare var window;
   selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
-
 export class ConfigurationScreen extends BasePage{
 
   showAll: boolean = false;
@@ -95,13 +95,13 @@ export class ConfigurationScreen extends BasePage{
    * Method executes when the search bar is tapped.
    * */
   async showModal(e: any) {
+    Keyboard.hide();
     e.preventDefault();
-    await Keyboard.hide();
     if (!!this.instances) {
       let searchModal = this.modalCtrl.create(InstitutionSearch, {
         instances: this.instances,
-        instanceName: this.instanceName}
-      );
+        instanceName: this.instanceName
+      });
 
       searchModal.onDidDismiss((data) => {
 
@@ -226,6 +226,9 @@ export class ConfigurationScreen extends BasePage{
     this.resetValues();
   }
 
+  ionViewWillEnter() {
+    this.loading.create();
+  }
   /**
    *  Lifecycle when entering a page, before it becomes the active one
    *  Load the discovery data and show the spinner

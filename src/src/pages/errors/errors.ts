@@ -75,7 +75,7 @@ export class ErrorsPage extends BasePage{
    * This method close error page on modal screen.
    */
   async closeModal() {
-    if (await this.errorService.checkAgain(this.checkMethod, this.isFinal)) {
+    if (await this.errorService.checkAgain(this.checkMethod, this.isFinal) || this.checkMethod === 'enableAccess') {
       await this.viewCtrl.dismiss();
     } else {
       this.showToast(this.text);

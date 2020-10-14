@@ -7,6 +7,7 @@ import {DictionaryServiceProvider} from "../../providers/dictionary-service/dict
 import {GlobalProvider} from "../../providers/global/global";
 const { Keyboard } = Plugins;
 
+
 @Component({
   selector: 'page-institution-search',
   templateUrl: 'institutionSearch.html',
@@ -131,13 +132,17 @@ export class InstitutionSearch extends BasePage{
     this.selectedProfileId = '';
   }
 
+
+  ionViewWillEnter() {
+    this.ios = !!this.platform.is('ios');
+  }
   /**
    * Lifecycle when entering a page, after it becomes the active page.
    *  this sets focus on search bar
    */
   ionViewDidEnter() {
-    this.platform.is('ios') ? this.ios = true : this.ios = false ;
     this.instances = this.navParams.get('instances');
+    this.filteredInstances = this.instances;
     this.instanceName = this.navParams.get('instanceName');
     this.filterInstances(this.instanceName);
 
