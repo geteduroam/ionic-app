@@ -11,7 +11,8 @@
     "accept": "Aceptar ",
     "terms": "términos de uso",
     "profile": "Perfil",
-    "password": "Contraseña"
+    "password": "Contraseña",
+    "passphrase": "Contraseña del certificado"
   },
   "placeholder": {
     "institution": "Selecciona una institución...",

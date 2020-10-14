@@ -11,7 +11,8 @@
     "accept": "Accept ",
     "terms": "terms of use",
     "profile": "Profile",
-    "password": "Password"
+    "password": "Password",
+    "passphrase": "Passphrase"
   },
   "placeholder": {
     "institution": "Select an institution...",

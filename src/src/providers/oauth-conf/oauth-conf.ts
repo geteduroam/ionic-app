@@ -8,6 +8,8 @@ import {ErrorHandlerProvider} from "../error-handler/error-handler";
 import {DictionaryServiceProvider} from "../dictionary-service/dictionary-service-provider.service";
 import {NavController} from "ionic-angular";
 import {WifiConfirmation} from "../../pages/wifiConfirmation/wifiConfirmation";
+import {OauthFlow} from "../../pages/oauthFlow/oauthFlow";
+import {ClientCertificatePassphrasePage} from "../../pages/clientCertificatePassphrase/clientCertificatePassphrase";
 
 @Injectable()
 export class OauthConfProvider {
@@ -35,6 +37,10 @@ export class OauthConfProvider {
     this.providerInfo = provInfo;
     if (validProfile) {
       this.validMethod = this.global.getAuthenticationMethod();
+      if (typeof this.validMethod.clientSideCredential.passphrase === 'undefined') {
+        await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
+        return;
+      }
       await this.checkForm();
 
     } else {
@@ -45,7 +51,12 @@ export class OauthConfProvider {
   /**
    * Method to check form, create connection with plugin WifiEapConfigurator and navigate.
    */
-  async checkForm() {
+  async checkForm(passphrase ?: string) {
+    if (typeof passphrase !== 'undefined') {
+      this.validMethod = this.global.getAuthenticationMethod();
+      this.providerInfo = this.global.getProviderInfo();
+      this.validMethod.clientSideCredential.passphrase = passphrase;
+    }
     let config = this.configConnection();
     const checkRequest = await this.getEduroamServices.connectProfile(config);
     this.loading.dismiss();

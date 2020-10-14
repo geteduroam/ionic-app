@@ -1,0 +1,25 @@
+<div *ngIf="showAll" class="profile-content">
+  <div class="header-content" margin-top padding-top>
+    <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
+    <h1>{{getString('header', 'profile')}}</h1>
+  </div>
+
+  <div class="content-form" margin-bottom text-center>
+
+    <form (ngSubmit)="sendPassphrase()">
+
+      <div  class="content-profile" padding-top >
+        <ion-label class="label-conf" text-left>{{getString('label', 'passphrase')}}</ion-label>
+
+        <input (blur)="blur()" [(ngModel)]="passphrase"
+               autocomplete="on" class="input-profile" name="passphrase" padding-left type="text"/>
+      </div>
+    </form>
+  </div>
+
+  <div class="footer-form">
+    <form (ngSubmit)="sendPassphrase()">
+      <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
+    </form>
+  </div>
+</div>
