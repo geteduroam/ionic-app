@@ -365,11 +365,8 @@ public class WifiEapConfigurator: CAPPlugin {
                                                kSecValueRef as String: certRef,
                                                kSecAttrLabel as String: certName]
                 let status = SecItemAdd(addquery as CFDictionary, nil)
-                guard status == errSecSuccess else {
-                    if status == errSecDuplicateItem {
-                        return true
-                    }
-                    NSLog("☠️ CA certificate not added with error " + String(status));
+                guard status == errSecSuccess || status == errSecDuplicateItem else {
+                    NSLog("☠️ addCertificate: SecItemAdd " + String(status));
                     return false;
                 }
                 return true
@@ -390,7 +387,10 @@ public class WifiEapConfigurator: CAPPlugin {
         let data = Data(base64Encoded: certBase64)!
 
         let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
-        guard statusImport == errSecSuccess else { return nil }
+        guard statusImport == errSecSuccess || statusImport == errSecDuplicateItem else {
+            NSLog("☠️ addServerCertificate: SecPKCS12Import: " + String(statusImport))
+            return nil
+        }
         let items = rawItems! as! Array<Dictionary<String, Any>>
         let firstItem = items[0]
         if let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]? {
@@ -407,19 +407,8 @@ public class WifiEapConfigurator: CAPPlugin {
 
                     let statusUpload = SecItemAdd(addquery as CFDictionary, nil)
 
-                    guard statusUpload == errSecSuccess else {
-                        if statusUpload == errSecDuplicateItem {
-                            let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                           kSecAttrLabel as String: "getEduroamCertificate" + "\(index)",
-                                kSecReturnRef as String: kCFBooleanTrue]
-
-                            var item: CFTypeRef?
-                            let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                            let statusDelete = SecItemDelete(getquery as CFDictionary)
-                            guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return nil }
-                            return addServerCertificate(certificate: certificate, passPhrase: passPhrase)
-
-                        }
+                    guard statusUpload == errSecSuccess || statusUpload == errSecDuplicateItem else {
+                        NSLog("☠️ addServerCertificate: SecItemAdd: " + String(statusUpload))
                         return nil
                     }
 
@@ -458,18 +447,8 @@ public class WifiEapConfigurator: CAPPlugin {
             let addquery: [String: Any] = [kSecValueRef as String: identity,
                                            kSecAttrLabel as String: certName]
             let status = SecItemAdd(addquery as CFDictionary, nil)
-            guard status == errSecSuccess else {
-                if status == errSecDuplicateItem {
-                    let getquery: [String: Any] = [kSecValueRef as String: identity,
-                                                   kSecAttrLabel as String: certName,
-                                                   kSecReturnRef as String: kCFBooleanTrue]
-                    var item: CFTypeRef?
-                    let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                    let statusDelete = SecItemDelete(getquery as CFDictionary)
-                    guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return nil }
-                    return addClientCertificate(certName: certName, certificate: certificate, password: password)
-                }
-
+            guard status == errSecSuccess || status == errSecDuplicateItem else {
+                NSLog("☠️ addClientCertificate: SecPKCS12Import: " + String(status))
                 return nil
             }
 
