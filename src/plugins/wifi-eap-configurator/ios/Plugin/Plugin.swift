@@ -8,6 +8,8 @@ import CoreLocation
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
 
+    var lastId = "Last observed ID, don't clear chain if matches";
+    
     func getAuthType(authType : Int) -> NEHotspotEAPSettings.TTLSInnerAuthenticationType? {
         switch authType {
         case 3:
@@ -69,8 +71,10 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
 
-
-        resetKeychain()
+        if (lastId != id) {
+            resetKeychain()
+            lastId = id;
+        }
 
         let eapSettings = NEHotspotEAPSettings()
         eapSettings.isTLSClientCertificateRequired = false
