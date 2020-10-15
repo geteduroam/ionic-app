@@ -8,7 +8,7 @@ import CoreLocation
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
 
-    var lastId = "Last observed ID, don't clear chain if matches";
+    var lastId = "Last observed ID, don't clear keychain if matches";
     
     func getAuthType(authType : Int) -> NEHotspotEAPSettings.TTLSInnerAuthenticationType? {
         switch authType {
@@ -185,7 +185,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 var index: Int = 0
                 var certificates = [SecCertificate]();
                 certificatesStrings.forEach { caCertificateString in
-                    NSLog("caCertificateString " + caCertificateString)
+                    NSLog("🦊 configureAP: caCertificateString " + caCertificateString)
                     // building the name for the cert that will be installed
                     let certName: String = "getEduroamCertCA" + String(index);
                     // adding the certificate
@@ -197,19 +197,19 @@ public class WifiEapConfigurator: CAPPlugin {
                         var item: CFTypeRef?
                         let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                         guard status == errSecSuccess else {
-                            NSLog("☠️ CA certificate not saved");
+                            NSLog("☠️ configureAP: CA certificate not saved");
                             return
                         }
                         let savedCert = item as! SecCertificate
                         certificates.append(savedCert);
                     }
                     else {
-                        NSLog("☠️ CA certificate not added");
+                        NSLog("☠️ configureAP: CA certificate not added");
                         return
                     }
                     index += 1
                 }
-                NSLog("All caCertificateStrings handled")
+                NSLog("🦊 configureAP: All caCertificateStrings handled")
                 eapSettings.setTrustedServerCertificates(certificates)
             }
         }
@@ -230,6 +230,7 @@ public class WifiEapConfigurator: CAPPlugin {
         // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
         // https://developer.apple.com/documentation/networkextension/nehotspotconfiguration/2887518-joinonce
         config.joinOnce = false
+        // TODO set to validity of client certificate
         config.lifeTimeInDays = NSNumber(integerLiteral: 825)
 
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
@@ -252,16 +253,16 @@ public class WifiEapConfigurator: CAPPlugin {
                     if let configError = NEHotspotConfigurationError(rawValue: nsError.code) {
                         switch configError {
                         case .invalidWPAPassphrase:
-                            NSLog("password error: \(error.localizedDescription)")
+                            NSLog("☠️ configureAP: password error: \(error.localizedDescription)")
                         case .invalid, .invalidSSIDPrefix, .invalidSSID, .invalidWEPPassphrase,
                              .invalidEAPSettings, .invalidHS20Settings, .invalidHS20DomainName, .userDenied, .pending, .systemConfiguration, .unknown, .joinOnceNotSupported, .alreadyAssociated, .applicationIsNotInForeground, .internal:
-                            NSLog("other error: \(error.localizedDescription)")
+                            NSLog("☠️ configureAP: other error: \(error.localizedDescription)")
                         @unknown default:
-                            NSLog("later added error: \(error.localizedDescription)")
+                            NSLog("☠️ configureAP: later added error: \(error.localizedDescription)")
                         }
                     }
                 } else {
-                    NSLog("some other error: \(error.localizedDescription)")
+                    NSLog("☠️ configureAP: some other error: \(error.localizedDescription)")
                 }
             } else {
                     call.success([
@@ -373,7 +374,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 }
                 return true
             } else {
-                NSLog("☠️ SecCertificateCreateWithData failed")
+                NSLog("☠️ addCertificate: SecCertificateCreateWithData: false")
                 return false;
             }
         } else {
@@ -386,7 +387,7 @@ public class WifiEapConfigurator: CAPPlugin {
         let options = [ kSecImportExportPassphrase as String: passPhrase ]
         var rawItems: CFArray?
         let certBase64 = certificate
-        /*If */let data = Data(base64Encoded: certBase64)!
+        let data = Data(base64Encoded: certBase64)!
 
         let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
         guard statusImport == errSecSuccess else { return nil }
@@ -428,12 +429,9 @@ public class WifiEapConfigurator: CAPPlugin {
                             kSecReturnRef as String: kCFBooleanTrue])
                 }
             }
-
-
             return certificateQueries
-
         }
-
+        NSLog("☠️ addServerCertificate: No certificates have been imported")
         return nil
     }
 
@@ -442,13 +440,19 @@ public class WifiEapConfigurator: CAPPlugin {
         let options = [ kSecImportExportPassphrase as String: password ]
         var rawItems: CFArray?
         let certBase64 = certificate
-        /*If */let data = Data(base64Encoded: certBase64)!
+        let data = Data(base64Encoded: certBase64)!
         let statusImport = SecPKCS12Import(data as CFData,
                                            options as CFDictionary,
                                            &rawItems)
-        guard statusImport == errSecSuccess else { return nil }
+        guard statusImport == errSecSuccess else {
+            NSLog("☠️ addClientCertificate: SecPKCS12Import: " + String(statusImport))
+            return nil
+        }
         let items = rawItems! as! Array<Dictionary<String, Any>>
         let firstItem = items[0]
+        if (items.count > 1) {
+            NSLog("😱 addClientCertificate: SecPKCS12Import: more than one result - using only first one")
+        }
         if let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity? {
 
             let addquery: [String: Any] = [kSecValueRef as String: identity,
@@ -473,6 +477,7 @@ public class WifiEapConfigurator: CAPPlugin {
 
         }
 
+        NSLog("☠️ addClientCertificate: SecPKCS12Import: No items returned")
         return nil
     }
 
