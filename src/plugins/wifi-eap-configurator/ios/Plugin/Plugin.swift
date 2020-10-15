@@ -192,15 +192,16 @@ public class WifiEapConfigurator: CAPPlugin {
                                                        kSecReturnRef as String: kCFBooleanTrue]
                         var item: CFTypeRef?
                         let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                        guard status == errSecSuccess else { return }
+                        guard status == errSecSuccess else {
+                            NSLog("☠️ CA certificate not saved");
+                            return
+                        }
                         let savedCert = item as! SecCertificate
                         certificates.append(savedCert);
                     }
                     else {
-                        return call.success([
-                            "message": "plugin.wifieapconfigurator.error.ca.invalid",
-                            "success": false,
-                        ])
+                        NSLog("☠️ CA certificate not added");
+                        return
                     }
                     index += 1
                 }
@@ -377,11 +378,11 @@ public class WifiEapConfigurator: CAPPlugin {
                 }
                 return true
             } else {
-                NSLog("SecCertificateCreateWithData failed")
+                NSLog("☠️ SecCertificateCreateWithData failed")
                 return false;
             }
         } else {
-            NSLog("Unable to base64 decode certificate data")
+            NSLog("☠️ Unable to base64 decode certificate data")
             return false;
         }
     }
