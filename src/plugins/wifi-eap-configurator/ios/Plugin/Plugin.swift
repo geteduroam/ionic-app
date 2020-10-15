@@ -45,7 +45,7 @@ public class WifiEapConfigurator: CAPPlugin {
     }
 
     func deleteAllKeysForSecClass(_ secClass: CFTypeRef) {
-        let dict: [NSString : Any] = [kSecClass : secClass]
+        let dict: [NSString : CFTypeRef] = [kSecClass : secClass]
         let result = SecItemDelete(dict as CFDictionary)
         assert(result == noErr || result == errSecItemNotFound, "Error deleting keychain data (\(result))")
     }
@@ -88,6 +88,8 @@ public class WifiEapConfigurator: CAPPlugin {
 
         if let anonymous = call.getString("anonymous") {
             if anonymous != "" {
+                // only works with TTLS, PEAP, and EAP-FAST
+                // https://developer.apple.com/documentation/networkextension/nehotspoteapsettings/2866691-outeridentity
                 eapSettings.outerIdentity = anonymous
             }
         }
@@ -100,7 +102,7 @@ public class WifiEapConfigurator: CAPPlugin {
             if let passPhrase = call.getString("passPhrase"){
                 if let queries = addServerCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
 
-                    for (_, query) in ((queries as? [[String: Any]])?.enumerated())! {
+                    for (_, query) in (queries.enumerated()) {
 
                         var item: CFTypeRef?
                         let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
@@ -117,7 +119,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 // but this works as long as we have only one (which we currently do)
                 if let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: clientCertificate, password: passPhrase)
                 {
-                    let id = identity as! SecIdentity
+                    let id = identity
                     if (!eapSettings.setIdentity(id)) {
                         return call.success([
                             "message": "plugin.wifieapconfigurator.error.clientCert.refused",
@@ -179,10 +181,11 @@ public class WifiEapConfigurator: CAPPlugin {
                 var index: Int = 0
                 var certificates = [SecCertificate]();
                 certificatesStrings.forEach { caCertificateString in
+                    NSLog("caCertificateString " + caCertificateString)
                     // building the name for the cert that will be installed
                     let certName: String = "getEduroamCertCA" + String(index);
                     // adding the certificate
-                    if (addCertificate(certName: certName, certificate: caCertificateString) as? Bool ?? false)
+                    if (addCertificate(certName: certName, certificate: caCertificateString))
                     {
                         let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                        kSecAttrLabel as String: certName,
@@ -194,24 +197,27 @@ public class WifiEapConfigurator: CAPPlugin {
                         certificates.append(savedCert);
                     }
                     else {
-                        // return call.success(addCertificate(certName: certName, certificate: caCertificateString) as! Dictionary<String, AnyObject>)
+                        return call.success([
+                            "message": "plugin.wifieapconfigurator.error.ca.invalid",
+                            "success": false,
+                        ])
                     }
                     index += 1
                 }
+                NSLog("All caCertificateStrings handled")
                 eapSettings.setTrustedServerCertificates(certificates)
             }
         }
 
-         var config:NEHotspotConfiguration
+        var config:NEHotspotConfiguration
         // If HS20 was enabled
         if oid != "" {
-            var oidStrings: [String]?
-            oidStrings = oid.components(separatedBy: ";")
+            let oidStrings = oid.components(separatedBy: ";")
             // HS20 object settings
             let hs20 = NEHotspotHS20Settings(
                 domainName: id,
                 roamingEnabled: true)
-            hs20.roamingConsortiumOIs = oidStrings ?? [""];
+            hs20.roamingConsortiumOIs = oidStrings;
             config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
         } else {
             config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
@@ -353,35 +359,10 @@ public class WifiEapConfigurator: CAPPlugin {
 
     }
 
-    func cleanCertificate(certificate: String) -> String{
-        // This function cleans up certificates that are base64-encoded PEM files,
-        // so the ----BEGIN stanza was base64 encoded.  The PoC geteduroam server did this.
-        // CAT doesn't, and the new geteduroam server doesn't either,
-        // but keep this code here because it is valid (abeit not a good idea)
-        // to present certificates this way, so let's keep supporting it.
-
-        let certDirty = certificate
-
-        let certWithoutHeader = certDirty.replacingOccurrences(of: "-----BEGIN CERTIFICATE-----\n", with: "")
-        let certWithoutBlankSpace = certWithoutHeader.replacingOccurrences(of: "\n", with: "")
-        let certClean = certWithoutBlankSpace.replacingOccurrences(of: "-----END CERTIFICATE-----", with: "")
-
-        return certClean
-    }
-
-
-    func addCertificate(certName: String, certificate: String) -> Any? {
+    func addCertificate(certName: String, certificate: String) -> Bool {
         let certBase64 = certificate
-        var error: Unmanaged<CFError>?
 
-        let attributesRSAPub: [String:Any] = [
-            kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
-            kSecAttrKeyClass as String: kSecAttrKeyClassPublic,
-            kSecAttrKeySizeInBits as String: 2048,
-            kSecAttrIsPermanent as String: false
-        ]
-        if var data = Data(base64Encoded: certBase64, options: Data.Base64DecodingOptions.ignoreUnknownCharacters) {
-            let publicKeySec = SecKeyCreateWithData(data as CFData, attributesRSAPub as CFDictionary, &error)
+        if let data = Data(base64Encoded: certBase64, options: Data.Base64DecodingOptions.ignoreUnknownCharacters) {
             if let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) {
                 let addquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
                                                kSecValueRef as String: certRef,
@@ -407,31 +388,25 @@ public class WifiEapConfigurator: CAPPlugin {
                     return false
                 }
             } else {
-                return [
-                    "message": "plugin.wifieapconfigurator.error.network.certificateRefConvertionFailed",
-                    "success": false,
-                ]
+                NSLog("SecCertificateCreateWithData failed")
+                return false;
             }
         } else {
-            return [
-                "message": "plugin.wifieapconfigurator.error.network.certificateDataFailed",
-                "success": false,
-            ]
+            NSLog("Unable to base64 decode certificate data")
+            return false;
         }
     }
 
-    func addServerCertificate(certificate: String, passPhrase: String) -> Any? {
+    func addServerCertificate(certificate: String, passPhrase: String) -> [[String: Any]]? {
         let options = [ kSecImportExportPassphrase as String: passPhrase ]
         var rawItems: CFArray?
         let certBase64 = certificate
         /*If */let data = Data(base64Encoded: certBase64)!
 
         let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
-        guard statusImport == errSecSuccess else { return false }
+        guard statusImport == errSecSuccess else { return nil }
         let items = rawItems! as! Array<Dictionary<String, Any>>
         let firstItem = items[0]
-        let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
-        let trust = firstItem[kSecImportItemTrust as String] as! SecTrust?
         if let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]? {
             var certificateQueries : [[String: Any]] = []
 
@@ -455,11 +430,11 @@ public class WifiEapConfigurator: CAPPlugin {
                             var item: CFTypeRef?
                             let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                             let statusDelete = SecItemDelete(getquery as CFDictionary)
-                            guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                            guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return nil }
                             return addServerCertificate(certificate: certificate, passPhrase: passPhrase)
 
                         }
-                        return false
+                        return nil
                     }
 
                     certificateQueries.append(
@@ -477,7 +452,7 @@ public class WifiEapConfigurator: CAPPlugin {
         return nil
     }
 
-    func addClientCertificate(certName: String, certificate: String, password: String) -> Any? {
+    func addClientCertificate(certName: String, certificate: String, password: String) -> SecIdentity? {
 
         let options = [ kSecImportExportPassphrase as String: password ]
         var rawItems: CFArray?
@@ -486,7 +461,7 @@ public class WifiEapConfigurator: CAPPlugin {
         let statusImport = SecPKCS12Import(data as CFData,
                                            options as CFDictionary,
                                            &rawItems)
-        guard statusImport == errSecSuccess else { return false }
+        guard statusImport == errSecSuccess else { return nil }
         let items = rawItems! as! Array<Dictionary<String, Any>>
         let firstItem = items[0]
         if let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity? {
@@ -502,11 +477,11 @@ public class WifiEapConfigurator: CAPPlugin {
                     var item: CFTypeRef?
                     let status = SecItemCopyMatching(getquery as CFDictionary, &item)
                     let statusDelete = SecItemDelete(getquery as CFDictionary)
-                    guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                    guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return nil }
                     return addClientCertificate(certName: certName, certificate: certificate, password: password)
                 }
 
-                return false
+                return nil
             }
 
             return identity
