@@ -74,7 +74,7 @@ export class ErrorsPage extends BasePage{
    * [ Only Android can closed app ]
    */
   async exitApp() {
-    if (!this.isFinal) {
+    if (!this.isFinal || !this.platform.is('android')) {
       await this.viewCtrl.dismiss();
 
     } else {

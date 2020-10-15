@@ -1,5 +1,5 @@
 import { Component, NgZone } from '@angular/core';
-import {Events, ModalController, NavController, ViewController} from 'ionic-angular';
+import {Events, ModalController, NavController} from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -10,8 +10,11 @@ import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
+import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import {ConfigFilePage} from "../configFile/configFile";
 
-const { Keyboard } = Plugins;
+const { Keyboard, App } = Plugins;
+declare var window;
 
 @Component({
   selector: 'page-config-screen',
@@ -82,10 +85,10 @@ export class ConfigurationScreen extends BasePage{
    * Constructor
    * */
   constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices, private ngZone: NgZone,
-              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, protected global: GlobalProvider, private viewCtrl: ViewController) {
+              protected loading: LoadingProvider, protected modalCtrl: ModalController, protected event: Events,
+              protected dictionary: DictionaryServiceProvider, protected global: GlobalProvider,
+              private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
-
   }
 
   /**
@@ -95,31 +98,27 @@ export class ConfigurationScreen extends BasePage{
     e.preventDefault();
     await Keyboard.hide();
     if (!!this.instances) {
-     this.openModal();
+      let searchModal = this.modalCtrl.create(InstitutionSearch, {
+        instances: this.instances,
+        instanceName: this.instanceName}
+      );
+
+      searchModal.onDidDismiss((data) => {
+
+        if (data !== undefined) {
+          this.instance = data;
+          this.instanceName = data.name;
+
+          this.initializeProfiles(this.instance);
+
+        }
+      });
+
+      return await searchModal.present();
     } else {
       await this.getDiscovery();
       this.showModal(e);
     }
-  }
-
-  openModal() {
-    let searchModal = this.modalCtrl.create(InstitutionSearch, {
-      instances: this.instances,
-      instanceName: this.instanceName}
-    );
-
-    searchModal.onDidDismiss((data) => {
-
-      if (data !== undefined) {
-        this.instance = data;
-        this.instanceName = data.name;
-
-        this.initializeProfiles(this.instance);
-
-      }
-    });
-
-    return searchModal.present();
   }
 
   /**
@@ -206,13 +205,25 @@ export class ConfigurationScreen extends BasePage{
     e.preventDefault();
     if (!!this.activeNavigation) {
       this.showAll = false;
+      if (!this.profile.redirect && !!profile.oauth) {
+        await this.navCtrl.push(OauthFlow, {profile}, {animation: 'transition'});
+      } else if (!this.profile.redirect && !profile.oauth) {
+        if (await this.checkEap(profile)) {
+          this.redirectToFlow();
+        } else {
+          const providerInfo = this.global.getProviderInfo();
+          await this.notValidProfile(providerInfo);
+        }
+      } else {
+        window.cordova.InAppBrowser.open(this.profile.redirect, '_system',"location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+        !!this.global.isAndroid() ? App.exitApp() : this.showAll = true
 
-      let destinationPage = !!profile.oauth ? OauthFlow : ProfilePage;
-      await this.navCtrl.push(destinationPage, {profile}, {animation: 'transition'});
-      this.resetValues();
+      }
+
     } else{
      await this.alertConnectionDisabled();
     }
+    this.resetValues();
   }
 
   /**
@@ -232,14 +243,50 @@ export class ConfigurationScreen extends BasePage{
 
   resetValues() {
     this.ngZone.run(() => {
-      this.profiles = null;
-      this.selectedProfileId =  null;
+      delete this.profiles;
+      this.profile = null;
       this.defaultProfile = null;
+      this.selectedProfileId = null;
       this.profileName = null;
-      this.instanceName = null;
-      this.showAll = true;
+      this.instanceName = '';
+
     });
 
+  }
+
+  async checkEap(profile: ProfileModel) {
+    return await this.getEduroamServices.eapValidation(profile);
+  }
+
+  /**
+   * Method to check if provider info contains links
+   * and show it on error page
+   */
+  checkUrlInfoProvide(providerInfo) {
+    return !!providerInfo.helpdesk.webAddress ? providerInfo.helpdesk.webAddress :
+        !!providerInfo.helpdesk.emailAddress ? providerInfo.helpdesk.emailAddress : '';
+  }
+
+  async notValidProfile(providerInfo) {
+    if(!!providerInfo){
+      let url = this.checkUrlInfoProvide(providerInfo);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+    } else {
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
+    }
+  }
+
+  /**
+   *
+   */
+  redirectToFlow() {
+    const authenticationMethod = this.global.getAuthenticationMethod();
+    const eap = parseInt(authenticationMethod.eapMethod.type.toString());
+    if (eap === 21 || eap === 25) {
+      this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
+    } else {
+      this.navCtrl.push(ConfigFilePage, '', {animation: 'transition'});
+    }
   }
 
 }

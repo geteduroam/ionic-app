@@ -129,7 +129,7 @@ export class GeteduroamServices {
     let returnValue = true;
     config['id'] = this.id;
     if (resultantProfiles) {
-      for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oid'].length; i++) {
+      for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oidConcat'].length; i++) {
         if(!!resultantProfiles['ssid'][i][0] && !!resultantProfiles['oid'][i][0]){
           config['ssid'] = resultantProfiles['ssid'][i][0];
           config['oid'] = resultantProfiles['oidConcat'];
@@ -261,7 +261,12 @@ export class GeteduroamServices {
         this.global.setCredentialApplicability(credentialApplicability);
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
-        if (!!authenticationMethod) {
+        if (!!authenticationMethod &&
+            (parseInt(authenticationMethod.eapMethod.type.toString()) === 13 &&
+                typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ||
+                parseInt(authenticationMethod.eapMethod.type.toString()) !== 13)
+        ) {
+            authenticationMethod = this.sanitize(authenticationMethod);
             this.global.setAuthenticationMethod(authenticationMethod);
             return true;
         } else {
@@ -389,5 +394,27 @@ export class GeteduroamServices {
     }
 
     return returnedJson;
+  }
+
+  isBase64(str) {
+    try {
+      return btoa(atob(str)) == str;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
+   * This method clean the certificates saving only the base64 string.
+   * @param authenticationMethod
+   */
+  sanitize(authenticationMethod) {
+    let certificates = [];
+    authenticationMethod.clientSideCredential.clientCertificate = typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ? authenticationMethod.clientSideCredential.clientCertificate["_"] : authenticationMethod.clientSideCredential.clientCertificate;
+    for ( let i = 0 ; i < authenticationMethod.serverSideCredential.ca.length ; i++ ){
+      certificates[i] = typeof authenticationMethod.serverSideCredential.ca[i] === 'object' ? authenticationMethod.serverSideCredential.ca[i].content : authenticationMethod.serverSideCredential.ca[i];
+    }
+    authenticationMethod.serverSideCredential.ca = certificates.join(';');
+    return authenticationMethod;
   }
 }
