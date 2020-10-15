@@ -124,6 +124,11 @@ public class WifiEapConfigurator: CAPPlugin {
                             "success": false,
                         ])
                     }
+                } else {
+                    return call.success([
+                        "message": "plugin.wifieapconfigurator.error.clientCert.refused",
+                        "success": false,
+                    ])
                 }
             }else{
                 return call.success([
