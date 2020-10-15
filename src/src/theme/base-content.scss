@@ -193,21 +193,18 @@ ion-content {
   color: #276fbf;
   position: relative;
   /* for Android, back button disappears outside the frame */
-  top: -.8em;
-  left: -1.4em;
-}
-@supports (-webkit-touch-callout: none) {
-  /* for iOS, back button can be outside the frame */
-  #btn-back .button-inner {
+  /* top: -.7em; */
+  /* left: -1.4em; */
+  /* @supports (-webkit-touch-callout: none) { */
     left: -1.6em;
     top: -2.7em;
-  }
+  /* } */
 }
 #btn-back .button-inner .caret {
   transform: rotate(-90deg);
   display: inline-block;
   position: relative;
-  top: .35em;
+  top: .33em;
   left: .3em;
   font-size: 1.5em;
 }
