@@ -88,7 +88,8 @@ export class WifiConfirmation extends BasePage implements OnInit {
   async backToConfig() {
     await this.statusConnection();
     if (!!this.activeNavigation) {
-      document.getElementById('back-arrow').style.opacity = '0.75';
+      document.getElementById('btn-back').style.opacity = '0';
+      document.getElementById('dismissable-back').style.opacity = '0';
       await this.viewCtrl.dismiss()
     } else {
       await this.alertConnectionDisabled();

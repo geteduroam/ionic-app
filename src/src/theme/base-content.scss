@@ -186,6 +186,32 @@ ion-content {
 
 }
 
+////------------------------------
+//// Custom style for back button
+////------------------------------
+#btn-back .button-inner {
+  color: #276fbf;
+  position: relative;
+  /* for Android, back button disappears outside the frame */
+  top: -.8em;
+  left: -1.4em;
+}
+@supports (-webkit-touch-callout: none) {
+  /* for iOS, back button can be outside the frame */
+  #btn-back .button-inner {
+    left: -1.6em;
+    top: -2.7em;
+  }
+}
+#btn-back .button-inner .caret {
+  transform: rotate(-90deg);
+  display: inline-block;
+  position: relative;
+  top: .35em;
+  left: .3em;
+  font-size: 1.5em;
+}
+
 ////---------------------------------
 //// Change background to black on dark mode
 ////---------------------------------

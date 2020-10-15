@@ -352,7 +352,8 @@ export class ProfilePage extends BasePage{
   }
 
   goBack() {
-    document.getElementById('back-arrow').style.opacity = '0.75';
+    document.getElementById('btn-back').style.opacity = '0';
+    document.getElementById('dismissable-back').style.opacity = '0';
     this.viewCtrl.dismiss();
   }
 }
