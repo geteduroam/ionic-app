@@ -96,11 +96,9 @@ public class WifiEapConfigurator: CAPPlugin {
         var password:String? = nil
         var authType:Int? = nil
 
-        var certificates: [SecCertificate]? = nil
         if let clientCertificate = call.getString("clientCertificate"){
             if let passPhrase = call.getString("passPhrase"){
                 if let queries = addServerCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
-                    certificates = []
 
                     for (_, query) in ((queries as? [[String: Any]])?.enumerated())! {
 
@@ -113,14 +111,7 @@ public class WifiEapConfigurator: CAPPlugin {
                                 "success": false,
                             ])
                         }
-
-                        let certificate = item as! SecCertificate
-
-                        certificates?.append(certificate)
-
                     }
-
-                    eapSettings.setTrustedServerCertificates(certificates!)
                 }
                 // TODO certName should be the CN of the certificate,
                 // but this works as long as we have only one (which we currently do)
