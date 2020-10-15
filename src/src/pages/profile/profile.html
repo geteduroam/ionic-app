@@ -1,4 +1,4 @@
-<div *ngIf="viewCtrl.enableBack() && showAll " class="arrow-back" >
+<div *ngIf="!global.isAndroid() && viewCtrl.enableBack() && showAll " class="arrow-back" >
     <button ion-button class="arrow-btn" (click)="goBack()" [ngClass]="!!hiddenIcon ? 'arrow-btn' : 'arrow-back-hidden'" id="btn-back">
         <span class="button-inner"><span class="caret">⌃</span>
             Back
