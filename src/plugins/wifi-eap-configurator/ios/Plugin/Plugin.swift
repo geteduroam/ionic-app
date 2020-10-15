@@ -232,26 +232,17 @@ public class WifiEapConfigurator: CAPPlugin {
         config.joinOnce = false
         config.lifeTimeInDays = NSNumber(integerLiteral: 825)
 
-        let options: [String: NSObject] = [kNEHotspotHelperOptionDisplayName : "Join our WIFI" as NSObject]
-        let queue: DispatchQueue = DispatchQueue(label: "app.eduroam.geteduroam", attributes: DispatchQueue.Attributes.concurrent)
-
-        NSLog("Started wifi list scanning.")
-
-        NEHotspotHelper.register(options: options, queue: queue) { (cmd: NEHotspotHelperCommand) in
-            NSLog("Received command: \(cmd.commandType.rawValue)")
-        }
-
         NEHotspotConfigurationManager.shared.apply(config) { (error) in
             if let error = error {
                if error.code == 13 {
-                    call.success([
+                    return call.success([
                         "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
                         "success": false,
                     ])
                 }
 
                 if error.code == 7 {
-                    call.success([
+                    return call.success([
                         "message": "plugin.wifieapconfigurator.error.network.userCancelled",
                         "success": false,
                     ])
