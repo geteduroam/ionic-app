@@ -370,23 +370,12 @@ public class WifiEapConfigurator: CAPPlugin {
                 let status = SecItemAdd(addquery as CFDictionary, nil)
                 guard status == errSecSuccess else {
                     if status == errSecDuplicateItem {
-                        let getquery: [String: Any] = [kSecClass as String: kSecClassCertificate,
-                                                       kSecAttrLabel as String: certName,
-                                                       kSecReturnRef as String: kCFBooleanTrue]
-                        var item: CFTypeRef?
-                        let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-                        let statusDelete = SecItemDelete(getquery as CFDictionary)
-                        guard statusDelete == errSecSuccess || status == errSecItemNotFound else { return false }
+                        return true
                     }
-                    return false
+                    NSLog("☠️ CA certificate not added with error " + String(status));
+                    return false;
                 }
-
-                if status == errSecSuccess {
-                    return true
-                }
-                else {
-                    return false
-                }
+                return true
             } else {
                 NSLog("SecCertificateCreateWithData failed")
                 return false;
