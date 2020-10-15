@@ -41,7 +41,12 @@ export class GeteduroamServices {
     try {
         const response = await this.http.get(url, params, headers);
         const data = JSON.parse(response.data);
-        return data.instances;
+        if (data.instances) {
+          return data.instances;
+        } else {
+          await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-institution'), false);
+        }
+
     } catch (e) {
         await this.errorHandler.handleError(e.error,false);
     }
@@ -64,7 +69,7 @@ export class GeteduroamServices {
     }
 
     // It checks the url if app is opened from a file
-    if ((url.includes('eap-config') || url.includes('document') || url.includes('octet-stream')) && !url.includes('https')) {
+    if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
 
       response = await this.store.readExtFile(url);
       response.data = atob(response.data);
@@ -116,7 +121,7 @@ export class GeteduroamServices {
         // the default case will take 'eduroam' for the SSID
         // to be removed before adding any profile
         let config = {
-          ssid: this.global.getSsid()
+          ssid: 'eduroam'
         };
         await this.removeNetwork(config);
       }
@@ -124,17 +129,18 @@ export class GeteduroamServices {
     let returnValue = true;
     config['id'] = this.id;
     if (resultantProfiles) {
-      for (let i = 0; i < resultantProfiles['ssid'].length; i++) {
-        if(resultantProfiles['ssid'][i][0] != '#Passpoint'){
+      for (let i = 0; i < resultantProfiles['ssid'].length && resultantProfiles['oidConcat'].length; i++) {
+        if(!!resultantProfiles['ssid'][i][0] && !!resultantProfiles['oid'][i][0]){
           config['ssid'] = resultantProfiles['ssid'][i][0];
-          config['oid'] = '';
+          config['oid'] = resultantProfiles['oidConcat'];
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }else if(!!resultantProfiles['ssid'][i][0] && !resultantProfiles['oid'][i][0]){
+          config['ssid'] = resultantProfiles['ssid'][i][0];
+          returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
+        }else {
+          config['oid'] = resultantProfiles['oidConcat'];
           returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
         }
-      }
-      if (resultantProfiles['oid'].length > 0) {
-        config['oid'] = resultantProfiles['oidConcat'];
-        config['ssid'] = '#Passpoint';
-        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
       }
     } else {
       // If there is no CredentialApplicability in the eap-config file,
@@ -162,14 +168,8 @@ export class GeteduroamServices {
             oidConcat = iEEE80211Aux['ConsortiumOID'];
           }
           oidAux.push(iEEE80211Aux['ConsortiumOID']);
-          if(iEEE80211Aux['SSID']) {
-            ssidAux.push(iEEE80211Aux['SSID']);
-          } else {
-            ssidAux.push(['#Passpoint']);
-          }
-        } else {
+        } else if(iEEE80211Aux['SSID']){
           ssidAux.push(iEEE80211Aux['SSID']);
-          oidAux.push(iEEE80211Aux['']);
         }
       }
       result['ssid'] = ssidAux;
@@ -261,7 +261,12 @@ export class GeteduroamServices {
         this.global.setCredentialApplicability(credentialApplicability);
         let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
 
-        if (!!authenticationMethod) {
+        if (!!authenticationMethod &&
+            (parseInt(authenticationMethod.eapMethod.type.toString()) === 13 &&
+                typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ||
+                parseInt(authenticationMethod.eapMethod.type.toString()) !== 13)
+        ) {
+            authenticationMethod = this.sanitize(authenticationMethod);
             this.global.setAuthenticationMethod(authenticationMethod);
             return true;
         } else {
@@ -389,5 +394,27 @@ export class GeteduroamServices {
     }
 
     return returnedJson;
+  }
+
+  isBase64(str) {
+    try {
+      return btoa(atob(str)) == str;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /**
+   * This method clean the certificates saving only the base64 string.
+   * @param authenticationMethod
+   */
+  sanitize(authenticationMethod) {
+    let certificates = [];
+    authenticationMethod.clientSideCredential.clientCertificate = typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ? authenticationMethod.clientSideCredential.clientCertificate["_"] : authenticationMethod.clientSideCredential.clientCertificate;
+    for ( let i = 0 ; i < authenticationMethod.serverSideCredential.ca.length ; i++ ){
+      certificates[i] = typeof authenticationMethod.serverSideCredential.ca[i] === 'object' ? authenticationMethod.serverSideCredential.ca[i].content : authenticationMethod.serverSideCredential.ca[i];
+    }
+    authenticationMethod.serverSideCredential.ca = certificates.join(';');
+    return authenticationMethod;
   }
 }

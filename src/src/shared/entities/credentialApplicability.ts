@@ -34,7 +34,19 @@ export class CredentialApplicability extends BaseJson{
     console.log(propertyValue);
     try {
       this.iEEE80211 = propertyValue['IEEE80211'];
-      this.global.setSsid(this.iEEE80211[0]['SSID'][0])
+      let i = 0;
+      let enc = false;
+      while (i < this.iEEE80211.length && !enc) {
+        if ( 'SSID' in this.iEEE80211[i] ) {
+          this.global.setSsid(this.iEEE80211[i]['SSID'][0]);
+          enc = true;
+        } else {
+          i++;
+        }
+      }
+      if (!enc) {
+        returnValue = false;
+      }
     } catch (e) {
       returnValue = false;
     }

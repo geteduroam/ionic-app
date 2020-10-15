@@ -29,7 +29,7 @@ export class GlobalProvider {
   private providerInfo: ProviderInfo;
   private credentialApplicability: CredentialApplicability;
 
-  private clientId : string = 'f817fbcc-e8f4-459e-af75-0822d86ff47a';
+  private clientId : string = 'app.geteduroam.ionic';
 
 
   private overrideProfile: boolean = false;

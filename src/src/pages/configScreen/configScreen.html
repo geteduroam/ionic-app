@@ -16,7 +16,7 @@
 
         <div *ngIf="this.instances" class="row" padding-top>
 
-            <ion-searchbar (click)="showModal()" [(ngModel)]="instanceName" cancelButtonText
+            <ion-searchbar (click)="showModal($event)" [(ngModel)]="instanceName" cancelButtonText
                            class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">
 
             </ion-searchbar>

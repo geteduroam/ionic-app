@@ -356,6 +356,12 @@ public class WifiEapConfigurator: CAPPlugin {
     }
     
     func cleanCertificate(certificate: String) -> String{
+        // This function cleans up certificates that are base64-encoded PEM files,
+        // so the ----BEGIN stanza was base64 encoded.  The PoC geteduroam server did this.
+        // CAT doesn't, and the new geteduroam server doesn't either,
+        // but keep this code here because it is valid (abeit not a good idea)
+        // to present certificates this way, so let's keep supporting it.
+
         let certDirty = certificate
         
         let certWithoutHeader = certDirty.replacingOccurrences(of: "-----BEGIN CERTIFICATE-----\n", with: "")
