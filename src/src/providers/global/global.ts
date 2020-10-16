@@ -39,7 +39,7 @@ export class GlobalProvider {
    * SSID network
    */
   getSsid() {
-    return this.ssid;
+    return !!this.ssid ? this.ssid : 'eduroam';
   }
 
   setSsid(value: string) {

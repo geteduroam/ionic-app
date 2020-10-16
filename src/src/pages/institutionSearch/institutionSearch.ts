@@ -136,7 +136,7 @@ export class InstitutionSearch extends BasePage{
    *  this sets focus on search bar
    */
   ionViewDidEnter() {
-    this.platform.is('ios') ? this.ios = true : this.ios = false ;
+    this.ios = !!this.platform.is('ios');
     this.instances = this.navParams.get('instances');
     this.instanceName = this.navParams.get('instanceName');
     this.filterInstances(this.instanceName);
@@ -144,6 +144,9 @@ export class InstitutionSearch extends BasePage{
     setTimeout(() => {
       this.searchBar.setFocus()
     }, 10);
+    if (!this.ios) {
+      Keyboard.show();
+    }
   }
 
   /**

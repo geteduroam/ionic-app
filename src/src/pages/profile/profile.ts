@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Events, NavController, NavParams } from 'ionic-angular';
+import {Events, NavController, NavParams, ViewController} from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
@@ -12,7 +12,9 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
+import { Plugins } from '@capacitor/core';
 
+const { Keyboard } = Plugins;
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
@@ -87,11 +89,21 @@ export class ProfilePage extends BasePage{
    */
   enableButton: boolean = false;
 
+  hiddenIcon: boolean = true;
+
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events) {
+              protected event: Events, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
+
+    Keyboard.addListener('keyboardWillShow', () => {
+      this.hiddenIcon = false;
+    });
+
+    Keyboard.addListener('keyboardWillHide', () => {
+      this.hiddenIcon = true;
+    });
 
   }
 
@@ -126,7 +138,7 @@ export class ProfilePage extends BasePage{
       let config = this.configConnection();
       const checkRequest = await this.getEduroamServices.connectProfile(config);
 
-      if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.notLinked')) {
+      if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
@@ -145,10 +157,14 @@ export class ProfilePage extends BasePage{
    * Navigation and check if navigation is active
    */
   async navigateTo() {
-    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
-      logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-    await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+    if (this.activeNavigation) {
 
+      !!this.providerInfo.providerLogo ? await this.navCtrl.push(WifiConfirmation, {
+          logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+        await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
+    } else {
+      await this.alertConnectionDisabled();
+    }
   }
 
   /**
@@ -333,5 +349,11 @@ export class ProfilePage extends BasePage{
       }
     }
     return candidate;
+  }
+
+  goBack() {
+    document.getElementById('btn-back').style.opacity = '0';
+    document.getElementById('dismissable-back').style.opacity = '0';
+    this.viewCtrl.dismiss();
   }
 }
