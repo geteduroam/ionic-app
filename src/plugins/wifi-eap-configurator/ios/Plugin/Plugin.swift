@@ -51,11 +51,15 @@ public class WifiEapConfigurator: CAPPlugin {
     }
 
     @objc func configureAP(_ call: CAPPluginCall) {
-        let id = call.getString("id")!
-        let ssid = call.getString("ssid") ?? ""
-        let oid = call.getString("oid") ?? ""
 
-        if (oid == "") && (ssid == "") {
+
+        resetKeychain();
+
+        let id = call.getString("id")!
+        let ssids = call.getArray("ssid", [String: Any].self)
+        let oids = getArray("oid", [String: Any].self)
+
+        if (oids.count == 0  && ssids.count == 0) {
             return call.success([
                 "message": "plugin.wifieapconfigurator.error.ssid.missing",
                 "success": false,
@@ -68,14 +72,6 @@ public class WifiEapConfigurator: CAPPlugin {
                 "success": false,
             ])
         }
-
-
-        resetKeychain()
-
-        let eapSettings = NEHotspotEAPSettings()
-        eapSettings.isTLSClientCertificateRequired = true
-        eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
-
 
         if let server = call.getString("servername"){
             if server != ""{
@@ -91,6 +87,11 @@ public class WifiEapConfigurator: CAPPlugin {
                 eapSettings.outerIdentity = anonymous
             }
         }
+
+        let eapSettings = NEHotspotEAPSettings()
+        eapSettings.isTLSClientCertificateRequired = true
+        eapSettings.supportedEAPTypes = [getEAPType(eapType: eapType)!]
+
 
         var username:String? = nil
         var password:String? = nil
@@ -202,73 +203,78 @@ public class WifiEapConfigurator: CAPPlugin {
             }
         }
 
-         var config:NEHotspotConfiguration
-                // If HS20 was enabled
-                if oid != "" {
-                    var oidStrings: [String]?
-                    oidStrings = oid.components(separatedBy: ";")
-                    // HS20 object settings
-                    let hs20 = NEHotspotHS20Settings(
+        for ssids in ssid {
+            let config:NEHotspotConfiguration
+            config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+            configureNetwork(config, call)
+        }
+
+        if oids.count != 0 {
+            let config:NEHotspotConfiguration
+            let hs20 = NEHotspotHS20Settings(
                         domainName: id,
                         roamingEnabled: true)
-                    hs20.roamingConsortiumOIs = oidStrings ?? [""];
-                    config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
-                } else {
-                    config = NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings)
+            hs20.roamingConsortiumOIs = oids ?? [""];
+            config = NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings)
+            configureNetwork(config, call)
+        }
+
+    }
+
+    func configureNetwork (config: NEHotspotConfiguration, _ call: CAPPluginCall) {
+        // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
+        // https://developer.apple.com/documentation/networkextension/nehotspotconfiguration/2887518-joinonce
+        config.joinOnce = false
+        config.lifeTimeInDays = NSNumber(integerLiteral: 825)
+
+       let options: [String: NSObject] = [kNEHotspotHelperOptionDisplayName : "Join our WIFI" as NSObject]
+       let queue: DispatchQueue = DispatchQueue(label: "app.eduroam.geteduroam", attributes: DispatchQueue.Attributes.concurrent)
+
+       NSLog("Started wifi list scanning.")
+
+       NEHotspotHelper.register(options: options, queue: queue) { (cmd: NEHotspotHelperCommand) in
+         NSLog("Received command: \(cmd.commandType.rawValue)")
+       }
+
+        NEHotspotConfigurationManager.shared.apply(config) { (error) in
+            if let error = error {
+             if error.code == 13 {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
+                        "success": false,
+                    ])
                 }
-                // this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
-                // https://developer.apple.com/documentation/networkextension/nehotspotconfiguration/2887518-joinonce
-                config.joinOnce = false
-                config.lifeTimeInDays = NSNumber(integerLiteral: 825)
 
-               let options: [String: NSObject] = [kNEHotspotHelperOptionDisplayName : "Join our WIFI" as NSObject]
-               let queue: DispatchQueue = DispatchQueue(label: "app.eduroam.geteduroam", attributes: DispatchQueue.Attributes.concurrent)
-
-               NSLog("Started wifi list scanning.")
-
-               NEHotspotHelper.register(options: options, queue: queue) { (cmd: NEHotspotHelperCommand) in
-                 NSLog("Received command: \(cmd.commandType.rawValue)")
-               }
-
-                NEHotspotConfigurationManager.shared.apply(config) { (error) in
-                    if let error = error {
-                     if error.code == 13 {
-                            call.success([
-                                "message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
-                                "success": false,
-                            ])
+                if error.code == 7 {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.error.network.userCancelled",
+                        "success": false,
+                    ])
+                }
+                let nsError = error as NSError
+                if nsError.domain == "NEHotspotConfigurationErrorDomain" {
+                    if let configError = NEHotspotConfigurationError(rawValue: nsError.code) {
+                        switch configError {
+                        case .invalidWPAPassphrase:
+                            print("password error: \(error.localizedDescription)")
+                        case .invalid, .invalidSSIDPrefix, .invalidSSID, .invalidWEPPassphrase,
+                             .invalidEAPSettings, .invalidHS20Settings, .invalidHS20DomainName, .userDenied, .pending, .systemConfiguration, .unknown, .joinOnceNotSupported, .alreadyAssociated, .applicationIsNotInForeground, .internal:
+                            print("other error: \(error.localizedDescription)")
+                        @unknown default:
+                            print("later added error: \(error.localizedDescription)")
                         }
-
-                        if error.code == 7 {
-                            call.success([
-                                "message": "plugin.wifieapconfigurator.error.network.userCancelled",
-                                "success": false,
-                            ])
-                        }
-                        let nsError = error as NSError
-                        if nsError.domain == "NEHotspotConfigurationErrorDomain" {
-                            if let configError = NEHotspotConfigurationError(rawValue: nsError.code) {
-                                switch configError {
-                                case .invalidWPAPassphrase:
-                                    print("password error: \(error.localizedDescription)")
-                                case .invalid, .invalidSSIDPrefix, .invalidSSID, .invalidWEPPassphrase,
-                                     .invalidEAPSettings, .invalidHS20Settings, .invalidHS20DomainName, .userDenied, .pending, .systemConfiguration, .unknown, .joinOnceNotSupported, .alreadyAssociated, .applicationIsNotInForeground, .internal:
-                                    print("other error: \(error.localizedDescription)")
-                                @unknown default:
-                                    print("later added error: \(error.localizedDescription)")
-                                }
-                            }
-                        } else {
-                            print("some other error: \(error.localizedDescription)")
-                        }
-                    } else {
-                            call.success([
-                                "message": "plugin.wifieapconfigurator.success.network.linked",
-                                "success": true,
-                            ])
                     }
+                } else {
+                    print("some other error: \(error.localizedDescription)")
                 }
+            } else {
+                    call.success([
+                        "message": "plugin.wifieapconfigurator.success.network.linked",
+                        "success": true,
+                    ])
             }
+        }
+    }
 
     @objc func isNetworkAssociated(_ call: CAPPluginCall) {
         guard let ssidToCheck = call.getString("ssid") else {

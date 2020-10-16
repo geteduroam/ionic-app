@@ -116,17 +116,10 @@ export class GeteduroamServices {
     // TODO if this falls through, it's a huge bug
     let returnValue = {message: 'No SSID/OID configured?!', success: false};
     config['id'] = this.id;
-    config['ssid'] = "";
-    if (resultantProfiles['oid'].length > 0) {
-        config['oid'] = resultantProfiles['oid'].join(';');
-        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-    }
-    config['oid'] = "";
-    for (let i in resultantProfiles['ssid']) {
-        config['ssid'] = resultantProfiles['ssid'][i];
-        returnValue = returnValue && await WifiEapConfigurator.configureAP(config);
-    }
-    return returnValue;
+    config['oid'] = resultantProfiles['oid'];
+    config['ssid'] = resultantProfiles['ssid'];
+
+    return await WifiEapConfigurator.configureAP(config);
   }
 
   /**
@@ -140,9 +133,9 @@ export class GeteduroamServices {
       for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
         let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
         if(iEEE80211Aux['ConsortiumOID']){
-          oidAux = oidAux.concat(iEEE80211Aux['ConsortiumOID']);
+          oidAux.push(iEEE80211Aux['ConsortiumOID']);
         } else if(iEEE80211Aux['SSID']){
-          ssidAux = ssidAux.concat(iEEE80211Aux['SSID']);
+          ssidAux.push(iEEE80211Aux['SSID']);
         }
       }
       result['ssid'] = ssidAux;
