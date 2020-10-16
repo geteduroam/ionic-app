@@ -104,6 +104,7 @@ public class WifiEapConfigurator: CAPPlugin {
 
         if let clientCertificate = call.getString("clientCertificate"){
             if let passPhrase = call.getString("passPhrase"){
+                NSLog("🦊 configureAP: Start handling clientCertificate")
                 if let queries = addServerCertificate(certificate: clientCertificate, passPhrase: passPhrase) {
 
                     for (_, query) in (queries.enumerated()) {
@@ -112,12 +113,19 @@ public class WifiEapConfigurator: CAPPlugin {
                         let statusCertificate = SecItemCopyMatching(query as CFDictionary, &item)
 
                         guard statusCertificate == errSecSuccess else {
+                            NSLog("☠️ configureAP: SecItemCopyMatching: " + String(statusCertificate))
                             return call.success([
-                                "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
+                                "message": "plugin.wifieapconfigurator.error.clientIdentity.refused",
                                 "success": false,
                             ])
                         }
                     }
+                } else {
+                    NSLog("☠️ configureAP: addServerCertificate: nil")
+                    return call.success([
+                        "message": "plugin.wifieapconfigurator.error.clientIdentity.missing",
+                        "success": false,
+                    ])
                 }
                 // TODO certName should be the CN of the certificate,
                 // but this works as long as we have only one (which we currently do)
@@ -131,12 +139,15 @@ public class WifiEapConfigurator: CAPPlugin {
                         ])
                     }
                 } else {
+                    NSLog("☠️ configureAP: addClientCertificate: nil")
                     return call.success([
                         "message": "plugin.wifieapconfigurator.error.clientCert.refused",
                         "success": false,
                     ])
                 }
+                NSLog("🦊 configureAP: Handled clientCertificate")
             }else{
+                NSLog("☠️ configureAP: empty passPhrase")
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.passPhrase.missing",
                     "success": false,
@@ -147,6 +158,7 @@ public class WifiEapConfigurator: CAPPlugin {
             if call.getString("username") != nil && call.getString("username") != ""{
                 username = call.getString("username")
             } else {
+                NSLog("☠️ configureAP: empty username")
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.username.missing",
                     "success": false,
@@ -157,6 +169,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 password = call.getString("password")
             }
             else{
+                NSLog("☠️ configureAP: empty password")
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.password.missing",
                     "success": false,
@@ -167,6 +180,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 authType = call.getInt("auth")
             }
             else{
+                NSLog("☠️ configureAP: empty auth")
                 return call.success([
                     "message": "plugin.wifieapconfigurator.error.auth.missing",
                     "success": false,
@@ -184,6 +198,7 @@ public class WifiEapConfigurator: CAPPlugin {
                 let certificatesStrings = certificatesString.components(separatedBy: ";")
                 var index: Int = 0
                 var certificates = [SecCertificate]();
+                NSLog("🦊 configureAP: Start handling caCertificateStrings")
                 certificatesStrings.forEach { caCertificateString in
                     NSLog("🦊 configureAP: caCertificateString " + caCertificateString)
                     // building the name for the cert that will be installed
