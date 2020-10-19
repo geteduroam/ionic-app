@@ -254,16 +254,12 @@ public class WifiEapConfigurator extends Plugin {
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
                     call.success(object);
-                    e.printStackTrace();
-                    Log.e("error", e.getMessage());
                     return;
                 } catch (IllegalArgumentException e) {
                     JSObject object = new JSObject();
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
                     call.success(object);
-                    e.printStackTrace();
-                    Log.e("error", e.getMessage());
                     return;
                 }
             }
@@ -276,8 +272,6 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
                 call.success(object);
-                e.printStackTrace();
-                Log.e("error", e.getMessage());
                 return;
             }
         }
@@ -308,8 +302,6 @@ public class WifiEapConfigurator extends Plugin {
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.passphrase.null");
                     call.success(object);
-                    e.printStackTrace();
-                    Log.e("error", e.getMessage());
                     return;
                 }
 
@@ -383,15 +375,11 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.remove");
             call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
         } catch (Exception e) {
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
             call.success(object);
-            e.printStackTrace();
-            Log.e("PasspointConfiguration", e.getMessage());
         }
     }
 
@@ -450,15 +438,11 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
             call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
         } catch (Exception e){
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
             call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
         }
     }
 
