@@ -233,7 +233,6 @@ export class GeteduroamApp {
     if (!this.checkExtFile) {
       this.connectionEvent(connectionStatus);
       this.global.setDiscovery(await this.getEduroamServices.discovery());
-
       if (!connectionStatus.connected){
         this.notConnectionNetwork();
       }

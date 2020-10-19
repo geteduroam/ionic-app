@@ -131,7 +131,7 @@ export class InstitutionSearch extends BasePage{
     this.selectedProfileId = '';
   }
 
-  ionViewWillEnter() {
+  ngOnInit() {
     this.instances = Object.values(this.global.getDiscovery());
     this.filteredInstances = Object.values(this.instances);
   }
@@ -139,10 +139,13 @@ export class InstitutionSearch extends BasePage{
    * Lifecycle when entering a page, after it becomes the active page.
    *  this sets focus on search bar
    */
-  ionViewDidEnter() {
+  ionViewWillEnter() {
     this.ios = !!this.platform.is('ios');
     this.instanceName = this.navParams.get('instanceName');
 
+
+  }
+  ionViewDidEnter() {
     setTimeout(() => {
       this.searchBar.setFocus()
     }, 10);

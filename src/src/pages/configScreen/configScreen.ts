@@ -95,11 +95,10 @@ export class ConfigurationScreen extends BasePage{
    * Method executes when the search bar is tapped.
    * */
   async showModal(e: any) {
-    Keyboard.hide();
+    await Keyboard.hide();
     e.preventDefault();
     if (!!this.instances) {
       let searchModal = this.modalCtrl.create(InstitutionSearch, {
-        instances: this.instances,
         instanceName: this.instanceName
       });
 
