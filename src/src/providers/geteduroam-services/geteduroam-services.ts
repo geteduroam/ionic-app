@@ -133,9 +133,9 @@ export class GeteduroamServices {
       for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
         let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
         if(iEEE80211Aux['ConsortiumOID']){
-          oidAux.push(iEEE80211Aux['ConsortiumOID']);
+          oidAux = oidAux.concat(iEEE80211Aux['ConsortiumOID']);
         } else if(iEEE80211Aux['SSID']){
-          ssidAux.push(iEEE80211Aux['SSID']);
+          ssidAux = ssidAux.concat(iEEE80211Aux['SSID']);
         }
       }
       result['ssid'] = ssidAux;
