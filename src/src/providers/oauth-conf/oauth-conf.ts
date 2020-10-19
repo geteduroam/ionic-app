@@ -67,19 +67,13 @@ export class OauthConfProvider {
   /**
    * Method to create configuration to plugin WifiEapConfigurator
    */
-  configConnection() {    let serverIDs : string = '';
-    for (let entry of this.validMethod.serverSideCredential.serverID){
-      let strAux : string = entry;
-      serverIDs = serverIDs.concat(strAux ,';');
-    }
-    serverIDs = serverIDs.slice(0, -1);
-
+  configConnection() {
     return {
       ssid: this.global.getSsid(),
       username: '',
       password: '',
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: serverIDs,
+      servername: this.validMethod.serverSideCredential.serverID,
       auth: null,
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
