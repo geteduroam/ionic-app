@@ -19,6 +19,7 @@ import { GlobalProvider } from '../providers/global/global';
 import { CryptoUtil } from '../providers/util/crypto-util';
 import { ErrorServiceProvider } from "../providers/error-service/error-service";
 import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
+import { InstitutionSearch } from '../pages/institutionSearch/institutionSearch';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,7 @@ import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
   imports: [
     BrowserModule,
     PagesModule,
-    IonicModule.forRoot(GeteduroamApp)
+    IonicModule.forRoot(GeteduroamApp, {preload: InstitutionSearch})
   ],
   bootstrap: [IonicApp],
   entryComponents: [

@@ -93,7 +93,7 @@ export class InstitutionSearch extends BasePage{
     if (stringAux && stringAux.trim() != '') {
 
       this.filteredInstances = this.instances.filter((item:any) => {
-        return (item.name.toLowerCase().indexOf(stringAux.toLowerCase()) > -1);
+        return (item.toLowerCase().indexOf(stringAux.toLowerCase()) > -1);
       })
     } else {
       this.clearInstance();
@@ -132,7 +132,7 @@ export class InstitutionSearch extends BasePage{
   }
 
   ngOnInit() {
-    this.instances = Object.values(this.global.getDiscovery());
+    this.instances = Object.values(this.global.getInstitutionNames());
     this.filteredInstances = Object.values(this.instances);
   }
   /**

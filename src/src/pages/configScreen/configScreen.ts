@@ -103,7 +103,12 @@ export class ConfigurationScreen extends BasePage{
       });
 
       searchModal.onDidDismiss((data) => {
-
+        this.instances.forEach((res: any) => {
+          if (res.name === data) {
+            data = res;
+          }
+        });
+        // TODO: MACHT NAME
         if (data !== undefined) {
           this.instance = data;
           this.instanceName = data.name;
