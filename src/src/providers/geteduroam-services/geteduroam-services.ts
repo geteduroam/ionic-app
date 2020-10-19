@@ -105,7 +105,7 @@ export class GeteduroamServices {
       // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
       for (let i in resultantProfiles['ssid']) {
         let config = {
-          ssid: resultantProfiles['ssid'][i]
+          ssid: resultantProfiles['ssid'][i][0]
         };
         await this.removeNetwork(config);
       }
@@ -113,8 +113,6 @@ export class GeteduroamServices {
     // TODO if this happens it's a huge bug
       return {message: 'No CredentialApplicability configured?!', success: false};
     }
-    // TODO if this falls through, it's a huge bug
-    let returnValue = {message: 'No SSID/OID configured?!', success: false};
     config['id'] = this.id;
     config['oid'] = resultantProfiles['oid'];
     config['ssid'] = resultantProfiles['ssid'];
