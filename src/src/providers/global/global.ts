@@ -35,13 +35,15 @@ export class GlobalProvider {
 
   private externalOpen: boolean = false;
 
+  discovery: any;
+
   constructor(public platform: Platform) {}
 
   /**
    * SSID network
    */
   getSsid() {
-    return this.ssid;
+    return !!this.ssid ? this.ssid : 'eduroam';
   }
 
   setSsid(value: string) {
@@ -127,5 +129,13 @@ export class GlobalProvider {
 
   getExternalOpen() {
     return this.externalOpen;
+  }
+
+  setDiscovery(list: any) {
+    this.discovery = list;
+  }
+
+  getDiscovery() {
+    return this.discovery;
   }
 }

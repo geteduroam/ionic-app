@@ -113,9 +113,9 @@ export class OauthConfProvider {
    */
   async navigateTo() {
 
-    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+    !!this.providerInfo.providerLogo ? await this.navCtrl.push(WifiConfirmation, {
           logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-        await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
+        await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
   }
 
 }

@@ -847,7 +847,8 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-    boolean checkEnabledWifi(PluginCall call) {
+    @PluginMethod
+    public boolean checkEnabledWifi(PluginCall call) {
         boolean res = true;
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 

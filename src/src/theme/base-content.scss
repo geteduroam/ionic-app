@@ -35,14 +35,38 @@ ion-content {
     margin-top: 0;
     border-top: none;
 
+    .arrow-back-hidden {
+      display: none;
+    }
+
+    .arrow-back {
+      display: block;
+      text-align: left;
+      background-color: transparent !important;
+
+      .arrow-btn {
+        background-color: transparent;
+        padding: 5px;
+        height: 100%;
+        box-shadow: none;
+        margin: 10px 0 0 0;
+
+        span {
+          padding: 5px 0 0 15px;
+
+          img{
+            height: 40px !important;
+          }
+        }
+      }
+    }
+
     .container-content {
       background: #FFFFFF;
-      height: 95%;
+      height: calc(100% - 26%);
     }
 
     .header-content {
-
-      height: 22%;
 
       img {
         width: 57px;
@@ -162,6 +186,29 @@ ion-content {
 
 }
 
+////------------------------------
+//// Custom style for back button
+////------------------------------
+#btn-back .button-inner {
+  color: #276fbf;
+  position: relative;
+  /* for Android, back button disappears outside the frame */
+  /* top: -.7em; */
+  /* left: -1.4em; */
+  /* @supports (-webkit-touch-callout: none) { */
+    left: -1.6em;
+    top: -2.7em;
+  /* } */
+}
+#btn-back .button-inner .caret {
+  transform: rotate(-90deg);
+  display: inline-block;
+  position: relative;
+  top: .33em;
+  left: .3em;
+  font-size: 1.5em;
+}
+
 ////---------------------------------
 //// Change background to black on dark mode
 ////---------------------------------
@@ -207,5 +254,3 @@ ion-app, ion-alert div:last-child {
 .nav-decor {
   display: none !important;
 }
-
-

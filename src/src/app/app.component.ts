@@ -39,6 +39,11 @@ export class GeteduroamApp {
   profile: ProfileModel;
 
   protected checkExtFile: boolean = false;
+
+  lastTimeBackPress = 0;
+
+  timePeriodToExit = 2000;
+
   /**
    * @constructor
    *
@@ -141,10 +146,24 @@ export class GeteduroamApp {
       }
     });
 
-    App.addListener('backButton', () => {
-      this.platform.backButton.observers.pop();
-
-    });
+    if (this.global.isAndroid()){
+      this.platform.registerBackButtonAction(() => {
+        // get current active page
+        let view = this.navCtrl.getActive();
+        if (view.component.name == "ConfigurationScreen" || view.component.name == "ReconfigurePage") {
+          //Double check to exit app
+          if (new Date().getTime() - this.lastTimeBackPress < this.timePeriodToExit) {
+            this.platform.exitApp(); //Exit from app
+          } else {
+            this.alertConnection('Press back again to exit App');
+            this.lastTimeBackPress = new Date().getTime();
+          }
+        } else {
+          // go to previous page
+          this.navCtrl.pop({});
+        }
+      });
+    }
   }
 
   /**
@@ -213,6 +232,7 @@ export class GeteduroamApp {
     let connectionStatus = await this.statusConnection();
     if (!this.checkExtFile) {
       this.connectionEvent(connectionStatus);
+      this.global.setDiscovery(await this.getEduroamServices.discovery());
 
       if (!connectionStatus.connected){
         this.notConnectionNetwork();
