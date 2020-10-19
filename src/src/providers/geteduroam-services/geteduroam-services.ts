@@ -379,7 +379,7 @@ export class GeteduroamServices {
     for ( let i = 0 ; i < authenticationMethod.serverSideCredential.ca.length ; i++ ){
       certificates[i] = typeof authenticationMethod.serverSideCredential.ca[i] === 'object' ? authenticationMethod.serverSideCredential.ca[i].content : authenticationMethod.serverSideCredential.ca[i];
     }
-    authenticationMethod.serverSideCredential.ca = certificates.join(';');
+    authenticationMethod.serverSideCredential.ca = certificates;
     return authenticationMethod;
   }
 }
