@@ -10,7 +10,7 @@ export class WifiEapConfiguratorWeb extends WebPlugin implements WifiEapConfigur
   }
 
   async echo(options: { value: string }): Promise<{value: string}> {
-    console.log('ECHO', options);
+    //console.log('ECHO', options);
     return options;
   }
 }

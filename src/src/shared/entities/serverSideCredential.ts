@@ -29,7 +29,7 @@ export class ServerSideCredential extends BaseJson{
         //this.ca = new Ca();
         // returnValue = returnValue && this.assignCaArray(this.ca, 'ca', jsonAux, 'CA', true);
         // this.serverID = this.getSingleProperty(jsonAux, 'ServerID', false);
-        console.log('ServerSideCredential', this);
+        //console.log('ServerSideCredential', this);
         return returnValue;
     }
 
@@ -43,7 +43,7 @@ export class ServerSideCredential extends BaseJson{
      */
     protected fillProperties<T extends BaseJson> (propertyValue: any):boolean {
         let returnValue: boolean = true;
-        console.log(propertyValue);
+        //console.log(propertyValue);
         if (isArray(propertyValue)) {
             // console.log('CA', propertyValue[0]['CA']);
             let certificates = propertyValue[0]['CA'];
@@ -59,13 +59,13 @@ export class ServerSideCredential extends BaseJson{
                     caAux.properties.encoding = this.getSingleProperty(certificate['$'], 'encoding', true);
                     caAux.properties.format = this.getSingleProperty(certificate['$'], 'format', true);
                     caAux.content = this.getSingleProperty(certificate, '_', true);
-                    console.log('caAux', caAux);
+                    //console.log('caAux', caAux);
                     this.ca.push(caAux);
                 } catch (e) {
                     returnValue = false;
                 }
             } try {
-                console.log('SERVER ID', propertyValue[0]['ServerID']);
+                //console.log('SERVER ID', propertyValue[0]['ServerID']);
                 this.serverID = propertyValue[0]['ServerID'];
             } catch (e) {
                 returnValue = false;
