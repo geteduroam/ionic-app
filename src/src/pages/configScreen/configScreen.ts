@@ -12,7 +12,6 @@ import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {ConfigFilePage} from "../configFile/configFile";
-import { CommonModule } from '@angular/common';
 
 const { Keyboard, App } = Plugins;
 declare var window;
@@ -89,13 +88,16 @@ export class ConfigurationScreen extends BasePage{
               protected dictionary: DictionaryServiceProvider, protected global: GlobalProvider,
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
+    Keyboard.addListener('keyboardWillShow', async () => {
+     await Keyboard.hide();
+    });
   }
+
 
   /**
    * Method executes when the search bar is tapped.
    * */
   async showModal(e: any) {
-    await Keyboard.hide();
     e.preventDefault();
     if (!!this.instances) {
       let searchModal = this.modalCtrl.create(InstitutionSearch, {
@@ -103,15 +105,14 @@ export class ConfigurationScreen extends BasePage{
       });
 
       searchModal.onDidDismiss((data) => {
-        this.instances.forEach((res: any) => {
-          if (res.name === data) {
-            data = res;
-          }
+
+        data = this.instances.filter((res: any) => {
+           if (res.name === data) return res
         });
-        // TODO: MACHT NAME
+
         if (data !== undefined) {
-          this.instance = data;
-          this.instanceName = data.name;
+          this.instance = data[0];
+          this.instanceName = data[0].name;
 
           this.initializeProfiles(this.instance);
 
@@ -238,7 +239,9 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewDidEnter() {
-    await this.getDiscovery();
+    if (!this.global.getDiscovery()) {
+      await this.getDiscovery();
+    }
     this.removeSpinner();
     this.showAll = true;
   }

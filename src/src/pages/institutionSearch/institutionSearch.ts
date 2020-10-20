@@ -58,6 +58,7 @@ export class InstitutionSearch extends BasePage{
               protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider) {
     super(loading, dictionary, event, global);
+    Keyboard.removeAllListeners();
   }
 
   /**
