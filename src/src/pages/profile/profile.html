@@ -1,5 +1,12 @@
-<div *ngIf="showAll" class="profile-content">
-    <div class="header-content" margin-top padding-top>
+<div *ngIf="!global.isAndroid() && viewCtrl.enableBack() && showAll " class="arrow-back" >
+    <button ion-button class="arrow-btn" (click)="goBack()" id="btn-back">
+        <span class="button-inner"><span class="caret">⌃</span>
+            Back
+        </span>
+    </button>
+</div>
+<div *ngIf="showAll" class="profile-content" id="dismissable-back">
+    <div class="header-content">
         <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
         <h1>{{getString('header', 'profile')}}</h1>
     </div>
@@ -49,6 +56,3 @@
         </form>
     </div>
 </div>
-
-
-

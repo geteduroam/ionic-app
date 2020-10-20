@@ -12,9 +12,7 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
-import { Plugins } from '@capacitor/core';
 
-const { Keyboard } = Plugins;
 @Component({
   selector: 'page-profile',
   templateUrl: 'profile.html'
@@ -89,21 +87,11 @@ export class ProfilePage extends BasePage{
    */
   enableButton: boolean = false;
 
-  hiddenIcon: boolean = true;
-
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
-
-    Keyboard.addListener('keyboardWillShow', () => {
-      this.hiddenIcon = false;
-    });
-
-    Keyboard.addListener('keyboardWillHide', () => {
-      this.hiddenIcon = true;
-    });
 
   }
 
@@ -157,14 +145,10 @@ export class ProfilePage extends BasePage{
    * Navigation and check if navigation is active
    */
   async navigateTo() {
-    if (this.activeNavigation) {
+    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+      logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+    await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
 
-      !!this.providerInfo.providerLogo ? await this.navCtrl.push(WifiConfirmation, {
-          logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-        await this.navCtrl.push(WifiConfirmation, {}, {animation: 'transition'});
-    } else {
-      await this.alertConnectionDisabled();
-    }
   }
 
   /**
@@ -306,49 +290,17 @@ export class ProfilePage extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
-    let serverIDs : string = '';
-    for (let entry of this.validMethod.serverSideCredential.serverID){
-      let strAux : string = entry;
-      serverIDs = serverIDs.concat(strAux ,';');
-    }
-    serverIDs = serverIDs.slice(0, -1);
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
       ssid: this.global.getSsid(),
       username: this.provide.email,
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: serverIDs,
+      servername: this.validMethod.serverSideCredential.serverID,
       auth: this.global.auth.MSCHAPv2,
       anonymous: "",
       caCertificate: this.validMethod.serverSideCredential.ca,
-      longestCommonSuffix: this.longestCommonSuffix(this.validMethod.serverSideCredential.serverID)
     };
-  }
-
-  private longestCommonSuffix(input){
-    let array = input.map(function(e) {
-      e = e.split("").reverse().join("");
-      return e;
-    });
-    let sortedArray = array.sort();
-    let first = sortedArray[0];
-    let last = sortedArray.pop();
-    let length = first.length;
-    let index = 0;
-    while(index<length && first[index] === last[index])
-      index++;
-    let candidate = first.substring(0, index).split("").reverse().join("");
-    if (!input.includes(candidate)) { // if this happens it is because is a common suffix
-      let parts = candidate.split('.');
-      if (parts.length > 2) {
-        parts.shift(); // removing the first one
-        candidate = parts.join('.');
-      } else {
-        candidate = '';
-      }
-    }
-    return candidate;
   }
 
   goBack() {

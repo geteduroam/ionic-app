@@ -84,36 +84,30 @@ public class WifiEapConfigurator extends Plugin {
     List<ScanResult> results = null;
 
     @PluginMethod()
-    public void configureAP(PluginCall call) {
-        String ssid = null;
+    public void configureAP(PluginCall call) throws JSONException {
+        String[] ssids = new String[call.getArray("ssid").length()];
         boolean res = true;
 
-        String oid = null;
-        if (call.getString("oid") != null && !call.getString("oid").equals("")) {
-            oid = call.getString("oid");
-        }
-
-        try {
-            if (!call.getArray("oid").toList().isEmpty() && !call.getArray("oid").toList().get(0).equals("")) {
-                List aux = new ArrayList();
-                aux = call.getArray("oid").toList();
-                oid = aux.get(0).toString();
+        String[] oids = new String[call.getArray("oid").length()];
+        if (call.getArray("oid").length() != 0 && call.getArray("oid").get(0) != "") {
+            List aux = call.getArray("oid").toList();
+            for (int i = 0 ; i < aux.size() ; i++) {
+                oids[i] = aux.get(i).toString();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
-        if (!call.getString("ssid").equals("") && call.getString("ssid") != null) {
-            ssid = call.getString("ssid");
+        if((call.getArray("ssid").length() == 0 || call.getArray("ssid").get(0) == "") && oids.length == 0) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+            call.success(object);
+            res = false;
+        }
 
-        } else {
-            // ssid OR oid are mandatory 
-            if (oid == null) {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
-                call.success(object);
-                res = false;
+        if (call.getArray("ssid").length() != 0 && call.getArray("ssid").get(0) != "") {
+            List aux = call.getArray("ssid").toList();
+            for (int i = 0 ; i < aux.size() ; i++) {
+                ssids[i] = aux.get(i).toString();
             }
         }
 
@@ -132,9 +126,12 @@ public class WifiEapConfigurator extends Plugin {
             anonymousIdentity = call.getString("anonymous");
         }
 
-        String caCertificate = null;
-        if (call.getString("caCertificate") != null && !call.getString("caCertificate").equals("")) {
-            caCertificate = call.getString("caCertificate");
+        String[] caCertificate = new String[call.getArray("caCertificate").length()];
+        if (call.getArray("caCertificate").length() != 0 && call.getArray("caCertificate").get(0) != "") {
+            List aux = call.getArray("caCertificate").toList();
+            for (int i = 0 ; i < aux.size() ; i++) {
+                caCertificate[i] = aux.get(i).toString();
+            }
         }
 
         Integer eap = null;
@@ -149,9 +146,12 @@ public class WifiEapConfigurator extends Plugin {
             res = false;
         }
 
-        String servername = null;
-        if (call.getString("servername") != null && !call.getString("servername").equals("")) {
-            servername = call.getString("servername");
+        String[] servername = new String[call.getArray("servername").length()];
+        if (call.getArray("servername").length() != 0 && call.getArray("servername").get(0) != "") {
+            List aux = call.getArray("servername").toList();
+            for (int i = 0 ; i < aux.size() ; i++) {
+                servername[i] = aux.get(i).toString();
+            }
         }
 
         String username = null;
@@ -201,16 +201,18 @@ public class WifiEapConfigurator extends Plugin {
         }
 
         if (res) {
-            res = getNetworkAssociated(call, ssid);
+            for (int i = 0 ; i < ssids.length ; i++) {
+                res = getNetworkAssociated(call, ssids[i]);
+            }
         }
 
         if (res) {
-            connectAP(ssid, username, password, servername, caCertificate, clientCertificate, passPhrase, eap, auth, anonymousIdentity, displayName, id, oid, call);
+            connectAP(ssids, username, password, servername, caCertificate, clientCertificate, passPhrase, eap, auth, anonymousIdentity, displayName, id, oids, call);
         }
     }
 
-    void connectAP(String ssid, String username, String password, String servername, String caCertificate, String clientCertificate, String passPhrase,
-                   Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String oid, PluginCall call) {
+    void connectAP(String[] ssids, String username, String password, String[] servernames, String[] caCertificates, String clientCertificate, String passPhrase,
+                   Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String[] oids, PluginCall call) {
 
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
 
@@ -218,15 +220,14 @@ public class WifiEapConfigurator extends Plugin {
             enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
         }
 
-        if (servername != null && !servername.equals("")) {
+        if (servernames.length != 0 && servernames[0] != "") {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                String longestCommonSuffix = null;
-                if (call.getString("longestCommonSuffix") != null && !call.getString("longestCommonSuffix").trim().equals("")) {
-                    longestCommonSuffix = call.getString("longestCommonSuffix");
+                String longestCommonSuffix = getLongestSuffix(servernames);
+                if (longestCommonSuffix.length() > 0) {
                     enterpriseConfig.setDomainSuffixMatch(longestCommonSuffix);
+                } else {
+                    enterpriseConfig.setDomainSuffixMatch(servernames[0]);
                 }
-                // now we have to configure the DNS
-                String[] servernames = servername.split(";");
                 for (int i = 0; i < servernames.length; i++) {
                     servernames[i] = "DNS:" + servernames[i];
                 }
@@ -240,9 +241,7 @@ public class WifiEapConfigurator extends Plugin {
         CertificateFactory certFactory = null;
         X509Certificate[] caCerts = null;
         List<X509Certificate> certificates = new ArrayList<X509Certificate>();
-        if (caCertificate != null && !caCertificate.equals("")) {
-            // Multi CA-allowing
-            String[] caCertificates = caCertificate.split(";");
+        if (caCertificates.length != 0 && caCertificates[0] != "") {
             // building the certificates
             for (String certString : caCertificates) {
                 byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
@@ -256,16 +255,12 @@ public class WifiEapConfigurator extends Plugin {
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
                     call.success(object);
-                    e.printStackTrace();
-                    Log.e("error", e.getMessage());
                     return;
                 } catch (IllegalArgumentException e) {
                     JSObject object = new JSObject();
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
                     call.success(object);
-                    e.printStackTrace();
-                    Log.e("error", e.getMessage());
                     return;
                 }
             }
@@ -278,8 +273,6 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
                 call.success(object);
-                e.printStackTrace();
-                Log.e("error", e.getMessage());
                 return;
             }
         }
@@ -310,8 +303,6 @@ public class WifiEapConfigurator extends Plugin {
                     object.put("success", false);
                     object.put("message", "plugin.wifieapconfigurator.error.passphrase.null");
                     call.success(object);
-                    e.printStackTrace();
-                    Log.e("error", e.getMessage());
                     return;
                 }
 
@@ -338,16 +329,18 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiManager myWifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
 
-        if (ssid != null) {
-            connectWifiBySsid(myWifiManager, ssid, enterpriseConfig, call, displayName);
+        if (ssids.length > 0) {
+            for (int i = 0 ; i < ssids.length ; i++) {
+                connectWifiBySsid(myWifiManager, ssids[i], enterpriseConfig, call, displayName);
+            }
         }
 
-        /*if (oid != null) {
+        if (oids.length > 0) {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 removePasspoint(myWifiManager, id, call);
             }
-            connectPasspoint(myWifiManager, id, displayName, oid, enterpriseConfig, call, caCertificate, key);
-        }*/
+            connectPasspoint(myWifiManager, id, displayName, oids, enterpriseConfig, call, key);
+        }
 
         /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
             JSObject object = new JSObject();
@@ -383,34 +376,30 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.remove");
             call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
         } catch (Exception e) {
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
             call.success(object);
-            e.printStackTrace();
-            Log.e("PasspointConfiguration", e.getMessage());
         }
     }
 
-    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String cert, PrivateKey key) {
+    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String[] oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PrivateKey key) {
 
         PasspointConfiguration config = new PasspointConfiguration();
 
         HomeSp homeSp = new HomeSp();
-        homeSp.setFqdn(id);
+        homeSp.setFqdn(enterpriseConfig.getDomainSuffixMatch());
 
         if (displayName != null) {
             homeSp.setFriendlyName(displayName);
         } else {
-            homeSp.setFriendlyName("#Passpoint");
+            homeSp.setFriendlyName(id + " via Passpoint");
         }
-        String[] consortiumOIDs = oid.split(";");
-        long[] roamingConsortiumOIDs = new long[consortiumOIDs.length];
+
+        long[] roamingConsortiumOIDs = new long[oid.length];
         int index = 0;
-        for (String roamingConsortiumOIDString : consortiumOIDs) {
+        for (String roamingConsortiumOIDString : oid) {
             if (!roamingConsortiumOIDString.startsWith("0x")) {
                 roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
             }
@@ -418,48 +407,60 @@ public class WifiEapConfigurator extends Plugin {
             index++;
         }
         homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
+
         config.setHomeSp(homeSp);
         Credential cred = new Credential();
         cred.setRealm(id);
+        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
 
         if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13) {
             Credential.CertificateCredential certCred = new Credential.CertificateCredential();
             certCred.setCertType("x509v3");
-            cred.setClientCertificateChain(enterpriseConfig.getClientCertificateChain());
             cred.setClientPrivateKey(key);
+            cred.setClientCertificateChain(enterpriseConfig.getClientCertificateChain());
             certCred.setCertSha256Fingerprint(getFingerprint(enterpriseConfig.getClientCertificateChain()[0]));
             cred.setCertCredential(certCred);
-        } else {
+        } else if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
+            byte[] data = new byte[0];
+            try {
+                data = enterpriseConfig.getPassword().getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+
             Credential.UserCredential us = new Credential.UserCredential();
             us.setUsername(enterpriseConfig.getIdentity());
-            us.setPassword(enterpriseConfig.getPassword());
+            us.setPassword(base64);
             us.setEapType(21);
-            us.setNonEapInnerMethod("MS-CHAP-V2");
+            if(enterpriseConfig.getPhase2Method() == WifiEnterpriseConfig.Phase2.MSCHAPV2) {
+                us.setNonEapInnerMethod("MS-CHAP-V2");
+            } else if (enterpriseConfig.getPhase2Method() == WifiEnterpriseConfig.Phase2.PAP) {
+                us.setNonEapInnerMethod("PAP");
+            }
             cred.setUserCredential(us);
         }
 
-        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
-        config.setCredential(cred);
+        if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13 || this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
+            config.setCredential(cred);
 
-        try {
-            wifiManager.addOrUpdatePasspointConfiguration(config);
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-        } catch (IllegalArgumentException e) {
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
-            call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
-        } catch (Exception e){
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
-            call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
+            try {
+                wifiManager.addOrUpdatePasspointConfiguration(config);
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
+                call.success(object);
+            } catch (Exception e) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
+                call.success(object);
+            }
         }
     }
 
@@ -618,7 +619,7 @@ public class WifiEapConfigurator extends Plugin {
         /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+            if (conf.SSID.equals(ssid) || conf.SSID().equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
                 wifi.removeNetwork(conf.networkId);
                 wifi.saveConfiguration();
                 JSObject object = new JSObject();
@@ -690,10 +691,10 @@ public class WifiEapConfigurator extends Plugin {
 
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+            if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
 
                 String packageName = getContext().getPackageName();
-                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
+                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) { // TODO document why case insensitive
                     isOverridable = true;
                 }
 
@@ -753,7 +754,7 @@ public class WifiEapConfigurator extends Plugin {
 
             while (isReachable == false && results.hasNext()) {
                 ScanResult s = results.next();
-                if (s.SSID.toLowerCase().equals(ssid.toLowerCase()) || s.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+                if (s.SSID.equals(ssid) || s.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
                     isReachable = true;
                 }
             }
@@ -800,7 +801,7 @@ public class WifiEapConfigurator extends Plugin {
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = wifiManager.getConnectionInfo();
             String currentlySsid = info.getSSID();
-            if (currentlySsid != null && (currentlySsid.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"") || currentlySsid.toLowerCase().equals(ssid.toLowerCase()))) {
+            if (currentlySsid != null && (currentlySsid.equals("\"" + ssid + "\"") || currentlySsid.equals(ssid))) { // TODO document why ssid can be surrounded by quotes
                 isConnected = true;
             }
 
@@ -828,9 +829,9 @@ public class WifiEapConfigurator extends Plugin {
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
 
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.toLowerCase().equals(ssid.toLowerCase()) || conf.SSID.toLowerCase().equals("\"" + ssid.toLowerCase() + "\"")) {
+            if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
                 String packageName = getContext().getPackageName();
-                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) {
+                if (conf.toString().toLowerCase().contains(packageName.toLowerCase())) { // TODO document why case insensitive
                     isOverridable = true;
                 }
 
@@ -992,6 +993,27 @@ public class WifiEapConfigurator extends Plugin {
             e.printStackTrace();
         }
         return fingerprint;
+    }
+
+    private static String getLongestSuffix(String[] strings) {
+        if (strings.length == 0) return "";
+        if (strings.length == 1) return strings[0];
+        String longest = strings[0];
+        for(String candidate : strings) {
+            int pos = candidate.length();
+            do {
+                pos = candidate.lastIndexOf('.', pos - 2) + 1;
+            } while (pos > 0 && longest.endsWith(candidate.substring(pos)));
+            if (!longest.endsWith(candidate.substring(pos))) {
+                pos = candidate.indexOf('.', pos);
+            }
+            if (pos == -1) {
+                longest = "";
+            } else if (longest.endsWith(candidate.substring(pos))) {
+                longest = candidate.substring(pos == 0 ? 0 : pos + 1);
+            }
+        }
+        return longest;
     }
 
 }

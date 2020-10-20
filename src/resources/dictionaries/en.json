@@ -48,7 +48,8 @@
     "configure": "Continue to configure ",
     "reconfigure1": "Hi, It seems you have ",
     "reconfigure2": " configured on your device.\n Do you want to reconfigure it?",
-    "network-available": "External access available"
+    "network-available": "External access available",
+    "configuring": "We are configuring your device, please wait"
   },
   "defaultError": "Key not found"
 }

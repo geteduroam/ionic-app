@@ -73,7 +73,7 @@ export class OauthConfProvider {
       username: '',
       password: '',
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: '',
+      servername: this.validMethod.serverSideCredential.serverID,
       auth: null,
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
