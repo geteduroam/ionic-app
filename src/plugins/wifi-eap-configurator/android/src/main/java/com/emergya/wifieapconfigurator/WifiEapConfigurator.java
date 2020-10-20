@@ -226,6 +226,8 @@ public class WifiEapConfigurator extends Plugin {
                 if (call.getString("longestCommonSuffix") != null && !call.getString("longestCommonSuffix").trim().equals("")) {
                     longestCommonSuffix = call.getString("longestCommonSuffix");
                     enterpriseConfig.setDomainSuffixMatch(longestCommonSuffix);
+                } else {
+                    enterpriseConfig.setDomainSuffixMatch(servernames[0]);
                 }
                 for (int i = 0; i < servernames.length; i++) {
                     servernames[i] = "DNS:" + servernames[i];
@@ -415,8 +417,8 @@ public class WifiEapConfigurator extends Plugin {
         if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13) {
             Credential.CertificateCredential certCred = new Credential.CertificateCredential();
             certCred.setCertType("x509v3");
-            cred.setClientCertificateChain(enterpriseConfig.getClientCertificateChain());
             cred.setClientPrivateKey(key);
+            cred.setClientCertificateChain(enterpriseConfig.getClientCertificateChain());
             certCred.setCertSha256Fingerprint(getFingerprint(enterpriseConfig.getClientCertificateChain()[0]));
             cred.setCertCredential(certCred);
         } else if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
@@ -442,13 +444,14 @@ public class WifiEapConfigurator extends Plugin {
 
         if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13 || this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
             config.setCredential(cred);
-            
+
             try {
                 wifiManager.addOrUpdatePasspointConfiguration(config);
                 JSObject object = new JSObject();
                 object.put("success", true);
                 object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
             } catch (IllegalArgumentException e) {
+                e.printStackTrace();
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
