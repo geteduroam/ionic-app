@@ -91,28 +91,11 @@ export class GeteduroamServices {
    * @param config Configuration object
    */
   async connectProfile(config) {
-    let resultantProfiles = null;
-    if (this.global.getCredentialApplicability() && this.global.getCredentialApplicability().iEEE80211.length > 0) {
-      // If there is a CredentialApplicability defined in the eap-config file,
-      // loop over CredentialApplicability to take possible SSID's and OID's
-      // to be removed before being configured
-      resultantProfiles = this.getSSID_OID(this.global.getCredentialApplicability());
-    }
-    if (resultantProfiles) {
-      // If there is a CredentialApplicability defined in the eap-config file,
-      // loop over CredentialApplicability to take possible SSID's and OID's
-      // to be removed before being configured
-      // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
-      for (let i in resultantProfiles['ssid']) {
-        let config = {
-          ssid: resultantProfiles['ssid'][i][0]
-        };
-        await this.removeNetwork(config);
-      }
-    } else {
-    // TODO if this happens it's a huge bug
-      return {message: 'No CredentialApplicability configured?!', success: false};
-    }
+    let resultantProfiles = this.global.getCredentialApplicability()
+      ? this.getSSID_OID(this.global.getCredentialApplicability())
+      : []
+      ;
+
     config['id'] = this.id;
     config['domain'] = this.id; // required for HS20
     config['oid'] = resultantProfiles['oid']; // required for HS20
