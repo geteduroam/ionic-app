@@ -1,11 +1,4 @@
-<div *ngIf="!global.isAndroid() && viewCtrl.enableBack() && showAll" class="arrow-back">
-    <button ion-button class="arrow-btn" (click)="backToConfig()" id="btn-back">
-        <span class="button-inner"><span class="caret">⌃</span>
-            Back
-        </span>
-    </button>
-</div>
-<div *ngIf="showAll" class="container-content" id="dismissable-back">
+<div *ngIf="showAll" class="container-content">
     <div class="header-content" margin padding-top>
         <img #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
         <h1>{{getString('header', 'confirmation')}}</h1>
@@ -27,3 +20,4 @@
         </div>
     </div>
 </div>
+
