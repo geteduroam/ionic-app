@@ -65,16 +65,15 @@ export class GeteduroamServices {
     let jsonResult = '';
 
     if (token) {
-        headers = {'Authorization': 'Bearer ' + token};
-    }
-
-    // It checks the url if app is opened from a file
-    if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
-
+      // OAuth authenticated eap-config
+      headers = {'Authorization': 'Bearer ' + token};
+      response = await this.http.sendRequest(url, {method: 'post', data: {}, headers, serializer: 'urlencoded'});
+    } else if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
+      // The app is opened from a file
       response = await this.store.readExtFile(url);
       response.data = atob(response.data);
-
     } else {
+      // Unauthenticated eap-config
       response = await this.http.get(url, params, headers);
     }
 
@@ -83,7 +82,6 @@ export class GeteduroamServices {
     });
 
     return jsonResult;
-
   }
 
   /**
