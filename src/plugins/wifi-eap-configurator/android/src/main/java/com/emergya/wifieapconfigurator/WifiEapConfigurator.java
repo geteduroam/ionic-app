@@ -410,6 +410,7 @@ public class WifiEapConfigurator extends Plugin {
         config.setHomeSp(homeSp);
         Credential cred = new Credential();
         cred.setRealm(id);
+        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
 
         if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13) {
             Credential.CertificateCredential certCred = new Credential.CertificateCredential();
@@ -418,7 +419,7 @@ public class WifiEapConfigurator extends Plugin {
             cred.setClientPrivateKey(key);
             certCred.setCertSha256Fingerprint(getFingerprint(enterpriseConfig.getClientCertificateChain()[0]));
             cred.setCertCredential(certCred);
-        } else {
+        } else if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
             byte[] data = new byte[0];
             try {
                 data = enterpriseConfig.getPassword().getBytes("UTF-8");
@@ -439,25 +440,25 @@ public class WifiEapConfigurator extends Plugin {
             cred.setUserCredential(us);
         }
 
-        cred.setCaCertificate(enterpriseConfig.getCaCertificate());
-
-        config.setCredential(cred);
-
-        try {
-            wifiManager.addOrUpdatePasspointConfiguration(config);
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-        } catch (IllegalArgumentException e) {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
-            call.success(object);
-        } catch (Exception e){
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
-            call.success(object);
+        if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13 || this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
+            config.setCredential(cred);
+            
+            try {
+                wifiManager.addOrUpdatePasspointConfiguration(config);
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
+            } catch (IllegalArgumentException e) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
+                call.success(object);
+            } catch (Exception e) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
+                call.success(object);
+            }
         }
     }
 
