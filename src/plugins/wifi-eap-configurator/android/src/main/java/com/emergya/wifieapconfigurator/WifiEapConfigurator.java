@@ -619,7 +619,7 @@ public class WifiEapConfigurator extends Plugin {
         /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.equals(ssid) || conf.SSID().equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
+            if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
                 wifi.removeNetwork(conf.networkId);
                 wifi.saveConfiguration();
                 JSObject object = new JSObject();
