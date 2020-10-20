@@ -164,18 +164,12 @@ export class GeteduroamServices {
 		url += "?";
     }
     url += `client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}`;
-    url += `&scope=${data.scope}&state=${CryptoUtil.generateRandomString(10)}`;
-    let codeVerifier = CryptoUtil.generateRandomString(43);
+    url += `&scope=${data.scope}&state=0`; // TODO set and check state
+    let codeVerifier = CryptoUtil.generateRandomString(128);
     let codeChallenge = await CryptoUtil.deriveChallenge(codeVerifier);
 
-    if (!!data.pkce) {
-      url += "&code_challenge="+ codeChallenge;
-      url += "&code_challenge_method=S256";
-
-    } else {
-      url += "&code_challenge=" + codeChallenge;
-      url += "&code_challenge_method=plain";
-    }
+    url += "&code_challenge="+ codeChallenge;
+    url += "&code_challenge_method=S256";
 
     return {
       uri: encodeURI(url),
@@ -212,7 +206,7 @@ export class GeteduroamServices {
     let credentialApplicability:CredentialApplicability= new CredentialApplicability(this.global);
 
     if (!!profile.oauth && !!profile.token) {
-        eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint+'?format=eap-metadata', profile.token);
+        eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint, profile.token);
 
     } else {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
