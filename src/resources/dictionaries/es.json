@@ -49,7 +49,8 @@
     "configure" : "Continuar para configurar ",
     "reconfigure1": "Hola, Parece que tienes ",
     "reconfigure2":" configurada en tu dispositivo.\n ¿Quieres volver a configurarla?",
-    "network-available": "Acceso remoto disponible"
+    "network-available": "Acceso remoto disponible",
+    "configuring": "Estamos configurando su dispositivo, espera porfavor"
   },
   "defaultError": "Clave no encontrada"
 }
