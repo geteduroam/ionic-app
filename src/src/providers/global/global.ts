@@ -12,9 +12,9 @@ export class GlobalProvider {
    * Type auth method
    */
   public auth = {
-    MSCHAP: 3,
-    MSCHAPv2: 4,
-    PAP: 5
+    PAP: 1,
+    MSCHAP: 2,
+    MSCHAPv2: 3,
   };
 
   /**
