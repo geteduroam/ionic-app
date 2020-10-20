@@ -114,8 +114,9 @@ export class GeteduroamServices {
       return {message: 'No CredentialApplicability configured?!', success: false};
     }
     config['id'] = this.id;
-    config['oid'] = resultantProfiles['oid'];
-    config['ssid'] = resultantProfiles['ssid'];
+    config['domain'] = this.id; // required for HS20
+    config['oid'] = resultantProfiles['oid']; // required for HS20
+    config['ssid'] = resultantProfiles['ssid']; // required for SSID
 
     return await WifiEapConfigurator.configureAP(config);
   }
@@ -207,7 +208,7 @@ export class GeteduroamServices {
   public async eapValidation(profile:ProfileModel): Promise<boolean> {
     let eapConfigFile: any;
     let authenticationMethods:AuthenticationMethod[] = [];
-    let providerInfo:ProviderInfo= new ProviderInfo();
+    let providerInfo:ProviderInfo = new ProviderInfo();
     let credentialApplicability:CredentialApplicability= new CredentialApplicability(this.global);
 
     if (!!profile.oauth && !!profile.token) {
