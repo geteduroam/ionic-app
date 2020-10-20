@@ -135,7 +135,7 @@ export class GlobalProvider {
   setDiscovery(list: any) {
     this.discovery = list;
     list.map((res) => {
-      if(res.name) {
+      if (res.name) {
         this.institutionNames.push(res.name);
       }
     })

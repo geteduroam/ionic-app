@@ -1,5 +1,5 @@
 import { Component, NgModule, NgZone } from '@angular/core';
-import {Events, ModalController, NavController} from 'ionic-angular';
+import { Events, Modal, ModalController, NavController, NavParams, ViewController } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -79,7 +79,6 @@ export class ConfigurationScreen extends BasePage{
    */
   showButton: boolean = true;
 
-
   /**
    * Constructor
    * */
@@ -115,7 +114,6 @@ export class ConfigurationScreen extends BasePage{
           this.instanceName = data[0].name;
 
           this.initializeProfiles(this.instance);
-
         }
       });
 
@@ -230,7 +228,9 @@ export class ConfigurationScreen extends BasePage{
     }
     this.resetValues();
   }
-
+  ngOnInit() {
+    this.instances = this.global.discovery;
+  }
   ionViewWillEnter() {
     this.loading.create();
   }
@@ -239,7 +239,7 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewDidEnter() {
-    if (!this.global.getDiscovery()) {
+    if (!this.instances) {
       await this.getDiscovery();
     }
     this.removeSpinner();

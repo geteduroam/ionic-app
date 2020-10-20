@@ -11,7 +11,7 @@
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
-    <ion-list *ngFor="let institution of filteredInstances" no-margin>
-        <ion-item (click)="selectInstitution(institution)">{{institution}}</ion-item>
+    <ion-list no-margin>
+        <div *ngFor="let institution of instances" (click)="selectInstitution(institution)">{{ institution }} </div>
     </ion-list>
 </ion-content>
