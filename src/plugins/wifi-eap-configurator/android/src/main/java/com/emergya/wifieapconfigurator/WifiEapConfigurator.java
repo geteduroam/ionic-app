@@ -431,7 +431,11 @@ public class WifiEapConfigurator extends Plugin {
             us.setUsername(enterpriseConfig.getIdentity());
             us.setPassword(base64);
             us.setEapType(21);
-            us.setNonEapInnerMethod("MS-CHAP-V2");
+            if(enterpriseConfig.getPhase2Method() == WifiEnterpriseConfig.Phase2.MSCHAPV2) {
+                us.setNonEapInnerMethod("MS-CHAP-V2");
+            } else if (enterpriseConfig.getPhase2Method() == WifiEnterpriseConfig.Phase2.PAP) {
+                us.setNonEapInnerMethod("PAP");
+            }
             cred.setUserCredential(us);
         }
 
