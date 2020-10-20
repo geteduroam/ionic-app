@@ -105,7 +105,13 @@ public class WifiEapConfigurator: CAPPlugin {
 				"success": false
 			])
 		}
-		
+        
+        // At this point, we're reasonably certain that this configuration can work,
+        // so break old configurations here
+        // TODO only remove keychain items that match these networks
+        removeNetwork(call)
+        resetKeychain()
+
 		applyConfigurations(configurations: configurations) { messages, success in
 			return call.success([
 				"message": messages.joined(separator: ";"),
@@ -151,11 +157,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			NSLog("☠️ createNetworkConfigurations: No OID or SSID in configuration")
 			return []
 		}
-		
-		// At this point, we're reasonably certain that this configuration can work,
-		// so break old configurations here
-		resetKeychain()
-		
+
 		guard let eapSettings = buildSettings(
 			outerEapTypes: outerEapTypes,
 			innerAuthType: innerAuthType,
