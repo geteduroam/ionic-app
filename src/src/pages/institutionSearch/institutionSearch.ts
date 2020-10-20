@@ -5,9 +5,6 @@ import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
-import { FormControl } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
-
 const { Keyboard } = Plugins;
 
 @Component({
@@ -51,8 +48,6 @@ export class InstitutionSearch extends BasePage{
    */
   ios: boolean = false;
 
-  searchControl: FormControl;
-
   /**
    * Component SearchBar
    */
@@ -63,14 +58,7 @@ export class InstitutionSearch extends BasePage{
               protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider) {
     super(loading, dictionary, event, global);
-    this.searchControl = new FormControl();
     Keyboard.removeAllListeners();
-    setTimeout(() => {
-      this.searchBar.setFocus()
-    }, 10);
-    if (!this.ios) {
-      Keyboard.show();
-    }
   }
 
   /**
@@ -93,10 +81,9 @@ export class InstitutionSearch extends BasePage{
    * @param {any} ev event triggered.
    */
   getItems(ev: any) {
-    this.searchControl.valueChanges.pipe(debounceTime(500)).subscribe((res: any) => {
-      this.filterInstances(res);
-    });
+    const val = ev.target.value;
 
+    this.filterInstances(val);
   }
 
   /**
@@ -105,7 +92,7 @@ export class InstitutionSearch extends BasePage{
    */
   filterInstances(stringAux: string){
     if (stringAux && stringAux.trim() != '') {
-      this.instances = this.instances.filter((item:any) => {
+      this.filteredInstances = this.instances.filter((item:any) => {
         return (item.toLowerCase().indexOf(stringAux.toLowerCase()) > -1);
       })
     } else {
@@ -119,7 +106,7 @@ export class InstitutionSearch extends BasePage{
    * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
    */
   getAllItems(){
-    this.instances = Object.values(this.global.getInstitutionNames());
+    this.filteredInstances = this.instances;
 
   }
 
@@ -146,6 +133,7 @@ export class InstitutionSearch extends BasePage{
 
   ngOnInit() {
     this.instances = Object.values(this.global.getInstitutionNames());
+    this.filteredInstances = Object.values(this.instances);
   }
   /**
    * Lifecycle when entering a page, after it becomes the active page.
@@ -156,6 +144,14 @@ export class InstitutionSearch extends BasePage{
     this.instanceName = this.navParams.get('instanceName');
 
   }
+  ionViewDidEnter() {
+    setTimeout(() => {
+      this.searchBar.setFocus()
+    }, 10);
+    if (!this.ios) {
+      Keyboard.show();
+    }
+  }
 
   /**
    * Lifecycle when you leave a page,
@@ -163,10 +159,6 @@ export class InstitutionSearch extends BasePage{
    */
   ionViewWillLeave() {
     Keyboard.hide();
-  }
-
-  instanceByName(index, instance) {
-    return instance.name;
   }
 
 }

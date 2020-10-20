@@ -2,11 +2,11 @@ page-institution-search {
   //---------------------------
   // ion-item custom style
   //---------------------------
-  ion-item {
-    background-color: unset;
-    div.item-inner {
-      padding: 0 !important;
-      border-bottom: 0 !important;
-    }
+  .list-institution {
+    background-color: white;
+  }
+  .label-institution {
+    font-size: 20px;
+    padding-left: 16px
   }
 }

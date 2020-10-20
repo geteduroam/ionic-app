@@ -11,7 +11,14 @@
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
-    <ion-list no-margin>
-        <div *ngFor="let institution of instances" (click)="selectInstitution(institution)">{{ institution }} </div>
+    <ion-list no-margin class="list list-ios list-institution">
+        <div *ngFor="let institution of filteredInstances;" class="item item-block">
+            <div class="item-inner" (click)="selectInstitution(institution)">
+                <div class="input-wrapper">
+                    <div class="label label-ios label-institution">{{ institution }} </div>
+                </div>
+            </div>
+            <div class="button-effect"></div>
+        </div>
     </ion-list>
 </ion-content>
