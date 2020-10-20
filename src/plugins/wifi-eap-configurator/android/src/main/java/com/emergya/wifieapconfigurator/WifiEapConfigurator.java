@@ -388,13 +388,14 @@ public class WifiEapConfigurator extends Plugin {
         PasspointConfiguration config = new PasspointConfiguration();
 
         HomeSp homeSp = new HomeSp();
-        homeSp.setFqdn(id);
+        homeSp.setFqdn(enterpriseConfig.getDomainSuffixMatch());
 
         if (displayName != null) {
             homeSp.setFriendlyName(displayName);
         } else {
-            homeSp.setFriendlyName("#Passpoint");
+            homeSp.setFriendlyName(id + " via Passpoint");
         }
+
         long[] roamingConsortiumOIDs = new long[oid.length];
         int index = 0;
         for (String roamingConsortiumOIDString : oid) {
@@ -405,6 +406,7 @@ public class WifiEapConfigurator extends Plugin {
             index++;
         }
         homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
+
         config.setHomeSp(homeSp);
         Credential cred = new Credential();
         cred.setRealm(id);
@@ -417,15 +419,24 @@ public class WifiEapConfigurator extends Plugin {
             certCred.setCertSha256Fingerprint(getFingerprint(enterpriseConfig.getClientCertificateChain()[0]));
             cred.setCertCredential(certCred);
         } else {
+            byte[] data = new byte[0];
+            try {
+                data = enterpriseConfig.getPassword().getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+
             Credential.UserCredential us = new Credential.UserCredential();
             us.setUsername(enterpriseConfig.getIdentity());
-            us.setPassword(enterpriseConfig.getPassword());
+            us.setPassword(base64);
             us.setEapType(21);
             us.setNonEapInnerMethod("MS-CHAP-V2");
             cred.setUserCredential(us);
         }
 
         cred.setCaCertificate(enterpriseConfig.getCaCertificate());
+
         config.setCredential(cred);
 
         try {
