@@ -20,8 +20,7 @@ export class ErrorServiceProvider {
 
     switch (method) {
         case 'removeConnection':
-            const isAssociated = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
-            !isAssociated.success && !isAssociated.overridable ? returnValue = false : returnValue = true;
+            returnValue = false;
             break;
         case 'enableAccess':
             const connect = await this.statusConnection();

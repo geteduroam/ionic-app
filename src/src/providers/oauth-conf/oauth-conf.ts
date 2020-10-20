@@ -54,9 +54,7 @@ export class OauthConfProvider {
       await this.navigateTo();
     }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
       await this.errorHandler.handleError(
-          this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
-          this.dictionary.getTranslation('error', 'available2') +
-          this.global.getSsid() + '.', false, '', '', true);
+          this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
     } else if (checkRequest.message.includes('error.network.userCancelled')) {
       await this.navCtrl.pop();
     } else {
@@ -69,7 +67,7 @@ export class OauthConfProvider {
    */
   configConnection() {
     return {
-      ssid: this.global.getSsid(),
+      ssid: [],
       username: '',
       password: '',
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
