@@ -435,12 +435,12 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
         } catch (IllegalArgumentException e) {
             JSObject object = new JSObject();
-            object.put("success", true);
+            object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
             call.success(object);
         } catch (Exception e){
             JSObject object = new JSObject();
-            object.put("success", true);
+            object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
             call.success(object);
         }
