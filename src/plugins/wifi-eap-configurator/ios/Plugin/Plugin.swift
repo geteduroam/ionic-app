@@ -16,11 +16,11 @@ public class WifiEapConfigurator: CAPPlugin {
 	*/
 	func getInnerAuthMethod(innerAuthMethod: Int?) -> NEHotspotEAPSettings.TTLSInnerAuthenticationType? {
 		switch innerAuthMethod {
-		case 5: // should be 1
+		case 1:
 			return .eapttlsInnerAuthenticationPAP
-		case 3: // should be 2
+		case 2:
 			return .eapttlsInnerAuthenticationMSCHAP
-		case 4: // should be 3
+		case 3:
 			return .eapttlsInnerAuthenticationMSCHAPv2
 		/*
 		case _: // not in XSD
@@ -105,7 +105,13 @@ public class WifiEapConfigurator: CAPPlugin {
 				"success": false
 			])
 		}
-		
+        
+        // At this point, we're reasonably certain that this configuration can work,
+        // so break old configurations here
+        // TODO only remove keychain items that match these networks
+        removeNetwork(call)
+        resetKeychain()
+
 		applyConfigurations(configurations: configurations) { messages, success in
 			return call.success([
 				"message": messages.joined(separator: ";"),
@@ -151,11 +157,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			NSLog("☠️ createNetworkConfigurations: No OID or SSID in configuration")
 			return []
 		}
-		
-		// At this point, we're reasonably certain that this configuration can work,
-		// so break old configurations here
-		resetKeychain()
-		
+
 		guard let eapSettings = buildSettings(
 			outerEapTypes: outerEapTypes,
 			innerAuthType: innerAuthType,

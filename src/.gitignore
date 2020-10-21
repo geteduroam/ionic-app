@@ -41,3 +41,5 @@ npm-debug.log*
 /android/local.properties
 /android/.idea
 /plugins/wifi-eap-configurator/android/build/
+/plugins/wifi-eap-configurator/ios/Plugin.xcodeproj/project.xcworkspace/
+/plugins/wifi-eap-configurator/ios/Plugin.xcodeproj/xcuserdata/jornane.xcuserdatad/

@@ -619,7 +619,7 @@ public class WifiEapConfigurator extends Plugin {
         /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.equals(ssid) || conf.SSID().equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
+            if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
                 wifi.removeNetwork(conf.networkId);
                 wifi.saveConfiguration();
                 JSObject object = new JSObject();
@@ -889,18 +889,20 @@ public class WifiEapConfigurator extends Plugin {
     private Integer getAuthMethod(Integer auth, PluginCall call) {
         Integer res = null;
         switch (auth) {
-            case 3:
-                res = WifiEnterpriseConfig.Phase2.MSCHAP;
-                break;
-            case 4:
-                res = WifiEnterpriseConfig.Phase2.MSCHAPV2;
-                break;
-            case 5:
+            case 1:
                 res = WifiEnterpriseConfig.Phase2.PAP;
                 break;
+            case 2:
+                res = WifiEnterpriseConfig.Phase2.MSCHAP;
+                break;
+            case 3:
+                res = WifiEnterpriseConfig.Phase2.MSCHAPV2;
+                break;
+            /*
             case 6:
                 res = WifiEnterpriseConfig.Phase2.GTC;
                 break;
+            */
             default:
                 JSObject object = new JSObject();
                 object.put("success", false);
