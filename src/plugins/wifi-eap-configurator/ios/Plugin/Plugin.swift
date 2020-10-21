@@ -16,20 +16,18 @@ public class WifiEapConfigurator: CAPPlugin {
 	*/
 	func getInnerAuthMethod(innerAuthMethod: Int?) -> NEHotspotEAPSettings.TTLSInnerAuthenticationType? {
 		switch innerAuthMethod {
-		case 1:
+		case -1: // Non-EAP PAP
 			return .eapttlsInnerAuthenticationPAP
-		case 2:
+		case -2: // Non-EAP MSCHAP
 			return .eapttlsInnerAuthenticationMSCHAP
-		case 3:
+		case -3: // Non-EAP MSCHAPv2
 			return .eapttlsInnerAuthenticationMSCHAPv2
-		case 26:
-        	return .eapttlsInnerAuthenticationMSCHAPv2
 		/*
 		case _: // not in XSD
-		return .eapttlsInnerAuthenticationCHAP
-		case _: // not in XSD
-		return .eapttlsInnerAuthenticationEAP
+			return .eapttlsInnerAuthenticationCHAP
 		*/
+		case 26: // EAP-MSCHAPv2 (Apple supports only this inner EAP type)
+			return .eapttlsInnerAuthenticationEAP
 		default:
 			return nil
 		}

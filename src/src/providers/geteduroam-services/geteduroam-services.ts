@@ -181,21 +181,6 @@ export class GeteduroamServices {
   }
 
   /**
-   * Method to get AuthenticationMethod from eap certificates
-   * @param authenticationMethods
-   * @param providerInfo
-   */
-  public async getFirstAuthenticationMethod(authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo): Promise<AuthenticationMethod> {
-    for (let authenticationMethod of authenticationMethods) {
-      if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
-        return authenticationMethod;
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Method to get the first valid authentication method form an eap institutionSearch file.
    * @return {AuthenticationMethod} the first valid authentication method
    */
@@ -206,37 +191,36 @@ export class GeteduroamServices {
     let credentialApplicability:CredentialApplicability= new CredentialApplicability(this.global);
 
     if (!!profile.oauth && !!profile.token) {
-        eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint, profile.token);
+      eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint, profile.token);
 
     } else {
-        eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
+      eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
     }
 
-    let validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability, profile);
-    validEap = validEap && this.validateEapMethod(authenticationMethods);
+    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability, profile);
 
     if (validEap) {
-        this.global.setProviderInfo(providerInfo);
-        this.global.setCredentialApplicability(credentialApplicability);
-        let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
+      this.global.setProviderInfo(providerInfo);
+      this.global.setCredentialApplicability(credentialApplicability);
 
-        if (!!authenticationMethod &&
-            (parseInt(authenticationMethod.eapMethod.type.toString()) === 13 &&
-                typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ||
-                parseInt(authenticationMethod.eapMethod.type.toString()) !== 13)
-        ) {
-            authenticationMethod = this.sanitize(authenticationMethod);
-            this.global.setAuthenticationMethod(authenticationMethod);
-            return true;
-        } else {
-            return false;
+      // Iterate over all authentication methods, and find one that's supported by this device
+      let authenticationMethod: AuthenticationMethod = null;
+      for (let candidate of authenticationMethods) {
+        if (this.supportsAuthenticationMethod(candidate)) {
+          authenticationMethod = candidate;
+          break;
         }
+      }
 
-    } else {
-        this.global.setProviderInfo(null);
-        this.global.setCredentialApplicability(null);
-        return false;
+      if (authenticationMethod != null) {
+        authenticationMethod = this.sanitize(authenticationMethod);
+        this.global.setAuthenticationMethod(authenticationMethod);
+        return true;
+      }
     }
+    this.global.setProviderInfo(null);
+    this.global.setCredentialApplicability(null);
+    return false;
   }
 
   /**
@@ -377,19 +361,49 @@ export class GeteduroamServices {
     return authenticationMethod;
   }
 
-  validateEapMethod(authenticationMethods) {
-    if (parseInt(authenticationMethods[0].eapMethod.type.toString()) === 13) {
-      return true;
-    } else if (parseInt(authenticationMethods[0].eapMethod.type.toString()) === 25) {
-      // TODO:  The innerAuthenticationMethod is hardcoded for the moment when the eapMethod is 25
-      return true;
-    } else if (parseInt(authenticationMethods[0].eapMethod.type.toString()) === 21 &&
-                (parseInt(authenticationMethods[0].innerAuthenticationMethod.nonEAPAuthMethod.type.toString()) === 1 ||
-                parseInt(authenticationMethods[0].innerAuthenticationMethod.nonEAPAuthMethod.type.toString()) === 2 ||
-                parseInt(authenticationMethods[0].innerAuthenticationMethod.nonEAPAuthMethod.type.toString()) === 3)){
-      return true;
-    } else {
+  supportsAuthenticationMethod(authenticationMethod): boolean {
+    let outerEapMethod = authenticationMethod.eapMethod.type;
+    // TODO we are not certain that "type" exists.
+    // Apparently that's a problem, since we're getting promise errors when connecting to EAP-TLS if this check is removed.
+    let innerNonEapMethod = '';
+    if ('innerAuthenticationMethod' in authenticationMethod
+      && 'nonEAPAuthMethod' in authenticationMethod.innerAuthenticationMethod
+      && 'type' in authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
+    ) innerNonEapMethod = authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type;
+    let innerEapMethod = '';
+    if ('innerAuthenticationMethod' in authenticationMethod
+      && 'eapMethod' in authenticationMethod.innerAuthenticationMethod
+      && 'type' in authenticationMethod.innerAuthenticationMethod.eapMethod
+    ) innerEapMethod = authenticationMethod.innerAuthenticationMethod.eapMethod.type;
+
+    let isAndroid = this.global.isAndroid();
+    let isApple = !isAndroid;
+
+    if (innerNonEapMethod && innerEapMethod) {
+      // Can't combine EAP and Non-EAP methods
       return false;
     }
+
+    // Check if the inner type is valid for the outer type
+    switch(outerEapMethod) {
+      case '13': // EAP-TLS
+        // We can't ask the user for a certificate, so one must be provided
+        if (typeof authenticationMethod.clientSideCredential.clientCertificate === 'object') break;
+        return false;
+      case '21': // EAP-TTLS
+        // Android and Apple can handle any Non-EAP type here
+        if (innerNonEapMethod) break; 
+        // iOS can also handle EAP-MSCHAPv2
+        if (isApple && innerEapMethod === '26') break;
+        // Android supports TTLS-GTC, but CAT doesn't
+      case '25': // EAP-PEAP
+        // The inner method must be 26 on any platform
+        if (innerEapMethod === '26') break;
+        return false;
+      default:
+        return false;
+    }
+
+    return true;
   }
 }
