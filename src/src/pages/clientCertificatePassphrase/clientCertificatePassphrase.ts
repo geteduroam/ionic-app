@@ -7,6 +7,8 @@ import {GlobalProvider} from "../../providers/global/global";
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+declare var Capacitor;
+const { WifiEapConfigurator } = Capacitor.Plugins;
 
 /**
  * Generated class for the ClientCertificatePassphrasePage page.
@@ -22,6 +24,8 @@ import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler"
 export class ClientCertificatePassphrasePage extends BasePage{
 
   passphrase: string;
+
+  validPassPhrase: boolean = true;
 
   enableButton: boolean = false;
 
@@ -42,10 +46,17 @@ export class ClientCertificatePassphrasePage extends BasePage{
   }
 
   blur() {
-    if (this.passphrase.length > 0) {
-      this.enableButton = true;
-    } else {
+    this.checkPassPhrase();
+  }
+
+  async checkPassPhrase() {
+    const response = await WifiEapConfigurator.validatePassPhrase({ 'certificate': this.global.getAuthenticationMethod().clientSideCredential.clientCertificate, 'passPhrase': this.passphrase});
+    if (!response.success) {
+      this.validPassPhrase = false;
       this.enableButton = false;
+    } else {
+      this.validPassPhrase = true;
+      this.enableButton = true;
     }
   }
 

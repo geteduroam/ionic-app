@@ -42,8 +42,8 @@
     "invalid-method": "Ningún método válido de autenticación en el perfil seleccionado",
     "invalid-profile": "El perfil seleccionado es erróneo",
     "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión WiFi",
-    "invalid-institution": "Esta institución no está soportada"
-
+    "invalid-institution": "Esta institución no está soportada",
+    "passphrase": "La contraseña del certificado es incorrecta"
   },
   "text": {
     "configured": " ya está cinfugurada en tu dispositivo.",

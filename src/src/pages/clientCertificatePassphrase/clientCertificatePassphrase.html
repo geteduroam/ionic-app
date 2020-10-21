@@ -11,8 +11,11 @@
       <div  class="content-profile" padding-top >
         <ion-label class="label-conf" text-left>{{getString('label', 'passphrase')}}</ion-label>
 
-        <input (blur)="blur()" [(ngModel)]="passphrase"
+        <input (blur)="blur()" [(ngModel)]="passphrase" [ngClass]="!validPassPhrase ? 'error-validation' : ''"
                autocomplete="on" class="input-profile" name="passphrase" padding-left type="text"/>
+
+        <p *ngIf="!validPassPhrase" class="error-msg">
+          {{getString('error', 'passphrase')}} </p>
       </div>
     </form>
   </div>

@@ -12,6 +12,15 @@ page-client-certificate-passphrase {
     margin-right: 12px;
     height: 40px;
   }
+
+  .error-msg {
+    font-size: 11px;
+    color: $color-danger;
+  }
+  .error-validation {
+    border: solid 1px red !important;
+  }
+
 }
 
 //---------------------------------//

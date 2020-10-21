@@ -296,24 +296,14 @@ public class WifiEapConfigurator extends Plugin {
 
         } else {
 
-            KeyStore pkcs12ks = null;
             try {
-                pkcs12ks = KeyStore.getInstance("pkcs12");
+                KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
 
                 byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
                 ByteArrayInputStream b = new ByteArrayInputStream(bytes);
                 InputStream in = new BufferedInputStream(b);
-                try {
-                    pkcs12ks.load(in, passPhrase.toCharArray());
-                } catch(Exception e) {
-                    JSObject object = new JSObject();
-                    object.put("success", false);
-                    object.put("message", "plugin.wifieapconfigurator.error.passphrase.null");
-                    call.success(object);
-                    e.printStackTrace();
-                    Log.e("error", e.getMessage());
-                    return;
-                }
+
+                pkcs12ks.load(in, passPhrase.toCharArray());
 
                 Enumeration<String> aliases = pkcs12ks.aliases();
 
@@ -323,7 +313,6 @@ public class WifiEapConfigurator extends Plugin {
                     key = (PrivateKey) pkcs12ks.getKey(alias, passPhrase.toCharArray());
                     enterpriseConfig.setClientKeyEntry(key, cert);
                 }
-
             } catch (KeyStoreException e) {
                 sendClientCertificateError(e, call);
                 e.printStackTrace();
@@ -333,6 +322,14 @@ public class WifiEapConfigurator extends Plugin {
             } catch (UnrecoverableKeyException e) {
                 sendClientCertificateError(e, call);
                 e.printStackTrace();
+            } catch(Exception e) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.passphrase.null");
+                call.success(object);
+                e.printStackTrace();
+                Log.e("error", e.getMessage());
+                return;
             }
         }
 
@@ -360,6 +357,33 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
             call.success(object);
         }*/
+    }
+
+    @PluginMethod
+    public void validatePassPhrase(PluginCall call) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+
+        String clientCertificate = call.getString("certificate");
+        String passPhrase = call.getString("passPhrase");
+
+        KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
+
+        byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        InputStream in = new BufferedInputStream(b);
+
+        try {
+            pkcs12ks.load(in, passPhrase.toCharArray());
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.passphrase.validation");
+            call.success(object);
+        } catch(Exception e) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
+            call.success(object);
+        }
+
     }
 
     private void removePasspoint(WifiManager wifiManager, String id, PluginCall call) {
