@@ -1,6 +1,5 @@
 import {Config, Events, Nav, Platform} from 'ionic-angular';
 import {Component, ViewChild} from '@angular/core';
-import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
@@ -80,22 +79,7 @@ export class GeteduroamApp {
       this.enableWifi();
     }
     if (!this.checkExtFile) {
-      const isAssociated = await this.isAssociatedNetwork();
-
-      if (!!isAssociated.success) {
-        // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
-        this.rootPage = ConfigurationScreen;
-      } else{
-        if (!isAssociated.message.includes('alreadyAssociated')) {
-          this.rootPage = ConfigurationScreen;
-        } else {
-          this.rootPage = ReconfigurePage;
-          this.getAssociation(isAssociated);
-          this.global.setOverrideProfile(true);
-
-          !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
-        }
-      }
+      this.rootPage = ConfigurationScreen;
     }
   }
   async checkExternalOpen() {
@@ -150,7 +134,7 @@ export class GeteduroamApp {
       this.platform.registerBackButtonAction(() => {
         // get current active page
         let view = this.navCtrl.getActive();
-        if (view.component.name == "ConfigurationScreen" || view.component.name == "ReconfigurePage") {
+        if (view.component.name == "ConfigurationScreen") {
           //Double check to exit app
           if (new Date().getTime() - this.lastTimeBackPress < this.timePeriodToExit) {
             this.platform.exitApp(); //Exit from app
@@ -200,11 +184,10 @@ export class GeteduroamApp {
    */
   async notConnectionNetwork() {
     if (!this.checkExtFile) {
-      this.rootPage = ReconfigurePage;
+      this.rootPage = ConfigurationScreen;
 
       const isAssociated = await this.isAssociatedNetwork();
       this.getAssociation(isAssociated);
-
 
       if (!isAssociated.success && !isAssociated.overridable) {
         this.removeAssociatedManually();
@@ -232,9 +215,11 @@ export class GeteduroamApp {
     let connectionStatus = await this.statusConnection();
     if (!this.checkExtFile) {
       this.connectionEvent(connectionStatus);
-      this.global.setDiscovery(await this.getEduroamServices.discovery());
-      if (!connectionStatus.connected){
+
+      if (!connectionStatus.connected) {
         this.notConnectionNetwork();
+      } else {
+        this.global.setDiscovery(await this.getEduroamServices.discovery());
       }
     }
   }

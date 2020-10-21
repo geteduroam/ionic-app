@@ -90,6 +90,12 @@ export class ConfigurationScreen extends BasePage{
     Keyboard.addListener('keyboardWillShow', async () => {
      await Keyboard.hide();
     });
+
+    this.event.subscribe('connection', async (res: any) => {
+      if (!!res.connected && !this.global.discovery) {
+        this.chargeDiscovery()
+      }
+    });
   }
 
 
@@ -119,7 +125,7 @@ export class ConfigurationScreen extends BasePage{
 
       return await searchModal.present();
     } else {
-      await this.getDiscovery();
+      await this.chargeDiscovery();
       this.showModal(e);
     }
   }
@@ -228,9 +234,11 @@ export class ConfigurationScreen extends BasePage{
     }
     this.resetValues();
   }
-  ngOnInit() {
+
+  async ngOnInit() {
     this.instances = this.global.discovery;
   }
+
   ionViewWillEnter() {
     this.loading.create();
   }
@@ -239,9 +247,6 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewDidEnter() {
-    if (!this.instances) {
-      await this.getDiscovery();
-    }
     this.removeSpinner();
     this.showAll = true;
   }
@@ -261,7 +266,6 @@ export class ConfigurationScreen extends BasePage{
       this.instanceName = '';
 
     });
-
   }
 
   async checkEap(profile: ProfileModel) {
@@ -284,6 +288,11 @@ export class ConfigurationScreen extends BasePage{
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
     }
+  }
+
+  async chargeDiscovery() {
+    await this.getDiscovery();
+    this.global.setDiscovery(this.instances)
   }
 
   /**
