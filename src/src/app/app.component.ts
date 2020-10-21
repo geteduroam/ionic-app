@@ -178,11 +178,13 @@ export class GeteduroamApp {
       const method = await this.getEduroamServices.eapValidation(this.profile);
       if (method) {
         this.profile.oauth = Number(this.global.getAuthenticationMethod().eapMethod.type) === 13;
-      }
-      if (!this.rootPage) {
-        this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
+        if (!this.rootPage) {
+          this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
+        } else {
+          await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
+        }
       } else {
-        await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
       }
     }
   }

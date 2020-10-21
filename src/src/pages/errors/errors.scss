@@ -42,8 +42,14 @@ and (orientation: portrait) {
 ////---------------------------------------------
 //// Specific style to error page on Android Moto G
 ////---------------------------------------------
-@media only screen and (max-device-width: 1940px) {
-  .content-error {
-    height: auto !important;
+@media only screen and (max-device-width: 1900px) {
+  page-errors{
+    .content-error {
+      height: auto !important;
+    }
+
+    .base-content{
+      height: auto !important;
+    }
   }
 }

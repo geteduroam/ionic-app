@@ -896,9 +896,10 @@ public class WifiEapConfigurator extends Plugin {
                 res = WifiEnterpriseConfig.Phase2.MSCHAP;
                 break;
             case 3:
+            case 26:
                 res = WifiEnterpriseConfig.Phase2.MSCHAPV2;
                 break;
-            /*
+                /*
             case 6:
                 res = WifiEnterpriseConfig.Phase2.GTC;
                 break;

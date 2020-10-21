@@ -212,7 +212,8 @@ export class GeteduroamServices {
         eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
     }
 
-    const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability, profile);
+    let validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability, profile);
+    validEap = validEap && this.validateEapMethod(authenticationMethods);
 
     if (validEap) {
         this.global.setProviderInfo(providerInfo);
@@ -374,5 +375,21 @@ export class GeteduroamServices {
     }
     authenticationMethod.serverSideCredential.ca = certificates;
     return authenticationMethod;
+  }
+
+  validateEapMethod(authenticationMethods) {
+    if (parseInt(authenticationMethods[0].eapMethod.type.toString()) === 13) {
+      return true;
+    } else if (parseInt(authenticationMethods[0].eapMethod.type.toString()) === 25) {
+      // TODO:  The innerAuthenticationMethod is hardcoded for the moment when the eapMethod is 25
+      return true;
+    } else if (parseInt(authenticationMethods[0].eapMethod.type.toString()) === 21 &&
+                (parseInt(authenticationMethods[0].innerAuthenticationMethod.nonEAPAuthMethod.type.toString()) === 1 ||
+                parseInt(authenticationMethods[0].innerAuthenticationMethod.nonEAPAuthMethod.type.toString()) === 2 ||
+                parseInt(authenticationMethods[0].innerAuthenticationMethod.nonEAPAuthMethod.type.toString()) === 3)){
+      return true;
+    } else {
+      return false;
+    }
   }
 }

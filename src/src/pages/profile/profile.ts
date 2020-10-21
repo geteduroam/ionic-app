@@ -297,7 +297,7 @@ export class ProfilePage extends BasePage{
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
       servername: this.validMethod.serverSideCredential.serverID,
-      auth: parseInt(this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type.toString()),
+      auth: parseInt(this.validMethod.eapMethod.type.toString()) === 21 ? parseInt(this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type.toString()) : this.validMethod.innerAuthenticationMethod.eapMethod ? parseInt(this.validMethod.innerAuthenticationMethod.eapMethod.type.toString()) : 26,
       anonymous: "",
       caCertificate: this.validMethod.serverSideCredential.ca,
     };
@@ -308,4 +308,5 @@ export class ProfilePage extends BasePage{
     document.getElementById('dismissable-back').style.opacity = '0';
     this.viewCtrl.dismiss();
   }
+
 }
