@@ -352,20 +352,24 @@ export class GeteduroamServices {
    * @param authenticationMethod
    */
   sanitize(authenticationMethod) {
-    let certificates = authenticationMethod.serverSideCredential.ca.map((ca) => {
-      if (ca.properties.encoding !== 'base64' || ca.properties.format !== 'X.509') {
-        console.error("Invalid CA provided!");
-        return null;
-      }
-      return ca.content;
-    });
-    authenticationMethod.serverSideCredential.ca = certificates.filter((ca) => {return ca;});
+    if (authenticationMethod.serverSideCredential && authenticationMethod.serverSideCredential.ca) {
+      let certificates = authenticationMethod.serverSideCredential.ca.map((ca) => {
+        if (ca.properties.encoding !== 'base64' || ca.properties.format !== 'X.509') {
+          console.error("Invalid CA provided!");
+          return null;
+        }
+        return ca.content;
+      });
+      authenticationMethod.serverSideCredential.ca = certificates.filter((ca) => {return ca;});
+    }
 
-    let clientCertificate = authenticationMethod.clientSideCredential.clientCertificate;
-    if (clientCertificate.$.format === 'PKCS12' && clientCertificate.$.encoding === 'base64') {
-      authenticationMethod.clientSideCredential.clientCertificate = clientCertificate._;
-    } else {
-      authenticationMethod.clientSideCredential.clientCertificate = null;
+    if (authenticationMethod.clientSideCredential && authenticationMethod.clientSideCredential.clientCertificate) {
+      let clientCertificate = authenticationMethod.clientSideCredential.clientCertificate;
+      if (clientCertificate.$.format === 'PKCS12' && clientCertificate.$.encoding === 'base64') {
+        authenticationMethod.clientSideCredential.clientCertificate = clientCertificate._;
+      } else {
+        authenticationMethod.clientSideCredential.clientCertificate = null;
+      }
     }
 
     // TODO why does CA use properties and content members,
@@ -378,16 +382,18 @@ export class GeteduroamServices {
     let outerEapMethod = authenticationMethod.eapMethod.type;
     // TODO we are not certain that "type" exists.
     // Apparently that's a problem, since we're getting promise errors when connecting to EAP-TLS if this check is removed.
-    let innerNonEapMethod = '';
-    if ('innerAuthenticationMethod' in authenticationMethod
-      && 'nonEAPAuthMethod' in authenticationMethod.innerAuthenticationMethod
-      && 'type' in authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
-    ) innerNonEapMethod = authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type;
-    let innerEapMethod = '';
-    if ('innerAuthenticationMethod' in authenticationMethod
-      && 'eapMethod' in authenticationMethod.innerAuthenticationMethod
-      && 'type' in authenticationMethod.innerAuthenticationMethod.eapMethod
-    ) innerEapMethod = authenticationMethod.innerAuthenticationMethod.eapMethod.type;
+    let innerNonEapMethod = authenticationMethod.innerAuthenticationMethod
+        ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
+          ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
+          : ''
+        : ''
+        ;
+    let innerEapMethod = authenticationMethod.innerAuthenticationMethod
+        ? authenticationMethod.innerAuthenticationMethod.eapMethod
+          ? authenticationMethod.innerAuthenticationMethod.eapMethod.type
+          : ''
+        : ''
+        ;
 
     let isAndroid = this.global.isAndroid();
     let isApple = !isAndroid;
