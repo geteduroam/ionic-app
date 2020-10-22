@@ -65,16 +65,15 @@ export class GeteduroamServices {
     let jsonResult = '';
 
     if (token) {
-        headers = {'Authorization': 'Bearer ' + token};
-    }
-
-    // It checks the url if app is opened from a file
-    if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
-
+      // OAuth authenticated eap-config
+      headers = {'Authorization': 'Bearer ' + token};
+      response = await this.http.sendRequest(url, {method: 'post', data: {}, headers, serializer: 'urlencoded'});
+    } else if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
+      // The app is opened from a file
       response = await this.store.readExtFile(url);
       response.data = atob(response.data);
-
     } else {
+      // Unauthenticated eap-config
       response = await this.http.get(url, params, headers);
     }
 
@@ -83,7 +82,6 @@ export class GeteduroamServices {
     });
 
     return jsonResult;
-
   }
 
   /**
@@ -91,28 +89,11 @@ export class GeteduroamServices {
    * @param config Configuration object
    */
   async connectProfile(config) {
-    let resultantProfiles = null;
-    if (this.global.getCredentialApplicability() && this.global.getCredentialApplicability().iEEE80211.length > 0) {
-      // If there is a CredentialApplicability defined in the eap-config file,
-      // loop over CredentialApplicability to take possible SSID's and OID's
-      // to be removed before being configured
-      resultantProfiles = this.getSSID_OID(this.global.getCredentialApplicability());
-    }
-    if (resultantProfiles) {
-      // If there is a CredentialApplicability defined in the eap-config file,
-      // loop over CredentialApplicability to take possible SSID's and OID's
-      // to be removed before being configured
-      // for every profile ssid will contain whether the SSID or #Passpoint if there is no SSID for the OID
-      for (let i in resultantProfiles['ssid']) {
-        let config = {
-          ssid: resultantProfiles['ssid'][i][0]
-        };
-        await this.removeNetwork(config);
-      }
-    } else {
-    // TODO if this happens it's a huge bug
-      return {message: 'No CredentialApplicability configured?!', success: false};
-    }
+    let resultantProfiles = this.global.getCredentialApplicability()
+      ? this.getSSID_OID(this.global.getCredentialApplicability())
+      : []
+      ;
+
     config['id'] = this.id;
     config['domain'] = this.id; // required for HS20
     config['oid'] = resultantProfiles['oid']; // required for HS20
