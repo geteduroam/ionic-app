@@ -291,7 +291,6 @@ export class ProfilePage extends BasePage{
    */
   private configConnection() {
     // Non-EAP < 0 < EAP
-    console.log("Going to figure auth number");
     let auth = this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
       ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type * -1
       : this.validMethod.innerAuthenticationMethod.eapMethod
