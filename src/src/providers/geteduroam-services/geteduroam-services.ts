@@ -378,16 +378,18 @@ export class GeteduroamServices {
     let outerEapMethod = authenticationMethod.eapMethod.type;
     // TODO we are not certain that "type" exists.
     // Apparently that's a problem, since we're getting promise errors when connecting to EAP-TLS if this check is removed.
-    let innerNonEapMethod = '';
-    if ('innerAuthenticationMethod' in authenticationMethod
-      && 'nonEAPAuthMethod' in authenticationMethod.innerAuthenticationMethod
-      && 'type' in authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
-    ) innerNonEapMethod = authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type;
-    let innerEapMethod = '';
-    if ('innerAuthenticationMethod' in authenticationMethod
-      && 'eapMethod' in authenticationMethod.innerAuthenticationMethod
-      && 'type' in authenticationMethod.innerAuthenticationMethod.eapMethod
-    ) innerEapMethod = authenticationMethod.innerAuthenticationMethod.eapMethod.type;
+    let innerNonEapMethod = authenticationMethod.innerAuthenticationMethod
+        ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
+          ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
+          : ''
+        : ''
+        ;
+    let innerEapMethod = authenticationMethod.innerAuthenticationMethod
+        ? authenticationMethod.innerAuthenticationMethod.eapMethod
+          ? authenticationMethod.innerAuthenticationMethod.eapMethod.type
+          : ''
+        : ''
+        ;
 
     let isAndroid = this.global.isAndroid();
     let isApple = !isAndroid;
