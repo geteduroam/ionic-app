@@ -184,7 +184,6 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 		eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
 		eapSettings.isTLSClientCertificateRequired = false
-		eapSettings.supportedEAPTypes = outerEapTypes.map() { outerEapType in NSNumber(value: outerEapType.rawValue) }
 
 		var configurations: [NEHotspotConfiguration] = []
 		if oids.count != 0 {
@@ -262,6 +261,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	*/
 	func buildSettingsWithClientCertificate(pkcs12: String, passphrase: String) -> NEHotspotEAPSettings? {
 		let eapSettings = NEHotspotEAPSettings()
+		eapSettings.supportedEAPTypes = [NSNumber(value: NEHotspotEAPSettings.EAPType.EAPTLS.rawValue)]
 		//NSLog("🦊 configureAP: Start handling clientCertificate")
 
 		// TODO certName should be the CN of the certificate,
@@ -312,23 +312,16 @@ public class WifiEapConfigurator: CAPPlugin {
 				NSLog("☠️ buildSettings: Failed precondition for EAPTLS")
 				break
 			case NEHotspotEAPSettings.EAPType.EAPTTLS:
-				if username != nil && password != nil && innerAuthType != nil {
-					return buildSettingsWithUsernamePassword(
-						username: username!,
-						password: password!,
-						innerAuthType: innerAuthType!
-					)!
-				}
-				NSLog("☠️ buildSettings: Failed precondition for EAPTTLS")
-				break
+				fallthrough
 			case NEHotspotEAPSettings.EAPType.EAPFAST:
 				fallthrough
 			case NEHotspotEAPSettings.EAPType.EAPPEAP:
 				if username != nil && password != nil {
 					return buildSettingsWithUsernamePassword(
+						outerEapTypes: outerEapTypes,
+						innerAuthType: innerAuthType,
 						username: username!,
-						password: password!,
-						innerAuthType: nil
+						password: password!
 					)!
 				}
 				NSLog("☠️ buildSettings: Failed precondition for EAPPEAP/EAPFAST")
@@ -341,24 +334,32 @@ public class WifiEapConfigurator: CAPPlugin {
 	/**
 	@function buildSettingsWithUsernamePassword
 	@abstract Create NEHotspotEAPSettings object for username/pass authentication
+	@param outerIdentity Outer identity
+	@param innerAuthType Inner auth types
 	@param username username for PEAP/TTLS authentication
 	@param password password for PEAP/TTLS authentication
 	@param innerAuthType Inner authentication type (only used for TTLS)
 	@result NEHotspotEAPSettings configured with the provided credentials
 	*/
-	func buildSettingsWithUsernamePassword(username: String, password: String, innerAuthType: NEHotspotEAPSettings.TTLSInnerAuthenticationType?) -> NEHotspotEAPSettings? {
+	func buildSettingsWithUsernamePassword(
+		outerEapTypes: [NEHotspotEAPSettings.EAPType],
+		innerAuthType: NEHotspotEAPSettings.TTLSInnerAuthenticationType?,
+		username: String,
+		password: String
+	) -> NEHotspotEAPSettings? {
 		let eapSettings = NEHotspotEAPSettings()
 
 		guard username != "" && password != "" else{
-			NSLog("☠️ configureAP: empty user/pass")
+			NSLog("☠️ buildSettingsWithUsernamePassword: empty user/pass")
 			return nil
 		}
 
+		eapSettings.supportedEAPTypes = outerEapTypes.map() { outerEapType in NSNumber(value: outerEapType.rawValue) }
+		// TODO: Default value is EAP, should we use that or MSCHAPv2?
+		eapSettings.ttlsInnerAuthenticationType = innerAuthType ?? NEHotspotEAPSettings.TTLSInnerAuthenticationType.eapttlsInnerAuthenticationMSCHAPv2
 		eapSettings.username = username
 		eapSettings.password = password
-		if innerAuthType != nil {
-			eapSettings.ttlsInnerAuthenticationType = innerAuthType!
-		}
+		NSLog("🦊 buildSettingsWithUsernamePassword: eapSettings.ttlsInnerAuthenticationType = " + String(eapSettings.ttlsInnerAuthenticationType.rawValue))
 		return eapSettings
 	}
 
