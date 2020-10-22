@@ -162,21 +162,6 @@ export class GeteduroamServices {
   }
 
   /**
-   * Method to get AuthenticationMethod from eap certificates
-   * @param authenticationMethods
-   * @param providerInfo
-   */
-  public async getFirstAuthenticationMethod(authenticationMethods: AuthenticationMethod[], providerInfo: ProviderInfo): Promise<AuthenticationMethod> {
-    for (let authenticationMethod of authenticationMethods) {
-      if (['13', '21', '25'].indexOf(authenticationMethod.eapMethod.type.toString()) >= 0){
-        return authenticationMethod;
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Method to get the first valid authentication method form an eap institutionSearch file.
    * @return {AuthenticationMethod} the first valid authentication method
    */
@@ -187,36 +172,36 @@ export class GeteduroamServices {
     let credentialApplicability:CredentialApplicability= new CredentialApplicability(this.global);
 
     if (!!profile.oauth && !!profile.token) {
-        eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint, profile.token);
+      eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint, profile.token);
 
     } else {
-        eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
+      eapConfigFile = await this.getEapConfig(profile.eapconfig_endpoint);
     }
 
     const validEap:boolean = this.validateEapconfig(eapConfigFile, authenticationMethods, providerInfo, credentialApplicability, profile);
 
     if (validEap) {
-        this.global.setProviderInfo(providerInfo);
-        this.global.setCredentialApplicability(credentialApplicability);
-        let authenticationMethod: AuthenticationMethod = await this.getFirstAuthenticationMethod(authenticationMethods, providerInfo);
+      this.global.setProviderInfo(providerInfo);
+      this.global.setCredentialApplicability(credentialApplicability);
 
-        if (!!authenticationMethod &&
-            (parseInt(authenticationMethod.eapMethod.type.toString()) === 13 &&
-                typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ||
-                parseInt(authenticationMethod.eapMethod.type.toString()) !== 13)
-        ) {
-            authenticationMethod = this.sanitize(authenticationMethod);
-            this.global.setAuthenticationMethod(authenticationMethod);
-            return true;
-        } else {
-            return false;
+      // Iterate over all authentication methods, and find one that's supported by this device
+      let authenticationMethod: AuthenticationMethod = null;
+      for (let candidate of authenticationMethods) {
+        if (this.supportsAuthenticationMethod(candidate)) {
+          authenticationMethod = candidate;
+          break;
         }
+      }
 
-    } else {
-        this.global.setProviderInfo(null);
-        this.global.setCredentialApplicability(null);
-        return false;
+      if (authenticationMethod != null) {
+        authenticationMethod = this.sanitize(authenticationMethod);
+        this.global.setAuthenticationMethod(authenticationMethod);
+        return true;
+      }
     }
+    this.global.setProviderInfo(null);
+    this.global.setCredentialApplicability(null);
+    return false;
   }
 
   /**
@@ -344,16 +329,77 @@ export class GeteduroamServices {
   }
 
   /**
-   * This method clean the certificates saving only the base64 string.
+   * Extract the content from the certificate fields
    * @param authenticationMethod
    */
   sanitize(authenticationMethod) {
-    let certificates = [];
-    authenticationMethod.clientSideCredential.clientCertificate = typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ? authenticationMethod.clientSideCredential.clientCertificate["_"] : authenticationMethod.clientSideCredential.clientCertificate;
-    for ( let i = 0 ; i < authenticationMethod.serverSideCredential.ca.length ; i++ ){
-      certificates[i] = typeof authenticationMethod.serverSideCredential.ca[i] === 'object' ? authenticationMethod.serverSideCredential.ca[i].content : authenticationMethod.serverSideCredential.ca[i];
+    let certificates = authenticationMethod.serverSideCredential.ca.map((ca) => {
+      if (ca.properties.encoding !== 'base64' || ca.properties.format !== 'X.509') {
+        console.error("Invalid CA provided!");
+        return null;
+      }
+      return ca.content;
+    });
+    authenticationMethod.serverSideCredential.ca = certificates.filter((ca) => {return ca;});
+
+    let clientCertificate = authenticationMethod.clientSideCredential.clientCertificate;
+    if (clientCertificate.$.format === 'PKCS12' && clientCertificate.$.encoding === 'base64') {
+      authenticationMethod.clientSideCredential.clientCertificate = clientCertificate._;
+    } else {
+      authenticationMethod.clientSideCredential.clientCertificate = null;
     }
-    authenticationMethod.serverSideCredential.ca = certificates;
+
+    // TODO why does CA use properties and content members,
+    // while clientCertificate uses $ and _ as members?
+
     return authenticationMethod;
+  }
+
+  supportsAuthenticationMethod(authenticationMethod): boolean {
+    let outerEapMethod = authenticationMethod.eapMethod.type;
+    // TODO we are not certain that "type" exists.
+    // Apparently that's a problem, since we're getting promise errors when connecting to EAP-TLS if this check is removed.
+    let innerNonEapMethod = authenticationMethod.innerAuthenticationMethod
+        ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
+          ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
+          : ''
+        : ''
+        ;
+    let innerEapMethod = authenticationMethod.innerAuthenticationMethod
+        ? authenticationMethod.innerAuthenticationMethod.eapMethod
+          ? authenticationMethod.innerAuthenticationMethod.eapMethod.type
+          : ''
+        : ''
+        ;
+
+    let isAndroid = this.global.isAndroid();
+    let isApple = !isAndroid;
+
+    if (innerNonEapMethod && innerEapMethod) {
+      // Can't combine EAP and Non-EAP methods
+      return false;
+    }
+
+    // Check if the inner type is valid for the outer type
+    switch(outerEapMethod) {
+      case '13': // EAP-TLS
+        // We can't ask the user for a certificate, so one must be provided
+        if (typeof authenticationMethod.clientSideCredential.clientCertificate === 'object') break;
+        return false;
+      case '21': // EAP-TTLS
+        // Android and Apple can handle any Non-EAP type here
+        if (innerNonEapMethod) break; 
+        // iOS can also handle EAP-MSCHAPv2
+        if (isApple && innerEapMethod === '26') break;
+        // Android supports TTLS-GTC, but CAT doesn't
+      case '25': // EAP-PEAP
+        // The inner method must be 26 on any platform
+        if (innerEapMethod === '26') break;
+        return false;
+      default:
+        return false;
+    }
+
+    return true;
   }
 }
