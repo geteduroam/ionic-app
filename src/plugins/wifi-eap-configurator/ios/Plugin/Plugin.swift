@@ -7,7 +7,7 @@ import CoreLocation
 
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
-	
+
 	/**
 	@function getInnerAuthMethod
 	@abstract Convert inner auth method integer to NEHotspotEAPSettings.TTLSInnerAuthenticationType enum
@@ -34,7 +34,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			return nil
 		}
 	}
-	
+
 	/**
 	@function getOuterEapType
 	@abstract Convert outer EAP type integer to NEHotspotEAPSettings enum
@@ -55,7 +55,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			return nil
 		}
 	}
-	
+
 	/**
 	@function resetKeychain
 	@abstract Clear all items in this app's Keychain
@@ -67,7 +67,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		deleteAllKeysForSecClass(kSecClassKey)
 		deleteAllKeysForSecClass(kSecClassIdentity)
 	}
-	
+
 	/**
 	@function deleteAllKeysForSecClass
 	@abstract Clear Keychain for given class
@@ -78,17 +78,26 @@ public class WifiEapConfigurator: CAPPlugin {
 		let result = SecItemDelete(dict as CFDictionary)
 		assert(result == noErr || result == errSecItemNotFound, "Error deleting keychain data (\(result))")
 	}
-	
+
 	/**
 	@function configureAP
 	@abstract Capacitor call to configure networks
 	@param call Capacitor call object
 	*/
 	@objc func configureAP(_ call: CAPPluginCall) {
+		let domain = call.getString("domain") ?? call.getString("id")!
+		let ssids = call.getArray("ssid", String.self) ?? []
+
+		// At this point, we're not certain this configuration can work,
+		// but we can't do this any step later, because createNetworkConfigurations will import things to the keychain.
+		// TODO only remove keychain items that match these networks
+		removeNetwork(ssids: ssids, domains: [domain])
+		resetKeychain()
+
 		let configurations = createNetworkConfigurations(
 			id: call.getString("id")!,
-			domain: call.getString("domain") ?? call.getString("id")!,
-			ssids: call.getArray("ssid", String.self) ?? [],
+			domain: domain,
+			ssids: ssids,
 			oids: call.getArray("oid", String.self) ?? [],
 			outerIdentity: call.getString("anonymous") ?? "",
 			serverNames: call.getArray("servername", String.self) ?? [],
@@ -100,19 +109,13 @@ public class WifiEapConfigurator: CAPPlugin {
 			password: call.getString("password") ?? "",
 			caCertificates: call.getArray("caCertificate", String.self)!
 		)
-		
+
 		guard configurations.count != 0 else {
 			return call.success([
 				"message": "plugin.wifieapconfigurator.error.config.invalid",
 				"success": false
 			])
 		}
-        
-        // At this point, we're reasonably certain that this configuration can work,
-        // so break old configurations here
-        // TODO only remove keychain items that match these networks
-        removeNetwork(call)
-        resetKeychain()
 
 		applyConfigurations(configurations: configurations) { messages, success in
 			return call.success([
@@ -121,7 +124,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			])
 		}
 	}
-	
+
 	/**
 	@function createNetworkConfigurations
 	@abstract Create network configuration objects
@@ -169,10 +172,10 @@ public class WifiEapConfigurator: CAPPlugin {
 			password: password,
 			caCertificates: caCertificates
 		) else {
-			NSLog("☠️ createNetworkConfigurations: Unable to build a working ")
+			NSLog("☠️ createNetworkConfigurations: Unable to build a working NEHotspotEAPSettings")
 			return []
 		}
-		
+
 		if serverNames.count > 0 {
 			eapSettings.trustedServerNames = serverNames
 		}
@@ -184,7 +187,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
 		eapSettings.isTLSClientCertificateRequired = false
 		eapSettings.supportedEAPTypes = outerEapTypes.map() { outerEapType in NSNumber(value: outerEapType.rawValue) }
-		
+
 		var configurations: [NEHotspotConfiguration] = []
 		if oids.count != 0 {
 			let hs20 = NEHotspotHS20Settings(
@@ -196,10 +199,10 @@ public class WifiEapConfigurator: CAPPlugin {
 		for ssid in ssids {
 			configurations.append(NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings))
 		}
-		
+
 		return configurations
 	}
-	
+
 	/**
 	@function applyConfigurations
 	@abstract Write the provided configurations to the OS (most will trigger a user consent each)
@@ -220,10 +223,18 @@ public class WifiEapConfigurator: CAPPlugin {
 			case NEHotspotConfigurationError.userDenied.rawValue:
 				errors.append("plugin.wifieapconfigurator.error.network.userCancelled")
 				break
+			case NEHotspotConfigurationError.invalidEAPSettings.rawValue:
+				// Check the debug log, search for NEHotspotConfigurationHelper
+				errors.append("plugin.wifieapconfigurator.error.network.invalidEap")
+				break
+			case NEHotspotConfigurationError.internal.rawValue:
+				// Are you running in an emulator?
+				errors.append("plugin.wifieapconfigurator.error.network.internal")
+				break
 			default:
 				errors.append("plugin.wifieapconfigurator.error.network.other." + String(error!.code))
 			}
-			
+
 			if (counter < configurations.count) {
 				let config = configurations[counter]
 				// this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
@@ -231,7 +242,7 @@ public class WifiEapConfigurator: CAPPlugin {
 				config.joinOnce = false
 				// TODO set to validity of client certificate
 				//config.lifeTimeInDays = NSNumber(integerLiteral: 825)
-				
+
 				NEHotspotConfigurationManager.shared.apply(config, completionHandler: handler)
 			} else {
 				callback(
@@ -240,10 +251,10 @@ public class WifiEapConfigurator: CAPPlugin {
 				)
 			}
 		}
-		
+
 		handler(error: nil)
 	}
-	
+
 	/**
 	@function buildSettingsWithClientCertificate
 	@abstract Create NEHotspotEAPSettings object for client certificate authentication
@@ -254,7 +265,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	func buildSettingsWithClientCertificate(pkcs12: String, passphrase: String) -> NEHotspotEAPSettings? {
 		let eapSettings = NEHotspotEAPSettings()
 		//NSLog("🦊 configureAP: Start handling clientCertificate")
-		
+
 		// TODO certName should be the CN of the certificate,
 		// but this works as long as we have only one (which we currently do)
 		guard let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: pkcs12, passphrase: passphrase) else {
@@ -265,11 +276,11 @@ public class WifiEapConfigurator: CAPPlugin {
 		guard eapSettings.setIdentity(id) else {
 			return nil
 		}
-		
+
 		//NSLog("🦊 configureAP: Handled clientCertificate")
 		return eapSettings
 	}
-	
+
 	/**
 	@function buildSettings
 	@abstract Build a Hotspot EAP settings object
@@ -300,11 +311,9 @@ public class WifiEapConfigurator: CAPPlugin {
 						passphrase: passphrase!
 					)!
 				}
+				NSLog("☠️ buildSettings: Failed precondition for EAPTLS")
+				break
 			case NEHotspotEAPSettings.EAPType.EAPTTLS:
-				fallthrough
-			case NEHotspotEAPSettings.EAPType.EAPPEAP:
-				fallthrough
-			case NEHotspotEAPSettings.EAPType.EAPFAST:
 				if username != nil && password != nil && innerAuthType != nil {
 					return buildSettingsWithUsernamePassword(
 						username: username!,
@@ -312,11 +321,25 @@ public class WifiEapConfigurator: CAPPlugin {
 						innerAuthType: innerAuthType!
 					)!
 				}
+				NSLog("☠️ buildSettings: Failed precondition for EAPTTLS")
+				break
+			case NEHotspotEAPSettings.EAPType.EAPFAST:
+				fallthrough
+			case NEHotspotEAPSettings.EAPType.EAPPEAP:
+				if username != nil && password != nil {
+					return buildSettingsWithUsernamePassword(
+						username: username!,
+						password: password!,
+						innerAuthType: nil
+					)!
+				}
+				NSLog("☠️ buildSettings: Failed precondition for EAPPEAP/EAPFAST")
+				break
 			}
 		}
 		return nil
 	}
-	
+
 	/**
 	@function buildSettingsWithUsernamePassword
 	@abstract Create NEHotspotEAPSettings object for username/pass authentication
@@ -325,20 +348,22 @@ public class WifiEapConfigurator: CAPPlugin {
 	@param innerAuthType Inner authentication type (only used for TTLS)
 	@result NEHotspotEAPSettings configured with the provided credentials
 	*/
-	func buildSettingsWithUsernamePassword(username: String, password: String, innerAuthType: NEHotspotEAPSettings.TTLSInnerAuthenticationType) -> NEHotspotEAPSettings? {
+	func buildSettingsWithUsernamePassword(username: String, password: String, innerAuthType: NEHotspotEAPSettings.TTLSInnerAuthenticationType?) -> NEHotspotEAPSettings? {
 		let eapSettings = NEHotspotEAPSettings()
-		
+
 		guard username != "" && password != "" else{
 			NSLog("☠️ configureAP: empty user/pass")
 			return nil
 		}
-		
+
 		eapSettings.username = username
 		eapSettings.password = password
-		eapSettings.ttlsInnerAuthenticationType = innerAuthType
+		if innerAuthType != nil {
+			eapSettings.ttlsInnerAuthenticationType = innerAuthType!
+		}
 		return eapSettings
 	}
-	
+
 	/**
 	@function isNetworkAssociated
 	@abstract Capacitor call to check if SSID is connect, doesn't work for HS20
@@ -351,8 +376,7 @@ public class WifiEapConfigurator: CAPPlugin {
 				"success": false,
 			])
 		}
-		
-		
+
 		var iterator = false
 		NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
 			for ssid in ssids {
@@ -360,7 +384,7 @@ public class WifiEapConfigurator: CAPPlugin {
 					iterator = true
 				}
 			}
-			
+
 			if !iterator && ssids.count < 1 {
 				call.success([
 					"message": "plugin.wifieapconfigurator.error.network.noNetworksFound",
@@ -368,7 +392,7 @@ public class WifiEapConfigurator: CAPPlugin {
 					"overridable": true
 				])
 			}
-			
+
 			else if(iterator){
 				call.success([
 					"message": "plugin.wifieapconfigurator.error.network.alreadyAssociated",
@@ -383,8 +407,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			}
 		}
 	}
-	
-	
+
 	/**
 	@function removeNetwork
 	@abstract Capacitor call to remove a network
@@ -393,20 +416,33 @@ public class WifiEapConfigurator: CAPPlugin {
 	@objc func removeNetwork(_ call: CAPPluginCall) {
 		let ssids = call.getArray("ssid", String.self) ?? []
 		let domain = call.getString("domain") ?? call.getString("id")
-		
+
 		call.success([
 			"message": "plugin.wifieapconfigurator.success.network.removed",
 			"success": true,
 		])
-		
+
+		if domain == nil {
+			removeNetwork(ssids: ssids)
+		} else {
+			removeNetwork(ssids: ssids, domains: [domain!])
+		}
+	}
+
+	/**
+	@function removeConfiguration
+	@abstract Capacitor call to remove a network
+	@param call Capacitor call object containing array "ssid" and/or string "domain"
+	*/
+	func removeNetwork(ssids: [String] = [], domains: [String] = []) {
 		for ssid in ssids {
 			NEHotspotConfigurationManager.shared.removeConfiguration(forSSID: ssid)
 		}
-		if domain != nil {
-			NEHotspotConfigurationManager.shared.removeConfiguration(forHS20DomainName: domain!)
+		for domain in domains {
+			NEHotspotConfigurationManager.shared.removeConfiguration(forHS20DomainName: domain)
 		}
 	}
-	
+
 	/**
 	@function importCACertificates
 	@abstract Import an array of Base64 encoded certificates and return an corresponding array of SecCertificate objects
@@ -427,7 +463,7 @@ public class WifiEapConfigurator: CAPPlugin {
 				NSLog("☠️ configureAP: CA certificate not added");
 				return
 			}
-			
+
 			let getquery: [String: Any] = [
 				kSecClass as String: kSecClassCertificate,
 				kSecAttrLabel as String: certName,
@@ -441,13 +477,13 @@ public class WifiEapConfigurator: CAPPlugin {
 			}
 			let savedCert = item as! SecCertificate
 			certificates.append(savedCert);
-			
+
 			index += 1
 		}
 		//NSLog("🦊 configureAP: All caCertificateStrings handled")
 		return certificates
 	}
-	
+
 	/**
 	@function addCertificate
 	@abstract Import Base64 encoded DER to keychain.
@@ -457,7 +493,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	*/
 	func addCertificate(certName: String, certificate: String) -> Bool {
 		let certBase64 = certificate
-		
+
 		guard let data = Data(base64Encoded: certBase64, options: Data.Base64DecodingOptions.ignoreUnknownCharacters) else {
 			NSLog("☠️ Unable to base64 decode certificate data")
 			return false;
@@ -466,7 +502,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			NSLog("☠️ addCertificate: SecCertificateCreateWithData: false")
 			return false;
 		}
-		
+
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
 			kSecValueRef as String: certRef,
@@ -479,7 +515,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 		return true
 	}
-	
+
 	/**
 	@function addClientCertificate
 	@abstract Import a PKCS12 to the keychain and return a handle to the imported item.
@@ -503,28 +539,28 @@ public class WifiEapConfigurator: CAPPlugin {
 		if (items.count > 1) {
 			NSLog("😱 addClientCertificate: SecPKCS12Import: more than one result - using only first one")
 		}
-		
+
 		// Get the chain from the imported certificate
 		let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]
 		for (index, cert) in chain.enumerated() {
 			let certData = SecCertificateCopyData(cert) as Data
-			
+
 			if let certificateData = SecCertificateCreateWithData(nil, certData as CFData) {
 				let addquery: [String: Any] = [
 					kSecClass as String: kSecClassCertificate,
 					kSecValueRef as String:  certificateData,
 					kSecAttrLabel as String: "getEduroamCertificate" + "\(index)"
 				]
-				
+
 				let statusUpload = SecItemAdd(addquery as CFDictionary, nil)
-				
+
 				guard statusUpload == errSecSuccess || statusUpload == errSecDuplicateItem else {
 					NSLog("☠️ addServerCertificate: SecItemAdd: " + String(statusUpload))
 					return nil
 				}
 			}
 		}
-		
+
 		// Get the identity from the imported certificate
 		let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity
 		let addquery: [String: Any] = [
@@ -538,7 +574,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 		return identity
 	}
-	
+
 	/**
 	@function isConnectedSSID
 	@abstract capacitor call to check if SSID is connected
