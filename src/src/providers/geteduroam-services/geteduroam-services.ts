@@ -333,20 +333,24 @@ export class GeteduroamServices {
    * @param authenticationMethod
    */
   sanitize(authenticationMethod) {
-    let certificates = authenticationMethod.serverSideCredential.ca.map((ca) => {
-      if (ca.properties.encoding !== 'base64' || ca.properties.format !== 'X.509') {
-        console.error("Invalid CA provided!");
-        return null;
-      }
-      return ca.content;
-    });
-    authenticationMethod.serverSideCredential.ca = certificates.filter((ca) => {return ca;});
+    if (authenticationMethod.serverSideCredential && authenticationMethod.serverSideCredential.ca) {
+      let certificates = authenticationMethod.serverSideCredential.ca.map((ca) => {
+        if (ca.properties.encoding !== 'base64' || ca.properties.format !== 'X.509') {
+          console.error("Invalid CA provided!");
+          return null;
+        }
+        return ca.content;
+      });
+      authenticationMethod.serverSideCredential.ca = certificates.filter((ca) => {return ca;});
+    }
 
-    let clientCertificate = authenticationMethod.clientSideCredential.clientCertificate;
-    if (clientCertificate.$.format === 'PKCS12' && clientCertificate.$.encoding === 'base64') {
-      authenticationMethod.clientSideCredential.clientCertificate = clientCertificate._;
-    } else {
-      authenticationMethod.clientSideCredential.clientCertificate = null;
+    if (authenticationMethod.clientSideCredential && authenticationMethod.clientSideCredential.clientCertificate) {
+      let clientCertificate = authenticationMethod.clientSideCredential.clientCertificate;
+      if (clientCertificate.$.format === 'PKCS12' && clientCertificate.$.encoding === 'base64') {
+        authenticationMethod.clientSideCredential.clientCertificate = clientCertificate._;
+      } else {
+        authenticationMethod.clientSideCredential.clientCertificate = null;
+      }
     }
 
     // TODO why does CA use properties and content members,
