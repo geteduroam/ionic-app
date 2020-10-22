@@ -348,16 +348,29 @@ export class GeteduroamServices {
   }
 
   /**
-   * This method clean the certificates saving only the base64 string.
+   * Extract the content from the certificate fields
    * @param authenticationMethod
    */
   sanitize(authenticationMethod) {
-    let certificates = [];
-    authenticationMethod.clientSideCredential.clientCertificate = typeof authenticationMethod.clientSideCredential.clientCertificate === 'object' ? authenticationMethod.clientSideCredential.clientCertificate["_"] : authenticationMethod.clientSideCredential.clientCertificate;
-    for ( let i = 0 ; i < authenticationMethod.serverSideCredential.ca.length ; i++ ){
-      certificates[i] = typeof authenticationMethod.serverSideCredential.ca[i] === 'object' ? authenticationMethod.serverSideCredential.ca[i].content : authenticationMethod.serverSideCredential.ca[i];
+    let certificates = authenticationMethod.serverSideCredential.ca.map((ca) => {
+      if (ca.properties.encoding !== 'base64' || ca.properties.format !== 'X.509') {
+        console.error("Invalid CA provided!");
+        return null;
+      }
+      return ca.content;
+    });
+    authenticationMethod.serverSideCredential.ca = certificates.filter((ca) => {return ca;});
+
+    let clientCertificate = authenticationMethod.clientSideCredential.clientCertificate;
+    if (clientCertificate.$.format === 'PKCS12' && clientCertificate.$.encoding === 'base64') {
+      authenticationMethod.clientSideCredential.clientCertificate = clientCertificate._;
+    } else {
+      authenticationMethod.clientSideCredential.clientCertificate = null;
     }
-    authenticationMethod.serverSideCredential.ca = certificates;
+
+    // TODO why does CA use properties and content members,
+    // while clientCertificate uses $ and _ as members?
+
     return authenticationMethod;
   }
 
