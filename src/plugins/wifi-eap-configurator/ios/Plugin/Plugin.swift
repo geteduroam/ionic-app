@@ -22,6 +22,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			return .eapttlsInnerAuthenticationMSCHAP
 		case 3:
 			return .eapttlsInnerAuthenticationMSCHAPv2
+		case 26:
+        	return .eapttlsInnerAuthenticationMSCHAPv2
 		/*
 		case _: // not in XSD
 		return .eapttlsInnerAuthenticationCHAP
