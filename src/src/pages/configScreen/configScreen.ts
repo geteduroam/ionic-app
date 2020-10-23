@@ -1,5 +1,5 @@
-import { Component, NgZone } from '@angular/core';
-import {Events, ModalController, NavController} from 'ionic-angular';
+import { Component, NgModule, NgZone } from '@angular/core';
+import { Events, Modal, ModalController, NavController, NavParams, ViewController } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -20,7 +20,6 @@ declare var window;
   selector: 'page-config-screen',
   templateUrl: 'configScreen.html',
 })
-
 export class ConfigurationScreen extends BasePage{
 
   showAll: boolean = false;
@@ -80,7 +79,6 @@ export class ConfigurationScreen extends BasePage{
    */
   showButton: boolean = true;
 
-
   /**
    * Constructor
    * */
@@ -89,34 +87,45 @@ export class ConfigurationScreen extends BasePage{
               protected dictionary: DictionaryServiceProvider, protected global: GlobalProvider,
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
+    Keyboard.addListener('keyboardWillShow', async () => {
+     await Keyboard.hide();
+    });
+
+    this.event.subscribe('connection', async (res: any) => {
+      if (!!res.connected && !this.global.discovery) {
+        this.chargeDiscovery()
+      }
+    });
   }
+
 
   /**
    * Method executes when the search bar is tapped.
    * */
   async showModal(e: any) {
     e.preventDefault();
-    await Keyboard.hide();
     if (!!this.instances) {
       let searchModal = this.modalCtrl.create(InstitutionSearch, {
-        instances: this.instances,
-        instanceName: this.instanceName}
-      );
+        instanceName: this.instanceName
+      });
 
       searchModal.onDidDismiss((data) => {
 
+        data = this.instances.filter((res: any) => {
+           if (res.name === data) return res
+        });
+
         if (data !== undefined) {
-          this.instance = data;
-          this.instanceName = data.name;
+          this.instance = data[0];
+          this.instanceName = data[0].name;
 
           this.initializeProfiles(this.instance);
-
         }
       });
 
       return await searchModal.present();
     } else {
-      await this.getDiscovery();
+      await this.chargeDiscovery();
       this.showModal(e);
     }
   }
@@ -226,12 +235,18 @@ export class ConfigurationScreen extends BasePage{
     this.resetValues();
   }
 
+  async ngOnInit() {
+    this.instances = this.global.discovery;
+  }
+
+  ionViewWillEnter() {
+    this.loading.create();
+  }
   /**
    *  Lifecycle when entering a page, before it becomes the active one
    *  Load the discovery data and show the spinner
    */
   async ionViewDidEnter() {
-    await this.getDiscovery();
     this.removeSpinner();
     this.showAll = true;
   }
@@ -251,7 +266,6 @@ export class ConfigurationScreen extends BasePage{
       this.instanceName = '';
 
     });
-
   }
 
   async checkEap(profile: ProfileModel) {
@@ -274,6 +288,11 @@ export class ConfigurationScreen extends BasePage{
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
     }
+  }
+
+  async chargeDiscovery() {
+    await this.getDiscovery();
+    this.global.setDiscovery(this.instances)
   }
 
   /**

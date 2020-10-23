@@ -14,9 +14,9 @@
     <div class="content-form" margin-top padding-top text-center>
         <ion-label class="label-conf" no-margin padding-top text-left>{{getString('label', 'institution')}}</ion-label>
 
-        <div class="row" padding-top>
+        <div *ngIf="this.instances" class="row" padding-top>
 
-            <ion-searchbar (click)="showModal($event)" [(ngModel)]="instanceName" cancelButtonText
+            <ion-searchbar (click)="showModal($event)" [(ngModel)]="instanceName" cancelButtonText debounce="500"
                            class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">
 
             </ion-searchbar>
@@ -44,4 +44,3 @@
         </div>
     </div>
 </div>
-

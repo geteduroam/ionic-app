@@ -58,6 +58,7 @@ export class InstitutionSearch extends BasePage{
               protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider) {
     super(loading, dictionary, event, global);
+    Keyboard.removeAllListeners();
   }
 
   /**
@@ -91,9 +92,8 @@ export class InstitutionSearch extends BasePage{
    */
   filterInstances(stringAux: string){
     if (stringAux && stringAux.trim() != '') {
-
       this.filteredInstances = this.instances.filter((item:any) => {
-        return (item.name.toLowerCase().indexOf(stringAux.toLowerCase()) > -1);
+        return (item.toLowerCase().indexOf(stringAux.toLowerCase()) > -1);
       })
     } else {
       this.clearInstance();
@@ -131,16 +131,20 @@ export class InstitutionSearch extends BasePage{
     this.selectedProfileId = '';
   }
 
+  ngOnInit() {
+    this.instances = Object.values(this.global.getInstitutionNames());
+    this.filteredInstances = Object.values(this.instances);
+  }
   /**
    * Lifecycle when entering a page, after it becomes the active page.
    *  this sets focus on search bar
    */
-  ionViewDidEnter() {
+  ionViewWillEnter() {
     this.ios = !!this.platform.is('ios');
-    this.instances = this.navParams.get('instances');
     this.instanceName = this.navParams.get('instanceName');
-    this.filterInstances(this.instanceName);
 
+  }
+  ionViewDidEnter() {
     setTimeout(() => {
       this.searchBar.setFocus()
     }, 10);

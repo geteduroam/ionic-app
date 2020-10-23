@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule } from 'ionic-angular';
 import { GeteduroamApp } from './app.component';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
-
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
@@ -18,6 +17,8 @@ import { StoringProvider } from '../providers/storing/storing';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorServiceProvider } from "../providers/error-service/error-service";
 import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
+import { InstitutionSearch } from '../pages/institutionSearch/institutionSearch';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -25,8 +26,9 @@ import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
   ],
   imports: [
     BrowserModule,
+    ReactiveFormsModule,
     PagesModule,
-    IonicModule.forRoot(GeteduroamApp)
+    IonicModule.forRoot(GeteduroamApp, { preload: InstitutionSearch }),
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -48,7 +50,7 @@ import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
     OauthConfProvider,
     ErrorServiceProvider
   ],
-  exports:[]
+  exports:[],
 })
 export class AppModule {
 

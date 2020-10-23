@@ -1,6 +1,5 @@
 import {Config, Events, Nav, Platform} from 'ionic-angular';
 import {Component, ViewChild} from '@angular/core';
-import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
@@ -44,6 +43,7 @@ export class GeteduroamApp {
   lastTimeBackPress = 0;
 
   timePeriodToExit = 2000;
+
   /**
    * @constructor
    *
@@ -84,21 +84,7 @@ export class GeteduroamApp {
       this.enableWifi();
     }
     if (!this.checkExtFile) {
-      const isAssociated = await this.isAssociatedNetwork();
-
-      if (!!isAssociated.success) {
-        // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
-        this.rootPage = ConfigurationScreen;
-      } else{
-        if (!isAssociated.message.includes('alreadyAssociated')) {
-          this.rootPage = ConfigurationScreen;
-        } else {
-          this.rootPage = ReconfigurePage;
-          this.getAssociation(isAssociated);
-
-          !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
-        }
-      }
+      this.rootPage = ConfigurationScreen;
     }
   }
   async checkExternalOpen() {
@@ -148,7 +134,7 @@ export class GeteduroamApp {
       this.platform.registerBackButtonAction(() => {
         // get current active page
         let view = this.navCtrl.getActive();
-        if (view.component.name == "ConfigurationScreen" || view.component.name == "ReconfigurePage") {
+        if (view.component.name == "ConfigurationScreen") {
           //Double check to exit app
           if (new Date().getTime() - this.lastTimeBackPress < this.timePeriodToExit) {
             this.platform.exitApp(); //Exit from app
@@ -177,13 +163,11 @@ export class GeteduroamApp {
       const method = await this.getEduroamServices.eapValidation(this.profile);
       if (method) {
         this.profile.oauth = Number(this.global.getAuthenticationMethod().eapMethod.type) === 13;
-        if (!this.rootPage) {
-          this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
-        } else {
-          await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
-        }
+      }
+      if (!this.rootPage) {
+        this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
       } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
+        await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
       }
     }
   }
@@ -200,11 +184,10 @@ export class GeteduroamApp {
    */
   async notConnectionNetwork() {
     if (!this.checkExtFile) {
-      this.rootPage = ReconfigurePage;
+      this.rootPage = ConfigurationScreen;
 
       const isAssociated = await this.isAssociatedNetwork();
       this.getAssociation(isAssociated);
-
 
       if (!isAssociated.success && !isAssociated.overridable) {
         this.removeAssociatedManually();
@@ -232,8 +215,10 @@ export class GeteduroamApp {
     if (!this.checkExtFile) {
       this.connectionEvent(connectionStatus);
 
-      if (!connectionStatus.connected){
+      if (!connectionStatus.connected) {
         this.notConnectionNetwork();
+      } else {
+        this.global.setDiscovery(await this.getEduroamServices.discovery());
       }
     }
   }
