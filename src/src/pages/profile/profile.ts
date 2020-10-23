@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ElementRef, ViewChild} from '@angular/core';
 import { Events, NavController, NavParams } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
@@ -12,6 +12,10 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
+import { Plugins } from '@capacitor/core';
+declare var Capacitor;
+const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-profile',
@@ -21,6 +25,8 @@ import { DictionaryServiceProvider } from "../../providers/dictionary-service/di
 export class ProfilePage extends BasePage{
 
   showAll: boolean = false;
+
+  showForm: boolean = false;
 
   /**
    * The profile which is received as a navigation parameter
@@ -87,12 +93,31 @@ export class ProfilePage extends BasePage{
    */
   enableButton: boolean = false;
 
+  /**
+   * DOM Sanitizer
+   */
+  converted_image: SafeResourceUrl;
+
+  /**
+   * It checks if provider has a logo
+   */
+  logo: boolean = false;
+
+  /**
+   * Variable to know if the keyboard if show or hide
+   */
+  focus: boolean = false;
+
+  @ViewChild('imgLogo') imgLogo: ElementRef;
+
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events) {
+              protected event: Events, private sanitizer: DomSanitizer) {
     super(loading, dictionary, event, global);
-
+    Keyboard.addListener('keyboardWillHide', () => {
+      this.focus = false;
+    });
   }
 
   /**
@@ -219,7 +244,6 @@ export class ProfilePage extends BasePage{
    * @param validProfile check if profile is valid
    */
   async manageProfileValidation(){
-    this.providerInfo = this.global.getProviderInfo();
 
     this.validMethod = this.global.getAuthenticationMethod();
 
@@ -263,15 +287,21 @@ export class ProfilePage extends BasePage{
    *  Lifecycle method executed when the class did enter
    */
   async ionViewDidEnter() {
+    this.providerInfo = this.global.getProviderInfo();
+    if(this.providerInfo.providerLogo) {
+      this.logo = true;
+      this.getLogo();
+    }
     if (this.validMethod.clientSideCredential.username && this.validMethod.clientSideCredential.password) {
       this.provide.email = this.validMethod.clientSideCredential.username;
       this.provide.pass = this.validMethod.clientSideCredential.password;
       this.enableButton = true;
-      await this.checkForm();
+      //await this.checkForm();
     } else {
       this.removeSpinner();
-      this.showAll = true;
+      this.showForm = true;
     }
+    this.showAll = true;
   }
 
   /**
@@ -337,5 +367,19 @@ export class ProfilePage extends BasePage{
       }
     }
     return candidate;
+  }
+
+  getLogo() {
+    let imageData = this.providerInfo.providerLogo._;
+    let mimeType = this.providerInfo.providerLogo.$.mime;
+    let encoding = this.providerInfo.providerLogo.$.encoding;
+
+    const data = `data:${mimeType};${encoding},${imageData}`;
+
+    this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
+  }
+
+  getFocus() {
+    this.focus = true;
   }
 }

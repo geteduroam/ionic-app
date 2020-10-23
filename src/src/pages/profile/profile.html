@@ -1,10 +1,10 @@
 <div *ngIf="showAll" class="profile-content">
-    <div class="header-content" margin-top padding-top>
-        <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
-        <h1>{{getString('header', 'profile')}}</h1>
+    <div class="header-content" [ngClass]="!showForm && !logo ? 'only-tittle' : !showForm && !!logo ? 'only-header' : ''" margin-top padding-top>
+        <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
+        <h1>{{providerInfo.displayName}}</h1>
     </div>
 
-    <div class="content-form" margin-bottom text-center>
+    <div *ngIf="showForm" class="content-form" margin-bottom text-center>
 
         <form (ngSubmit)="checkForm()">
 
@@ -13,7 +13,7 @@
 
                 <input (blur)="blur()" [(ngModel)]="provide.email"
                        [ngClass]="!validSuffix && !validMail ? 'error-validation' : ''" [placeholder]="getPlaceholder()"
-                       autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
+                       (focus)="getFocus()" autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
 
                 <p *ngIf="!validMail" class="error-msg">
                     {{getString('error', 'username')}}{{getPlaceholder()}} </p>
@@ -25,7 +25,7 @@
             <div class="content-profile" margin-top>
                 <ion-label class="label-conf" text-left>{{getString('label', 'password')}}</ion-label>
                 <input (blur)="validateForm()" (ngModelChange)="validateForm()" [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
-                       name="pass" padding-left type="password"/>
+                       (focus)="getFocus()" name="pass" padding-left type="password"/>
 
                 <p *ngIf="errorPass" class="error-msg">{{getString('error', 'password')}}</p>
             </div>
@@ -38,10 +38,10 @@
         </form>
     </div>
 
-    <div class="footer-form">
+    <div id="footer" [ngClass]="!focus ? 'footer-form' : 'footer-form-focus'">
         <form (ngSubmit)="checkForm()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
+                <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
     </div>

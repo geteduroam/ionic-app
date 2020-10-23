@@ -26,8 +26,12 @@ page-profile {
     }
   }
 
+  .button-control {
+    width: 100% !important;
+  }
+
   .bottom-button {
-    margin: 30px;
+    margin: 20px 17px 10px 15px;
   }
   .error-msg {
     font-size: 11px;
@@ -35,6 +39,37 @@ page-profile {
   }
   .error-validation {
     border: solid 1px red !important;
+  }
+
+  img.imgLogo {
+    width: calc(90% - 40px) !important;
+    height: 100% !important
+  }
+
+  .footer-form {
+    height: auto !important;
+    position: absolute !important;
+    bottom: 1px;
+    width: 100% !important;
+  }
+  .footer-form-focus {
+    height: auto !important;
+    bottom: 1px;
+    width: 100% !important;
+    position: relative !important;
+
+    .disabled-button {
+      opacity: .4;
+      pointer-events: none;
+    }
+  }
+
+  .only-tittle {
+    margin-top: 50% !important;
+  }
+
+  .only-header {
+    margin-top: 25% !important;
   }
 }
 
