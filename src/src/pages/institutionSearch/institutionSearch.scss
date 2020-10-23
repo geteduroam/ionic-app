@@ -8,5 +8,11 @@ page-institution-search {
   .label-institution {
     font-size: 17px;
     padding-left: 16px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    color: #444;
   }
 }
