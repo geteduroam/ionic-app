@@ -4,15 +4,15 @@
     <h1>{{providerInfo.displayName}}</h1>
   </div>
 
-  <div class="content-form" margin-bottom text-center>
+  <div class="content-form" margin-bottom margin-top text-center>
 
     <form (ngSubmit)="sendPassphrase()">
 
-      <div  class="content-profile" padding-top >
+      <div  class="content-profile" padding-top margin-top>
         <ion-label class="label-conf" text-left>{{getString('label', 'passphrase')}}</ion-label>
 
-        <input (blur)="blur()" [(ngModel)]="passphrase" [ngClass]="!validPassPhrase ? 'error-validation' : ''"
-               autocomplete="on" class="input-profile" name="passphrase" padding-left type="text"/>
+        <input id="input" (blur)="blur()" [(ngModel)]="passphrase" [ngClass]="!validPassPhrase ? 'error-validation' : ''" (focus)="getFocus()"
+               autocomplete="on" class="input-profile" name="passphrase" padding-left type="text" />
 
         <p *ngIf="!validPassPhrase" class="error-msg">
           {{getString('error', 'passphrase')}} </p>
@@ -20,7 +20,7 @@
     </form>
   </div>
 
-  <div id="footer" class="footer-form">
+  <div id="footer" [ngClass]="!focus ? 'footer-form' : 'footer-form-focus'">
     <form (ngSubmit)="sendPassphrase()">
       <div class="content-button bottom-button">
         <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'connect')}}</button>

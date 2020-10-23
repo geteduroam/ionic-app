@@ -54,15 +54,24 @@ export class ClientCertificatePassphrasePage extends BasePage{
    */
   providerInfo: ProviderInfo;
 
+  focus: boolean = false;
+  private footer = document.getElementById('footer');
+
   constructor(public navCtrl: NavController, public navParams: NavParams, protected event: Events,
               public loading: LoadingProvider, public dictionary: DictionaryServiceProvider,
               public global: GlobalProvider, private getEduroamServices: GeteduroamServices,
               private errorHandler: ErrorHandlerProvider, private sanitizer: DomSanitizer) {
     super(loading, dictionary, event, global);
     this.oauthConf = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
+
+  }
+
+  getFocus() {
+    this.focus = !this.focus;
   }
 
   ionViewDidEnter() {
+
     this.providerInfo = this.global.getProviderInfo();
     if(this.providerInfo.providerLogo) {
       this.logo = true;
@@ -73,6 +82,7 @@ export class ClientCertificatePassphrasePage extends BasePage{
 
   blur() {
     this.checkPassPhrase();
+    this.focus = !this.focus;
   }
 
   async checkPassPhrase() {
