@@ -95,7 +95,6 @@ export class GeteduroamApp {
         } else {
           this.rootPage = ReconfigurePage;
           this.getAssociation(isAssociated);
-          this.global.setOverrideProfile(true);
 
           !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
         }
@@ -119,17 +118,13 @@ export class GeteduroamApp {
     if (connect.connected) {
 
       await this.errorHandler.handleError(
-        this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
-        this.dictionary.getTranslation('error', 'available2') +
-        this.global.getSsid() + '.', false, '', 'removeConnection', true);
+        this.dictionary.getTranslation('error', 'duplicate'), false, '', 'removeConnection', true);
 
     } else {
 
       await this.errorHandler.handleError(
-        this.dictionary.getTranslation('error', 'available1') +
-        this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
-        this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false, '', 'enableAccess', false);
+        this.dictionary.getTranslation('error', 'duplicate') + '\n' +
+        this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', false);
     }
   }
 
@@ -144,8 +139,7 @@ export class GeteduroamApp {
         this.connectionEvent(connectionStatus);
 
         !connectionStatus.connected ?
-          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on') +
-            this.global.getSsid() + '.') :
+          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on')) :
           this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
       }
     });
@@ -183,11 +177,13 @@ export class GeteduroamApp {
       const method = await this.getEduroamServices.eapValidation(this.profile);
       if (method) {
         this.profile.oauth = Number(this.global.getAuthenticationMethod().eapMethod.type) === 13;
-      }
-      if (!this.rootPage) {
-        this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
+        if (!this.rootPage) {
+          this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
+        } else {
+          await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
+        }
       } else {
-        await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
       }
     }
   }
@@ -214,8 +210,7 @@ export class GeteduroamApp {
         this.removeAssociatedManually();
 
       } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-          this.global.getSsid() + '.', false, '', 'enableAccess', true);
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', true);
       }
     }
   }

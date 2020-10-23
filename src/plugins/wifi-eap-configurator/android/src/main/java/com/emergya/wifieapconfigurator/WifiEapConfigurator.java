@@ -134,14 +134,11 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
-        Integer eap = null;
-        if (call.getInt("eap") != null && (call.getInt("eap") == 13 || call.getInt("eap") == 21
-                || call.getInt("eap") == 25)) {
-            eap = call.getInt("eap");
-        } else {
+        Integer eap = getEapMethod(call.getInt("eap"));
+        if (eap == null) {
             JSObject object = new JSObject();
             object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.eap.missing");
+            object.put("message", "plugin.wifieapconfigurator.error.eap.invalid");
             call.success(object);
             res = false;
         }
@@ -189,12 +186,11 @@ public class WifiEapConfigurator extends Plugin {
             }
 
 
-            if (call.getInt("auth") != null) {
-                auth = call.getInt("auth");
-            } else {
+            auth = getAuthMethod(call.getInt("auth"));
+            if (auth == null) {
                 JSObject object = new JSObject();
                 object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.auth.missing");
+                object.put("message", "plugin.wifieapconfigurator.error.auth.invalid");
                 call.success(object);
                 res = false;
             }
@@ -235,8 +231,7 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
-        Integer eapMethod = getEapMethod(eap, call);
-        enterpriseConfig.setEapMethod(eapMethod);
+        enterpriseConfig.setEapMethod(eap);
 
         CertificateFactory certFactory = null;
         X509Certificate[] caCerts = null;
@@ -284,8 +279,7 @@ public class WifiEapConfigurator extends Plugin {
             enterpriseConfig.setIdentity(username);
             enterpriseConfig.setPassword(password);
 
-            Integer authMethod = getAuthMethod(auth, call);
-            enterpriseConfig.setPhase2Method(authMethod);
+            enterpriseConfig.setPhase2Method(auth);
 
         } else {
 
@@ -413,54 +407,61 @@ public class WifiEapConfigurator extends Plugin {
         cred.setRealm(id);
         cred.setCaCertificate(enterpriseConfig.getCaCertificate());
 
-        if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13) {
-            Credential.CertificateCredential certCred = new Credential.CertificateCredential();
-            certCred.setCertType("x509v3");
-            cred.setClientPrivateKey(key);
-            cred.setClientCertificateChain(enterpriseConfig.getClientCertificateChain());
-            certCred.setCertSha256Fingerprint(getFingerprint(enterpriseConfig.getClientCertificateChain()[0]));
-            cred.setCertCredential(certCred);
-        } else if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
-            byte[] data = new byte[0];
-            try {
-                data = enterpriseConfig.getPassword().getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+        switch(enterpriseConfig.getEapMethod()) {
+            case WifiEnterpriseConfig.Eap.TLS:
+                Credential.CertificateCredential certCred = new Credential.CertificateCredential();
+                certCred.setCertType("x509v3");
+                cred.setClientPrivateKey(key);
+                cred.setClientCertificateChain(enterpriseConfig.getClientCertificateChain());
+                certCred.setCertSha256Fingerprint(getFingerprint(enterpriseConfig.getClientCertificateChain()[0]));
+                cred.setCertCredential(certCred);
+                break;
+            case WifiEnterpriseConfig.Eap.PEAP:
+            case WifiEnterpriseConfig.Eap.TTLS:
+            case WifiEnterpriseConfig.Eap.PWD:
+                byte[] data = new byte[0];
+                try {
+                    data = enterpriseConfig.getPassword().getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                String base64 = Base64.encodeToString(data, Base64.DEFAULT);
 
-            Credential.UserCredential us = new Credential.UserCredential();
-            us.setUsername(enterpriseConfig.getIdentity());
-            us.setPassword(base64);
-            us.setEapType(21);
-            if(enterpriseConfig.getPhase2Method() == WifiEnterpriseConfig.Phase2.MSCHAPV2) {
-                us.setNonEapInnerMethod("MS-CHAP-V2");
-            } else if (enterpriseConfig.getPhase2Method() == WifiEnterpriseConfig.Phase2.PAP) {
-                us.setNonEapInnerMethod("PAP");
-            }
-            cred.setUserCredential(us);
+                Credential.UserCredential us = new Credential.UserCredential();
+                us.setUsername(enterpriseConfig.getIdentity());
+                us.setPassword(base64);
+                us.setEapType(21);
+                switch(enterpriseConfig.getPhase2Method()) {
+                    // Strings from android.net.wifi.hotspot2.pps.Credential.UserCredential.AUTH_METHOD_*
+                    case WifiEnterpriseConfig.Phase2.MSCHAPV2: us.setNonEapInnerMethod("MS-CHAP-V2"); break;
+                    case WifiEnterpriseConfig.Phase2.PAP: us.setNonEapInnerMethod("PAP"); break;
+                    case WifiEnterpriseConfig.Phase2.MSCHAP: us.setNonEapInnerMethod("MS-CHAP"); break;
+                    // Do we need a default case here?
+                }
+                cred.setUserCredential(us);
+                break;
+            default:
+                return; // this is probably not what we should do..
         }
 
-        if (this.getEapType(enterpriseConfig.getEapMethod(), call) == 13 || this.getEapType(enterpriseConfig.getEapMethod(), call) == 21) {
-            config.setCredential(cred);
+        config.setCredential(cred);
 
-            try {
-                wifiManager.addOrUpdatePasspointConfiguration(config);
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
-                call.success(object);
-            } catch (Exception e) {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
-                call.success(object);
-            }
+        try {
+            wifiManager.addOrUpdatePasspointConfiguration(config);
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
+            call.success(object);
+        } catch (Exception e) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
+            call.success(object);
         }
     }
 
@@ -863,55 +864,28 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
-    private Integer getEapMethod(Integer eap, PluginCall call) {
-        Integer res = null;
+    private Integer getEapMethod(Integer eap) {
         switch (eap) {
-            case 13:
-                res = WifiEnterpriseConfig.Eap.TLS;
-                break;
-            case 21:
-                res = WifiEnterpriseConfig.Eap.TTLS;
-                break;
-            case 25:
-                res = WifiEnterpriseConfig.Eap.PEAP;
-                break;
-            default:
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.eap.invalid");
-                call.success(object);
-                res = 0;
-                break;
+            case 13: return WifiEnterpriseConfig.Eap.TLS;
+            case 21: return WifiEnterpriseConfig.Eap.TTLS;
+            case 25: return WifiEnterpriseConfig.Eap.PEAP;
+            default: return null;
         }
-        return res;
     }
 
-    private Integer getAuthMethod(Integer auth, PluginCall call) {
-        Integer res = null;
+    private Integer getAuthMethod(Integer auth) {
         switch (auth) {
-            case 1:
-                res = WifiEnterpriseConfig.Phase2.PAP;
-                break;
-            case 2:
-                res = WifiEnterpriseConfig.Phase2.MSCHAP;
-                break;
-            case 3:
-                res = WifiEnterpriseConfig.Phase2.MSCHAPV2;
-                break;
+            case -1: return WifiEnterpriseConfig.Phase2.PAP;
+            case -2: return WifiEnterpriseConfig.Phase2.MSCHAP;
+            case -3:
+            case 26: /* Android cannot do PEAP-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try PEAP-MSCHAPv2 instead */
+                return WifiEnterpriseConfig.Phase2.MSCHAPV2;
             /*
-            case 6:
-                res = WifiEnterpriseConfig.Phase2.GTC;
-                break;
+            case _:
+                return WifiEnterpriseConfig.Phase2.GTC;
             */
-            default:
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.auth.invalid");
-                call.success(object);
-                res = 0;
-                break;
+            default: return null;
         }
-        return res;
     }
 
     boolean getPermission(String permission) {
@@ -921,52 +895,6 @@ public class WifiEapConfigurator extends Plugin {
             ActivityCompat.requestPermissions(getActivity(), new String[]{permission}, 123);
         }
 
-        return res;
-    }
-
-    private Integer getEapType(Integer eap, PluginCall call) {
-        Integer res = null;
-        switch (eap) {
-            case 1:
-                res = 13;
-                break;
-            case 2:
-                res = 21;
-                break;
-            case 0:
-                res = 25;
-                break;
-            default:
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.eap.invalid");
-                call.success(object);
-                res = 0;
-                break;
-        }
-        return res;
-    }
-
-    private String getAuthType(Integer auth, PluginCall call) {
-        String res = null;
-        switch (auth) {
-            case 2:
-                res = "AUTH_METHOD_MSCHAP";
-                break;
-            case 3:
-                res = "MS-CHAP-V2";
-                break;
-            case 1:
-                res = "AUTH_METHOD_PAP";
-                break;
-            default:
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.auth.invalid");
-                call.success(object);
-                res = "0";
-                break;
-        }
         return res;
     }
 

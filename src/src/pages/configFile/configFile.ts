@@ -46,7 +46,7 @@ export class ConfigFilePage extends BasePage{
    *  Lifecycle method executed when the class did enter
    */
   async ionViewDidEnter() {
-    this.configured = await WifiEapConfigurator.isNetworkAssociated({'ssid': this.global.getSsid()});
+    this.configured = false; // TODO check if a network is already configured
     this.isAndroid = this.platform.is('android');
     await this.waitingSpinner(this.configured);
     this.removeSpinner();

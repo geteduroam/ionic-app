@@ -71,7 +71,7 @@ export abstract class BasePage {
    * This method show a toast message
    */
   protected async alertConnectionDisabled() {
-      this.showToast(this.dictionary.getTranslation('error', 'turn-on')+this.global.getSsid()+'.');
+      this.showToast(this.dictionary.getTranslation('error', 'turn-on'));
   }
 
   /**

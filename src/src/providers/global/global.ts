@@ -12,9 +12,9 @@ export class GlobalProvider {
    * Type auth method
    */
   public auth = {
-    PAP: 1,
-    MSCHAP: 2,
-    MSCHAPv2: 3,
+    PAP: -1,
+    MSCHAP: -2,
+    MSCHAPv2: -3,
   };
 
   /**
@@ -36,17 +36,6 @@ export class GlobalProvider {
   private externalOpen: boolean = false;
 
   constructor(public platform: Platform) {}
-
-  /**
-   * SSID network
-   */
-  getSsid() {
-    return !!this.ssid ? this.ssid : 'eduroam';
-  }
-
-  setSsid(value: string) {
-    this.ssid = value;
-  }
 
   /**
    * Get Profile
@@ -96,21 +85,6 @@ export class GlobalProvider {
    */
   getClientId(){
     return this.clientId;
-  }
-
-  /**
-   * Method to get profile if is overridable
-   */
-  getOverrideProfile(){
-    return this.overrideProfile;
-  }
-
-  /**
-   * Method to setting profile if is overridable
-   * @param profile
-   */
-  setOverrideProfile(profile: boolean){
-    this.overrideProfile = profile;
   }
 
   getCredentialApplicability(){
