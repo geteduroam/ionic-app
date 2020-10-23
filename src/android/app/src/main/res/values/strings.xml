@@ -3,5 +3,5 @@
     <string name="app_name">geteduroam</string>
     <string name="title_activity_main">geteduroam</string>
     <string name="package_name">app.eduroam.geteduroam</string>
-    <string name="custom_url_scheme">app.geteduroam.ionic</string>
+    <string name="custom_url_scheme">app.eduroam.geteduroam</string>
 </resources>

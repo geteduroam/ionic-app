@@ -11,8 +11,6 @@ import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {DictionaryServiceProvider} from "../dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../global/global";
 import {isArray, isObject} from "ionic-angular/util/util";
-import { oAuthModel } from '../../shared/models/oauth-model';
-import { CryptoUtil } from '../util/crypto-util';
 import {IEEE80211} from "../../shared/entities/iEEE80211";
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
@@ -130,35 +128,6 @@ export class GeteduroamServices {
    */
   async removeNetwork(config){
       return await WifiEapConfigurator.removeNetwork(config);
-  }
-
-  /**
-   * Method to generate certificates
-   * [Api Documentation]{@link https://github.com/Uninett/lets-wifi/blob/master/API.md}
-   * @param data: oAUthModel
-   */
-  async generateOAuthFlow(data: oAuthModel) {
-    let url = data.oAuthUrl;
-    if (url.includes("?")) {
-		url += "&";
-	} else {
-		url += "?";
-    }
-    url += `client_id=${data.client_id}&response_type=${data.type}&redirect_uri=${data.redirectUrl}`;
-    url += `&scope=${data.scope}&state=0`; // TODO set and check state
-    let codeVerifier = CryptoUtil.generateRandomString(128);
-    let codeChallenge = await CryptoUtil.deriveChallenge(codeVerifier);
-
-    url += "&code_challenge="+ codeChallenge;
-    url += "&code_challenge_method=S256";
-
-    return {
-      uri: encodeURI(url),
-      codeVerifier,
-      codeChallenge,
-      redirectUrl: data.redirectUrl,
-      codeChallengeMethod: 'S256'
-    }
   }
 
   /**
