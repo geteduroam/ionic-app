@@ -29,7 +29,8 @@
     "reconfigure": "Reconfigurar",
     "configure" : "Configurar",
     "no-thanks": "No, gracias",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "connect": "Conectarse a la red"
   },
   "error": {
     "username": "El usuario debe seguir el patron ",

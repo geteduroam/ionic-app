@@ -21,6 +21,26 @@ page-client-certificate-passphrase {
     border: solid 1px red !important;
   }
 
+  img.imgLogo {
+    width: calc(90% - 40px) !important;
+    height: 100% !important
+  }
+
+  .footer-form {
+    height: auto !important;
+    position: absolute !important;
+    bottom: 1px;
+    width: 100% !important;
+  }
+
+  .button-control {
+    width: 100% !important;
+  }
+
+  .bottom-button {
+    margin: 20px 17px 10px 15px;
+  }
+
 }
 
 //---------------------------------//

@@ -1,7 +1,7 @@
 <div *ngIf="showAll" class="profile-content">
   <div class="header-content" margin-top padding-top>
-    <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
-    <h1>{{getString('header', 'profile')}}</h1>
+    <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
+    <h1>{{providerInfo.displayName}}</h1>
   </div>
 
   <div class="content-form" margin-bottom text-center>
@@ -20,11 +20,11 @@
     </form>
   </div>
 
-  <div class="footer-form">
+  <div id="footer" class="footer-form">
     <form (ngSubmit)="sendPassphrase()">
-        <div class="content-button">
-        <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'next')}}</button>
-        </div>
+      <div class="content-button bottom-button">
+        <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'connect')}}</button>
+      </div>
     </form>
   </div>
 </div>

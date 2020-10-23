@@ -29,7 +29,8 @@
     "reconfigure": "Reconfigure",
     "configure" : "Configure",
     "no-thanks": "No, thanks",
-    "close": "Close"
+    "close": "Close",
+    "connect": "Connect to network"
   },
   "error": {
     "username": "The username must follow the pattern ",
