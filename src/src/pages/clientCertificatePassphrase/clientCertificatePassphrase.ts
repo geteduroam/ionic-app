@@ -63,7 +63,9 @@ export class ClientCertificatePassphrasePage extends BasePage{
               private errorHandler: ErrorHandlerProvider, private sanitizer: DomSanitizer) {
     super(loading, dictionary, event, global);
     this.oauthConf = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
-
+    Keyboard.addListener('keyboardWillHide', () => {
+      this.focus = !this.focus;
+    })
   }
 
   getFocus() {
@@ -82,7 +84,6 @@ export class ClientCertificatePassphrasePage extends BasePage{
 
   blur() {
     this.checkPassPhrase();
-    this.focus = !this.focus;
   }
 
   async checkPassPhrase() {
