@@ -130,9 +130,7 @@ export class ProfilePage extends BasePage{
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
-            this.dictionary.getTranslation('error', 'available2') +
-            this.global.getSsid() + '.', false, '', '', true);
+            this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
@@ -299,13 +297,13 @@ export class ProfilePage extends BasePage{
       ;
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
-      ssid: this.global.getSsid(),
+      ssid: [],
       username: this.provide.email,
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
       servername: this.validMethod.serverSideCredential.serverID,
       auth,
-      anonymous: "",
+      anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
     };
   }
