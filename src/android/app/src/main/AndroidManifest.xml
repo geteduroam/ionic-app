@@ -23,7 +23,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="@string/custom_url_scheme" />
+                <data android:scheme="@string/custom_url_scheme" android:host="@string/custom_url_scheme"/>
             </intent-filter>
             <!-- MIME Type registration -->
             <intent-filter>

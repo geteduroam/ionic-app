@@ -86,7 +86,7 @@ export class OauthFlow extends BasePage{
       this.getToken(urlToken);
 
     }).catch(reason => {
-      console.error("OAuth rejected", reason);
+      this.closeEventBrowser(reason);
     });
 
 
