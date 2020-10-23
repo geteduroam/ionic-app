@@ -11,7 +11,8 @@ import {GlobalProvider} from "../../providers/global/global";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
-
+import { Plugins } from '@capacitor/core';
+const { OAuth2Client } = Plugins;
 declare var window: any;
 
 @Component({
@@ -55,6 +56,42 @@ export class OauthFlow extends BasePage{
   buildFlowAuth(oAuth, oauth2Options: oAuthModel, token_endpoint) {
     let urlToken;
 
+    OAuth2Client.authenticate({
+      authorizationBaseUrl: oAuth.uri,
+      accessTokenEndpoint: "",
+      scope: oauth2Options.scope,
+      pkceDisabled: oauth2Options.pkce,
+      web: {
+        appId: oauth2Options.client_id,
+        responseType: oauth2Options.type, // implicit flow
+        accessTokenEndpoint: "", // clear the tokenEndpoint as we know that implicit flow gets the accessToken from the authorizationRequest
+        redirectUrl: oauth2Options.redirectUrl
+      },
+      android: {
+        appId: oauth2Options.client_id,
+        responseType: oauth2Options.type, // if you configured a android app in google dev console the value must be "code"
+        redirectUrl: oauth2Options.redirectUrl, // package name from google dev console
+      },
+      ios: {
+        appId: oauth2Options.client_id,
+        responseType: oauth2Options.type, // if you configured a ios app in google dev console the value must be "code"
+        redirectUrl: oauth2Options.redirectUrl // Bundle ID from google dev console
+      }
+    }).then(resourceUrlResponse => {
+      console.log('res oAuth: ', resourceUrlResponse);
+
+      let state = resourceUrlResponse["state"];
+      urlToken = `client_id=${oauth2Options.client_id}&grant_type=authorization_code&code=${resourceUrlResponse["code"]}&code_verifier=${oAuth.codeVerifier}&redirect_uri=${oauth2Options.redirectUrl}`;
+
+      this.getToken(urlToken);
+
+    }).catch(reason => {
+      console.error("OAuth rejected", reason);
+    });
+
+
+
+    /*
     let target = !!this.global.isAndroid() ? "": "_blank";
     // Initialized browser inside app
     let browserRef = window.cordova.InAppBrowser.open(oAuth.uri, target, "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
@@ -78,6 +115,7 @@ export class OauthFlow extends BasePage{
             'code_verifier': oAuth.codeVerifier,
             'redirect_uri': oauth2Options.redirectUrl
           };*/
+        /*
           await browserRef.close();
           await this.getToken(urlToken);
         }
@@ -90,7 +128,9 @@ export class OauthFlow extends BasePage{
     browserRef.addEventListener("exit", (event) => {
       this.closeEventBrowser();
     })
+         */
   }
+
 
   closeEventBrowser(error?: boolean) {
     this.loading.create();
@@ -169,7 +209,7 @@ export class OauthFlow extends BasePage{
       client_id: this.global.getClientId(),
       oAuthUrl: this.profile.authorization_endpoint,
       type: 'code',
-      redirectUrl: 'http://127.0.0.1:8080/',
+      redirectUrl: 'app.geteduroam.ionic:/',
       pkce: true,
       scope: 'eap-metadata',
     };
