@@ -288,6 +288,13 @@ export class ProfilePage extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
+    // Non-EAP < 0 < EAP
+    let auth = this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
+      ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type * -1
+      : this.validMethod.innerAuthenticationMethod.eapMethod
+        ? this.validMethod.innerAuthenticationMethod.eapMethod.type * 1
+        : null
+      ;
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
       ssid: [],
@@ -295,7 +302,7 @@ export class ProfilePage extends BasePage{
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
       servername: this.validMethod.serverSideCredential.serverID,
-      auth: this.global.auth.MSCHAPv2,
+      auth,
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
     };
@@ -306,4 +313,5 @@ export class ProfilePage extends BasePage{
     document.getElementById('dismissable-back').style.opacity = '0';
     this.viewCtrl.dismiss();
   }
+
 }
