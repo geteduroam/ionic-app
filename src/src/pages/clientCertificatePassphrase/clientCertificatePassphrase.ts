@@ -40,11 +40,6 @@ export class ClientCertificatePassphrasePage extends BasePage{
   logo: boolean = false;
 
   /**
-   * Variable to know if the keyboard if show or hide
-   */
-  filling: boolean = false;
-
-  /**
    * DOM Sanitizer
    */
   converted_image: SafeResourceUrl;
@@ -54,8 +49,10 @@ export class ClientCertificatePassphrasePage extends BasePage{
    */
   providerInfo: ProviderInfo;
 
+  /**
+   * Variable to know if the keyboard if show or hide
+   */
   focus: boolean = false;
-  private footer = document.getElementById('footer');
 
   constructor(public navCtrl: NavController, public navParams: NavParams, protected event: Events,
               public loading: LoadingProvider, public dictionary: DictionaryServiceProvider,
@@ -64,12 +61,12 @@ export class ClientCertificatePassphrasePage extends BasePage{
     super(loading, dictionary, event, global);
     this.oauthConf = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
     Keyboard.addListener('keyboardWillHide', () => {
-      this.focus = !this.focus;
-    })
+      this.focus = false;
+    });
   }
 
   getFocus() {
-    this.focus = !this.focus;
+    this.focus = true;
   }
 
   ionViewDidEnter() {

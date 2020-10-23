@@ -37,6 +37,11 @@ page-client-certificate-passphrase {
     bottom: 1px;
     width: 100% !important;
     position: relative !important;
+
+    .disabled-button {
+      opacity: .4;
+      pointer-events: none;
+    }
   }
 
   .button-control {
