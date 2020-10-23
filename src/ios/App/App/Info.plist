@@ -97,7 +97,7 @@
         <dict>
             <key>CFBundleURLSchemes</key>
             <array>
-                <string>app.geteduroam.eduroam</string>
+                <string>app.eduroam.geteduroam</string>
             </array>
         </dict>
     </array>
