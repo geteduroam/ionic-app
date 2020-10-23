@@ -29,7 +29,21 @@ export class GlobalProvider {
   private providerInfo: ProviderInfo;
   private credentialApplicability: CredentialApplicability;
 
-  private clientId : string = 'app.geteduroam.ionic';
+  /*
+   * Client ID of the application. Must match the following strings:
+   * * src/android/app/build.gradle (applicationId)
+   * * src/android/app/build.gradle (manifestPlaceholders) (appAuthRedirectScheme)
+   * * src/android/app/src/main/AndroidManifest.xml (package)
+   * * src/android/app/src/main/assets/capacitor.config.json (appId)
+   * * src/android/app/src/main/res/values/strings.xml (package_name)
+   * * src/android/app/src/main/res/values/strings.xml (custom_url_scheme)
+   * * src/capacitor.config.json (appId)
+   * * src/config.xml (<widget id>)
+   * * src/ios/App/App.xcodeproj/project.pbxproj (PRODUCT_BUNDLE_IDENTIFIER 2x)
+   * * src/ios/App/App/Info.plist (3x)
+   * * src/ios/App/App/capacitor.config.json (appId)
+   */
+  private clientId : string = 'app.eduroam.geteduroam';
 
   private overrideProfile: boolean = false;
 

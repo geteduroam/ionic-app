@@ -16,7 +16,6 @@ import { LoadingProvider } from '../providers/loading/loading';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx'
 import { StoringProvider } from '../providers/storing/storing';
 import { GlobalProvider } from '../providers/global/global';
-import { CryptoUtil } from '../providers/util/crypto-util';
 import { ErrorServiceProvider } from "../providers/error-service/error-service";
 import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
 
@@ -46,7 +45,6 @@ import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
     NetworkInterface,
     StoringProvider,
     GlobalProvider,
-    CryptoUtil,
     OauthConfProvider,
     ErrorServiceProvider
   ],

@@ -6,7 +6,7 @@ import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/Transition';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
-import { AppUrlOpen, Plugins } from '@capacitor/core';
+import { AppUrlOpen, Plugins,  registerWebPlugin } from '@capacitor/core';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
@@ -14,9 +14,10 @@ import {DictionaryServiceProvider} from "../providers/dictionary-service/diction
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
 import {ConfigFilePage} from "../pages/configFile/configFile";
 import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
+import {OAuth2Client} from '@byteowls/capacitor-oauth2';
 
-const { Toast, Network, App } = Plugins;
 declare var Capacitor;
+const { Toast, Network, App } = Plugins;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
 @Component({
@@ -69,6 +70,10 @@ export class GeteduroamApp {
       // Add listeners to app
       await this.addListeners();
     });
+  }
+
+  ngOnInit() {
+    registerWebPlugin(OAuth2Client);
   }
   /**
    * This method check if network is associated and flow to initialize app
