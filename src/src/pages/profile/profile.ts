@@ -289,12 +289,20 @@ export class ProfilePage extends BasePage{
    */
   private configConnection() {
     // Non-EAP < 0 < EAP
-    let auth = this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
-      ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type * -1
-      : this.validMethod.innerAuthenticationMethod.eapMethod
-        ? this.validMethod.innerAuthenticationMethod.eapMethod.type * 1
-        : null
-      ;
+    let innerNonEapMethod: number = this.validMethod.innerAuthenticationMethod
+        ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
+          ? +this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
+          : 0
+        : 0
+        ;
+    let innerEapMethod: number = this.validMethod.innerAuthenticationMethod
+        ? this.validMethod.innerAuthenticationMethod.eapMethod
+          ? +this.validMethod.innerAuthenticationMethod.eapMethod.type
+          : 0
+        : 0
+        ;
+    let auth = innerEapMethod || innerNonEapMethod * -1;
+
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
       ssid: [],
