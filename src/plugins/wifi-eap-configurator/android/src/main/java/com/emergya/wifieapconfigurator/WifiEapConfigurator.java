@@ -214,22 +214,12 @@ public class WifiEapConfigurator extends Plugin {
 
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
 
-        if (anonymousIdentity != null && !anonymousIdentity.equals("")) {
-            enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
-        }
+        enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
 
-        if (servernames.length != 0 && servernames[0] != "") {
+        if (servernames.length != 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                String longestCommonSuffix = getLongestSuffix(servernames);
-                if (longestCommonSuffix.length() > 0) {
-                    enterpriseConfig.setDomainSuffixMatch(longestCommonSuffix);
-                } else {
-                    enterpriseConfig.setDomainSuffixMatch(servernames[0]);
-                }
-                for (int i = 0; i < servernames.length; i++) {
-                    servernames[i] = "DNS:" + servernames[i];
-                }
-                enterpriseConfig.setAltSubjectMatch(String.join(";", servernames));
+                enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
+                enterpriseConfig.setAltSubjectMatch("DNS:" + String.join(";DNS:", servernames));
             }
         }
 
@@ -238,33 +228,20 @@ public class WifiEapConfigurator extends Plugin {
         CertificateFactory certFactory = null;
         X509Certificate[] caCerts = null;
         List<X509Certificate> certificates = new ArrayList<X509Certificate>();
-        if (caCertificates.length != 0 && caCertificates[0] != "") {
-            // building the certificates
-            for (String certString : caCertificates) {
-                byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
-                ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        // building the certificates
+        for (String certString : caCertificates) {
+            byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
+            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 
-                try {
-                    certFactory = CertificateFactory.getInstance("X.509");
-                    certificates.add((X509Certificate) certFactory.generateCertificate(b));
-                } catch (CertificateException e) {
-                    JSObject object = new JSObject();
-                    object.put("success", false);
-                    object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
-                    call.success(object);
-                    return;
-                } catch (IllegalArgumentException e) {
-                    JSObject object = new JSObject();
-                    object.put("success", false);
-                    object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
-                    call.success(object);
-                    return;
-                }
-            }
-            // Adding the certificates to the configuration
-            caCerts = certificates.toArray(new X509Certificate[certificates.size()]);
             try {
-                enterpriseConfig.setCaCertificates(caCerts);
+                certFactory = CertificateFactory.getInstance("X.509");
+                certificates.add((X509Certificate) certFactory.generateCertificate(b));
+            } catch (CertificateException e) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
+                call.success(object);
+                return;
             } catch (IllegalArgumentException e) {
                 JSObject object = new JSObject();
                 object.put("success", false);
@@ -273,17 +250,39 @@ public class WifiEapConfigurator extends Plugin {
                 return;
             }
         }
+        try {
+            // null disables CA checking, [] would keep it enabled with an empty list
+            enterpriseConfig.setCaCertificates(caCertificates.length == 0 ? null : certificates.toArray(new X509Certificate[certificates.size()]));
+        } catch (IllegalArgumentException e) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ca.invalid");
+            call.success(object);
+            return;
+        }
 
         X509Certificate cert = null;
         PrivateKey key = null;
 
-        if ((clientCertificate == null || clientCertificate.equals("")) && (passPhrase == null || passPhrase.equals(""))) {
+        // Explicitly reset client certificate, will set later if needed
+        enterpriseConfig.setClientKeyEntry(null, null);
+
+        if (eap != WifiEnterpriseConfig.Eap.TLS) {
             enterpriseConfig.setIdentity(username);
             enterpriseConfig.setPassword(password);
 
             enterpriseConfig.setPhase2Method(auth);
 
         } else {
+            // Explicitly unset unused fields
+            enterpriseConfig.setPassword("");
+            enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+
+            // For TLS, "identity" is used for outer identity,
+            // while for PEAP/TTLS, "identity" is the inner identity,
+            // and anonymousIdentity is the outer identity
+            // - so we have to do some weird shuffling here.
+            enterpriseConfig.setIdentity(anonymousIdentity);
 
             KeyStore pkcs12ks = null;
             try {
