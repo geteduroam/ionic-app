@@ -221,6 +221,12 @@ public class WifiEapConfigurator extends Plugin {
                 enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
                 enterpriseConfig.setAltSubjectMatch("DNS:" + String.join(";DNS:", servernames));
             }
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.ca.missing");
+            call.success(object);
+            return;
         }
 
         enterpriseConfig.setEapMethod(eap);
@@ -251,8 +257,7 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
         try {
-            // null disables CA checking, [] would keep it enabled with an empty list
-            enterpriseConfig.setCaCertificates(caCertificates.length == 0 ? null : certificates.toArray(new X509Certificate[certificates.size()]));
+            enterpriseConfig.setCaCertificates(certificates.toArray(new X509Certificate[certificates.size()]));
         } catch (IllegalArgumentException e) {
             JSObject object = new JSObject();
             object.put("success", false);
