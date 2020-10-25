@@ -83,6 +83,8 @@ public class WifiEapConfigurator extends Plugin {
 
     List<ScanResult> results = null;
 
+    private WifiManager wifiManager;
+
     @PluginMethod()
     public void configureAP(PluginCall call) throws JSONException {
         String[] ssids = new String[call.getArray("ssid").length()];
@@ -321,19 +323,17 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
-        WifiManager myWifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
-
         if (ssids.length > 0) {
-            for (int i = 0 ; i < ssids.length ; i++) {
-                connectWifiBySsid(myWifiManager, ssids[i], enterpriseConfig, call, displayName);
+            for (String ssid : ssids) {
+                connectWifiBySsid(ssid, enterpriseConfig, call, displayName);
             }
         }
 
         if (oids.length > 0) {
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                removePasspoint(myWifiManager, id, call);
+                removePasspoint(id, call);
             }
-            connectPasspoint(myWifiManager, id, displayName, oids, enterpriseConfig, call, key);
+            connectPasspoint(id, displayName, oids, enterpriseConfig, call, key);
         }
 
         /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
@@ -349,8 +349,10 @@ public class WifiEapConfigurator extends Plugin {
         }*/
     }
 
-    private void removePasspoint(WifiManager wifiManager, String id, PluginCall call) {
+    private void removePasspoint(String id, PluginCall call) {
         List passpointsConfigurated = new ArrayList();
+        WifiManager wifiManager = getWifiManager();
+
         try {
             passpointsConfigurated = wifiManager.getPasspointConfigurations();
             int pos = 0;
@@ -378,7 +380,7 @@ public class WifiEapConfigurator extends Plugin {
         }
     }
 
-    private void connectPasspoint(WifiManager wifiManager, String id, String displayName, String[] oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PrivateKey key) {
+    private void connectPasspoint(String id, String displayName, String[] oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PrivateKey key) {
 
         PasspointConfiguration config = new PasspointConfiguration();
 
@@ -465,7 +467,8 @@ public class WifiEapConfigurator extends Plugin {
         }
     }
 
-    private void connectWifiBySsid(WifiManager myWifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String displayName) {
+    private void connectWifiBySsid(String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String displayName) {
+        WifiManager myWifiManager = getWifiManager();
         WifiConfiguration config = new WifiConfiguration();
         config.SSID = "\"" + ssid + "\"";
         config.priority = 1;
@@ -480,8 +483,7 @@ public class WifiEapConfigurator extends Plugin {
             myWifiManager.enableNetwork(wifiIndex, true);
             myWifiManager.reconnect();
 
-            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            wifiManager.setWifiEnabled(true);
+            myWifiManager.setWifiEnabled(true);
 
             JSObject object = new JSObject();
             object.put("success", true);
@@ -649,10 +651,17 @@ public class WifiEapConfigurator extends Plugin {
         return res;
     }
 
+    private WifiManager getWifiManager() {
+        if (wifiManager == null) {
+            wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        }
+        return wifiManager;
+    }
+
     @PluginMethod
     public void enableWifi(PluginCall call) {
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = getWifiManager();
         if (wifiManager.setWifiEnabled(true)) {
             JSObject object = new JSObject();
             object.put("success", true);
@@ -688,7 +697,7 @@ public class WifiEapConfigurator extends Plugin {
             return res;
         }
 
-        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = getWifiManager();
 
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
         for (WifiConfiguration conf : configuredNetworks) {
@@ -750,7 +759,7 @@ public class WifiEapConfigurator extends Plugin {
             call.success(object);
         } else if (granted) {
 
-            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiManager wifiManager = getWifiManager();
             Iterator<ScanResult> results = wifiManager.getScanResults().iterator();
 
             while (isReachable == false && results.hasNext()) {
@@ -799,7 +808,7 @@ public class WifiEapConfigurator extends Plugin {
             object.put("message", "plugin.wifieapconfigurator.error.location.disabled");
             call.success(object);
         } else if (granted) {
-            WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiManager wifiManager = getWifiManager();
             WifiInfo info = wifiManager.getConnectionInfo();
             String currentlySsid = info.getSSID();
             if (currentlySsid != null && (currentlySsid.equals("\"" + ssid + "\"") || currentlySsid.equals(ssid))) { // TODO document why ssid can be surrounded by quotes
@@ -826,7 +835,7 @@ public class WifiEapConfigurator extends Plugin {
         boolean res = true, isOverridable = false;
 
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = getWifiManager();
         List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
 
         for (WifiConfiguration conf : configuredNetworks) {
@@ -852,7 +861,7 @@ public class WifiEapConfigurator extends Plugin {
     @PluginMethod
     public boolean checkEnabledWifi(PluginCall call) {
         boolean res = true;
-        WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = getWifiManager();
 
         if (!wifi.isWifiEnabled()) {
             JSObject object = new JSObject();
