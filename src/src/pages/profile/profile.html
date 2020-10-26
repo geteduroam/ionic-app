@@ -5,10 +5,10 @@
         </span>
     </button>
 </div>
-<div *ngIf="showAll" class="profile-content" id="dismissable-back">
-    <div class="header-content">
-        <img alt="authorized" src="../../assets/icon/locked-outline.svg" />
-        <h1>{{getString('header', 'profile')}}</h1>
+<div *ngIf="showAll" class="profile-content">
+    <div class="header-content" [ngClass]="!showForm && !logo ? 'only-tittle' : !showForm && !!logo ? 'only-header' : ''" margin-top padding-top>
+        <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
+        <h1>{{providerInfo.displayName}}</h1>
     </div>
 
     <div *ngIf="showForm" class="content-form" margin-bottom text-center>
@@ -40,9 +40,7 @@
             <!-- Terms of use -->
             <div *ngIf="termsOfUse" class="content-terms" ion-row>
                 <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
-                <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}
-                    <a class="terms" href="{{termsUrl}}">{{getString('label', 'terms')}}</a>
-                </ion-label>
+                <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}<a class="terms" href="{{termsUrl}}">{{getString('label', 'terms')}}</a></ion-label>
             </div>
         </form>
     </div>
@@ -55,3 +53,6 @@
         </form>
     </div>
 </div>
+
+
+
