@@ -654,11 +654,13 @@ public class SSID {
 					ssid: nil,
 					bssid: nil
 				)
-				if let dict = CNCopyCurrentNetworkInfo(interfaceName as CFString) as NSDictionary? {
-					networkInfo.success = true
-					networkInfo.ssid = dict[kCNNetworkInfoKeySSID as String] as? String
-					networkInfo.bssid = dict[kCNNetworkInfoKeyBSSID as String] as? String
-				}
+                if #available(macCatalyst 14.0, *) {
+                    if  let dict = CNCopyCurrentNetworkInfo(interfaceName as CFString) as NSDictionary? {
+                        networkInfo.success = true
+                        networkInfo.ssid = dict[kCNNetworkInfoKeySSID as String] as? String
+                        networkInfo.bssid = dict[kCNNetworkInfoKeyBSSID as String] as? String
+                    }
+                } 
 				networkInfos.append(networkInfo)
 			}
 			return networkInfos

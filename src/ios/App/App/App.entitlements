@@ -13,13 +13,25 @@
 		<string>dns-proxy</string>
 		<string>packet-tunnel-provider</string>
 	</array>
+	<key>com.apple.developer.networking.wifi-info</key>
+	<true/>
 	<key>com.apple.external-accessory.wireless-configuration</key>
+	<true/>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.device.audio-input</key>
+	<true/>
+	<key>com.apple.security.device.camera</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<key>com.apple.security.personal-information.location</key>
+	<true/>
+	<key>com.apple.security.personal-information.photos-library</key>
 	<true/>
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)com.apple.networkextensionsharing</string>
 	</array>
-	<key>com.apple.developer.networking.wifi-info</key>
-	<true/>
 </dict>
 </plist>
