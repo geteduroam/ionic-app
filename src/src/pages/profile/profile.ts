@@ -130,11 +130,11 @@ export class ProfilePage extends BasePage{
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
+            this.dictionary.getTranslation('error', 'duplicate'), false, '', 'retryConfiguration', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false, '', 'retryConfiguration', true);
       }
     }
   }
