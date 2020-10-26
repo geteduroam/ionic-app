@@ -1,20 +1,27 @@
+<!-- TODO: DISCUSS: IS NECESSARY BACK TO WELCOME PAGE ?
+<div *ngIf="viewCtrl.enableBack() && showAll" class="arrow-back">
+    <button ion-button class="arrow-btn" (click)="viewCtrl.dismiss()">
+        <img alt="back" src="../../assets/icon/flecha.svg" />
+    </button>
+</div>
+-->
 <div *ngIf="showAll" class="container-content">
     <div class="header-content" margin-top padding-top>
-        <img alt="setting" src="../../assets/icon/cog-outline.svg" />
+        <img *ngIf="showAll" alt="setting" src="../../assets/icon/cog-outline.svg" />
         <h1>{{getString('header', 'config')}}</h1>
     </div>
 
     <div class="content-form" margin-top padding-top text-center>
         <ion-label class="label-conf" no-margin padding-top text-left>{{getString('label', 'institution')}}</ion-label>
 
-        <div class="row" padding-top>
+        <div *ngIf="this.instances" class="row" padding-top>
 
-            <ion-searchbar (click)="showModal($event)" [(ngModel)]="instanceName" cancelButtonText
+            <ion-searchbar (click)="showModal($event)" [(ngModel)]="instanceName" cancelButtonText debounce="500"
                            class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">
 
             </ion-searchbar>
         </div>
-        <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" no-margin padding-top text-left >{{getString('label', 'profile')}}</ion-label>
+        <ion-label *ngIf="!!profiles && profiles.length > 1" class="label-conf" margin-top padding-top text-left >{{getString('label', 'profile')}}</ion-label>
         <div class="row" margin-top>
 
             <ion-item *ngIf="!!profiles && profiles.length > 1" class="item-profile" no-margin no-padding>
@@ -37,4 +44,3 @@
         </div>
     </div>
 </div>
-

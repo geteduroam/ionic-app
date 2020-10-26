@@ -1,12 +1,11 @@
 import {Config, Events, Nav, Platform} from 'ionic-angular';
 import {Component, ViewChild} from '@angular/core';
-import { ReconfigurePage } from '../pages/welcome/reconfigure';
 import { ProfilePage } from '../pages/profile/profile';
 import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/Transition';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
-import { AppUrlOpen, Plugins } from '@capacitor/core';
+import { AppUrlOpen, Plugins,  registerWebPlugin } from '@capacitor/core';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
@@ -14,9 +13,10 @@ import {DictionaryServiceProvider} from "../providers/dictionary-service/diction
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
 import {ConfigFilePage} from "../pages/configFile/configFile";
 import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
+import {OAuth2Client} from '@byteowls/capacitor-oauth2';
 
-const { Toast, Network, App } = Plugins;
 declare var Capacitor;
+const { Toast, Network, App } = Plugins;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
 @Component({
@@ -39,6 +39,11 @@ export class GeteduroamApp {
   profile: ProfileModel;
 
   protected checkExtFile: boolean = false;
+
+  lastTimeBackPress = 0;
+
+  timePeriodToExit = 2000;
+
   /**
    * @constructor
    *
@@ -66,6 +71,10 @@ export class GeteduroamApp {
       await this.addListeners();
     });
   }
+
+  ngOnInit() {
+    registerWebPlugin(OAuth2Client);
+  }
   /**
    * This method check if network is associated and flow to initialize app
    */
@@ -75,22 +84,7 @@ export class GeteduroamApp {
       this.enableWifi();
     }
     if (!this.checkExtFile) {
-      const isAssociated = await this.isAssociatedNetwork();
-
-      if (!!isAssociated.success) {
-        // this.rootPage = !!isAssociated.success ? ConfigurationScreen : ReconfigurePage;
-        this.rootPage = ConfigurationScreen;
-      } else{
-        if (!isAssociated.message.includes('alreadyAssociated')) {
-          this.rootPage = ConfigurationScreen;
-        } else {
-          this.rootPage = ReconfigurePage;
-          this.getAssociation(isAssociated);
-          this.global.setOverrideProfile(true);
-
-          !isAssociated.success && !isAssociated.overridable ? this.removeAssociatedManually() : '';
-        }
-      }
+      this.rootPage = ConfigurationScreen;
     }
   }
   async checkExternalOpen() {
@@ -110,17 +104,13 @@ export class GeteduroamApp {
     if (connect.connected) {
 
       await this.errorHandler.handleError(
-        this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
-        this.dictionary.getTranslation('error', 'available2') +
-        this.global.getSsid() + '.', false, '', 'removeConnection', true);
+        this.dictionary.getTranslation('error', 'duplicate'), false, '', 'removeConnection', true);
 
     } else {
 
       await this.errorHandler.handleError(
-        this.dictionary.getTranslation('error', 'available1') +
-        this.global.getSsid() + this.dictionary.getTranslation('error', 'available2') +
-        this.global.getSsid() + '.\n' + this.dictionary.getTranslation('error', 'turn-on') +
-        this.global.getSsid() + '.', false, '', 'enableAccess', false);
+        this.dictionary.getTranslation('error', 'duplicate') + '\n' +
+        this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', false);
     }
   }
 
@@ -135,16 +125,29 @@ export class GeteduroamApp {
         this.connectionEvent(connectionStatus);
 
         !connectionStatus.connected ?
-          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on') +
-            this.global.getSsid() + '.') :
+          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on')) :
           this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
       }
     });
 
-    App.addListener('backButton', () => {
-      this.platform.backButton.observers.pop();
-
-    });
+    if (this.global.isAndroid()){
+      this.platform.registerBackButtonAction(() => {
+        // get current active page
+        let view = this.navCtrl.getActive();
+        if (view.component.name == "ConfigurationScreen") {
+          //Double check to exit app
+          if (new Date().getTime() - this.lastTimeBackPress < this.timePeriodToExit) {
+            this.platform.exitApp(); //Exit from app
+          } else {
+            this.alertConnection('Press back again to exit App');
+            this.lastTimeBackPress = new Date().getTime();
+          }
+        } else {
+          // go to previous page
+          this.navCtrl.pop({});
+        }
+      });
+    }
   }
 
   /**
@@ -181,18 +184,16 @@ export class GeteduroamApp {
    */
   async notConnectionNetwork() {
     if (!this.checkExtFile) {
-      this.rootPage = ReconfigurePage;
+      this.rootPage = ConfigurationScreen;
 
       const isAssociated = await this.isAssociatedNetwork();
       this.getAssociation(isAssociated);
-
 
       if (!isAssociated.success && !isAssociated.overridable) {
         this.removeAssociatedManually();
 
       } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on') +
-          this.global.getSsid() + '.', false, '', 'enableAccess', true);
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', true);
       }
     }
   }
@@ -214,8 +215,10 @@ export class GeteduroamApp {
     if (!this.checkExtFile) {
       this.connectionEvent(connectionStatus);
 
-      if (!connectionStatus.connected){
+      if (!connectionStatus.connected) {
         this.notConnectionNetwork();
+      } else {
+        this.global.setDiscovery(await this.getEduroamServices.discovery());
       }
     }
   }

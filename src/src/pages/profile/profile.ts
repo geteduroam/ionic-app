@@ -1,5 +1,5 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
-import { Events, NavController, NavParams } from 'ionic-angular';
+import { Events, NavController, NavParams, ViewController } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
@@ -113,7 +113,7 @@ export class ProfilePage extends BasePage{
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, private sanitizer: DomSanitizer) {
+              protected event: Events, private sanitizer: DomSanitizer, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
     Keyboard.addListener('keyboardWillHide', () => {
       this.focus = false;
@@ -155,9 +155,7 @@ export class ProfilePage extends BasePage{
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'available1') + this.global.getSsid() +
-            this.dictionary.getTranslation('error', 'available2') +
-            this.global.getSsid() + '.', false, '', '', true);
+            this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
@@ -170,14 +168,10 @@ export class ProfilePage extends BasePage{
    * Navigation and check if navigation is active
    */
   async navigateTo() {
-    if (this.activeNavigation) {
+    !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
+      logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
+    await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
 
-      !!this.providerInfo.providerLogo ? await this.navCtrl.setRoot(WifiConfirmation, {
-          logo: this.providerInfo.providerLogo}, {  animation: 'transition'  }) :
-        await this.navCtrl.setRoot(WifiConfirmation, {}, {animation: 'transition'});
-    } else {
-      await this.alertConnectionDisabled();
-    }
   }
 
   /**
@@ -244,6 +238,7 @@ export class ProfilePage extends BasePage{
    * @param validProfile check if profile is valid
    */
   async manageProfileValidation(){
+    this.providerInfo = this.global.getProviderInfo();
 
     this.validMethod = this.global.getAuthenticationMethod();
 
@@ -324,49 +319,38 @@ export class ProfilePage extends BasePage{
    * Method to create configuration to plugin WifiEapConfigurator
    */
   private configConnection() {
-    let serverIDs : string = '';
-    for (let entry of this.validMethod.serverSideCredential.serverID){
-      let strAux : string = entry;
-      serverIDs = serverIDs.concat(strAux ,';');
-    }
-    serverIDs = serverIDs.slice(0, -1);
+    // Non-EAP < 0 < EAP
+    let innerNonEapMethod: number = this.validMethod.innerAuthenticationMethod
+        ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
+          ? +this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
+          : 0
+        : 0
+        ;
+    let innerEapMethod: number = this.validMethod.innerAuthenticationMethod
+        ? this.validMethod.innerAuthenticationMethod.eapMethod
+          ? +this.validMethod.innerAuthenticationMethod.eapMethod.type
+          : 0
+        : 0
+        ;
+    let auth = innerEapMethod || innerNonEapMethod * -1;
+
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
-      ssid: this.global.getSsid(),
+      ssid: [],
       username: this.provide.email,
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
-      servername: serverIDs,
-      auth: this.global.auth.MSCHAPv2,
-      anonymous: "",
+      servername: this.validMethod.serverSideCredential.serverID,
+      auth,
+      anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
-      longestCommonSuffix: this.longestCommonSuffix(this.validMethod.serverSideCredential.serverID)
     };
   }
 
-  private longestCommonSuffix(input){
-    let array = input.map(function(e) {
-      e = e.split("").reverse().join("");
-      return e;
-    });
-    let sortedArray = array.sort();
-    let first = sortedArray[0];
-    let last = sortedArray.pop();
-    let length = first.length;
-    let index = 0;
-    while(index<length && first[index] === last[index])
-      index++;
-    let candidate = first.substring(0, index).split("").reverse().join("");
-    if (!input.includes(candidate)) { // if this happens it is because is a common suffix
-      let parts = candidate.split('.');
-      if (parts.length > 2) {
-        parts.shift(); // removing the first one
-        candidate = parts.join('.');
-      } else {
-        candidate = '';
-      }
-    }
-    return candidate;
+  goBack() {
+    document.getElementById('btn-back').style.opacity = '0';
+    document.getElementById('dismissable-back').style.opacity = '0';
+    this.viewCtrl.dismiss();
   }
 
   getLogo() {

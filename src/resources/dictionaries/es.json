@@ -35,22 +35,21 @@
     "username": "El usuario debe seguir el patron ",
     "domain": "El nombre de usuario debe terminar en ",
     "password": "Contraseña errónea",
-    "turn-on": "Por favor, active los datos móviles para configurar ",
-    "available1": "Una conexión de red llamada ",
-    "available2": " se encuentra ya disponible en el dispositivo.\n Por favor vaya a Configuración > Redes e Internet > Wi-Fi y elimine la configuración para reconfigurar ",
+    "turn-on": "Por favor, active los datos móviles",
+    "duplicate": "Una conexión de red llamada eduroam se encuentra ya disponible en el dispositivo.\nPor favor vaya a Configuración > Redes e Internet > Wi-Fi y elimine la configuración para reconfigurar eduroam.",
     "invalid-eap": "El perfil seleccionado es erróneo",
     "invalid-method": "Ningún método válido de autenticación en el perfil seleccionado",
     "invalid-profile": "El perfil seleccionado es erróneo",
-    "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión WiFi",
+    "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión Wi-Fi",
     "invalid-institution": "Esta institución no está soportada"
 
   },
   "text": {
-    "configured": " ya está cinfugurada en tu dispositivo.",
-    "configure" : "Continuar para configurar ",
-    "reconfigure1": "Hola, Parece que tienes ",
-    "reconfigure2":" configurada en tu dispositivo.\n ¿Quieres volver a configurarla?",
-    "network-available": "Acceso remoto disponible"
+    "configured": "Wi-Fi ya está cinfugurada en tu dispositivo.",
+    "configure" : "Continuar para configurar eduroam",
+    "reconfigure": "Hola, Parece que tienes eduroam configurada en tu dispositivo.\n¿Quieres volver a configurarla?",
+    "network-available": "Acceso remoto disponible",
+    "configuring": "Estamos configurando su dispositivo, espera porfavor"
   },
   "defaultError": "Clave no encontrada"
 }

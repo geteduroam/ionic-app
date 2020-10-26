@@ -1,6 +1,6 @@
 {
   "name": "geteduroam",
-  "version": "1.0.1",
+  "version": "1.0.10",
   "author": "Emergya",
   "private": true,
   "scripts": {
@@ -24,12 +24,12 @@
     "@angular/http": "5.2.11",
     "@angular/platform-browser": "5.2.11",
     "@angular/platform-browser-dynamic": "5.2.11",
+    "@byteowls/capacitor-oauth2": "2.1.0",
     "@capacitor/android": "^2.3.0",
     "@capacitor/cli": "^2.3.0",
     "@capacitor/core": "^2.3.0",
     "@capacitor/ios": "^2.3.0",
     "@ionic-native/android-permissions": "^5.17.1",
-    "@ionic-native/browser-tab": "^5.28.0",
     "@ionic-native/core": "~5.17.1",
     "@ionic-native/diagnostic": "^5.17.1",
     "@ionic-native/http": "^5.17.1",

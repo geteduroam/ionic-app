@@ -1,3 +1,9 @@
 page-welcome {
 
 }
+
+@media only screen and (max-device-width: 1940px) {
+  .content-info {
+    height: auto !important;
+  }
+}

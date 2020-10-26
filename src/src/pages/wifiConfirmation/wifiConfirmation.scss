@@ -5,3 +5,9 @@ page-wifi-confirm{
     height: 100% !important
   }
 }
+
+@media only screen and (max-device-width: 1940px) {
+  .copy, .info-text, .content-info {
+    padding-top: 0 !important;
+  }
+}

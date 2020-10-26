@@ -12,9 +12,9 @@ export class GlobalProvider {
    * Type auth method
    */
   public auth = {
-    MSCHAP: 3,
-    MSCHAPv2: 4,
-    PAP: 5
+    PAP: -1,
+    MSCHAP: -2,
+    MSCHAPv2: -3,
   };
 
   /**
@@ -29,24 +29,30 @@ export class GlobalProvider {
   private providerInfo: ProviderInfo;
   private credentialApplicability: CredentialApplicability;
 
-  private clientId : string = 'app.geteduroam.ionic';
+  /*
+   * Client ID of the application. Must match the following strings:
+   * * src/android/app/build.gradle (applicationId)
+   * * src/android/app/build.gradle (manifestPlaceholders) (appAuthRedirectScheme)
+   * * src/android/app/src/main/AndroidManifest.xml (package)
+   * * src/android/app/src/main/assets/capacitor.config.json (appId)
+   * * src/android/app/src/main/res/values/strings.xml (package_name)
+   * * src/android/app/src/main/res/values/strings.xml (custom_url_scheme)
+   * * src/capacitor.config.json (appId)
+   * * src/config.xml (<widget id>)
+   * * src/ios/App/App.xcodeproj/project.pbxproj (PRODUCT_BUNDLE_IDENTIFIER 2x)
+   * * src/ios/App/App/Info.plist (3x)
+   * * src/ios/App/App/capacitor.config.json (appId)
+   */
+  private clientId : string = 'app.eduroam.geteduroam';
 
   private overrideProfile: boolean = false;
 
   private externalOpen: boolean = false;
 
+  discovery: any;
+  institutionNames: string[] = [];
+
   constructor(public platform: Platform) {}
-
-  /**
-   * SSID network
-   */
-  getSsid() {
-    return this.ssid;
-  }
-
-  setSsid(value: string) {
-    this.ssid = value;
-  }
 
   /**
    * Get Profile
@@ -98,21 +104,6 @@ export class GlobalProvider {
     return this.clientId;
   }
 
-  /**
-   * Method to get profile if is overridable
-   */
-  getOverrideProfile(){
-    return this.overrideProfile;
-  }
-
-  /**
-   * Method to setting profile if is overridable
-   * @param profile
-   */
-  setOverrideProfile(profile: boolean){
-    this.overrideProfile = profile;
-  }
-
   getCredentialApplicability(){
     return this.credentialApplicability;
   }
@@ -127,5 +118,24 @@ export class GlobalProvider {
 
   getExternalOpen() {
     return this.externalOpen;
+  }
+
+  setDiscovery(list: any) {
+    this.discovery = list;
+    if (!!list) {
+      list.map((res) => {
+        if (res.name) {
+          this.institutionNames.push(res.name);
+        }
+      })
+    }
+  }
+
+  getDiscovery() {
+    return this.discovery;
+  }
+
+  getInstitutionNames() {
+    return this.institutionNames;
   }
 }
