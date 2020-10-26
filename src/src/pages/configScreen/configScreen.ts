@@ -1,5 +1,5 @@
-import { Component, NgModule, NgZone } from '@angular/core';
-import { Events, Modal, ModalController, NavController, NavParams, ViewController } from 'ionic-angular';
+import { Component, ViewChild, NgModule, NgZone } from '@angular/core';
+import { Events, Modal, ModalController, NavController, NavParams, Searchbar, ViewController } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -80,6 +80,11 @@ export class ConfigurationScreen extends BasePage{
   showButton: boolean = true;
 
   /**
+   * Component SearchBar
+   */
+  @ViewChild('instituteSearchBar') instituteSearchBar: Searchbar;
+
+  /**
    * Constructor
    * */
   constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices, private ngZone: NgZone,
@@ -87,8 +92,12 @@ export class ConfigurationScreen extends BasePage{
               protected dictionary: DictionaryServiceProvider, protected global: GlobalProvider,
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
+
+    // When the institute search bar gets focus, a keyboard may popup
+    // Hiding it is slow, so we mark it readOnly, but we keep this hack here
+    // in case the readOnly hack stops working at some point.
     Keyboard.addListener('keyboardWillShow', async () => {
-     await Keyboard.hide();
+      await Keyboard.hide();
     });
 
     this.event.subscribe('connection', async (res: any) => {
@@ -98,12 +107,13 @@ export class ConfigurationScreen extends BasePage{
     });
   }
 
-
   /**
    * Method executes when the search bar is tapped.
    * */
-  async showModal(e: any) {
-    e.preventDefault();
+  searchBarClicked(e: any) {
+    this.showModal();
+  }
+  async showModal() {
     if (!!this.instances) {
       let searchModal = this.modalCtrl.create(InstitutionSearch, {
         instanceName: this.instanceName
@@ -126,7 +136,7 @@ export class ConfigurationScreen extends BasePage{
       return await searchModal.present();
     } else {
       await this.chargeDiscovery();
-      this.showModal(e);
+      this.showModal();
     }
   }
 
@@ -249,6 +259,20 @@ export class ConfigurationScreen extends BasePage{
   async ionViewDidEnter() {
     this.removeSpinner();
     this.showAll = true;
+
+    // The instituteSearchBar is not loaded in this context, but when we set a timeout it will be when it fires.
+    // Taken from https://angular.io/api/core/ViewChild
+    setTimeout(() => {
+      // According to the documentation, there should be a getInputElement() function,
+      // but it doesn't exist. Maybe a newer version? Anyway, we need to set the readonly property on it,
+      // and I found a handle that I can use, so I'll use that instead.
+      // Documentation here: https://ionicframework.com/docs/api/searchbar
+      const elem = this.instituteSearchBar?._searchbarInput?.nativeElement ?? {};
+
+      // readOnly prevents the keyboard from showing up when the institute field is pressed,
+      // which means we don't have to hide it, which speeds up loading of the discovery significantly.
+      elem.readOnly = true;
+    }, 0);
   }
 
   async getDiscovery() {
