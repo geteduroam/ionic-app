@@ -249,8 +249,11 @@ export class ConfigurationScreen extends BasePage{
     this.instances = this.global.discovery;
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     this.loading.create();
+    if (!this.global.discovery) {
+      await this.chargeDiscovery();
+    }
   }
   /**
    *  Lifecycle when entering a page, before it becomes the active one
