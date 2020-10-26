@@ -93,7 +93,7 @@ export class ConfigurationScreen extends BasePage{
 
     this.event.subscribe('connection', async (res: any) => {
       if (!!res.connected && !this.global.discovery) {
-        this.chargeDiscovery()
+        await this.chargeDiscovery()
       }
     });
   }

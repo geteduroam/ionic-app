@@ -7,7 +7,6 @@ import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ErrorServiceProvider} from "../../providers/error-service/error-service";
-import {ConfigurationScreen} from "../configScreen/configScreen";
 const {Browser, Network } = Plugins;
 
 
@@ -44,8 +43,7 @@ export class ErrorsPage extends BasePage{
 
   constructor(private platform: Platform, private navParams: NavParams, private viewCtrl: ViewController, private ngZone: NgZone,
               private validator: ValidatorProvider, protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, protected global: GlobalProvider, private errorService: ErrorServiceProvider,
-              private navCtrl: NavController) {
+              protected event: Events, protected global: GlobalProvider, private errorService: ErrorServiceProvider) {
     super(loading, dictionary, event, global);
 
     this.checkConnection();
@@ -89,10 +87,9 @@ export class ErrorsPage extends BasePage{
    */
   async closeModal() {
     if (this.checkMethod === 'enableAccess' && !this.isFinal ||
-        this.checkMethod === 'removeConnection' && !this.isFinal) {
+        this.checkMethod === 'removeConnection' && !this.isFinal ||
+        this.checkMethod === 'retryConfiguration' && !this.isFinal) {
       await this.viewCtrl.dismiss();
-    } else if (this.checkMethod === 'retryConfiguration') {
-      await this.navCtrl.push(ConfigurationScreen);
     } else if (await this.errorService.checkAgain(this.checkMethod, this.isFinal)) {
       await this.viewCtrl.dismiss();
     } else {

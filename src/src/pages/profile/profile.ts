@@ -12,6 +12,7 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {ConfigurationScreen} from "../configScreen/configScreen";
 
 @Component({
   selector: 'page-profile',
@@ -131,10 +132,12 @@ export class ProfilePage extends BasePage{
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
             this.dictionary.getTranslation('error', 'duplicate'), false, '', 'retryConfiguration', true);
+        await this.navCtrl.setRoot(ConfigurationScreen);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false, '', 'retryConfiguration', true);
+        await this.navCtrl.setRoot(ConfigurationScreen);
       }
     }
   }

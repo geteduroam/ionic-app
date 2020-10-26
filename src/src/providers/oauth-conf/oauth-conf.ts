@@ -8,6 +8,7 @@ import {ErrorHandlerProvider} from "../error-handler/error-handler";
 import {DictionaryServiceProvider} from "../dictionary-service/dictionary-service-provider.service";
 import {NavController} from "ionic-angular";
 import {WifiConfirmation} from "../../pages/wifiConfirmation/wifiConfirmation";
+import {ConfigurationScreen} from "../../pages/configScreen/configScreen";
 
 @Injectable()
 export class OauthConfProvider {
@@ -55,10 +56,12 @@ export class OauthConfProvider {
     }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
       await this.errorHandler.handleError(
           this.dictionary.getTranslation('error', 'duplicate'), false, '', 'retryConfiguration', true);
+      await this.navCtrl.setRoot(ConfigurationScreen);
     } else if (checkRequest.message.includes('error.network.userCancelled')) {
       await this.navCtrl.pop();
     } else {
       await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false, '', 'retryConfiguration', true);
+      await this.navCtrl.setRoot(ConfigurationScreen);
     }
   }
 
