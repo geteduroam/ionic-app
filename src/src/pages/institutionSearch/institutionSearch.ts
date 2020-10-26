@@ -16,12 +16,12 @@ export class InstitutionSearch extends BasePage{
   /**
    * Institutions
    */
-  instances: any;
+  instances: any[];
 
   /**
    * Set of institutions filtered by what is written in the search-bar
    */
-  filteredInstances: any;
+  filteredInstances: any[];
 
   /**
    * Name of the selected profile
@@ -51,7 +51,7 @@ export class InstitutionSearch extends BasePage{
   /**
    * Component SearchBar
    */
-  @ViewChild('searchBar') searchBar: Searchbar;
+  @ViewChild('instituteSearchBar') instituteSearchBar: Searchbar;
 
   constructor(public navParams: NavParams, private viewCtrl: ViewController,
               private platform: Platform, protected loading: LoadingProvider,
@@ -68,9 +68,9 @@ export class InstitutionSearch extends BasePage{
    * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
    * @param {any} institution the selected institution.
    */
-  selectInstitution(institution: any) {
+  selectInstitution(institution: any[]) {
     this.instances = institution;
-    this.searchBar.setFocus();
+    this.instituteSearchBar.setFocus();
     this.viewCtrl.dismiss(institution);
   }
 
@@ -146,7 +146,7 @@ export class InstitutionSearch extends BasePage{
   }
   ionViewDidEnter() {
     setTimeout(() => {
-      this.searchBar.setFocus()
+      this.instituteSearchBar.setFocus()
     }, 10);
     if (!this.ios) {
       Keyboard.show();
