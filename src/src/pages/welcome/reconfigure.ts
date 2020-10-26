@@ -35,7 +35,7 @@ export class ReconfigurePage extends BasePage{
    */
   async navigateTo() {
     if (this.activeNavigation) {
-      await this.navCtrl.setRoot(ConfigurationScreen, null, { animation: 'transition' });
+      await this.navCtrl.push(ConfigurationScreen, null, { animation: 'transition' });
     } else{
       await this.alertConnectionDisabled();
     }

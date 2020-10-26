@@ -7,6 +7,8 @@ import com.emergya.wifieapconfigurator.WifiEapConfigurator;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 import java.util.ArrayList;
+import com.byteowls.capacitor.oauth2.OAuth2ClientPlugin;
+
 public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -16,6 +18,7 @@ public class MainActivity extends BridgeActivity {
       // Additional plugins you've installed go here
       // Ex: add(TotallyAwesomePlugin.class);
       add(WifiEapConfigurator.class);
+      add(OAuth2ClientPlugin.class);
     }});
     // ATTENTION: This was auto-generated to handle app links.
     Intent appLinkIntent = getIntent();
