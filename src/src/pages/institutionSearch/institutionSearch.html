@@ -1,6 +1,6 @@
 <ion-header transparent>
     <ion-toolbar>
-        <ion-searchbar #searchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)"
+        <ion-searchbar #instituteSearchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)" debounce="100"
                        [(ngModel)]="instanceName" placeholder="{{getString('placeholder', 'institution')}}"></ion-searchbar>
     </ion-toolbar>
 </ion-header>
