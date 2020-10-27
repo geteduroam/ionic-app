@@ -93,13 +93,6 @@ export class ConfigurationScreen extends BasePage{
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
 
-    // When the institute search bar gets focus, a keyboard may popup
-    // Hiding it is slow, so we mark it readOnly, but we keep this hack here
-    // in case the readOnly hack stops working at some point.
-    Keyboard.addListener('keyboardWillShow', async () => {
-      await Keyboard.hide();
-    });
-
     this.event.subscribe('connection', async (res: any) => {
       if (!!res.connected && !this.global.discovery) {
         await this.chargeDiscovery()
@@ -119,19 +112,7 @@ export class ConfigurationScreen extends BasePage{
         instanceName: this.instanceName
       });
 
-      searchModal.onDidDismiss((data) => {
-
-        data = this.instances.filter((res: any) => {
-           if (res.name === data) return res
-        });
-
-        if (data !== undefined) {
-          this.instance = data[0];
-          this.instanceName = data[0].name;
-
-          this.initializeProfiles(this.instance);
-        }
-      });
+      searchModal.onDidDismiss(institution => this.initializeProfiles(institution));
 
       return await searchModal.present();
     } else {
@@ -168,6 +149,7 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
+    this.instanceName = institution.name;
     if (institution.profiles.length > 1 ) {
       // Check default profile and sort array for highlighting default profile
       institution.profiles.forEach((profile, index) => {

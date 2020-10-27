@@ -57,6 +57,9 @@ export class OauthConfProvider {
       await this.errorHandler.handleError(
           this.dictionary.getTranslation('error', 'duplicate'), false, '', 'retryConfiguration', true);
       await this.navCtrl.setRoot(ConfigurationScreen);
+    }else if (checkRequest.message.includes('error.network.mobileconfig')) {
+      await this.errorHandler.handleError(
+          this.dictionary.getTranslation('error', 'mobileconfig'), false, '', '', true);
     } else if (checkRequest.message.includes('error.network.userCancelled')) {
       await this.navCtrl.pop();
     } else {
