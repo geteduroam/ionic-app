@@ -234,6 +234,10 @@ public class WifiEapConfigurator: CAPPlugin {
 				// Are you running in an emulator?
 				errors.append("plugin.wifieapconfigurator.error.network.internal")
 				break
+			case NEHotspotConfigurationError.systemConfiguration.rawValue:
+				// There is a conflicting mobileconfig installed
+				errors.append("plugin.wifieapconfigurator.error.network.mobileconfig")
+				break
 			default:
 				errors.append("plugin.wifieapconfigurator.error.network.other." + String(error!.code))
 			}
