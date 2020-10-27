@@ -55,6 +55,9 @@ export class OauthConfProvider {
     }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
       await this.errorHandler.handleError(
           this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
+    }else if (checkRequest.message.includes('error.network.mobileconfig')) {
+      await this.errorHandler.handleError(
+          this.dictionary.getTranslation('error', 'mobileconfig'), false, '', '', true);
     } else if (checkRequest.message.includes('error.network.userCancelled')) {
       await this.navCtrl.pop();
     } else {
