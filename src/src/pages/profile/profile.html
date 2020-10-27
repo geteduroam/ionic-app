@@ -47,7 +47,7 @@
     <div id="footer" >
         <form (ngSubmit)="checkForm()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [disabled]="!enableButton" class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
+                <button [disabled]="!enableButton || !!termsOfUse && !provide.terms" class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
     </div>
