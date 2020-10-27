@@ -300,7 +300,7 @@ export class ProfilePage extends BasePage{
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
       servername: this.validMethod.serverSideCredential.serverID,
-      auth,
+      auth: parseInt(auth.toString()),
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
     };
