@@ -1,10 +1,10 @@
 import {LoadingProvider} from "../providers/loading/loading";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {Events} from "ionic-angular";
-import {Plugins} from "@capacitor/core";
+import { Plugins } from '@capacitor/core';
 import {GlobalProvider} from "../providers/global/global";
-const { Toast, Network } = Plugins;
-
+const { Toast, Network, Modals, Browser } = Plugins;
+declare var window: any;
 export abstract class BasePage {
 
   /**
@@ -86,4 +86,28 @@ export abstract class BasePage {
           this.messageShown = true;
       }
   }
+  async modalSupport() {
+    const providerInfo = this.global.getProviderInfo();
+    let options = {
+      title: this.dictionary.getTranslation('modalSupport', 'title'),
+      message: this.dictionary.getTranslation('modalSupport', 'message'),
+      options: []
+    };
+    if (providerInfo.helpdesk.webAddress) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'web')});
+    if (providerInfo.helpdesk.emailAddress) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'email')});
+    if (providerInfo.helpdesk.phone) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'phone')});
+
+    let supportOption = await Modals.showActions(options);
+
+    switch(options.options[supportOption.index].title) {
+      case this.dictionary.getTranslation('modalSupport', 'web'):
+        return await Browser.open({url: providerInfo.helpdesk.webAddress});
+      case this.dictionary.getTranslation('modalSupport', 'email'):
+        return window.location.href = 'mailto:' + providerInfo.helpdesk.emailAddress + '?Subject=' + this.dictionary.getTranslation('modalSupport', 'help');
+      case this.dictionary.getTranslation('modalSupport', 'phone'):
+        return window.location.href = 'tel:'+providerInfo.helpdesk.phone;
+    }
+
+}
+
 }

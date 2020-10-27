@@ -1,5 +1,5 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
-import { Events, NavController, NavParams, ViewController } from 'ionic-angular';
+import { Events, ModalController, NavController, NavParams, ViewController } from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
@@ -14,7 +14,6 @@ import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import { Plugins } from '@capacitor/core';
-declare var Capacitor;
 const { Keyboard } = Plugins;
 
 @Component({
@@ -57,7 +56,10 @@ export class ProfilePage extends BasePage{
    * Check terms of use
    */
   termsOfUse: boolean = false;
-
+  /**
+   * Check help desk
+   */
+  helpDesk: boolean = false;
   /**
    * Link url of terms of use
    */
@@ -103,21 +105,14 @@ export class ProfilePage extends BasePage{
    */
   logo: boolean = false;
 
-  /**
-   * Variable to know if the keyboard if show or hide
-   */
-  focus: boolean = false;
-
   @ViewChild('imgLogo') imgLogo: ElementRef;
 
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
-              private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
+              private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider, protected modalCtrl: ModalController,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events, private sanitizer: DomSanitizer, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
-    Keyboard.addListener('keyboardWillHide', () => {
-      this.focus = false;
-    });
+
   }
 
   /**
@@ -287,11 +282,13 @@ export class ProfilePage extends BasePage{
       this.logo = true;
       this.getLogo();
     }
+    if (!!this.providerInfo.termsOfUse) this.createTerms();
+    if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||
+        !!this.providerInfo.helpdesk.phone) this.helpDesk = true;
     if (this.validMethod.clientSideCredential.username && this.validMethod.clientSideCredential.password) {
       this.provide.email = this.validMethod.clientSideCredential.username;
       this.provide.pass = this.validMethod.clientSideCredential.password;
       this.enableButton = true;
-      //await this.checkForm();
     } else {
       this.removeSpinner();
       this.showForm = true;
@@ -303,16 +300,17 @@ export class ProfilePage extends BasePage{
    * Method to activate terms of use on view.
    */
   protected createTerms() {
-    if (this.providerInfo.termsOfUse !== '') {
-
       // Activate checkbox on view
       this.termsOfUse = true;
       const terms = this.providerInfo.termsOfUse.toString();
+      try {
+        // Get the web address within the terms of use
+        this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
+          !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
+      } catch (e) {
+        this.termsOfUse = false;
+      }
 
-      // Get the web address within the terms of use
-      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
-        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
-    }
   }
 
   /**
@@ -361,9 +359,5 @@ export class ProfilePage extends BasePage{
     const data = `data:${mimeType};${encoding},${imageData}`;
 
     this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
-  }
-
-  getFocus() {
-    this.focus = true;
   }
 }

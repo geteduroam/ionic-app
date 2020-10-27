@@ -40,7 +40,7 @@
     <div class="footer-form">
 
         <div class="content-button" margin *ngIf="showButton">
-            <button (click)="global.isAndroid ? navigateAndroid($event) : navigateTo(profile, $event)" [disabled]="!profile" class="button-control" ion-button text-capitalize>{{getString('button', 'next')}}</button>
+            <button (click)="global.isAndroid ? navigateAndroid($event) : navigateTo(profile, $event)" [disabled]="!profile" class="button-control" ion-button text-capitalize col-11>{{getString('button', 'next')}}</button>
         </div>
     </div>
 </div>

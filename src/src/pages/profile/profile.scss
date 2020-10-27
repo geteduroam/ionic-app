@@ -25,13 +25,8 @@ page-profile {
 
     }
   }
-
-  .button-control {
-    width: 100% !important;
-  }
-
-  .bottom-button {
-    margin: 20px 17px 10px 15px;
+  .content-button button {
+    height: 45px;
   }
   .error-msg {
     font-size: 11px;
@@ -43,26 +38,16 @@ page-profile {
 
   img.imgLogo {
     width: auto !important;
-    height: 100% !important
+    max-width: 160px;
   }
 
   .footer-form {
     height: auto !important;
-    position: absolute !important;
-    bottom: 1px;
-    width: 100% !important;
+    position: relative;
+    width: 100%;
+    top: 10px;
   }
-  .footer-form-focus {
-    height: auto !important;
-    bottom: 1px;
-    width: 100% !important;
-    position: relative !important;
 
-    .disabled-button {
-      opacity: .4;
-      pointer-events: none;
-    }
-  }
 
   .only-tittle {
     margin-top: 50% !important;
@@ -70,6 +55,12 @@ page-profile {
 
   .only-header {
     margin-top: 25% !important;
+  }
+
+  .note-msg {
+    font-size: 10px;
+    text-align: left;
+    color: #404B52;
   }
 }
 

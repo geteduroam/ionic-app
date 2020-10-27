@@ -12,7 +12,6 @@ import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler"
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
 import { Plugins } from '@capacitor/core';
 const { OAuth2Client } = Plugins;
-declare var window: any;
 
 @Component({
   selector: 'page-oauthFlow',

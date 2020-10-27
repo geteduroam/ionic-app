@@ -5,7 +5,7 @@
         </span>
     </button>
 </div>
-<div *ngIf="showAll" class="profile-content">
+<div *ngIf="showAll" class="profile-content" id="dismissable-back">
     <div class="header-content" [ngClass]="!showForm && !logo ? 'only-tittle' : !showForm && !!logo ? 'only-header' : ''" margin-top padding-top>
         <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
         <h1>{{providerInfo.displayName}}</h1>
@@ -18,9 +18,8 @@
             <div  class="content-profile" padding-top >
                 <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
 
-                <input (blur)="blur()" [(ngModel)]="provide.email"
-                       [ngClass]="!validSuffix && !validMail ? 'error-validation' : ''" [placeholder]="getPlaceholder()"
-                       (focus)="getFocus()" autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
+                <input (blur)="blur()" [(ngModel)]="provide.email" [ngClass]="!validSuffix && !validMail ? 'error-validation' : ''"
+                       [placeholder]="getPlaceholder()" autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
 
                 <p *ngIf="!validMail" class="error-msg">
                     {{getString('error', 'username')}}{{getPlaceholder()}} </p>
@@ -31,11 +30,11 @@
 
             <div class="content-profile" margin-top>
                 <ion-label class="label-conf" text-left>{{getString('label', 'password')}}</ion-label>
-                <input (blur)="validateForm()" (ngModelChange)="validateForm()" [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''" class="input-profile"
-                       (focus)="getFocus()" name="pass" padding-left type="password"/>
-
+                <input (blur)="validateForm()" (ngModelChange)="validateForm()" [(ngModel)]="provide.pass" [ngClass]="!!errorPass ? 'error-validation' : ''"
+                       class="input-profile" name="pass" padding-left type="password"/>
+                <p padding-left class="note-msg">{{getString('label', 'note')}}</p>
                 <p *ngIf="errorPass" class="error-msg">{{getString('error', 'password')}}</p>
-            </div>
+    </div>
 
             <!-- Terms of use -->
             <div *ngIf="termsOfUse" class="content-terms" ion-row>
@@ -44,13 +43,18 @@
             </div>
         </form>
     </div>
-
-    <div id="footer" [ngClass]="!focus ? 'footer-form' : 'footer-form-focus'">
+    <!-- [ngClass]="!focus ? 'footer-form' : 'footer-form-focus'" -->
+    <div id="footer" >
         <form (ngSubmit)="checkForm()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'connect')}}</button>
+                <button [disabled]="!enableButton" class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
+    </div>
+    <div *ngIf="helpDesk" class="help-desk" margin>
+        <ion-label no-padding text-left>{{getString('label', 'help')}}
+            <a class="support" (click)="modalSupport()">{{getString('label', 'support')}}</a>
+        </ion-label>
     </div>
 </div>
 
