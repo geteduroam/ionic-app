@@ -111,7 +111,7 @@ export class InstitutionSearch extends BasePage{
         return a.name.localeCompare(b.name) + modifier;
       });
     } else {
-      this.clearInstance();
+      this.filteredInstances = [];
     }
   }
 
