@@ -289,18 +289,8 @@ export class ProfilePage extends BasePage{
    */
   private configConnection() {
     // Non-EAP < 0 < EAP
-    let innerNonEapMethod: number = this.validMethod.innerAuthenticationMethod
-        ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
-          ? +this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
-          : 0
-        : 0
-        ;
-    let innerEapMethod: number = this.validMethod.innerAuthenticationMethod
-        ? this.validMethod.innerAuthenticationMethod.eapMethod
-          ? +this.validMethod.innerAuthenticationMethod.eapMethod.type
-          : 0
-        : 0
-        ;
+    let innerNonEapMethod: number = this.validMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
+    let innerEapMethod: number = this.validMethod?.innerAuthenticationMethod?.eapMethod?.type;
     let auth = innerEapMethod || innerNonEapMethod * -1;
 
     return {
