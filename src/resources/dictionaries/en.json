@@ -12,12 +12,25 @@
     "terms": "terms of use",
     "profile": "Profile",
     "password": "Password",
-    "passphrase": "Passphrase"
+    "passphrase": "Passphrase",
+    "note": "*Note: if the connection fails, please check your password",
+    "help": "Need help ?",
+    "support": "Click here for support"
   },
   "placeholder": {
     "institution": "Select an institution...",
     "profile": "Select a profile...",
     "example": "username"
+  },
+  "modalSupport": {
+    "title": "Support Options",
+    "message": "Select an option",
+    "web": "Web: ",
+    "email": "Email: ",
+    "phone": "Phone: ",
+    "help": "Support help",
+    "cancel": "Cancel",
+    "terms": "Terms of use"
   },
   "button": {
     "next": "Next",
@@ -38,6 +51,7 @@
     "password": "Password is incorrect",
     "turn-on": "Please, turn on mobile data",
     "duplicate": "This network is already available in the device.\nPlease go to Settings > Wi-Fi Networks and remove it first",
+    "mobileconfig": "Your device is configured through a configuration profile.\nPlease go to Settings > General > Profile and remove it",
     "invalid-eap": "Invalid selected profile, if the error persists, contact with the admin please",
     "invalid-method": "No valid authentication method available from the selected profile",
     "invalid-profile": "The selected profile is wrong",

@@ -25,9 +25,8 @@ page-profile {
 
     }
   }
-
-  .bottom-button {
-    margin: 30px;
+  .content-button button {
+    height: 45px;
   }
   .error-msg {
     font-size: 11px;
@@ -35,6 +34,34 @@ page-profile {
   }
   .error-validation {
     border: solid 1px red !important;
+  }
+
+  img.imgLogo {
+    width: 100% !important;
+    max-width: 160px;
+    max-height: 40px;
+  }
+
+  .footer-form {
+    height: auto !important;
+    position: relative;
+    width: 100%;
+    top: 10px;
+  }
+
+
+  .only-tittle {
+    margin-top: 50% !important;
+  }
+
+  .only-header {
+    margin-top: 25% !important;
+  }
+
+  .note-msg {
+    font-size: 10px;
+    text-align: left;
+    color: #404B52;
   }
 }
 

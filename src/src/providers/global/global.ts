@@ -49,8 +49,7 @@ export class GlobalProvider {
 
   private externalOpen: boolean = false;
 
-  discovery: any;
-  institutionNames: string[] = [];
+  discovery: any[];
 
   constructor(public platform: Platform) {}
 
@@ -122,20 +121,9 @@ export class GlobalProvider {
 
   setDiscovery(list: any) {
     this.discovery = list;
-    if (!!list) {
-      list.map((res) => {
-        if (res.name) {
-          this.institutionNames.push(res.name);
-        }
-      })
-    }
   }
 
   getDiscovery() {
     return this.discovery;
-  }
-
-  getInstitutionNames() {
-    return this.institutionNames;
   }
 }

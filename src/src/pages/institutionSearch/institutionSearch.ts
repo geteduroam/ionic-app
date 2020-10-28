@@ -68,9 +68,8 @@ export class InstitutionSearch extends BasePage{
    * This method also calls the methods [initializeProfiles()]{@link #initializeProfiles} and [checkProfiles()]{@link #checkProfiles}.
    * @param {any} institution the selected institution.
    */
-  selectInstitution(institution: any[]) {
-    this.instances = institution;
-    this.instituteSearchBar.setFocus();
+  selectInstitution(institution) {
+    this.instanceName = institution.name;
     this.viewCtrl.dismiss(institution);
   }
 
@@ -86,39 +85,52 @@ export class InstitutionSearch extends BasePage{
     this.filterInstances(val);
   }
 
+  abbr(s: string[]) {
+    return s.map(s => s.substring(0,1)).filter(s => s.match(/\p{General_Category=Letter}/gu)).join('');
+  }
+
   /**
    * Method to filter institutions
    * @param stringAux Searched on search bar
    */
   filterInstances(stringAux: string){
-    if (stringAux && stringAux.trim() != '') {
-      this.filteredInstances = this.instances.filter((item:any) => {
-        return (item.toLowerCase().indexOf(stringAux.toLowerCase()) > -1);
-      })
+    if (stringAux) {
+      const s = stringAux.toLowerCase();
+      const terms = s.split(' ');
+      this.filteredInstances = this.instances;
+      this.filteredInstances = this.filteredInstances.filter((item:any) => {
+        return item.abbr1 === s || item.abbr2 === s
+          || terms.reduce((found, term) => found || item.terms.includes(term), false)
+          || (stringAux.length > 2 && item.search.indexOf(s.toLowerCase()) != -1);
+      });
+      this.filteredInstances.sort((a, b) => {
+        let modifier = 0;
+        for(let i = 1; i < s.length; i++) {
+          if (a.search.substring(0, i) === s.substring(0,i)) modifier-=2;
+          if (a.abbr1.substring(0, i) === s.substring(0,i)) modifier-=1;
+          if (a.abbr2.substring(0, i) === s.substring(0,i)) modifier-=1;
+          if (b.search.substring(0, i) === s.substring(0,i)) modifier+=2;
+          if (b.abbr1.substring(0, i) === s.substring(0,i)) modifier+=1;
+          if (b.abbr2.substring(0, i) === s.substring(0,i)) modifier+=1;
+        }
+        if (terms.reduce((found, term) => found || a.terms.includes(term), false)) modifier-=s.length*2;
+        if (terms.reduce((found, term) => found || b.terms.includes(term), false)) modifier+=s.length*2;
+        return a.name.localeCompare(b.name) + modifier;
+      });
     } else {
-      this.clearInstance();
+      this.filteredInstances = [];
     }
-  }
-
-  /**
-   * Method which gets all the institutions.
-   * Used after cleaning or first click on the search-bar.
-   * This method updates the properties [showInstanceItems]{@link #showInstanceItems} and [filteredInstances]{@link #filteredInstances}
-   */
-  getAllItems(){
-    this.filteredInstances = this.instances;
-
   }
 
   /**
    * Method which clears the instance after pressing X in the search-bar.
    * This method updates the properties [showInstanceItems]{@link #showInstanceItems}, [instance]{@link #instance},
    * [instanceName]{@link #instanceName}, [defaultProfile]{@link #defaultProfile} and [profiles]{@link #profiles}.
-   * This method also calls the methods [clearProfile()]{@link #clearProfile} and [getAllItems()]{@link #getAllItems}
    */
   clearInstance(){
     this.clearProfile();
-    this.getAllItems();
+    this.instanceName = '';
+    this.filteredInstances = [];
   }
 
   /**
@@ -132,8 +144,14 @@ export class InstitutionSearch extends BasePage{
   }
 
   ngOnInit() {
-    this.instances = Object.values(this.global.getInstitutionNames());
-    this.filteredInstances = Object.values(this.instances);
+    this.instances = this.global.getDiscovery().map((item:any) => {
+        if (!('abbr1' in item)) item.abbr1 = this.abbr(item.name.split(" ")).toLowerCase();
+        if (!('abbr2' in item)) item.abbr2 = this.abbr(item.name.split(/[\/\-_ ]/)).toLowerCase();
+        if (!('search' in item)) item.search = [item.name, item.abbr].join(' ').toLowerCase();
+        if (!('terms' in item)) item.terms = item.name.toLowerCase().split(' ');
+        return item;
+      });
+    this.clearInstance();
   }
   /**
    * Lifecycle when entering a page, after it becomes the active page.
@@ -142,9 +160,10 @@ export class InstitutionSearch extends BasePage{
   ionViewWillEnter() {
     this.ios = !!this.platform.is('ios');
     this.instanceName = this.navParams.get('instanceName');
-
   }
   ionViewDidEnter() {
+    // The instituteSearchBar is not loaded in this context, but when we set a timeout it will be when it fires.
+    // Taken from https://angular.io/api/core/ViewChild
     setTimeout(() => {
       this.instituteSearchBar.setFocus()
     }, 10);

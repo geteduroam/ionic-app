@@ -329,21 +329,9 @@ export class GeteduroamServices {
   }
 
   supportsAuthenticationMethod(authenticationMethod): boolean {
-    let outerEapMethod = authenticationMethod.eapMethod.type;
-    // TODO we are not certain that "type" exists.
-    // Apparently that's a problem, since we're getting promise errors when connecting to EAP-TLS if this check is removed.
-    let innerNonEapMethod = authenticationMethod.innerAuthenticationMethod
-        ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
-          ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
-          : ''
-        : ''
-        ;
-    let innerEapMethod = authenticationMethod.innerAuthenticationMethod
-        ? authenticationMethod.innerAuthenticationMethod.eapMethod
-          ? authenticationMethod.innerAuthenticationMethod.eapMethod.type
-          : ''
-        : ''
-        ;
+    let outerEapMethod = authenticationMethod?.eapMethod?.type;
+    let innerNonEapMethod = authenticationMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
+    let innerEapMethod = authenticationMethod?.innerAuthenticationMethod?.eapMethod?.type;
 
     let isAndroid = this.global.isAndroid();
     let isApple = !isAndroid;
@@ -365,6 +353,7 @@ export class GeteduroamServices {
         // iOS can also handle EAP-MSCHAPv2
         if (isApple && innerEapMethod === '26') break;
         // Android supports TTLS-GTC, but CAT doesn't
+        return false;
       case '25': // EAP-PEAP
         // The inner method must be 26 on any platform
         if (innerEapMethod === '26') break;

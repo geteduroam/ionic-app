@@ -1,5 +1,5 @@
 import { Component, NgZone } from '@angular/core';
-import {Events, NavParams, Platform, ViewController} from "ionic-angular";
+import {Events, NavController, NavParams, Platform, ViewController} from "ionic-angular";
 import {Plugins} from "@capacitor/core";
 import {ValidatorProvider} from "../../providers/validator/validator";
 import {BasePage} from "../basePage";
@@ -87,7 +87,8 @@ export class ErrorsPage extends BasePage{
    */
   async closeModal() {
     if (this.checkMethod === 'enableAccess' && !this.isFinal ||
-        this.checkMethod === 'removeConnection' && !this.isFinal) {
+        this.checkMethod === 'removeConnection' && !this.isFinal ||
+        this.checkMethod === 'retryConfiguration' && !this.isFinal) {
       await this.viewCtrl.dismiss();
     } else if (await this.errorService.checkAgain(this.checkMethod, this.isFinal)) {
       await this.viewCtrl.dismiss();

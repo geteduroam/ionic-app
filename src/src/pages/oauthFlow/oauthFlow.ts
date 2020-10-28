@@ -12,7 +12,6 @@ import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler"
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
 import { Plugins } from '@capacitor/core';
 const { OAuth2Client } = Plugins;
-declare var window: any;
 
 @Component({
   selector: 'page-oauthFlow',
@@ -72,6 +71,7 @@ export class OauthFlow extends BasePage{
 
   closeEventBrowser(error?: boolean) {
     this.loading.create();
+    this.navCtrl.pop();
     if (!!error) {
       this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
       this.navCtrl.pop();

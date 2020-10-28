@@ -1,10 +1,10 @@
 import {LoadingProvider} from "../providers/loading/loading";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {Events} from "ionic-angular";
-import {Plugins} from "@capacitor/core";
+import { Plugins, ActionSheetOptionStyle } from '@capacitor/core';
 import {GlobalProvider} from "../providers/global/global";
-const { Toast, Network } = Plugins;
-
+const { Toast, Network, Modals, Browser } = Plugins;
+declare var window: any;
 export abstract class BasePage {
 
   /**
@@ -85,5 +85,90 @@ export abstract class BasePage {
           });
           this.messageShown = true;
       }
+  }
+  /**
+   * This method show a modal with support options
+   */
+  async modalSupport() {
+    const providerInfo = this.global.getProviderInfo();
+    let options = {
+      title: this.dictionary.getTranslation('modalSupport', 'title'),
+      message: this.dictionary.getTranslation('modalSupport', 'message'),
+      options: []
+    };
+    // Options available
+    if (providerInfo.helpdesk.webAddress) {
+      options.options.push({action: 'web', title: this.dictionary.getTranslation('modalSupport', 'web') + this.shortenAddress(providerInfo.helpdesk.webAddress)});
+    }
+    if (providerInfo.helpdesk.emailAddress) options.options.push({action: 'email', title: this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress});
+    if (providerInfo.helpdesk.phone) options.options.push({action: 'phone', title: this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone});
+    // Include cancel button
+    options.options.push({title: this.dictionary.getTranslation('modalSupport', 'cancel'), style: ActionSheetOptionStyle.Cancel });
+    // Show modal
+    let supportOption = await Modals.showActions(options);
+    let selectedAction = options.options[supportOption.index].action;
+
+    switch(selectedAction) {
+        // Web option
+      case 'web':
+        return await Browser.open({url: providerInfo.helpdesk.webAddress});
+        // Email option
+      case 'email':
+        return window.location.href = 'mailto:' + providerInfo.helpdesk.emailAddress + '?Subject=' + this.dictionary.getTranslation('modalSupport', 'help');
+        // Phone option
+      case 'phone':
+        return window.location.href = 'tel:'+providerInfo.helpdesk.phone;
+    }
+
+  }
+
+  shortenAddress(address?: string) {
+    if (address) {
+      console.log("REPLACING");
+      console.log(address);
+      return address.replace(/^https:\/\/([^/]+)\/.*?\/.*?([^/]+\/?)$/, '$1/…/$2');
+    }
+  }
+
+  async termsModal(termsOfUse: any) {
+    let splitTerms = termsOfUse.split(' ');
+
+    let terms = splitTerms.map(res => {
+      if (!!res.match(/\bwww?\S+/gi) ||  !!res.match(/\bhttps?\S+/gi) || res.match(/\bhttp?\S+/gi)) {
+        res = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
+          !!res.match(/\bhttps?\S+/gi) ? res.match(/\bhttps?\S+/gi)[0] : res.match(/\bhttp?\S+/gi)[0];
+
+        res =`<a href="${res}">${res}</a>`;
+
+      }
+      return res
+    });
+
+    terms = terms.join(' ');
+
+    const htmlView = `<title>${this.getString('label', 'terms')}</title>
+      <meta name="charset" value="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+      <style type="text/css">
+        @media (prefers-color-scheme: dark) { html { background: black; color: rgba(255,255,255,.75); } }
+        html { font-family: sans-serif; margin-top: 1.4em; }
+        a { color: #276fbf; }
+      </style>
+      ${terms}`;
+    const pageContentUrl = 'data:text/html;base64,' + btoa(htmlView);
+    const browser = window.cordova.InAppBrowser.open(
+      pageContentUrl ,
+      '_blank',
+      'location=no,hidenavigationbuttons=yes,hidespinner=yes,toolbarposition=top,beforeload=yes'
+    );
+
+    browser.addEventListener('beforeload', (params, callback) => {
+      if (params.url == pageContentUrl) {
+        callback(params.url);
+      } else {
+        window.cordova.InAppBrowser.open(params.url, '_system');
+        setTimeout(() => browser.close(), 1000);
+      }
+    });
   }
 }

@@ -10,6 +10,7 @@ import {NavController} from "ionic-angular";
 import {WifiConfirmation} from "../../pages/wifiConfirmation/wifiConfirmation";
 import {OauthFlow} from "../../pages/oauthFlow/oauthFlow";
 import {ClientCertificatePassphrasePage} from "../../pages/clientCertificatePassphrase/clientCertificatePassphrase";
+import {ConfigurationScreen} from "../../pages/configScreen/configScreen";
 
 @Injectable()
 export class OauthConfProvider {
@@ -65,11 +66,16 @@ export class OauthConfProvider {
       await this.navigateTo();
     }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
       await this.errorHandler.handleError(
-          this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
+          this.dictionary.getTranslation('error', 'duplicate'), false, '', 'retryConfiguration', true);
+      await this.navCtrl.setRoot(ConfigurationScreen);
+    }else if (checkRequest.message.includes('error.network.mobileconfig')) {
+      await this.errorHandler.handleError(
+          this.dictionary.getTranslation('error', 'mobileconfig'), false, '', 'retryConfiguration', true);
     } else if (checkRequest.message.includes('error.network.userCancelled')) {
       await this.navCtrl.pop();
     } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false, '', 'retryConfiguration', true);
+      await this.navCtrl.setRoot(ConfigurationScreen);
     }
   }
 
