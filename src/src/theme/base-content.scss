@@ -31,7 +31,7 @@ ion-content {
     box-shadow: 0 0 4px 4px rgba(20, 20, 20, 0.04);
     border-radius: 0 0 4px 4px;
     position: relative;
-    height: calc(90% - 70px);
+    height: calc(90% - 65px);
     margin-top: 0;
     border-top: none;
 
@@ -40,6 +40,7 @@ ion-content {
     }
 
     .arrow-back {
+      height: 0;
       display: block;
       text-align: left;
       background-color: transparent !important;
@@ -49,7 +50,7 @@ ion-content {
         padding: 5px;
         height: 100%;
         box-shadow: none;
-        margin: 10px 0 0 0;
+        margin: 25px 0 0 0;
 
         span {
           padding: 5px 0 0 15px;
@@ -131,7 +132,6 @@ ion-content {
         height: 30%;
 
         button {
-          width: 147px;
           height: 45px;
           font-family: Helvetica, sans-serif;
           font-size: 16px;
@@ -167,7 +167,6 @@ ion-content {
         height: 30%;
 
         button {
-          width: 147px;
           height: 45px;
           font-family: Helvetica, sans-serif;
           font-size: 16px;
@@ -179,6 +178,18 @@ ion-content {
         .disabled-button {
           opacity: .4;
           pointer-events: none;
+        }
+      }
+    }
+    .help-desk {
+      position: relative;
+      display: inline-block;
+
+      ion-label {
+        text-align: center;
+
+        a {
+          text-decoration: underline;
         }
       }
     }
@@ -253,4 +264,34 @@ ion-app, ion-alert div:last-child {
 ////-------------------------------------
 .nav-decor {
   display: none !important;
+}
+
+// Remove some elements on very small screens
+@media (max-height: 536px) {
+  ion-content {
+    background: white !important;
+
+    .logo {
+      margin: 4px auto !important;
+      height: 46px;
+      width: 105px;
+    }
+    .bar-upped {
+      display: none;
+    }
+    .base-content {
+      margin: 0 !important;
+      box-shadow: none;
+
+      .header-content {
+        img {
+          width: 42px;
+          height: 50px;
+        }
+        h1 {
+          margin: 0;
+        }
+      }
+    }
+  }
 }
