@@ -3,12 +3,19 @@ package com.emergya.wifieapconfigurator;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.FeatureInfo;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiNetworkSpecifier;
+import android.net.wifi.WifiNetworkSuggestion;
 import android.net.wifi.hotspot2.ConfigParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.HomeSp;
@@ -21,6 +28,8 @@ import android.net.wifi.WifiManager;
 //import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -85,6 +94,7 @@ public class WifiEapConfigurator extends Plugin {
 
     private WifiManager wifiManager;
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @PluginMethod()
     public void configureAP(PluginCall call) throws JSONException {
         String[] ssids = new String[call.getArray("ssid").length()];
@@ -209,6 +219,7 @@ public class WifiEapConfigurator extends Plugin {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     void connectAP(String[] ssids, String username, String password, String[] servernames, String[] caCertificates, String clientCertificate, String passPhrase,
                    Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String[] oids, PluginCall call) {
 
@@ -329,7 +340,11 @@ public class WifiEapConfigurator extends Plugin {
 
         if (ssids.length > 0) {
             for (String ssid : ssids) {
-                connectWifiBySsid(ssid, enterpriseConfig, call, displayName);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    connectWifiAndroidQ(ssid, enterpriseConfig, call);
+                } else {
+                    connectWifiBySsid(ssid, enterpriseConfig, call, displayName);
+                }
             }
         }
 
@@ -339,18 +354,6 @@ public class WifiEapConfigurator extends Plugin {
             }
             connectPasspoint(id, displayName, oids, enterpriseConfig, call, key);
         }
-
-        /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.network.linked");
-            call.success(object);
-        } else {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
-            call.success(object);
-        }*/
     }
 
     private void removePasspoint(String id, PluginCall call) {
@@ -503,7 +506,8 @@ public class WifiEapConfigurator extends Plugin {
         }
     }
 
-    /*private boolean createSuggestion(WifiManager wifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig){
+    /*
+    private boolean createSuggestion(WifiManager wifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig){
             boolean configured = false;
             if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
@@ -552,21 +556,20 @@ public class WifiEapConfigurator extends Plugin {
 
     }*/
 
-    /*
-    private boolean connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig) {
-        boolean configured = false;
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call) {
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
             ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-            WifiNetworkSuggestion.Builder suggestionBuilder =  new WifiNetworkSuggestion.Builder();
+            WifiNetworkSuggestion suggestion =  new WifiNetworkSuggestion.Builder()
+                    .setSsid(ssid)
+                    .setWpa2EnterpriseConfig(enterpriseConfig)
+                    .build();
 
-            suggestionBuilder.setSsid(ssid);
-            suggestionBuilder.setWpa2EnterpriseConfig(enterpriseConfig);
-
-            if (passpointConfig != null) {
+            /*if (passpointConfig != null) {
                 suggestionBuilder.setPasspointConfig(passpointConfig);
-            }
-            final WifiNetworkSuggestion suggestion = suggestionBuilder.build();
+            }*/
 
             // WifiNetworkSuggestion approach
             suggestions.add(suggestion);
@@ -589,14 +592,37 @@ public class WifiEapConfigurator extends Plugin {
                 };
                 getContext().registerReceiver(broadcastReceiver, intentFilter);
 
-                configured = true;
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+                call.success(object);
             } else {
-                Log.d("STATUS ERROR", "" + status);
-                configured = false;
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
+                call.success(object);
             }
+
+            /*
+            WifiNetworkSpecifier wifiNetworkSpecifier = suggestionBuilder.build();
+            NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
+            NetworkRequest networkRequest = networkRequestBuilder.build();
+            final ConnectivityManager cm = (ConnectivityManager)
+                    getContext().getApplicationContext()
+                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                cm.requestNetwork(networkRequest, new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(@NonNull Network network) {
+                        super.onAvailable(network);
+                        cm.bindProcessToNetwork(network);
+                    }});
+            }*/
         }
-        return configured;
-    }*/
+
+    }
 
     private void sendClientCertificateError(Exception e, PluginCall call) {
         JSObject object = new JSObject();
