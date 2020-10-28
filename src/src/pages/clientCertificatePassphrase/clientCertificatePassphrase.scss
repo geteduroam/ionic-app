@@ -1,0 +1,64 @@
+page-client-certificate-passphrase {
+
+  .profile-content {
+    background-color: white;
+  }
+
+  .input-profile {
+    border-radius: 4px;
+    margin-left: 14px !important;
+    border: 1px solid #CAD0D6 !important;
+    width: calc(100% - 30px);
+    margin-right: 12px;
+    height: 40px;
+  }
+
+  .error-msg {
+    font-size: 11px;
+    color: $color-danger;
+  }
+  .error-validation {
+    border: solid 1px red !important;
+  }
+
+  img.imgLogo {
+    width: calc(90% - 40px) !important;
+    height: 100% !important
+  }
+
+  .footer-form {
+    height: auto !important;
+    position: absolute !important;
+    bottom: 1px;
+    width: 100% !important;
+  }
+  .footer-form-focus {
+    height: auto !important;
+    bottom: 1px;
+    width: 100% !important;
+    position: relative !important;
+
+    .disabled-button {
+      opacity: .4;
+      pointer-events: none;
+    }
+  }
+
+  .button-control {
+    width: 100% !important;
+  }
+
+  .bottom-button {
+    margin: 20px 17px 10px 15px;
+  }
+
+}
+
+//---------------------------------//
+// Show all elements to tap input  //
+//---------------------------------//
+ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
+  contain: unset !important;
+  overflow: unset !important;
+
+}

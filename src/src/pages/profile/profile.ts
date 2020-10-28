@@ -1,5 +1,5 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
-import { Events, ModalController, NavController, NavParams, ViewController } from 'ionic-angular';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import {Events, NavController, NavParams, ViewController} from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
 import { AuthenticationMethod } from '../../shared/entities/authenticationMethod';
@@ -12,6 +12,7 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {ConfigurationScreen} from "../configScreen/configScreen";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import { Plugins } from '@capacitor/core';
 const { Keyboard } = Plugins;
@@ -108,7 +109,7 @@ export class ProfilePage extends BasePage{
   @ViewChild('imgLogo') imgLogo: ElementRef;
 
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
-              private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider, protected modalCtrl: ModalController,
+              private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events, private sanitizer: DomSanitizer, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
@@ -150,11 +151,16 @@ export class ProfilePage extends BasePage{
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
+            this.dictionary.getTranslation('error', 'duplicate'), false, '', 'retryConfiguration', true);
+        await this.navCtrl.setRoot(ConfigurationScreen);
+      }else if (checkRequest.message.includes('error.network.mobileconfig')) {
+        await this.errorHandler.handleError(
+            this.dictionary.getTranslation('error', 'mobileconfig'), false, '', '', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false, '', 'retryConfiguration', true);
+        await this.navCtrl.setRoot(ConfigurationScreen);
       }
     }
   }
@@ -318,18 +324,8 @@ export class ProfilePage extends BasePage{
    */
   private configConnection() {
     // Non-EAP < 0 < EAP
-    let innerNonEapMethod: number = this.validMethod.innerAuthenticationMethod
-        ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
-          ? +this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
-          : 0
-        : 0
-        ;
-    let innerEapMethod: number = this.validMethod.innerAuthenticationMethod
-        ? this.validMethod.innerAuthenticationMethod.eapMethod
-          ? +this.validMethod.innerAuthenticationMethod.eapMethod.type
-          : 0
-        : 0
-        ;
+    let innerNonEapMethod: number = this.validMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
+    let innerEapMethod: number = this.validMethod?.innerAuthenticationMethod?.eapMethod?.type;
     let auth = innerEapMethod || innerNonEapMethod * -1;
 
     return {

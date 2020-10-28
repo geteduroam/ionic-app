@@ -1,5 +1,5 @@
-import { Component, NgModule, NgZone } from '@angular/core';
-import { Events, Modal, ModalController, NavController, NavParams, ViewController } from 'ionic-angular';
+import { Component, ViewChild, NgModule, NgZone } from '@angular/core';
+import { Events, Modal, ModalController, NavController, NavParams, Searchbar, ViewController } from 'ionic-angular';
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
@@ -80,6 +80,11 @@ export class ConfigurationScreen extends BasePage{
   showButton: boolean = true;
 
   /**
+   * Component SearchBar
+   */
+  @ViewChild('instituteSearchBar') instituteSearchBar: Searchbar;
+
+  /**
    * Constructor
    * */
   constructor(private navCtrl: NavController, private getEduroamServices: GeteduroamServices, private ngZone: NgZone,
@@ -87,46 +92,32 @@ export class ConfigurationScreen extends BasePage{
               protected dictionary: DictionaryServiceProvider, protected global: GlobalProvider,
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
-    Keyboard.addListener('keyboardWillShow', async () => {
-     await Keyboard.hide();
-    });
 
     this.event.subscribe('connection', async (res: any) => {
       if (!!res.connected && !this.global.discovery) {
-        this.chargeDiscovery()
+        await this.chargeDiscovery()
       }
     });
   }
 
-
   /**
    * Method executes when the search bar is tapped.
    * */
-  async showModal(e: any) {
-    e.preventDefault();
+  searchBarClicked(e: any) {
+    this.showModal();
+  }
+  async showModal() {
     if (!!this.instances) {
       let searchModal = this.modalCtrl.create(InstitutionSearch, {
         instanceName: this.instanceName
       });
 
-      searchModal.onDidDismiss((data) => {
-
-        data = this.instances.filter((res: any) => {
-           if (res.name === data) return res
-        });
-
-        if (data !== undefined) {
-          this.instance = data[0];
-          this.instanceName = data[0].name;
-
-          this.initializeProfiles(this.instance);
-        }
-      });
+      searchModal.onDidDismiss(institution => this.initializeProfiles(institution));
 
       return await searchModal.present();
     } else {
       await this.chargeDiscovery();
-      this.showModal(e);
+      this.showModal();
     }
   }
 
@@ -158,6 +149,7 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
+    this.instanceName = institution.name;
     if (institution.profiles.length > 1 ) {
       // Check default profile and sort array for highlighting default profile
       institution.profiles.forEach((profile, index) => {
@@ -239,8 +231,11 @@ export class ConfigurationScreen extends BasePage{
     this.instances = this.global.discovery;
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     this.loading.create();
+    if (!this.global.discovery) {
+      await this.chargeDiscovery();
+    }
   }
   /**
    *  Lifecycle when entering a page, before it becomes the active one
@@ -249,6 +244,20 @@ export class ConfigurationScreen extends BasePage{
   async ionViewDidEnter() {
     this.removeSpinner();
     this.showAll = true;
+
+    // The instituteSearchBar is not loaded in this context, but when we set a timeout it will be when it fires.
+    // Taken from https://angular.io/api/core/ViewChild
+    setTimeout(() => {
+      // According to the documentation, there should be a getInputElement() function,
+      // but it doesn't exist. Maybe a newer version? Anyway, we need to set the readonly property on it,
+      // and I found a handle that I can use, so I'll use that instead.
+      // Documentation here: https://ionicframework.com/docs/api/searchbar
+      const elem = this.instituteSearchBar?._searchbarInput?.nativeElement ?? {};
+
+      // readOnly prevents the keyboard from showing up when the institute field is pressed,
+      // which means we don't have to hide it, which speeds up loading of the discovery significantly.
+      elem.readOnly = true;
+    }, 0);
   }
 
   async getDiscovery() {
