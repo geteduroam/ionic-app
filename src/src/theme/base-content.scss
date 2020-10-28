@@ -230,15 +230,6 @@ ion-content {
       background-image: url('../assets/imgs/eduroam-dark.svg');
     }
   }
-  /*
-   * The discovery uses the background color as separation lines,
-   * so we revert this back to the light theme, since we don't have a dark theme for this
-   */
-  page-institution-search {
-    ion-content {
-      background: #f6f4f3 !important;
-    }
-  }
 }
 
 ////---------------------------------
