@@ -146,7 +146,9 @@ export abstract class BasePage {
 
     terms = terms.join(' ');
 
-    const htmlView = `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    const htmlView = `<title>${this.getString('label', 'terms')}</title>
+      <meta name="charset" value="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
       <style type="text/css">
         @media (prefers-color-scheme: dark) { html { background: black; color: rgba(255,255,255,.75); } }
         html { font-family: sans-serif; margin-top: 1.4em; }
