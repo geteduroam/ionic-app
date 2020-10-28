@@ -7,8 +7,8 @@
 </div>
 <div *ngIf="showAll" class="profile-content" id="dismissable-back">
     <div class="header-content" [ngClass]="!showForm && !logo ? 'only-tittle' : !showForm && !!logo ? 'only-header' : ''" margin-top padding-top>
-        <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
-        <h1>{{providerInfo.displayName}}</h1>
+        <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" />
+        <h1 *ngIf="!converted_image">{{providerInfo.displayName}}</h1>
     </div>
 
     <div *ngIf="showForm" class="content-form" margin-bottom text-center>
