@@ -254,3 +254,33 @@ ion-app, ion-alert div:last-child {
 .nav-decor {
   display: none !important;
 }
+
+// Remove some elements on very small screens
+@media (max-height: 536px) {
+  ion-content {
+    background: white !important;
+
+    .logo {
+      margin: 4px auto !important;
+      height: 46px;
+      width: 105px;
+    }
+    .bar-upped {
+      display: none;
+    }
+    .base-content {
+      margin: 0 !important;
+      box-shadow: none;
+
+      .header-content {
+        img {
+          width: 42px;
+          height: 50px;
+        }
+        h1 {
+          margin: 0;
+        }
+      }
+    }
+  }
+}
