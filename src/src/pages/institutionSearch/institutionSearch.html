@@ -1,18 +1,11 @@
 <ion-header transparent>
     <ion-toolbar>
-        <ion-searchbar #instituteSearchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)" debounce="100"
+        <ion-searchbar #instituteSearchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)" debounce="500"
                        [(ngModel)]="instanceName" placeholder="{{getString('placeholder', 'institution')}}"></ion-searchbar>
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
-    <ion-list no-margin class="list list-ios list-institution">
-        <div *ngFor="let institution of filteredInstances;" class="item item-block">
-            <div class="item-inner" (click)="selectInstitution(institution)">
-                <div class="input-wrapper">
-                    <div class="label label-ios label-institution">{{ institution }} </div>
-                </div>
-            </div>
-            <div class="button-effect"></div>
-        </div>
+    <ion-list no-margin>
+        <ion-item *ngFor="let institution of filteredInstances" (click)="selectInstitution(institution)">{{institution.name}}</ion-item>
     </ion-list>
 </ion-content>
