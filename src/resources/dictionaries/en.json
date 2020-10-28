@@ -24,9 +24,9 @@
   "modalSupport": {
     "title": "Support Options",
     "message": "Select an option",
-    "web": "Web",
-    "email": "Email",
-    "phone": "Phone",
+    "web": "Web: ",
+    "email": "Email: ",
+    "phone": "Phone: ",
     "help": "Support help"
   },
   "button": {

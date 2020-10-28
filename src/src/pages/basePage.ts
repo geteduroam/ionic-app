@@ -1,7 +1,7 @@
 import {LoadingProvider} from "../providers/loading/loading";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {Events} from "ionic-angular";
-import { Plugins } from '@capacitor/core';
+import { Plugins, ActionSheetOptionStyle } from '@capacitor/core';
 import {GlobalProvider} from "../providers/global/global";
 const { Toast, Network, Modals, Browser } = Plugins;
 declare var window: any;
@@ -86,6 +86,9 @@ export abstract class BasePage {
           this.messageShown = true;
       }
   }
+  /**
+   * This method show a modal with support options
+   */
   async modalSupport() {
     const providerInfo = this.global.getProviderInfo();
     let options = {
@@ -93,18 +96,27 @@ export abstract class BasePage {
       message: this.dictionary.getTranslation('modalSupport', 'message'),
       options: []
     };
-    if (providerInfo.helpdesk.webAddress) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'web')});
-    if (providerInfo.helpdesk.emailAddress) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'email')});
-    if (providerInfo.helpdesk.phone) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'phone')});
-
+    // Options available
+    if (providerInfo.helpdesk.webAddress) {
+      options.options.push({title: this.dictionary.getTranslation('modalSupport', 'web') + providerInfo.helpdesk.webAddress});
+    }
+    if (providerInfo.helpdesk.emailAddress) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress});
+    if (providerInfo.helpdesk.phone) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone});
+    // Include cancel button
+    options.options.push({title: 'Cancel', style: ActionSheetOptionStyle.Cancel });
+    // Show modal
     let supportOption = await Modals.showActions(options);
+    let selectedOption = options.options[supportOption.index].title;
 
-    switch(options.options[supportOption.index].title) {
-      case this.dictionary.getTranslation('modalSupport', 'web'):
+    switch(selectedOption) {
+        // Web option
+      case this.dictionary.getTranslation('modalSupport', 'web') + providerInfo.helpdesk.webAddress:
         return await Browser.open({url: providerInfo.helpdesk.webAddress});
-      case this.dictionary.getTranslation('modalSupport', 'email'):
+        // Email option
+      case this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress:
         return window.location.href = 'mailto:' + providerInfo.helpdesk.emailAddress + '?Subject=' + this.dictionary.getTranslation('modalSupport', 'help');
-      case this.dictionary.getTranslation('modalSupport', 'phone'):
+        // Phone option
+      case this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone:
         return window.location.href = 'tel:'+providerInfo.helpdesk.phone;
     }
 
