@@ -85,8 +85,8 @@ export class InstitutionSearch extends BasePage{
     this.filterInstances(val);
   }
 
-  abbr(s: string) {
-    return s.split(" ").map(s => s.substring(0,1)).join('');
+  abbr(s: string[]) {
+    return s.map(s => s.substring(0,1)).filter(s => s.match(/\p{General_Category=Letter}/gu)).join('');
   }
 
   /**
@@ -94,20 +94,27 @@ export class InstitutionSearch extends BasePage{
    * @param stringAux Searched on search bar
    */
   filterInstances(stringAux: string){
-    if (stringAux && stringAux.length > 2) {
+    if (stringAux) {
       const s = stringAux.toLowerCase();
+      const terms = s.split(' ');
       this.filteredInstances = this.instances;
       this.filteredInstances = this.filteredInstances.filter((item:any) => {
-        return item.search.indexOf(s.toLowerCase()) != -1;
+        return item.abbr1 === s || item.abbr2 === s
+          || terms.reduce((found, term) => found || item.terms.includes(term), false)
+          || (stringAux.length > 2 && item.search.indexOf(s.toLowerCase()) != -1);
       });
       this.filteredInstances.sort((a, b) => {
         let modifier = 0;
         for(let i = 1; i < s.length; i++) {
           if (a.search.substring(0, i) === s.substring(0,i)) modifier-=2;
-          if (a.abbr.substring(0, i) === s.substring(0,i)) modifier-=1;
+          if (a.abbr1.substring(0, i) === s.substring(0,i)) modifier-=1;
+          if (a.abbr2.substring(0, i) === s.substring(0,i)) modifier-=1;
           if (b.search.substring(0, i) === s.substring(0,i)) modifier+=2;
-          if (b.abbr.substring(0, i) === s.substring(0,i)) modifier+=1;
+          if (b.abbr1.substring(0, i) === s.substring(0,i)) modifier+=1;
+          if (b.abbr2.substring(0, i) === s.substring(0,i)) modifier+=1;
         }
+        if (terms.reduce((found, term) => found || a.terms.includes(term), false)) modifier-=s.length*2;
+        if (terms.reduce((found, term) => found || b.terms.includes(term), false)) modifier+=s.length*2;
         return a.name.localeCompare(b.name) + modifier;
       });
     } else {
@@ -138,8 +145,10 @@ export class InstitutionSearch extends BasePage{
 
   ngOnInit() {
     this.instances = this.global.getDiscovery().map((item:any) => {
-        if (!('abbr' in item)) item.abbr = this.abbr(item.name).toLowerCase();
+        if (!('abbr1' in item)) item.abbr1 = this.abbr(item.name.split(" ")).toLowerCase();
+        if (!('abbr2' in item)) item.abbr2 = this.abbr(item.name.split(/\/-_ /)).toLowerCase();
         if (!('search' in item)) item.search = [item.name, item.abbr].join(' ').toLowerCase();
+        if (!('terms' in item)) item.terms = item.name.toLowerCase().split(' ');
         return item;
       });
     this.clearInstance();
