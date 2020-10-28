@@ -37,8 +37,9 @@ page-profile {
   }
 
   img.imgLogo {
-    width: auto !important;
+    width: 100% !important;
     max-width: 160px;
+    max-height: 40px;
   }
 
   .footer-form {
