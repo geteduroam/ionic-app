@@ -562,17 +562,25 @@ public class WifiEapConfigurator extends Plugin {
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
             ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-            WifiNetworkSuggestion suggestion =  new WifiNetworkSuggestion.Builder()
+            WifiNetworkSpecifier suggestion =  new WifiNetworkSpecifier.Builder()
                     .setSsid(ssid)
                     .setWpa2EnterpriseConfig(enterpriseConfig)
                     .build();
+
+            NetworkRequest networkRequest = new NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .setNetworkSpecifier(suggestion)
+                    .build();
+
+            ConnectivityManager connectivityManager = (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            connectivityManager.requestNetwork(networkRequest, new ConnectivityManager.NetworkCallback());
 
             /*if (passpointConfig != null) {
                 suggestionBuilder.setPasspointConfig(passpointConfig);
             }*/
 
             // WifiNetworkSuggestion approach
-            suggestions.add(suggestion);
+            /*suggestions.add(suggestion);
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             int status = wifiManager.addNetworkSuggestions(suggestions);
 
@@ -601,7 +609,7 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
                 call.success(object);
-            }
+            }*/
 
             /*
             WifiNetworkSpecifier wifiNetworkSpecifier = suggestionBuilder.build();
