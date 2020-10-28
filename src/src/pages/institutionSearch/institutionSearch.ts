@@ -146,7 +146,7 @@ export class InstitutionSearch extends BasePage{
   ngOnInit() {
     this.instances = this.global.getDiscovery().map((item:any) => {
         if (!('abbr1' in item)) item.abbr1 = this.abbr(item.name.split(" ")).toLowerCase();
-        if (!('abbr2' in item)) item.abbr2 = this.abbr(item.name.split(/\/-_ /)).toLowerCase();
+        if (!('abbr2' in item)) item.abbr2 = this.abbr(item.name.split(/[\/\-_ ]/)).toLowerCase();
         if (!('search' in item)) item.search = [item.name, item.abbr].join(' ').toLowerCase();
         if (!('terms' in item)) item.terms = item.name.toLowerCase().split(' ');
         return item;
