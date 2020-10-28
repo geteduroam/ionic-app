@@ -146,13 +146,27 @@ export abstract class BasePage {
 
     terms = terms.join(' ');
 
-    let htmlView = `<html><head></head><body><div style="position:relative; top:150px; left: 40px;"><h1>${terms}</h1></div></body></html>`;
+    const htmlView = `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+      <style type="text/css">
+        @media (prefers-color-scheme: dark) { html { background: black; color: rgba(255,255,255,.75); } }
+        html { font-family: sans-serif; margin-top: 1.4em; }
+        a { color: #276fbf; }
+      </style>
+      ${terms}`;
     const pageContentUrl = 'data:text/html;base64,' + btoa(htmlView);
-    window.cordova.InAppBrowser.open(
+    const browser = window.cordova.InAppBrowser.open(
       pageContentUrl ,
-      "_blank",
-      "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes"
+      '_blank',
+      'location=no,hidenavigationbuttons=yes,hidespinner=yes,toolbarposition=top,beforeload=yes'
     );
 
+    browser.addEventListener('beforeload', (params, callback) => {
+      if (params.url == pageContentUrl) {
+        callback(params.url);
+      } else {
+        window.cordova.InAppBrowser.open(params.url, '_system');
+        setTimeout(() => browser.close(), 1000);
+      }
+    });
   }
 }
