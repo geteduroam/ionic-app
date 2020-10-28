@@ -103,7 +103,7 @@ export abstract class BasePage {
     if (providerInfo.helpdesk.emailAddress) options.options.push({action: 'email', title: this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress});
     if (providerInfo.helpdesk.phone) options.options.push({action: 'phone', title: this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone});
     // Include cancel button
-    options.options.push({title: 'Cancel', style: ActionSheetOptionStyle.Cancel });
+    options.options.push({title: this.dictionary.getTranslation('modalSupport', 'cancel'), style: ActionSheetOptionStyle.Cancel });
     // Show modal
     let supportOption = await Modals.showActions(options);
     let selectedAction = options.options[supportOption.index].action;
@@ -130,4 +130,29 @@ export abstract class BasePage {
     }
   }
 
+  async termsModal(termsOfUse: any) {
+    let splitTerms = termsOfUse.split(' ');
+
+    let terms = splitTerms.map(res => {
+      if (!!res.match(/\bwww?\S+/gi) ||  !!res.match(/\bhttps?\S+/gi) || res.match(/\bhttp?\S+/gi)) {
+        res = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
+          !!res.match(/\bhttps?\S+/gi) ? res.match(/\bhttps?\S+/gi)[0] : res.match(/\bhttp?\S+/gi)[0];
+
+        res =`<a href="${res}">${res}</a>`;
+
+      }
+      return res
+    });
+
+    terms = terms.join(' ');
+
+    let htmlView = `<html><head></head><body><div style="position:relative; top:150px; left: 40px;"><h1>${terms}</h1></div></body></html>`;
+    const pageContentUrl = 'data:text/html;base64,' + btoa(htmlView);
+    window.cordova.InAppBrowser.open(
+      pageContentUrl ,
+      "_blank",
+      "location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes"
+    );
+
+  }
 }

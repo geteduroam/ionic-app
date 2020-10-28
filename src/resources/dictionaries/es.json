@@ -27,7 +27,9 @@
     "web": "Página Web: ",
     "email": "Correo electrónico: ",
     "phone": "Teléfono: ",
-    "help": "Ayuda de Soporte"
+    "help": "Ayuda de Soporte",
+    "cancel": "Cancelar",
+    "terms": "Términos de uso"
   },
   "button": {
     "next": "Siguiente",

@@ -27,7 +27,9 @@
     "web": "Web: ",
     "email": "Email: ",
     "phone": "Phone: ",
-    "help": "Support help"
+    "help": "Support help",
+    "cancel": "Cancel",
+    "terms": "Terms of use"
   },
   "button": {
     "next": "Next",
