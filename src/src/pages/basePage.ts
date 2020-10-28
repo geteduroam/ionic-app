@@ -98,28 +98,36 @@ export abstract class BasePage {
     };
     // Options available
     if (providerInfo.helpdesk.webAddress) {
-      options.options.push({title: this.dictionary.getTranslation('modalSupport', 'web') + providerInfo.helpdesk.webAddress});
+      options.options.push({action: 'web', title: this.dictionary.getTranslation('modalSupport', 'web') + this.shortenAddress(providerInfo.helpdesk.webAddress)});
     }
-    if (providerInfo.helpdesk.emailAddress) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress});
-    if (providerInfo.helpdesk.phone) options.options.push({title: this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone});
+    if (providerInfo.helpdesk.emailAddress) options.options.push({action: 'email', title: this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress});
+    if (providerInfo.helpdesk.phone) options.options.push({action: 'phone', title: this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone});
     // Include cancel button
     options.options.push({title: 'Cancel', style: ActionSheetOptionStyle.Cancel });
     // Show modal
     let supportOption = await Modals.showActions(options);
-    let selectedOption = options.options[supportOption.index].title;
+    let selectedAction = options.options[supportOption.index].action;
 
-    switch(selectedOption) {
+    switch(selectedAction) {
         // Web option
-      case this.dictionary.getTranslation('modalSupport', 'web') + providerInfo.helpdesk.webAddress:
+      case 'web':
         return await Browser.open({url: providerInfo.helpdesk.webAddress});
         // Email option
-      case this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress:
+      case 'email':
         return window.location.href = 'mailto:' + providerInfo.helpdesk.emailAddress + '?Subject=' + this.dictionary.getTranslation('modalSupport', 'help');
         // Phone option
-      case this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone:
+      case 'phone':
         return window.location.href = 'tel:'+providerInfo.helpdesk.phone;
     }
 
-}
+  }
+
+  shortenAddress(address?: string) {
+    if (address) {
+      console.log("REPLACING");
+      console.log(address);
+      return address.replace(/^https:\/\/([^/]+)\/.*?\/.*?([^/]+\/?)$/, '$1/…/$2');
+    }
+  }
 
 }
