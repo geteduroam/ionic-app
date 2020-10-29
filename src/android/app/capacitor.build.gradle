@@ -11,7 +11,7 @@ apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':byteowls-capacitor-oauth2')
     implementation project(':wifi-eap-configurator')
-    implementation "com.squareup.okhttp3:okhttp-urlconnection:3.10.0"
+
 }
 
 
