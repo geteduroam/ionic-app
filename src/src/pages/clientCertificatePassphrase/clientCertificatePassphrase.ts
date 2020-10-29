@@ -116,6 +116,10 @@ export class ClientCertificatePassphrasePage extends BasePage{
     }
   }
 
+  resetError() {
+    this.showError = false;
+  }
+
   async sendPassphrase() {
     if ((!!this.termsOfUse && !!this.termsAccepted) || !this.termsOfUse) {
       if (this.showInput) {

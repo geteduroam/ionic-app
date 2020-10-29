@@ -12,7 +12,7 @@
             <div *ngIf="showInput" class="content-profile" padding-top margin-top>
                 <ion-label class="label-conf" text-left>{{getString('label', 'passphrase')}}</ion-label>
 
-                <input id="input" (keydown)="showError = false" [(ngModel)]="passphrase"
+                <input id="input" (keydown)="resetError()" [(ngModel)]="passphrase"
                        [ngClass]="showError ? 'error-validation' : ''" (focus)="getFocus()"
                        autocomplete="on" class="input-profile" name="passphrase" padding-left type="text"/>
 
