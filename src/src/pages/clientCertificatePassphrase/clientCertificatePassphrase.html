@@ -37,7 +37,7 @@
     <div id="footer">
         <form (ngSubmit)="sendPassphrase()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [disabled]="!enableButton || !!termsOfUse && !termsAccepted" class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
+                <button class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
     </div>
