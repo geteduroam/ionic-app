@@ -135,10 +135,10 @@ export abstract class BasePage {
 
     let terms = splitTerms.map(res => {
       if (!!res.match(/\bwww?\S+/gi) ||  !!res.match(/\bhttps?\S+/gi) || res.match(/\bhttp?\S+/gi)) {
-        res = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
+        const link = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
           !!res.match(/\bhttps?\S+/gi) ? res.match(/\bhttps?\S+/gi)[0] : res.match(/\bhttp?\S+/gi)[0];
 
-        res =`<a href="${res}">${res}</a>`;
+        res =`<a href="${link}">${res}</a>`;
 
       }
       return res
@@ -157,7 +157,7 @@ export abstract class BasePage {
       ${terms}`;
     const pageContentUrl = 'data:text/html;base64,' + btoa(htmlView);
     const browser = window.cordova.InAppBrowser.open(
-      pageContentUrl ,
+      pageContentUrl,
       '_blank',
       'location=no,hidenavigationbuttons=yes,hidespinner=yes,toolbarposition=top,beforeload=yes'
     );
@@ -166,7 +166,7 @@ export abstract class BasePage {
       if (params.url == pageContentUrl) {
         callback(params.url);
       } else {
-        window.cordova.InAppBrowser.open(params.url, '_system');
+        Browser.open({url: params.url});
         setTimeout(() => browser.close(), 1000);
       }
     });
