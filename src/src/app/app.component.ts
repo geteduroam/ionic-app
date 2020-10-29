@@ -16,7 +16,7 @@ import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-se
 import {OAuth2Client} from '@byteowls/capacitor-oauth2';
 
 declare var Capacitor;
-const { Toast, Network, App } = Plugins;
+const { Toast, Network, App, LocalNotifications } = Plugins;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
 @Component({
@@ -69,6 +69,22 @@ export class GeteduroamApp {
       await this.associatedNetwork();
       // Add listeners to app
       await this.addListeners();
+
+      const notifs = await LocalNotifications.schedule({
+        notifications: [
+          {
+            title: "Title",
+            body: "Body",
+            id: 1,
+            schedule: { at: new Date(Date.now() + 1000 * 10) },
+            sound: null,
+            attachments: null,
+            actionTypeId: "",
+            extra: null
+          }
+        ]
+      });
+      console.log('scheduled notifications', notifs);
     });
   }
 
