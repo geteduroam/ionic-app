@@ -92,7 +92,6 @@ export class ConfigurationScreen extends BasePage{
               protected dictionary: DictionaryServiceProvider, protected global: GlobalProvider,
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
-
   }
 
   /**
@@ -233,10 +232,8 @@ export class ConfigurationScreen extends BasePage{
   }
 
   async ngOnInit() {
-    this.event.subscribe('connection',  () => {
-      this.chargeDiscovery()
-      if (!!this.global.isAndroid()) this.showToast(this.getString('text', 'institutions'));
-    });
+   this.suscribeEvent()
+    this.institutions = this.global.discovery;
   }
 
   async ionViewWillEnter() {
@@ -325,4 +322,10 @@ export class ConfigurationScreen extends BasePage{
     }
   }
 
+  suscribeEvent() {
+    this.event.subscribe('connection',  () => {
+      this.chargeDiscovery()
+      if (!!this.global.isAndroid()) this.showToast(this.getString('text', 'institutions'));
+    });
+  }
 }
