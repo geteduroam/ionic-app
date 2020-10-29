@@ -144,7 +144,6 @@ export class ProfilePage extends BasePage{
   async checkForm() {
     this.loading.createAndPresent();
     if (!!this.enableButton) {
-      this.showAll = false;
       let config = this.configConnection();
       const checkRequest = await this.getEduroamServices.connectProfile(config);
       this.loading.dismiss();
