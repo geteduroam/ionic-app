@@ -57,7 +57,8 @@
     "invalid-profile": "The selected profile is wrong",
     "invalid-oauth": "You have to authorize the app to be able to configure the WiFi connection",
     "invalid-institution": "This institution is not supported",
-    "passphrase": "The Passphrase is incorrect"
+    "passphrase": "The Passphrase is incorrect",
+    "terms": "You need accept terms of use"
   },
   "text": {
     "configured": "Wi-Fi is now configured on your device.",

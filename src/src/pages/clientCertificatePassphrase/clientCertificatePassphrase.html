@@ -12,11 +12,11 @@
             <div *ngIf="showInput" class="content-profile" padding-top margin-top>
                 <ion-label class="label-conf" text-left>{{getString('label', 'passphrase')}}</ion-label>
 
-                <input id="input" (blur)="blur()" [(ngModel)]="passphrase"
-                       [ngClass]="!validPassPhrase ? 'error-validation' : ''" (focus)="getFocus()"
+                <input id="input" (keydown)="showError = false" [(ngModel)]="passphrase"
+                       [ngClass]="showError ? 'error-validation' : ''" (focus)="getFocus()"
                        autocomplete="on" class="input-profile" name="passphrase" padding-left type="text"/>
 
-                <p *ngIf="!validPassPhrase" class="error-msg">
+                <p *ngIf="showError" class="error-msg">
                     {{getString('error', 'passphrase')}} </p>
             </div>
 
@@ -27,6 +27,9 @@
                 <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}<a class="terms"
                                                                                          (click)="termsModal(providerInfo.termsOfUse)">{{getString('label', 'terms')}}</a>
                 </ion-label>
+
+                <span *ngIf="!termsAccepted" class="error-msg content-profile" margin-left>
+                    {{getString('error', 'terms')}} </span>
             </div>
         </form>
     </div>
@@ -34,7 +37,7 @@
     <div id="footer">
         <form (ngSubmit)="sendPassphrase()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [disabled]="!enableButton || !!termsOfUse && !termsAccepted" class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
+                <button class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
     </div>

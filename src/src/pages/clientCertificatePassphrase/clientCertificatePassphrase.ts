@@ -38,6 +38,8 @@ export class ClientCertificatePassphrasePage extends BasePage{
 
   showInput: boolean = true;
 
+  showError: boolean = false;
+
   oauthConf: OauthConfProvider;
 
   logo: boolean = false;
@@ -103,14 +105,9 @@ export class ClientCertificatePassphrasePage extends BasePage{
     this.showAll = true;
   }
 
-  blur() {
-    this.checkPassPhrase();
-  }
-
   async checkPassPhrase() {
-    const validateTerms = !!this.termsOfUse && !!this.termsAccepted ? true : !this.termsOfUse;
     const response = await WifiEapConfigurator.validatePassPhrase({ 'certificate': this.global.getAuthenticationMethod().clientSideCredential.clientCertificate, 'passPhrase': this.passphrase});
-    if (!response.success || !validateTerms) {
+    if (!response.success) {
       this.validPassPhrase = false;
       this.enableButton = false;
     } else {
@@ -120,7 +117,18 @@ export class ClientCertificatePassphrasePage extends BasePage{
   }
 
   async sendPassphrase() {
-    await this.oauthConf.checkForm(this.passphrase);
+    if ((!!this.termsOfUse && !!this.termsAccepted) || !this.termsOfUse) {
+      if (this.showInput) {
+        await this.checkPassPhrase();
+        if (this.validPassPhrase) {
+          await this.oauthConf.checkForm(this.passphrase);
+        } else {
+          this.showError = true;
+        }
+      } else {
+        await this.oauthConf.checkForm();
+      }
+    }
   }
 
   getLogo() {
