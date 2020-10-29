@@ -62,7 +62,8 @@
     "configure" : "Continuar para configurar eduroam",
     "reconfigure": "Hola, Parece que tienes eduroam configurada en tu dispositivo.\n¿Quieres volver a configurarla?",
     "network-available": "Acceso remoto disponible",
-    "configuring": "Estamos configurando su dispositivo, espera porfavor"
+    "configuring": "Estamos configurando su dispositivo, espera porfavor",
+    "institutions": "Cargando instituciones"
   },
   "defaultError": "Clave no encontrada"
 }

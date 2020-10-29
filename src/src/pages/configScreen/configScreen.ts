@@ -93,11 +93,6 @@ export class ConfigurationScreen extends BasePage{
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
 
-    this.event.subscribe('connection', async (res: any) => {
-      if (!!res.connected && !this.global.discovery) {
-        await this.chargeDiscovery()
-      }
-    });
   }
 
   /**
@@ -238,7 +233,10 @@ export class ConfigurationScreen extends BasePage{
   }
 
   async ngOnInit() {
-    this.institutions = this.global.discovery;
+    this.event.subscribe('connection',  () => {
+      this.chargeDiscovery()
+      if (!!this.global.isAndroid()) this.showToast(this.getString('text', 'institutions'));
+    });
   }
 
   async ionViewWillEnter() {
