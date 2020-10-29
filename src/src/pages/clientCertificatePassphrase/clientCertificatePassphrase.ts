@@ -90,6 +90,7 @@ export class ClientCertificatePassphrasePage extends BasePage{
   }
 
   ionViewDidEnter() {
+
     this.providerInfo = this.global.getProviderInfo();
     if (!!this.providerInfo.termsOfUse) this.createTerms();
     if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||

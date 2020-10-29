@@ -14,6 +14,7 @@ import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
 import {ConfigFilePage} from "../pages/configFile/configFile";
 import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
 import {OAuth2Client} from '@byteowls/capacitor-oauth2';
+import {ClientCertificatePassphrasePage} from "../pages/clientCertificatePassphrase/clientCertificatePassphrase";
 
 declare var Capacitor;
 const { Toast, Network, App, Device } = Plugins;
@@ -147,9 +148,9 @@ export class GeteduroamApp {
         this.profile.oauth = Number(this.global.getAuthenticationMethod().eapMethod.type) === 13;
       }
       if (!this.rootPage) {
-        this.rootPage = !!this.profile.oauth ? ConfigFilePage : ProfilePage;
+        this.rootPage = !!this.profile.oauth ? ClientCertificatePassphrasePage : ProfilePage;
       } else {
-        await this.navCtrl.push( !!this.profile.oauth ? ConfigFilePage : ProfilePage );
+        await this.navCtrl.push( !!this.profile.oauth ? ClientCertificatePassphrasePage : ProfilePage );
       }
     }
   }

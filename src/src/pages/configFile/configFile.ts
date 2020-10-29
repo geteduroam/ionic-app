@@ -57,7 +57,6 @@ export class ConfigFilePage extends BasePage{
    */
   async configure(){
     const oauthConf: OauthConfProvider = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
-    oauthConf.manageProfileValidation(true, this.global.getProviderInfo())
   }
 
   /**
