@@ -2,6 +2,9 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +24,11 @@ import android.net.wifi.WifiManager;
 //import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 
+import com.emergya.wifieapconfigurator.wifieapconfigurator.R;
+
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import android.security.KeyChain;
@@ -957,6 +964,24 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
         return longest;
+    }
+
+    @PluginMethod
+    public void sendNotification(PluginCall call) {
+        NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setDescription("This is channel 1");
+
+        NotificationManager manager = getContext().getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(channel1);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "channel1")
+                .setSmallIcon(R.drawable.ic_transparent)
+                .setContentTitle("Prueba")
+                .setContentText("Probando las notificaciones nativas")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
+        notificationManager.notify(1523, builder.build());
     }
 
 }
