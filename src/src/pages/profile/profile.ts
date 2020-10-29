@@ -142,10 +142,12 @@ export class ProfilePage extends BasePage{
    * Method to check form and navigate.
    */
   async checkForm() {
+    this.loading.createAndPresent();
     if (!!this.enableButton) {
       this.showAll = false;
       let config = this.configConnection();
       const checkRequest = await this.getEduroamServices.connectProfile(config);
+      this.loading.dismiss();
 
       if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
         await this.navigateTo();
