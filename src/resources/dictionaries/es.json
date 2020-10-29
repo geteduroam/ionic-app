@@ -56,14 +56,15 @@
     "invalid-profile": "El perfil seleccionado es erróneo",
     "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión WiFi",
     "invalid-institution": "Esta institución no está soportada",
-    "passphrase": "La contraseña del certificado es incorrecta"
+    "passphrase": "La contraseña del certificado es incorrecta",
+    "terms": "Debes aceptar los términos de uso"
   },
   "text": {
     "configured": "Wi-Fi ya está cinfugurada en tu dispositivo.",
     "configure" : "Continuar para configurar eduroam",
     "reconfigure": "Hola, Parece que tienes eduroam configurada en tu dispositivo.\n¿Quieres volver a configurarla?",
     "network-available": "Acceso remoto disponible",
-    "configuring": "Estamos configurando su dispositivo, espera porfavor"
+    "configuring": "Recibiendo la configuracion de la red, espera porfavor"
   },
   "defaultError": "Clave no encontrada"
 }
