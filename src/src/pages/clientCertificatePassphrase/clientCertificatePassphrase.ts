@@ -10,6 +10,7 @@ import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler"
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import { Plugins } from '@capacitor/core';
+import {ProvideModel} from "../../shared/models/provide-model";
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 const { Keyboard } = Plugins;
@@ -41,6 +42,8 @@ export class ClientCertificatePassphrasePage extends BasePage{
 
   logo: boolean = false;
 
+  termsAccepted: boolean = true;
+
   /**
    * DOM Sanitizer
    */
@@ -55,6 +58,19 @@ export class ClientCertificatePassphrasePage extends BasePage{
    * Variable to know if the keyboard if show or hide
    */
   focus: boolean = false;
+
+  /**
+   * Check terms of use
+   */
+  termsOfUse: boolean = false;
+  /**
+   * Check help desk
+   */
+  helpDesk: boolean = false;
+  /**
+   * Link url of terms of use
+   */
+  termsUrl: string = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, protected event: Events,
               public loading: LoadingProvider, public dictionary: DictionaryServiceProvider,
@@ -72,11 +88,14 @@ export class ClientCertificatePassphrasePage extends BasePage{
   }
 
   ionViewDidEnter() {
+    this.providerInfo = this.global.getProviderInfo();
+    if (!!this.providerInfo.termsOfUse) this.createTerms();
+    if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||
+        !!this.providerInfo.helpdesk.phone) this.helpDesk = true;
     if (typeof this.global.getAuthenticationMethod().clientSideCredential.passphrase !== 'undefined') {
         this.showInput = false;
         this.enableButton = true;
     }
-    this.providerInfo = this.global.getProviderInfo();
     if(this.providerInfo.providerLogo) {
       this.logo = true;
       this.getLogo();
@@ -89,8 +108,9 @@ export class ClientCertificatePassphrasePage extends BasePage{
   }
 
   async checkPassPhrase() {
+    const validateTerms = !!this.termsOfUse && !!this.termsAccepted ? true : !this.termsOfUse;
     const response = await WifiEapConfigurator.validatePassPhrase({ 'certificate': this.global.getAuthenticationMethod().clientSideCredential.clientCertificate, 'passPhrase': this.passphrase});
-    if (!response.success) {
+    if (!response.success || !validateTerms) {
       this.validPassPhrase = false;
       this.enableButton = false;
     } else {
@@ -111,6 +131,20 @@ export class ClientCertificatePassphrasePage extends BasePage{
     const data = `data:${mimeType};${encoding},${imageData}`;
 
     this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
+  }
+
+  protected createTerms() {
+    // Activate checkbox on view
+    this.termsOfUse = true;
+    const terms = this.providerInfo.termsOfUse.toString();
+    try {
+      // Get the web address within the terms of use
+      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
+          !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
+    } catch (e) {
+      this.termsOfUse = false;
+    }
+
   }
 
 }
