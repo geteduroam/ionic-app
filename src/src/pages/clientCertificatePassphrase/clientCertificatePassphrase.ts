@@ -107,8 +107,9 @@ export class ClientCertificatePassphrasePage extends BasePage{
   }
 
   async checkPassPhrase() {
+    const validateTerms = !!this.termsOfUse && !!this.termsAccepted ? true : !this.termsOfUse;
     const response = await WifiEapConfigurator.validatePassPhrase({ 'certificate': this.global.getAuthenticationMethod().clientSideCredential.clientCertificate, 'passPhrase': this.passphrase});
-    if (!response.success) {
+    if (!response.success || !validateTerms) {
       this.validPassPhrase = false;
       this.enableButton = false;
     } else {

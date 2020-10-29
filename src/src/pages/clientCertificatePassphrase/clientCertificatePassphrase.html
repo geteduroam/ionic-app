@@ -5,7 +5,7 @@
         <h1>{{providerInfo.displayName}}</h1>
     </div>
 
-    <div *ngIf="showInput" class="content-form" margin-bottom margin-top text-center>
+    <div class="content-form" margin-bottom margin-top text-center>
 
         <form (ngSubmit)="sendPassphrase()">
 
@@ -37,7 +37,7 @@
     <div id="footer">
         <form (ngSubmit)="sendPassphrase()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button class="button-control" ion-button col-11 type="submit">{{getString('button', 'connect')}}</button>
+                <button [disabled]="!enableButton || !!termsOfUse && !termsAccepted" class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
     </div>
