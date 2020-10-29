@@ -1,11 +1,11 @@
 <ion-header transparent>
     <ion-toolbar>
-        <ion-searchbar #instituteSearchBar (ionCancel)="clearInstance()" (ionInput)="getItems($event)" debounce="500"
-                       [(ngModel)]="instanceName" placeholder="{{getString('placeholder', 'institution')}}"></ion-searchbar>
+        <ion-searchbar #instituteSearchBar (ionCancel)="selectInstitution(null)" cancelButtonText="{{getString('button', 'close')}}" [showCancelButton]="true" (ionInput)="filterInstitutions()" debounce="500"
+                       [(ngModel)]="institutionName" placeholder="{{getString('placeholder', 'institution')}}"></ion-searchbar>
     </ion-toolbar>
 </ion-header>
 <ion-content fullscreen>
     <ion-list no-margin>
-        <ion-item *ngFor="let institution of filteredInstances" (click)="selectInstitution(institution)">{{institution.name}}</ion-item>
+        <ion-item *ngFor="let institution of filteredInstitutions" (click)="selectInstitution(institution)">{{institution.name}}</ion-item>
     </ion-list>
 </ion-content>
