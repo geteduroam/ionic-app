@@ -11,8 +11,9 @@ import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
 import { Plugins } from '@capacitor/core';
+import {ClientCertificatePassphrasePage} from "../clientCertificatePassphrase/clientCertificatePassphrase";
+import {ProfilePage} from "../profile/profile";
 const { OAuth2Client } = Plugins;
-declare var window: any;
 
 @Component({
   selector: 'page-oauthFlow',
@@ -72,6 +73,7 @@ export class OauthFlow extends BasePage{
 
   closeEventBrowser(error?: boolean) {
     this.loading.create();
+    this.navCtrl.pop();
     if (!!error) {
       this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
       this.navCtrl.pop();
@@ -90,9 +92,18 @@ export class OauthFlow extends BasePage{
     this.profile.token = res['access_token'];
 
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
-    const oauthConf: OauthConfProvider = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
-    this.providerInfo = this.global.getProviderInfo();
-    await oauthConf.manageProfileValidation(validProfile, this.providerInfo);
+    if (validProfile) {
+      this.showAll = false;
+      const validMethod = this.global.getAuthenticationMethod();
+      if (validMethod.eapMethod.type.toString() === '13') {
+        await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
+      } else {
+        await this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
+      }
+    } else {
+      this.providerInfo = this.global.getProviderInfo();
+      await this.notValidProfile();
+    }
   }
 
   /**
@@ -111,5 +122,31 @@ export class OauthFlow extends BasePage{
    */
   showSpinner() {
     this.loading.createAndPresent();
+  }
+
+  /**
+   * Method to check message when profile is not valid
+   */
+  async notValidProfile() {
+    if(!!this.providerInfo) {
+
+      let url = this.checkUrlInfoProvide();
+
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+
+    } else {
+
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
+    }
+    await this.navCtrl.pop();
+  }
+
+  /**
+   * Method to check if provider info contains links
+   * and show it on error page
+   */
+  checkUrlInfoProvide() {
+    return !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
+        !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
   }
 }

@@ -31,31 +31,13 @@ export class OauthConfProvider {
   }
 
   /**
-   * Method to manage validation profile
-   * @param validProfile check if profile is valid
-   */
-  async manageProfileValidation(validProfile: boolean, provInfo: ProviderInfo) {
-    this.providerInfo = provInfo;
-    if (validProfile) {
-      this.validMethod = this.global.getAuthenticationMethod();
-      if (typeof this.validMethod.clientSideCredential.passphrase === 'undefined') {
-        await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
-        return;
-      }
-      await this.checkForm();
-
-    } else {
-      await this.notValidProfile();
-    }
-  }
-
-  /**
    * Method to check form, create connection with plugin WifiEapConfigurator and navigate.
    */
   async checkForm(passphrase? : string) {
+    this.loading.createAndPresent();
+    this.validMethod = this.global.getAuthenticationMethod();
+    this.providerInfo = this.global.getProviderInfo();
     if (typeof passphrase !== 'undefined') {
-      this.validMethod = this.global.getAuthenticationMethod();
-      this.providerInfo = this.global.getProviderInfo();
       this.validMethod.clientSideCredential.passphrase = passphrase;
     }
     let config = this.configConnection();
@@ -95,32 +77,6 @@ export class OauthConfProvider {
       clientCertificate: this.validMethod.clientSideCredential.clientCertificate,
       passPhrase: this.validMethod.clientSideCredential.passphrase
     };
-  }
-
-  /**
-   * Method to check message when profile is not valid
-   */
-  async notValidProfile() {
-    if(!!this.providerInfo) {
-
-      let url = this.checkUrlInfoProvide();
-
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
-
-    } else {
-
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
-    }
-    await this.navCtrl.pop();
-  }
-
-  /**
-   * Method to check if provider info contains links
-   * and show it on error page
-   */
-  checkUrlInfoProvide() {
-    return !!this.providerInfo.helpdesk.webAddress ? this.providerInfo.helpdesk.webAddress :
-        !!this.providerInfo.helpdesk.emailAddress ? this.providerInfo.helpdesk.emailAddress : '';
   }
 
   /**

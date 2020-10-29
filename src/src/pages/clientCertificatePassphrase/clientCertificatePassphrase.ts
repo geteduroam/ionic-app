@@ -35,6 +35,8 @@ export class ClientCertificatePassphrasePage extends BasePage{
 
   showAll: boolean = false;
 
+  showInput: boolean = true;
+
   oauthConf: OauthConfProvider;
 
   logo: boolean = false;
@@ -70,7 +72,10 @@ export class ClientCertificatePassphrasePage extends BasePage{
   }
 
   ionViewDidEnter() {
-
+    if (typeof this.global.getAuthenticationMethod().clientSideCredential.passphrase !== 'undefined') {
+        this.showInput = false;
+        this.enableButton = true;
+    }
     this.providerInfo = this.global.getProviderInfo();
     if(this.providerInfo.providerLogo) {
       this.logo = true;

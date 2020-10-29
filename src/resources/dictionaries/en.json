@@ -12,12 +12,25 @@
     "terms": "terms of use",
     "profile": "Profile",
     "password": "Password",
-    "passphrase": "Passphrase"
+    "passphrase": "Passphrase",
+    "note": "*Note: if the connection fails, please check your password",
+    "help": "Need help ?",
+    "support": "Click here for support"
   },
   "placeholder": {
     "institution": "Select an institution...",
     "profile": "Select a profile...",
     "example": "username"
+  },
+  "modalSupport": {
+    "title": "Support Options",
+    "message": "Select an option",
+    "web": "Web: ",
+    "email": "Email: ",
+    "phone": "Phone: ",
+    "help": "Support help",
+    "cancel": "Cancel",
+    "terms": "Terms of use"
   },
   "button": {
     "next": "Next",

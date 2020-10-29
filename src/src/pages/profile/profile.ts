@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import {Events, NavController, NavParams, ViewController} from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
@@ -13,6 +13,9 @@ import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {ConfigurationScreen} from "../configScreen/configScreen";
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
+import { Plugins } from '@capacitor/core';
+const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-profile',
@@ -22,6 +25,8 @@ import {ConfigurationScreen} from "../configScreen/configScreen";
 export class ProfilePage extends BasePage{
 
   showAll: boolean = false;
+
+  showForm: boolean = false;
 
   /**
    * The profile which is received as a navigation parameter
@@ -52,7 +57,10 @@ export class ProfilePage extends BasePage{
    * Check terms of use
    */
   termsOfUse: boolean = false;
-
+  /**
+   * Check help desk
+   */
+  helpDesk: boolean = false;
   /**
    * Link url of terms of use
    */
@@ -88,10 +96,22 @@ export class ProfilePage extends BasePage{
    */
   enableButton: boolean = false;
 
+  /**
+   * DOM Sanitizer
+   */
+  converted_image: SafeResourceUrl;
+
+  /**
+   * It checks if provider has a logo
+   */
+  logo: boolean = false;
+
+  @ViewChild('imgLogo') imgLogo: ElementRef;
+
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, private viewCtrl: ViewController) {
+              protected event: Events, private sanitizer: DomSanitizer, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
 
   }
@@ -122,10 +142,12 @@ export class ProfilePage extends BasePage{
    * Method to check form and navigate.
    */
   async checkForm() {
+    this.loading.createAndPresent();
     if (!!this.enableButton) {
       this.showAll = false;
       let config = this.configConnection();
       const checkRequest = await this.getEduroamServices.connectProfile(config);
+      this.loading.dismiss();
 
       if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
         await this.navigateTo();
@@ -263,31 +285,40 @@ export class ProfilePage extends BasePage{
    *  Lifecycle method executed when the class did enter
    */
   async ionViewDidEnter() {
+    this.providerInfo = this.global.getProviderInfo();
+    if(this.providerInfo.providerLogo) {
+      this.logo = true;
+      this.getLogo();
+    }
+    if (!!this.providerInfo.termsOfUse) this.createTerms();
+    if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||
+        !!this.providerInfo.helpdesk.phone) this.helpDesk = true;
     if (this.validMethod.clientSideCredential.username && this.validMethod.clientSideCredential.password) {
       this.provide.email = this.validMethod.clientSideCredential.username;
       this.provide.pass = this.validMethod.clientSideCredential.password;
       this.enableButton = true;
-      await this.checkForm();
     } else {
       this.removeSpinner();
-      this.showAll = true;
+      this.showForm = true;
     }
+    this.showAll = true;
   }
 
   /**
    * Method to activate terms of use on view.
    */
   protected createTerms() {
-    if (this.providerInfo.termsOfUse !== '') {
-
       // Activate checkbox on view
       this.termsOfUse = true;
       const terms = this.providerInfo.termsOfUse.toString();
+      try {
+        // Get the web address within the terms of use
+        this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
+          !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
+      } catch (e) {
+        this.termsOfUse = false;
+      }
 
-      // Get the web address within the terms of use
-      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
-        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
-    }
   }
 
   /**
@@ -306,7 +337,7 @@ export class ProfilePage extends BasePage{
       password: this.provide.pass,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
       servername: this.validMethod.serverSideCredential.serverID,
-      auth,
+      auth: parseInt(auth.toString()),
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
     };
@@ -318,4 +349,13 @@ export class ProfilePage extends BasePage{
     this.viewCtrl.dismiss();
   }
 
+  getLogo() {
+    let imageData = this.providerInfo.providerLogo._;
+    let mimeType = this.providerInfo.providerLogo.$.mime;
+    let encoding = this.providerInfo.providerLogo.$.encoding;
+
+    const data = `data:${mimeType};${encoding},${imageData}`;
+
+    this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
+  }
 }

@@ -14,9 +14,9 @@
     <div class="content-form" margin-top padding-top text-center>
         <ion-label class="label-conf" no-margin padding-top text-left>{{getString('label', 'institution')}}</ion-label>
 
-        <div *ngIf="this.instances" class="row" padding-top>
+        <div *ngIf="this.institutions" class="row" padding-top>
 
-            <ion-searchbar #instituteSearchBar (click)="searchBarClicked($event)" [(ngModel)]="instanceName" cancelButtonText debounce="500"
+            <ion-searchbar #instituteSearchBar (click)="searchBarClicked($event)" [(ngModel)]="institutionName" cancelButtonText debounce="500"
                            class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">
 
             </ion-searchbar>
@@ -40,7 +40,7 @@
     <div class="footer-form">
 
         <div class="content-button" margin *ngIf="showButton">
-            <button (click)="global.isAndroid ? navigateAndroid($event) : navigateTo(profile, $event)" [disabled]="!profile" class="button-control" ion-button text-capitalize>{{getString('button', 'next')}}</button>
+            <button (click)="global.isAndroid ? navigateAndroid($event) : navigateTo(profile, $event)" [disabled]="!profile" class="button-control" ion-button text-capitalize col-11>{{getString('button', 'next')}}</button>
         </div>
     </div>
 </div>

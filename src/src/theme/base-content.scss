@@ -40,6 +40,7 @@ ion-content {
     }
 
     .arrow-back {
+      height: 0;
       display: block;
       text-align: left;
       background-color: transparent !important;
@@ -49,7 +50,7 @@ ion-content {
         padding: 5px;
         height: 100%;
         box-shadow: none;
-        margin: 10px 0 0 0;
+        margin: 25px 0 0 0;
 
         span {
           padding: 5px 0 0 15px;
@@ -131,7 +132,6 @@ ion-content {
         height: 30%;
 
         button {
-          width: 147px;
           height: 45px;
           font-family: Helvetica, sans-serif;
           font-size: 16px;
@@ -167,7 +167,6 @@ ion-content {
         height: 30%;
 
         button {
-          width: 147px;
           height: 45px;
           font-family: Helvetica, sans-serif;
           font-size: 16px;
@@ -179,6 +178,18 @@ ion-content {
         .disabled-button {
           opacity: .4;
           pointer-events: none;
+        }
+      }
+    }
+    .help-desk {
+      position: relative;
+      display: inline-block;
+
+      ion-label {
+        text-align: center;
+
+        a {
+          text-decoration: underline;
         }
       }
     }
@@ -213,20 +224,14 @@ ion-content {
 //// Change background to black on dark mode
 ////---------------------------------
 @media (prefers-color-scheme: dark) {
-  ion-content {
+  ion-content, ion-content .content-ios {
     background: black !important;
     .logo {
       background-image: url('../assets/imgs/eduroam-dark.svg');
     }
   }
-  /*
-   * The discovery uses the background color as separation lines,
-   * so we revert this back to the light theme, since we don't have a dark theme for this
-   */
-  page-institution-search {
-    ion-content {
-      background: #f6f4f3 !important;
-    }
+  page-institution-search > ion-content {
+    background: black !important;
   }
 }
 
@@ -253,4 +258,34 @@ ion-app, ion-alert div:last-child {
 ////-------------------------------------
 .nav-decor {
   display: none !important;
+}
+
+// Remove some elements on very small screens
+@media (max-height: 536px) {
+  .app-root > ion-content {
+    background: white !important;
+
+    .logo {
+      margin: 4px auto !important;
+      height: 46px;
+      width: 105px;
+    }
+    .bar-upped {
+      display: none;
+    }
+    .base-content {
+      margin: 0 !important;
+      box-shadow: none;
+
+      .header-content {
+        img {
+          width: 42px;
+          height: 50px;
+        }
+        h1 {
+          margin: 0;
+        }
+      }
+    }
+  }
 }

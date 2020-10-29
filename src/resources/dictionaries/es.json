@@ -12,12 +12,25 @@
     "terms": "términos de uso",
     "profile": "Perfil",
     "password": "Contraseña",
+    "note": "*Nota: si la conexión falló, verifique su contraseña",
+    "help": "¿ Necesitas ayuda ?",
+    "support": "Haga click aquí para obtener ayuda",
     "passphrase": "Contraseña del certificado"
   },
   "placeholder": {
     "institution": "Selecciona una institución...",
     "profile": "Selecciona un perfil...",
     "example": "usuario"
+  },
+  "modalSupport": {
+    "title": "Opciones de soporte",
+    "message": "Selecciona una opción",
+    "web": "Página Web: ",
+    "email": "Correo electrónico: ",
+    "phone": "Teléfono: ",
+    "help": "Ayuda de Soporte",
+    "cancel": "Cancelar",
+    "terms": "Términos de uso"
   },
   "button": {
     "next": "Siguiente",
