@@ -224,11 +224,14 @@ ion-content {
 //// Change background to black on dark mode
 ////---------------------------------
 @media (prefers-color-scheme: dark) {
-  ion-content {
+  ion-content, ion-content .content-ios {
     background: black !important;
     .logo {
       background-image: url('../assets/imgs/eduroam-dark.svg');
     }
+  }
+  page-institution-search > ion-content {
+    background: black !important;
   }
 }
 
@@ -259,7 +262,7 @@ ion-app, ion-alert div:last-child {
 
 // Remove some elements on very small screens
 @media (max-height: 536px) {
-  ion-content {
+  .app-root > ion-content {
     background: white !important;
 
     .logo {
