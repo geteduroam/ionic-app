@@ -11,7 +11,6 @@ import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
-import {ConfigFilePage} from "../pages/configFile/configFile";
 import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
 import {OAuth2Client} from '@byteowls/capacitor-oauth2';
 import {ClientCertificatePassphrasePage} from "../pages/clientCertificatePassphrase/clientCertificatePassphrase";

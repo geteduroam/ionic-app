@@ -11,7 +11,7 @@ import {DictionaryServiceProvider} from "../../providers/dictionary-service/dict
 import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
-import {ConfigFilePage} from "../configFile/configFile";
+import {ClientCertificatePassphrasePage} from "../clientCertificatePassphrase/clientCertificatePassphrase";
 
 const { Keyboard, App } = Plugins;
 declare var window;
@@ -213,7 +213,6 @@ export class ConfigurationScreen extends BasePage{
   async navigateTo(profile:ProfileModel, e: Event) {
     e.preventDefault();
     if (!!this.activeNavigation) {
-      this.showAll = false;
       if (!this.profile.redirect && !!profile.oauth) {
         await this.navCtrl.push(OauthFlow, {profile}, {animation: 'transition'});
       } else if (!this.profile.redirect && !profile.oauth) {
@@ -300,9 +299,9 @@ export class ConfigurationScreen extends BasePage{
   async notValidProfile(providerInfo) {
     if(!!providerInfo){
       let url = this.checkUrlInfoProvide(providerInfo);
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), true, url);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-method'), false, url);
     } else {
-      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), true, '');
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-profile'), false, '');
     }
   }
 
@@ -320,7 +319,7 @@ export class ConfigurationScreen extends BasePage{
     if (eap === 21 || eap === 25) {
       this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
     } else {
-      this.navCtrl.push(ConfigFilePage, '', {animation: 'transition'});
+      this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
     }
   }
 
