@@ -3,6 +3,7 @@ package com.emergya.wifieapconfigurator;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.byteowls.capacitor.oauth2.OAuth2ClientPlugin;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 
@@ -21,8 +22,7 @@ public class NotificationActivity extends BridgeActivity {
             // Additional plugins you've installed go here
             // Ex: add(TotallyAwesomePlugin.class);
             add(WifiEapConfigurator.class);
+            add(OAuth2ClientPlugin.class);
         }});
-        WifiEapConfigurator wifiEap = new WifiEapConfigurator();
-        wifiEap.setOpenFromNotification();
     }
 }

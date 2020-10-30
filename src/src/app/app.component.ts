@@ -70,7 +70,7 @@ export class GeteduroamApp {
       // Add listeners to app
       await this.addListeners();
 
-      WifiEapConfigurator.sendNotification();
+      this.getEduroamServices.setTimeToExpire(10000);
     });
   }
 

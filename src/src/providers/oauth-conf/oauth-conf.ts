@@ -63,6 +63,8 @@ export class OauthConfProvider {
     this.loading.dismiss();
 
     if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
+      this.getEduroamServices.saveInstitutionId();
+      this.getEduroamServices.setTimeToExpire(31556952000);
       await this.navigateTo();
     }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
       await this.errorHandler.handleError(

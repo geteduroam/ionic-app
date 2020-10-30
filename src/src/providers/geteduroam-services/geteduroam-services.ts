@@ -364,4 +364,14 @@ export class GeteduroamServices {
 
     return true;
   }
+
+  saveInstitutionId() {
+    const config = { id: this.global.getIdInstitution()};
+    WifiEapConfigurator.writeToFile(config);
+  }
+
+  setTimeToExpire(ms: number) {
+    const config = { delay: ms};
+    WifiEapConfigurator.writeToFile(config);
+  }
 }

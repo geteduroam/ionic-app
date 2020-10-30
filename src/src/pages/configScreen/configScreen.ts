@@ -13,7 +13,8 @@ import {ProfileModel} from "../../shared/models/profile-model";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {ConfigFilePage} from "../configFile/configFile";
 
-const { Keyboard, App } = Plugins;
+declare var Capacitor;
+const { Keyboard, App, WifiEapConfigurator } = Plugins;
 declare var window;
 
 @Component({
@@ -200,24 +201,33 @@ export class ConfigurationScreen extends BasePage{
         return;
     }
   }
-  navigateAndroid(e: Event) {
-    setTimeout(async () => {
-      await this.navigateTo(this.profile, e);
-    }, 1200);
+  navigateAndroid(e?: Event) {
+    if (e) {
+      setTimeout(async () => {
+        await this.navigateTo(this.profile, e);
+      }, 1200);
+    } else {
+      setTimeout(async () => {
+        await this.navigateTo(this.profile);
+      }, 1200);
+    }
   }
   /**
    * Method which navigates to the following view.
    * If the selected profile is oauth, navigates to [OauthFlow]{OauthFlow}.
    * In other case, navigates to [ProfilePage]{ProfilePage} sending the selected [profile]{#profile}.
    */
-  async navigateTo(profile:ProfileModel, e: Event) {
-    e.preventDefault();
+  async navigateTo(profile:ProfileModel, e?: Event) {
+    if (e) {
+      e.preventDefault();
+    }
     if (!!this.activeNavigation) {
       this.showAll = false;
       if (!this.profile.redirect && !!profile.oauth) {
         await this.navCtrl.push(OauthFlow, {profile}, {animation: 'transition'});
       } else if (!this.profile.redirect && !profile.oauth) {
         if (await this.checkEap(profile)) {
+          this.global.setIdInstitution(this.selectedProfileId);
           this.redirectToFlow();
         } else {
           const providerInfo = this.global.getProviderInfo();
@@ -248,22 +258,29 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewDidEnter() {
+    // Check if the application is opened through a notification
+    await this.isReconfigured();
+    if (!!this.global.getIsReconfigure()) {
+      this.selectedProfileId = this.global.getIdInstitution();
+      this.selectProfileFromExternal();
+      this.global.isAndroid ? this.navigateAndroid() : await this.navigateTo(this.profile);
+    } else {
+      this.showAll = true;
+      // The instituteSearchBar is not loaded in this context, but when we set a timeout it will be when it fires.
+      // Taken from https://angular.io/api/core/ViewChild
+      setTimeout(() => {
+        // According to the documentation, there should be a getInputElement() function,
+        // but it doesn't exist. Maybe a newer version? Anyway, we need to set the readonly property on it,
+        // and I found a handle that I can use, so I'll use that instead.
+        // Documentation here: https://ionicframework.com/docs/api/searchbar
+        const elem = this.instituteSearchBar?._searchbarInput?.nativeElement ?? {};
+
+        // readOnly prevents the keyboard from showing up when the institute field is pressed,
+        // which means we don't have to hide it, which speeds up loading of the discovery significantly.
+        elem.readOnly = true;
+      }, 0);
+    }
     this.removeSpinner();
-    this.showAll = true;
-
-    // The instituteSearchBar is not loaded in this context, but when we set a timeout it will be when it fires.
-    // Taken from https://angular.io/api/core/ViewChild
-    setTimeout(() => {
-      // According to the documentation, there should be a getInputElement() function,
-      // but it doesn't exist. Maybe a newer version? Anyway, we need to set the readonly property on it,
-      // and I found a handle that I can use, so I'll use that instead.
-      // Documentation here: https://ionicframework.com/docs/api/searchbar
-      const elem = this.instituteSearchBar?._searchbarInput?.nativeElement ?? {};
-
-      // readOnly prevents the keyboard from showing up when the institute field is pressed,
-      // which means we don't have to hide it, which speeds up loading of the discovery significantly.
-      elem.readOnly = true;
-    }, 0);
   }
 
   async getDiscovery() {
@@ -323,4 +340,31 @@ export class ConfigurationScreen extends BasePage{
     }
   }
 
+  /**
+   * Select profile when we have its id
+   */
+  selectProfileFromExternal() {
+    this.institutions.forEach( (inst) => {
+      inst['profiles'].forEach( (prof) => {
+        if (prof.id === this.selectedProfileId) {
+          this.profile = prof;
+          return;
+        }
+      })
+    })
+  }
+
+  private async isReconfigured() {
+    const checkRequest = await WifiEapConfigurator.checkIfOpenThroughNotifications();
+    console.log(checkRequest.fromNotification);
+    if (checkRequest.fromNotification === true) {
+      this.global.setIsReconfigure(true);
+      const read = await WifiEapConfigurator.readFromFile();
+      if (read.success === true) {
+        this.global.setIdInstitution(read.id.replace(/[\n\r]+/g, ''));
+      }
+    } else {
+      this.global.setIsReconfigure(false);
+    }
+  }
 }

@@ -10,9 +10,6 @@ public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Log.e("Exception", "Estoy en notificationReceiver");
-        //Intent i = new Intent(context, ScheduledService.class);
-        //context.startService(i);
         ScheduledService.enqueueWork(context, new Intent());
     }
 }

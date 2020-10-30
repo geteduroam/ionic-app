@@ -49,7 +49,11 @@ export class GlobalProvider {
 
   private externalOpen: boolean = false;
 
+  private idInstitution: string;
+
   discovery: any[];
+
+  reconfigure: boolean;
 
   constructor(public platform: Platform) {}
 
@@ -125,5 +129,21 @@ export class GlobalProvider {
 
   getDiscovery() {
     return this.discovery;
+  }
+
+  setIdInstitution(idInstitution: string) {
+    this.idInstitution = idInstitution;
+  }
+
+  getIdInstitution() {
+    return this.idInstitution;
+  }
+
+  setIsReconfigure(reconfigure: boolean) {
+    this.reconfigure = reconfigure;
+  }
+
+  getIsReconfigure() {
+    return this.reconfigure;
   }
 }

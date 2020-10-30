@@ -26,7 +26,6 @@ public class ScheduledService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.e("Exception", "Estoy en schedulerService");
         // First we create the channel of the notifications
         NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
         channel1.setDescription("This is channel 1");

@@ -56,6 +56,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
@@ -95,7 +97,6 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 public class WifiEapConfigurator extends Plugin {
 
     List<ScanResult> results = null;
-    Boolean openFromNot = false;
 
     private WifiManager wifiManager;
 
@@ -975,83 +976,86 @@ public class WifiEapConfigurator extends Plugin {
 
     @PluginMethod
     public void sendNotification(PluginCall call) {
-
-        /*NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
-        channel1.setDescription("This is channel 1");
-
-        NotificationManager manager = getContext().getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(channel1);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "channel1")
-                .setSmallIcon(R.drawable.ic_transparent)
-                .setContentTitle("Test")
-                .setContentText("Testing the native notifications")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-        Notification not = builder.build();
-        not.flags |= Notification.FLAG_AUTO_CANCEL | Notification.FLAG_SHOW_LIGHTS;
-
-        Intent notificationIntent = new Intent(getContext(), NotificationActivity.class);
-        notificationIntent.putExtra(NotificationActivity.NOTIFICATION_ID, 1);
-        notificationIntent.putExtra(NotificationActivity.NOTIFICATION, builder.build());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Calendar cal = Calendar.getInstance();
-        // cal.set(2020, 10, 30, 10, 30);
-
-        long futureInMillis = SystemClock.elapsedRealtime() + 10000;
-        AlarmManager alarmManager = (AlarmManager)getContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);*/
-
-        /////////////// SECOND FLOW ///////////////
-        // First we create the channel of the notifications
-        /*NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
-        channel1.setDescription("This is channel 1");
-
-        NotificationManager manager = getContext().getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(channel1);
-
-        // Create the intent that it will be throw when tap on the notification
-        Intent notificationIntent = new Intent(getContext(), NotificationActivity.class);
-        notificationIntent.putExtra(NotificationActivity.NOTIFICATION_ID, 1);
-        notificationIntent.putExtra(NotificationActivity.NOTIFICATION, "notification");
-
-        SecureRandom random = new SecureRandom();
-        int requestCode = random.nextInt();
-
-        PendingIntent contentIntent = PendingIntent.getActivity(getContext(), requestCode, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Create the notification
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getContext(), "channel1");
-
-        Calendar cal = Calendar.getInstance();
-        cal.set(2020, 10, 30, 11, 47);
-        mBuilder.setWhen(cal.getTimeInMillis())
-                .setSmallIcon(R.drawable.ic_transparent)
-                .setContentTitle("Test")
-                .setContentText("Testing second flow")
-                .setContentIntent(contentIntent)
-                .setAutoCancel(true);
-
-        manager.notify(123, mBuilder.build());*/
-
-        ////////////// THIRD FLOW ////////////////
         AlarmManager mgr = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(getContext(), NotificationReceiver.class);
         PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, 0);
-        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 10000, pi);
+        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + call.getInt("delay"), pi);
 
     }
 
-    @PluginMethod
+    @PluginMethod()
+    public void writeToFile(PluginCall call) {
+        String data = call.getString("id");
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(getContext().openFileOutput("config.txt", Context.MODE_PRIVATE));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.writing");
+            call.success(object);
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.writing");
+            call.success(object);
+        }
+    }
+
+    @PluginMethod()
+    public void readFromFile(PluginCall call) {
+
+        String ret = "";
+
+        try {
+            InputStream inputStream = getContext().openFileInput("config.txt");
+
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.reading");
+                object.put("id", ret);
+                call.success(object);
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.reading");
+            call.success(object);
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.reading");
+            call.success(object);
+        }
+    }
+
+    @PluginMethod()
     public void checkIfOpenThroughNotifications(PluginCall call) {
+        Boolean openFromNot;
+        if (getActivity().getComponentName().getClassName().contains("MainActivity")) {
+            openFromNot = false;
+        } else {
+            openFromNot = true;
+        }
         JSObject object = new JSObject();
-        object.put("fromNotification", this.openFromNot);
+        object.put("fromNotification", openFromNot);
         call.success(object);
-    }
-
-    public void setOpenFromNotification(){
-        this.openFromNot = true;
     }
 }
