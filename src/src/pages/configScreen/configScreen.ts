@@ -149,9 +149,7 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
-    if (institution === null) {
-      this.resetValues();
-    } else {
+    if (institution !== null) {
       this.institutionName = institution.name;
       if (institution.profiles.length > 1 ) {
         // Check default profile and sort array for highlighting default profile
@@ -230,11 +228,9 @@ export class ConfigurationScreen extends BasePage{
         !!this.global.isAndroid() ? App.exitApp() : this.showAll = true
 
       }
-
     } else{
      await this.alertConnectionDisabled();
     }
-    this.resetValues();
   }
 
   async ngOnInit() {
