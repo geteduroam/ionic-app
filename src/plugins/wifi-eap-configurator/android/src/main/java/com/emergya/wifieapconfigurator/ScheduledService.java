@@ -4,23 +4,29 @@ import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import com.emergya.wifieapconfigurator.wifieapconfigurator.R;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
 import java.security.SecureRandom;
 
-public class ScheduledService extends IntentService {
+public class ScheduledService extends JobIntentService {
 
-    public ScheduledService() {
-        super("My service");
+    public static final int JOB_ID = 1;
+
+    public static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, ScheduledService.class, JOB_ID, work);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleWork(@NonNull Intent intent) {
+        Log.e("Exception", "Estoy en schedulerService");
         // First we create the channel of the notifications
         NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
         channel1.setDescription("This is channel 1");
@@ -47,4 +53,5 @@ public class ScheduledService extends IntentService {
 
         manager.notify(123, mBuilder.build());
     }
+
 }
