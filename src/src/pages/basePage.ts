@@ -124,8 +124,6 @@ export abstract class BasePage {
 
   shortenAddress(address?: string) {
     if (address) {
-      console.log("REPLACING");
-      console.log(address);
       return address.replace(/^https:\/\/([^/]+)\/.*?\/.*?([^/]+\/?)$/, '$1/…/$2');
     }
   }
