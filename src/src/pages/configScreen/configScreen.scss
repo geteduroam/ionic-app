@@ -3,6 +3,11 @@ page-config-screen {
   .content-button {
     padding-top: 30px;
   }
+  @media (min-height: 536px) {
+    .content-button {
+      padding-top: 0;
+    }
+  }
 
   //---------------------------
   // Searchbar custom style
@@ -75,18 +80,6 @@ ion-item.item-profile {
   div.item-inner {
     padding: 0 !important;
     border-bottom: 0 !important;
-  }
-}
-
-//---------------------------------
-// ion-list custom style
-//---------------------------------
-ion-list {
-  width: 100%;
-  margin-top: 1px !important;
-
-  ion-item {
-    background-color: unset;
   }
 }
 

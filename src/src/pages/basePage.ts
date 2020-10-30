@@ -151,7 +151,7 @@ export abstract class BasePage {
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
       <style type="text/css">
         @media (prefers-color-scheme: dark) { html { background: black; color: rgba(255,255,255,.75); } }
-        html { font-family: sans-serif; margin-top: 1.4em; }
+        html { font-family: sans-serif; margin-top: 2.4em; }
         a { color: #276fbf; }
       </style>
       ${terms}`;
@@ -159,7 +159,7 @@ export abstract class BasePage {
     const browser = window.cordova.InAppBrowser.open(
       pageContentUrl,
       '_blank',
-      'location=no,hidenavigationbuttons=yes,hidespinner=yes,toolbarposition=top,beforeload=yes'
+      'location=no,hidenavigationbuttons=yes,hidespinner=yes,toolbarposition=top,beforeload=yes,footer=yes,closebuttoncaption=Done'
     );
 
     browser.addEventListener('beforeload', (params, callback) => {

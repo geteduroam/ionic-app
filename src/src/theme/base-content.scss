@@ -31,7 +31,7 @@ ion-content {
     box-shadow: 0 0 4px 4px rgba(20, 20, 20, 0.04);
     border-radius: 0 0 4px 4px;
     position: relative;
-    height: calc(90% - 65px);
+    min-height: calc(90% - 65px);
     margin-top: 0;
     border-top: none;
 
@@ -63,11 +63,11 @@ ion-content {
     }
 
     .container-content {
-      background: #FFFFFF;
-      height: calc(100% - 26%);
+      background: white;
     }
 
     .header-content {
+      min-height: 15vh;
 
       img {
         width: 57px;
@@ -84,7 +84,7 @@ ion-content {
     }
 
     .content-info {
-      height: calc(50% - 20px);
+      min-height: calc(50% - 20px);
 
       .info-text {
         height: 100%;
@@ -100,17 +100,13 @@ ion-content {
 
         .message {
           overflow: hidden;
-          height: calc(80% - 30px);
+          min-height: calc(80% - 30px);
         }
       }
     }
 
     .content-form {
-      height: calc(60% - 30px);
-
-      .row {
-        height: calc(35% - 10px)
-      }
+      min-height: 35vh;
 
       //---------------------------
       // ion-label custom style
@@ -124,9 +120,10 @@ ion-content {
       }
     }
 
-    .footer-info {
-      height: calc(30% - 10px);
-
+    .content-button {
+      min-height: 9vh;
+    }
+    .footer-info, .footer-form {
       .content-button {
         position: relative;
         height: 30%;
@@ -139,7 +136,14 @@ ion-content {
           letter-spacing: 0;
           text-align: center;
         }
+        .disabled-button {
+          opacity: .4;
+          pointer-events: none;
+        }
       }
+    }
+    .footer-info {
+      min-height: calc(30% - 10px);
 
       .text-bottom {
 
@@ -158,29 +162,10 @@ ion-content {
         }
       }
     }
-
     .footer-form {
-      height: calc(20% - 10px);
-
-      .content-button {
-        position: relative;
-        height: 30%;
-
-        button {
-          height: 45px;
-          font-family: Helvetica, sans-serif;
-          font-size: 16px;
-          color: #FFFFFF;
-          letter-spacing: 0;
-          text-align: center;
-
-        }
-        .disabled-button {
-          opacity: .4;
-          pointer-events: none;
-        }
-      }
+      min-height: calc(20% - 10px);
     }
+
     .help-desk {
       position: relative;
       display: inline-block;
