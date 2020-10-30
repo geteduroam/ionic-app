@@ -37,6 +37,16 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.emergya.wifieapconfigurator.NotificationActivity"
+            android:parentActivityName=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode">
+        </activity>
+        <service android:name="com.emergya.wifieapconfigurator.ScheduledService" ></service>
+        <receiver android:name="com.emergya.wifieapconfigurator.NotificationReceiver" />
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"

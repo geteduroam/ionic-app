@@ -2,15 +2,18 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.hotspot2.ConfigParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -31,6 +34,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import android.os.SystemClock;
 import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
@@ -61,6 +65,7 @@ import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
@@ -73,6 +78,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +95,7 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 public class WifiEapConfigurator extends Plugin {
 
     List<ScanResult> results = null;
+    Boolean openFromNot = false;
 
     private WifiManager wifiManager;
 
@@ -968,7 +975,8 @@ public class WifiEapConfigurator extends Plugin {
 
     @PluginMethod
     public void sendNotification(PluginCall call) {
-        NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
+
+        /*NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
         channel1.setDescription("This is channel 1");
 
         NotificationManager manager = getContext().getSystemService(NotificationManager.class);
@@ -976,12 +984,74 @@ public class WifiEapConfigurator extends Plugin {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "channel1")
                 .setSmallIcon(R.drawable.ic_transparent)
-                .setContentTitle("Prueba")
-                .setContentText("Probando las notificaciones nativas")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setContentTitle("Test")
+                .setContentText("Testing the native notifications")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        Notification not = builder.build();
+        not.flags |= Notification.FLAG_AUTO_CANCEL | Notification.FLAG_SHOW_LIGHTS;
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
-        notificationManager.notify(1523, builder.build());
+        Intent notificationIntent = new Intent(getContext(), NotificationActivity.class);
+        notificationIntent.putExtra(NotificationActivity.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationActivity.NOTIFICATION, builder.build());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Calendar cal = Calendar.getInstance();
+        // cal.set(2020, 10, 30, 10, 30);
+
+        long futureInMillis = SystemClock.elapsedRealtime() + 10000;
+        AlarmManager alarmManager = (AlarmManager)getContext().getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);*/
+
+        /////////////// SECOND FLOW ///////////////
+        // First we create the channel of the notifications
+        /*NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setDescription("This is channel 1");
+
+        NotificationManager manager = getContext().getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(channel1);
+
+        // Create the intent that it will be throw when tap on the notification
+        Intent notificationIntent = new Intent(getContext(), NotificationActivity.class);
+        notificationIntent.putExtra(NotificationActivity.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(NotificationActivity.NOTIFICATION, "notification");
+
+        SecureRandom random = new SecureRandom();
+        int requestCode = random.nextInt();
+
+        PendingIntent contentIntent = PendingIntent.getActivity(getContext(), requestCode, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Create the notification
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getContext(), "channel1");
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(2020, 10, 30, 11, 47);
+        mBuilder.setWhen(cal.getTimeInMillis())
+                .setSmallIcon(R.drawable.ic_transparent)
+                .setContentTitle("Test")
+                .setContentText("Testing second flow")
+                .setContentIntent(contentIntent)
+                .setAutoCancel(true);
+
+        manager.notify(123, mBuilder.build());*/
+
+        ////////////// THIRD FLOW ////////////////
+        AlarmManager mgr = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(getContext(), NotificationReceiver.class);
+        PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, 0);
+        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 10000, pi);
+
     }
 
+    @PluginMethod
+    public void checkIfOpenThroughNotifications(PluginCall call) {
+        JSObject object = new JSObject();
+        object.put("fromNotification", this.openFromNot);
+        call.success(object);
+    }
+
+    public void setOpenFromNotification(){
+        this.openFromNot = true;
+    }
 }
