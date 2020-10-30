@@ -353,6 +353,33 @@ public class WifiEapConfigurator extends Plugin {
         }*/
     }
 
+    @PluginMethod
+    public void validatePassPhrase(PluginCall call) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+
+        String clientCertificate = call.getString("certificate");
+        String passPhrase = call.getString("passPhrase");
+
+        KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
+
+        byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        InputStream in = new BufferedInputStream(b);
+
+        try {
+            pkcs12ks.load(in, passPhrase.toCharArray());
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.passphrase.validation");
+            call.success(object);
+        } catch(Exception e) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
+            call.success(object);
+        }
+
+    }
+
     private void removePasspoint(String id, PluginCall call) {
         List passpointsConfigurated = new ArrayList();
         WifiManager wifiManager = getWifiManager();

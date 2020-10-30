@@ -12,6 +12,7 @@
     "terms": "términos de uso",
     "profile": "Perfil",
     "password": "Contraseña",
+    "passphrase": "Contraseña del certificado",
     "note": "*Nota: si la conexión falló, verifique su contraseña",
     "help": "¿ Necesitas ayuda ?",
     "support": "Haga click aquí para obtener ayuda"
@@ -53,9 +54,9 @@
     "invalid-eap": "El perfil seleccionado es erróneo",
     "invalid-method": "Ningún método válido de autenticación en el perfil seleccionado",
     "invalid-profile": "El perfil seleccionado es erróneo",
-    "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión Wi-Fi",
-    "invalid-institution": "Esta institución no está soportada"
-
+    "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión WiFi",
+    "invalid-institution": "Esta institución no está soportada",
+    "passphrase": "La contraseña del certificado es incorrecta"
   },
   "text": {
     "configured": "Wi-Fi ya está cinfugurada en tu dispositivo.",

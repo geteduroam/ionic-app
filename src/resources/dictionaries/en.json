@@ -12,6 +12,7 @@
     "terms": "terms of use",
     "profile": "Profile",
     "password": "Password",
+    "passphrase": "Passphrase",
     "note": "*Note: if the connection fails, please check your password",
     "help": "Need help ?",
     "support": "Click here for support"
@@ -54,8 +55,9 @@
     "invalid-eap": "Invalid selected profile, if the error persists, contact with the admin please",
     "invalid-method": "No valid authentication method available from the selected profile",
     "invalid-profile": "The selected profile is wrong",
-    "invalid-oauth": "You have to authorize the app to be able to configure the Wi-Fi connection",
-    "invalid-institution": "This institution is not supported"
+    "invalid-oauth": "You have to authorize the app to be able to configure the WiFi connection",
+    "invalid-institution": "This institution is not supported",
+    "passphrase": "The Passphrase is incorrect"
   },
   "text": {
     "configured": "Wi-Fi is now configured on your device.",

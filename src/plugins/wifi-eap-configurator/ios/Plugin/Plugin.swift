@@ -585,6 +585,27 @@ public class WifiEapConfigurator: CAPPlugin {
 		return identity
 	}
 
+	@objc func validatePassPhrase(_ call: CAPPluginCall) {
+        let passPhrase = call.getString("passPhrase")
+        let certificate = call.getString("certificate")
+        let options = [ kSecImportExportPassphrase as String: passPhrase ]
+        var rawItems: CFArray?
+        let certBase64 = certificate
+        /*If */let data = Data(base64Encoded: certBase64!)!
+
+        let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
+        guard statusImport == errSecSuccess else {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.passphrase.invalid",
+                "success": false,
+            ])
+        }
+        return call.success([
+            "message": "plugin.wifieapconfigurator.valid.passphrase",
+            "success": true,
+        ])
+    }
+
 	/**
 	@function isConnectedSSID
 	@abstract capacitor call to check if SSID is connected

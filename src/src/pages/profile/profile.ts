@@ -155,7 +155,7 @@ export class ProfilePage extends BasePage{
         await this.navCtrl.setRoot(ConfigurationScreen);
       }else if (checkRequest.message.includes('error.network.mobileconfig')) {
         await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'mobileconfig'), false, '', '', true);
+            this.dictionary.getTranslation('error', 'mobileconfig'), false, '', 'retryConfiguration', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
