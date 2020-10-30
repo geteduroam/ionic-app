@@ -8,6 +8,7 @@ import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 import java.util.ArrayList;
 import com.byteowls.capacitor.oauth2.OAuth2ClientPlugin;
+import com.getcapacitor.plugin.http.Http;
 
 public class MainActivity extends BridgeActivity {
   @Override
@@ -19,6 +20,7 @@ public class MainActivity extends BridgeActivity {
       // Ex: add(TotallyAwesomePlugin.class);
       add(WifiEapConfigurator.class);
       add(OAuth2ClientPlugin.class);
+      add(Http.class);
     }});
     // ATTENTION: This was auto-generated to handle app links.
     Intent appLinkIntent = getIntent();

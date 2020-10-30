@@ -1,4 +1,3 @@
-import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
@@ -14,7 +13,9 @@ import {isArray, isObject} from "ionic-angular/util/util";
 import {IEEE80211} from "../../shared/entities/iEEE80211";
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
-
+import '@capacitor-community/http';
+import { Plugins } from '@capacitor/core';
+const { Http } = Plugins;
 
 /**
  *  @class GeteduroamServices provider
@@ -22,8 +23,10 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
 @Injectable()
 export class GeteduroamServices {
   protected id: string;
+  protected response: any;
 
-  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider,
+
+  constructor(private errorHandler : ErrorHandlerProvider, private store: StoringProvider,
               private validator: ValidatorProvider, private dictionary: DictionaryServiceProvider,
               private global: GlobalProvider) {  }
 
@@ -37,14 +40,19 @@ export class GeteduroamServices {
     const headers = {};
 
     try {
-        const response = await this.http.get(url, params, headers);
-        const data = JSON.parse(response.data);
-        if (data.instances) {
-          return data.instances;
-        } else {
-          await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-institution'), false);
-        }
 
+      const response = await Http.request({
+        method: 'GET',
+        url,
+        headers ,
+        params
+      });
+
+      if (response.data.instances) {
+        return response.data.instances;
+      } else {
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-institution'), false);
+      }
     } catch (e) {
         await this.errorHandler.handleError(e.error,false);
     }
@@ -65,14 +73,26 @@ export class GeteduroamServices {
     if (token) {
       // OAuth authenticated eap-config
       headers = {'Authorization': 'Bearer ' + token};
-      response = await this.http.sendRequest(url, {method: 'post', data: {}, headers, serializer: 'urlencoded'});
+      //response = await this.http.sendRequest(url, {method: 'post', data: {}, headers, serializer: 'urlencoded'});
+      response = await Http.request({
+        method: 'POST',
+        url,
+        headers ,
+        params
+      });
     } else if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
       // The app is opened from a file
       response = await this.store.readExtFile(url);
       response.data = atob(response.data);
     } else {
       // Unauthenticated eap-config
-      response = await this.http.get(url, params, headers);
+      response = await Http.request({
+        method: 'GET',
+        url,
+        headers ,
+        params
+      });
+      // response = await this.http.get(url, params, headers);
     }
 
     xml2js.parseString(response.data, function (err, result) {
@@ -361,7 +381,7 @@ export class GeteduroamServices {
         return false;
       case '21': // EAP-TTLS
         // Android and Apple can handle any Non-EAP type here
-        if (innerNonEapMethod) break; 
+        if (innerNonEapMethod) break;
         // iOS can also handle EAP-MSCHAPv2
         if (isApple && innerEapMethod === '26') break;
         // Android supports TTLS-GTC, but CAT doesn't

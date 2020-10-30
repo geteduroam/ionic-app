@@ -25,6 +25,7 @@
     "@angular/platform-browser": "5.2.11",
     "@angular/platform-browser-dynamic": "5.2.11",
     "@byteowls/capacitor-oauth2": "2.1.0",
+    "@capacitor-community/http": "^0.2.1",
     "@capacitor/android": "^2.3.0",
     "@capacitor/cli": "^2.3.0",
     "@capacitor/core": "^2.3.0",

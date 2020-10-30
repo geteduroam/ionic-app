@@ -246,7 +246,8 @@ export class ConfigurationScreen extends BasePage{
   }
 
   async ngOnInit() {
-    this.instances = this.global.discovery;
+    await this.getDiscovery();
+    console.log('global-discovery: ', this.global.discovery);
   }
 
   ionViewWillEnter() {
