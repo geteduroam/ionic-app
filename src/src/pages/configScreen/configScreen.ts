@@ -232,7 +232,7 @@ export class ConfigurationScreen extends BasePage{
   }
 
   async ngOnInit() {
-   this.suscribeEvent()
+    this.event.subscribe('connection', () => this.institutions.length === 0 && this.chargeDiscovery());
     this.institutions = this.global.discovery;
   }
 
@@ -320,12 +320,5 @@ export class ConfigurationScreen extends BasePage{
     } else {
       this.navCtrl.push(ConfigFilePage, '', {animation: 'transition'});
     }
-  }
-
-  suscribeEvent() {
-    this.event.subscribe('connection',  () => {
-      this.chargeDiscovery()
-      if (!!this.global.isAndroid()) this.showToast(this.getString('text', 'institutions'));
-    });
   }
 }
