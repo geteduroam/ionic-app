@@ -22,7 +22,7 @@
                 <a *ngIf="isLinkEmail()" class="button-control" href="{{getEmail()}}" ion-button text-capitalize>{{getString('button', 'email')}}</a>
             </div>
 
-            <div (click)="exitApp()" class="text-bottom" margin-top>
+            <div *ngIf="!global.isAndroid()" (click)="exitApp()" class="text-bottom" margin-top>
                 <p class="text-down" padding-top text-center >{{getString('button', 'close')}}</p>
             </div>
         </div>
