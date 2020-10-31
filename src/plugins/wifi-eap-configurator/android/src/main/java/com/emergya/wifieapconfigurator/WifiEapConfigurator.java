@@ -2,6 +2,8 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +26,7 @@ import android.os.Build;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.os.SystemClock;
 import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
@@ -984,6 +987,15 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
         return longest;
+    }
+
+    @PluginMethod
+    public void sendNotification(PluginCall call) {
+        AlarmManager mgr = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(getContext(), NotificationReceiver.class);
+        PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, 0);
+        //mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + call.getInt("delay"), pi);
+        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 30000, pi);
     }
 
 }
