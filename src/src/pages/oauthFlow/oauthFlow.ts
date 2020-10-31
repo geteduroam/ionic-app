@@ -74,7 +74,6 @@ export class OauthFlow extends BasePage{
     this.navCtrl.pop();
     if (!!error) {
       this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
-      this.navCtrl.pop();
     }
     this.loading.dismiss();
   }
