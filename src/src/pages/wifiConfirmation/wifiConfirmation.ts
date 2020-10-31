@@ -6,6 +6,8 @@ import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 
+declare var Capacitor;
+const { WifiEapConfigurator } = Capacitor.Plugins;
 
 @Component({
   selector: 'page-wifi-confirm',
@@ -65,6 +67,10 @@ export class WifiConfirmation extends BasePage implements OnInit {
    *
    */
   ionViewWillEnter() {
+
+    if(this.platform.is('android')) {
+        WifiEapConfigurator.sendNotification();
+    }
 
     this.logoProvider = this.navParams.get('logo');
 
