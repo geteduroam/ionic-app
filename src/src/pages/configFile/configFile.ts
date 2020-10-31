@@ -48,7 +48,6 @@ export class ConfigFilePage extends BasePage{
   async ionViewDidEnter() {
     this.configured = false; // TODO check if a network is already configured
     this.isAndroid = this.platform.is('android');
-    await this.waitingSpinner(this.configured);
     this.removeSpinner();
     this.showAll = true;
   }
