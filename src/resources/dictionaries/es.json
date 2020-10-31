@@ -61,7 +61,8 @@
   },
   "text": {
     "configured": "Wi-Fi ya está cinfugurada en tu dispositivo.",
-    "configure" : "Continuar para configurar eduroam",
+    "configure" : "Está a punto de instalar un perfil de red Wi-Fi.",
+    "configure1" : "Continuar para configurar eduroam",
     "reconfigure": "Hola, Parece que tienes eduroam configurada en tu dispositivo.\n¿Quieres volver a configurarla?",
     "network-available": "Acceso remoto disponible",
     "configuring": "Recibiendo la configuracion de la red, espera porfavor"
