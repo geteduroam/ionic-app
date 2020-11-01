@@ -109,6 +109,16 @@ export class GeteduroamServices {
       let result:Object = {};
       let ssidAux = [];
       let oidAux = [];
+
+      // Remove after July 2021
+      // Needed because of cat.eduroam.de
+      // After this date, a missing iEEE80211 is an error!
+      if (!credentialApplicabilityAux.iEEE80211) {
+        result['ssid'] = ['eduroam'];
+        result['oid'] = ['001bc50460'];
+        return result;
+      }
+
       for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
         let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
         if(iEEE80211Aux['ConsortiumOID']){
