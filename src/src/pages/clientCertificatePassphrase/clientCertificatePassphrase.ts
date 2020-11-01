@@ -123,6 +123,7 @@ export class ClientCertificatePassphrasePage extends BasePage{
   async sendPassphrase() {
     if ((!!this.termsOfUse && !!this.termsAccepted) || !this.termsOfUse) {
       if (this.showInput) {
+        this.waitingSpinner(null);
         await this.checkPassPhrase();
         if (this.validPassPhrase) {
           await this.oauthConf.checkForm(this.passphrase);
@@ -130,8 +131,10 @@ export class ClientCertificatePassphrasePage extends BasePage{
           this.showError = true;
         }
       } else {
+        this.waitingSpinner(null);
         await this.oauthConf.checkForm();
       }
+      this.removeSpinner();
     }
   }
 
