@@ -16,7 +16,7 @@ export class LoadingProvider {
    * Method to create loading spinner
    */
   create() {
-    this.loadingAttribute = this.loadingCtrl.create({
+    this.loadingAttribute = this.loadingAttribute || this.loadingCtrl.create({
       spinner: 'circles',
       showBackdrop: true,
       duration: 4000
@@ -35,14 +35,14 @@ export class LoadingProvider {
    * Method to initialize loading spinner
    */
   present(){
-    this.loadingAttribute.present();
+    this.loadingAttribute?.present();
   }
 
   /**
    * Method to remove loading spinner
    */
   dismiss(){
-    this.loadingAttribute.dismiss();
+    this.loadingAttribute?.dismiss();
   }
 
 }
