@@ -519,8 +519,15 @@ public class WifiEapConfigurator extends Plugin {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
         config.enterpriseConfig = enterpriseConfig;
 
+        int wifiIndex = -1;
         try {
-            int wifiIndex = myWifiManager.addNetwork(config);
+            wifiIndex = myWifiManager.addNetwork(config);
+        } catch (java.lang.SecurityException e) {
+            wifiIndex = -1; // redundant
+            e.printStackTrace();
+            Log.e("error", e.getMessage());
+        }
+        if (wifiIndex != -1) {
             myWifiManager.disconnect();
             myWifiManager.enableNetwork(wifiIndex, true);
             myWifiManager.reconnect();
@@ -531,13 +538,11 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.linked");
             call.success(object);
-        } catch (java.lang.SecurityException e) {
+        } else {
             JSObject object = new JSObject();
             object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.network.linked");
+            object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
             call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
         }
     }
 
