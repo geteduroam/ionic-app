@@ -46,7 +46,7 @@
     "connect": "mit Netzwerk verbinden"
   },
   "error": {
-    "username": "Benutzername sieht aus wie ",
+    "username": "Benutzername ist ähnlich wie ",
     "domain": "Benutzername muss enden mit ",
     "password": "Passwort ist falsch",
     "turn-on": "Bitte schalten Sie mobile Daten ein",
