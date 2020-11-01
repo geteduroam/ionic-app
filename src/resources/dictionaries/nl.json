@@ -20,7 +20,7 @@
   "placeholder": {
     "institution": "Kies een organisatie...",
     "profile": "Kies een profiel...",
-    "example": "gebruikersnaam"
+    "example": "gebruiker"
   },
   "modalSupport": {
     "title": "Ondersteuningsopties",
@@ -28,7 +28,7 @@
     "web": "Web: ",
     "email": "E-mail: ",
     "phone": "Telefoon: ",
-    "help": "Ondersteunings hulp",
+    "help": "Ondersteunings",
     "cancel": "Annuleren",
     "terms": "Gebruiksvoorwaarden"
   },
