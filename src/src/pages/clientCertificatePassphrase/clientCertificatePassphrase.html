@@ -24,7 +24,7 @@
             <div *ngIf="termsOfUse" class="content-terms" ion-row>
                 <ion-checkbox [(ngModel)]="termsAccepted" col-1 color="primary" name="terms" no-margin
                               no-padding></ion-checkbox>
-                <ion-label col-6 no-padding text-left>{{getString('label', 'accept')}}<a class="terms"
+                <ion-label no-padding text-left>{{getString('label', 'accept')}}<a class="terms"
                                                                                          (click)="termsModal(providerInfo.termsOfUse)">{{getString('label', 'terms')}}</a>
                 </ion-label>
 
@@ -37,7 +37,7 @@
     <div id="footer">
         <form (ngSubmit)="sendPassphrase()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button class="button-control" ion-button text-capitalize col-11 type="submit">{{getString('button', 'connect')}}</button>
+                <button class="button-control" ion-button col-11 type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
     </div>
