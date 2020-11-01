@@ -46,7 +46,8 @@ export class GeteduroamServices {
         }
 
     } catch (e) {
-        await this.errorHandler.handleError(e.error,false);
+      // Error is not dismissable, so disable for now
+      // await this.errorHandler.handleError(e.error,false);
     }
   }
 
