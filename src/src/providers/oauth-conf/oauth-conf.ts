@@ -60,7 +60,7 @@ export class OauthConfProvider {
     }
     let config = this.configConnection();
     const checkRequest = await this.getEduroamServices.connectProfile(config);
-    this.loading.dismiss();
+    this.loading?.dismiss();
 
     if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
       await this.navigateTo();
