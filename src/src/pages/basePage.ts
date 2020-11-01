@@ -57,7 +57,7 @@ export abstract class BasePage {
    * Method called to remove loading spinner
    */
   protected removeSpinner() {
-    this.loading.dismiss();
+    this.loading?.dismiss();
   }
 
   /**
