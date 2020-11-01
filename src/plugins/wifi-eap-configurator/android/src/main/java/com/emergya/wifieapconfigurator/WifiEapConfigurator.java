@@ -524,6 +524,8 @@ public class WifiEapConfigurator extends Plugin {
             wifiIndex = myWifiManager.addNetwork(config);
         } catch (java.lang.SecurityException e) {
             wifiIndex = -1; // redundant
+            e.printStackTrace();
+            Log.e("error", e.getMessage());
         }
         if (wifiIndex != -1) {
             myWifiManager.disconnect();
@@ -541,8 +543,6 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.network.linked");
             call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
         }
     }
 
