@@ -936,7 +936,9 @@ public class WifiEapConfigurator extends Plugin {
             case -1: return WifiEnterpriseConfig.Phase2.PAP;
             case -2: return WifiEnterpriseConfig.Phase2.MSCHAP;
             case -3:
-            case 26: /* Android cannot do PEAP-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try PEAP-MSCHAPv2 instead */
+            case 26: /* Android cannot do TTLS-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try TTLS-MSCHAPv2 instead */
+	            // This currently DOES happen because CAT has a bug where it reports TTLS-MSCHAPv2 as TTLS-EAP-MSCHAPv2,
+	            // so denying this would prevent profiles from being sideloaded
                 return WifiEnterpriseConfig.Phase2.MSCHAPV2;
             /*
             case _:
