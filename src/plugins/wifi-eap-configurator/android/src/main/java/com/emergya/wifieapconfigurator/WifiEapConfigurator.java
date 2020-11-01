@@ -198,6 +198,17 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
+        for(String ssid : ssids) {
+            try {
+                removeNetwork(ssid);
+            } catch (Throwable _) {
+                /* ignore exceptions when removing the network,
+                 * since many Android versions don't let us remove them,
+                 * but allow us to override them
+                 */
+            }
+        }
+
         if (res) {
             for (int i = 0 ; i < ssids.length ; i++) {
                 res = getNetworkAssociated(call, ssids[i]);
@@ -634,20 +645,26 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     @PluginMethod
-    public boolean removeNetwork(PluginCall call) {
-        String ssid = null;
-        boolean res = false;
+    public void removeNetwork(PluginCall call) {
+        String ssid = call.getString("ssid");
+        JSObject object = new JSObject();
 
-        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
-            ssid = call.getString("ssid");
-        } else {
-            JSObject object = new JSObject();
+        if (null == ssid || "".equals(ssid)) {
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
             call.success(object);
-            return res;
+        } else if (removeNetwork(ssid)) {
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.removed");
+            call.success(object);
+        } else {
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.success(object);
         }
-
+    }
+    public boolean removeNetwork(String ssid) {
+        boolean res = false;
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
@@ -656,28 +673,13 @@ public class WifiEapConfigurator extends Plugin {
             if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
                 wifi.removeNetwork(conf.networkId);
                 wifi.saveConfiguration();
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.network.removed");
-                call.success(object);
                 res = true;
             }
         }
         /*} else {
             wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.network.removed");
-            call.success(object);
             res = true;
         }*/
-
-        if (!res) {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
-            call.success(object);
-        }
 
         return res;
     }
