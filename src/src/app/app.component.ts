@@ -16,7 +16,7 @@ import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-se
 import {OAuth2Client} from '@byteowls/capacitor-oauth2';
 
 declare var Capacitor;
-const { Toast, Network, App } = Plugins;
+const { Toast, Network, App, Device } = Plugins;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
 @Component({
@@ -250,8 +250,8 @@ export class GeteduroamApp {
    * This method sets the global dictionary
    *  Default: 'en'
    */
-  private setDictionary(){
-    this.dictionary.loadDictionary('en');
+  private async setDictionary(){
+    this.dictionary.loadDictionary((await Device.getLanguageCode())?.value || 'en')
   }
 }
 
