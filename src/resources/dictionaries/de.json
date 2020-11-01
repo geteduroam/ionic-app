@@ -2,7 +2,7 @@
   "header": {
     "config": "eduroam Konfiguration",
     "profile": "Information eingeben",
-    "confirmation": "Viel Spaß mit Eduroam!",
+    "confirmation": "Viel Spaß mit eduroam!",
     "error": "Fehler"
   },
   "label": {
@@ -64,9 +64,9 @@
     "configured": "Wi-Fi ist jetzt konfiguriert.",
     "configure": "Sie werden ein Wi-Fi-Netzwerk Profil installieren.",
     "configure1": "Einstellung fortsetzen",
-    "reconfigure": "Hi, It seems you have configured this device already.\nMöchten Sie neu konfigurieren?",
+    "reconfigure": "Sie haben dieses Gerät bereits konfiguriert.\nMöchten Sie neu konfigurieren?",
     "network-available": "Netzwerk ist verfügbar",
-    "configuring": "Empfangen von Netzwerkkonfiguration, bitte warten"
+    "configuring": "Die Netzwerkkonfiguration wird heruntergeladen, bitte warten..."
   },
   "defaultError": "Unbekannter Fehler"
 }
