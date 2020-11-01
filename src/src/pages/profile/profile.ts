@@ -326,7 +326,7 @@ export class ProfilePage extends BasePage{
     // Non-EAP < 0 < EAP
     let innerNonEapMethod: number = this.validMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
     let innerEapMethod: number = this.validMethod?.innerAuthenticationMethod?.eapMethod?.type;
-    let auth = innerEapMethod || innerNonEapMethod * -1;
+    let auth: number = innerEapMethod * 1 || innerNonEapMethod * -1;
 
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
