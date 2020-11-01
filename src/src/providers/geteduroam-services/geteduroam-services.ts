@@ -363,6 +363,10 @@ export class GeteduroamServices {
         if (innerNonEapMethod) break; 
         // iOS can also handle EAP-MSCHAPv2
         if (isApple && innerEapMethod === '26') break;
+        // We will temporary allow this for Android as well,
+        // due to the bug in CAT; Android will configure TTLS-MSCHAPv2 instead
+        // please re-evaluate after July 2021, currently both cat.eduroam.org and cat.eduroam.de are broken.
+        if (isAndroid && innerEapMethod === '26') break;
         // Android supports TTLS-GTC, but CAT doesn't
         return false;
       case '25': // EAP-PEAP
