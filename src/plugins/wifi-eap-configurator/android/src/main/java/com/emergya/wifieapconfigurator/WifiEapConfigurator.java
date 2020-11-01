@@ -541,7 +541,7 @@ public class WifiEapConfigurator extends Plugin {
         } else {
             JSObject object = new JSObject();
             object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.network.linked");
+            object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
             call.success(object);
         }
     }
