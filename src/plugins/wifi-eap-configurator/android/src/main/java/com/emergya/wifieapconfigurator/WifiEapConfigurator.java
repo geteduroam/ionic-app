@@ -370,6 +370,13 @@ public class WifiEapConfigurator extends Plugin {
         String clientCertificate = call.getString("certificate");
         String passPhrase = call.getString("passPhrase");
 
+        if (clientCertificate == null || passPhrase == null) {
+	        JSObject object = new JSObject();
+	        object.put("success", false);
+	        object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
+	        call.success(object);
+        }
+
         KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
 
         byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
