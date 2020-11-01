@@ -1,0 +1,72 @@
+{
+  "header": {
+    "config": "eduroam configuratie",
+    "profile": "Verstrek informatie",
+    "confirmation": "Veel plezier met eduroam!",
+    "error": "Fout"
+  },
+  "label": {
+    "institution": "Organisatie",
+    "username": "Gebruikersnaam",
+    "accept": "Accepteer ",
+    "terms": "gebruiksvoorwaarden",
+    "profile": "Profiel",
+    "password": "Wachtwoord",
+    "passphrase": "Wachtwoord",
+    "note": "*Let op: controleer het wachtwoord als de verbinding niet werkt",
+    "help": "Hulp nodig ?",
+    "support": "Klik hier voor ondersteuning"
+  },
+  "placeholder": {
+    "institution": "Kies een organisatie...",
+    "profile": "Kies een profiel...",
+    "example": "gebruikersnaam"
+  },
+  "modalSupport": {
+    "title": "Ondersteuningsopties",
+    "message": "Kies een optie",
+    "web": "Web: ",
+    "email": "E-mail: ",
+    "phone": "Telefoon: ",
+    "help": "Ondersteunings hulp",
+    "cancel": "Annuleren",
+    "terms": "Gebruiksvoorwaarden"
+  },
+  "button": {
+    "next": "Volgende",
+    "ok": "ok",
+    "more": "Meer weten",
+    "email": "Stuur e-mail",
+    "back": "Terug",
+    "done": "Klaar",
+    "reconfigure": "Opnieuw instellen",
+    "configure" : "Instellen",
+    "no-thanks": "Nee, bedankt",
+    "close": "Sluiten",
+    "connect": "Verbind met netwerk"
+  },
+  "error": {
+    "username": "De gebruikersnaam moet lijken op het patroon ",
+    "domain": "De gebruikersnaam moet eindigen met ",
+    "password": "Wachtwoord is onjuist",
+    "turn-on": "Zet mobiele verbinding aan",
+    "duplicate": "Dit netwerk is al beschikbaar op het apparaat.\nGa naar de Instellingen > Verbindingen > Wi-Fi en verwijder deze eerst",
+    "mobileconfig": "Dit apparaat is al geconfigureerd met een profiel.\nGa naar Instellingen > Algemeen > Profielen en verwijder deze",
+    "invalid-eap": "Onjuist profiel gekozen; Als de foutmelding blijft, neem contact op met de beheerder",
+    "invalid-method": "Geen bruikbare authenticatiemethode beschikbaar van het gekozen profiel",
+    "invalid-profile": "Het gekozen profiel klopt niet",
+    "invalid-oauth": "Je moet de app autoriseren om de Wi-Fi verbinding te kunnen instellen",
+    "invalid-institution": "Deze organisatie wordt niet ondersteund",
+    "passphrase": "Het wachtwoord is onjuist",
+    "terms": "Je moet de gebruiksvoorwaarden accepteren"
+  },
+  "text": {
+    "configured": "Wi-Fi is nu ingesteld op dit apparaat.",
+    "configure": "Je staat op het punt een Wi-Fi-netwerkprofiel te installeren.",
+    "configure1": "Ga door met instellen",
+    "reconfigure": "Het lijkt er op dat je dit apparaat al hebt ingesteld.\nWil je het opnieuw configureren?",
+    "network-available": "Externe toegang beschikbaar",
+    "configuring": "Netwerk configuratie ophalen, even geduld"
+  },
+  "defaultError": "Onbekende foutmelding"
+}
