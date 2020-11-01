@@ -252,7 +252,9 @@ export class GeteduroamApp {
    */
   private setDictionary(){
     Device.getLanguageCode().then(lang => {
-      this.dictionary.loadDictionary(lang['value']);
+      this.dictionary.loadDictionary(lang.value);
+    }).catch(async() => {
+      this.dictionary.loadDictionary('en');
     });
   }
 }
