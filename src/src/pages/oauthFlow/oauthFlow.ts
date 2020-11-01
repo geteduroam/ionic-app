@@ -84,8 +84,6 @@ export class OauthFlow extends BasePage{
    * @param res url to get token
    */
   async handleOAuthResponse(res) {
-    this.showSpinner();
-
     this.profile.token = res['access_token'];
 
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
@@ -103,12 +101,5 @@ export class OauthFlow extends BasePage{
     this.buildFlowAuth();
     this.loading?.dismiss();
     this.showAll = true;
-  }
-
-  /**
-   * Method to build spinner loading
-   */
-  showSpinner() {
-    this.loading.createAndPresent();
   }
 }
