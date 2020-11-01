@@ -250,12 +250,8 @@ export class GeteduroamApp {
    * This method sets the global dictionary
    *  Default: 'en'
    */
-  private setDictionary(){
-    Device.getLanguageCode().then(lang => {
-      this.dictionary.loadDictionary(lang.value);
-    }).catch(async() => {
-      this.dictionary.loadDictionary('en');
-    });
+  private async setDictionary(){
+    this.dictionary.loadDictionary((await Device.getLanguageCode())?.value || 'en')
   }
 }
 
