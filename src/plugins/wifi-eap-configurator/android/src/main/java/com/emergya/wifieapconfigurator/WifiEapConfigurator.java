@@ -929,6 +929,9 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     private Integer getAuthMethod(Integer auth) {
+        if (auth == null) {
+            return WifiEnterpriseConfig.Phase2.MSCHAPV2;
+        }
         switch (auth) {
             case -1: return WifiEnterpriseConfig.Phase2.PAP;
             case -2: return WifiEnterpriseConfig.Phase2.MSCHAP;
