@@ -130,9 +130,9 @@ export class ProfilePage extends BasePage{
    */
   getPlaceholder() {
     if (this.suffixIdentity !== '' && !!this.hintIdentity) {
-      return `username@${this.suffixIdentity}`;
+      return this.getString('placeholder', 'example') + `@${this.suffixIdentity}`;
     } else if (this.suffixIdentity !== '' && !this.hintIdentity) {
-      return `username@${this.suffixIdentity}`;
+      return this.getString('placeholder', 'example') + `@${this.suffixIdentity}`;
     } else {
       return this.getString('placeholder', 'example');
     }
