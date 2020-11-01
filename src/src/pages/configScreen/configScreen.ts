@@ -235,6 +235,7 @@ export class ConfigurationScreen extends BasePage{
 
   async ngOnInit() {
     this.institutions = this.global.discovery;
+    this.event.subscribe('connection', () => this.chargeDiscovery());
   }
 
   async ionViewWillEnter() {

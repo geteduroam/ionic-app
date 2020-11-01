@@ -105,12 +105,6 @@ export class GeteduroamApp {
 
       await this.errorHandler.handleError(
         this.dictionary.getTranslation('error', 'duplicate'), false, '', 'removeConnection', true);
-
-    } else {
-
-      await this.errorHandler.handleError(
-        this.dictionary.getTranslation('error', 'duplicate') + '\n' +
-        this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', false);
     }
   }
 
@@ -179,9 +173,6 @@ export class GeteduroamApp {
 
       if (!isAssociated.success && !isAssociated.overridable) {
         this.removeAssociatedManually();
-
-      } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', true);
       }
     }
   }
