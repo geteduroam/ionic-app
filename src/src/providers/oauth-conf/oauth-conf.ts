@@ -10,6 +10,7 @@ import {NavController} from "ionic-angular";
 import {WifiConfirmation} from "../../pages/wifiConfirmation/wifiConfirmation";
 import {OauthFlow} from "../../pages/oauthFlow/oauthFlow";
 import {ClientCertificatePassphrasePage} from "../../pages/clientCertificatePassphrase/clientCertificatePassphrase";
+import {ProfilePage} from "../../pages/profile/profile";
 import {ConfigurationScreen} from "../../pages/configScreen/configScreen";
 
 @Injectable()
@@ -38,14 +39,17 @@ export class OauthConfProvider {
     this.providerInfo = provInfo;
     if (validProfile) {
       this.validMethod = this.global.getAuthenticationMethod();
-      if (typeof this.validMethod.clientSideCredential.passphrase === 'undefined') {
-        await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
-        return;
+      if (this.validMethod.eapMethod.type == 13) {
+        if (typeof this.validMethod.clientSideCredential.passphrase === 'undefined') {
+          await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
+          return;
+        }
+        await this.checkForm();
+      } else {
+        await this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
       }
-      await this.checkForm();
-
     } else {
-      await this.notValidProfile();
+      await this.notValidProfile(); 
     }
   }
 
