@@ -375,6 +375,7 @@ public class WifiEapConfigurator extends Plugin {
 	        object.put("success", false);
 	        object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
 	        call.success(object);
+	        return;
         }
 
         KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
