@@ -55,8 +55,7 @@ export class WifiConfirmation extends BasePage implements OnInit {
    *  Lifecycle when it is active
    */
   async ngOnInit(){
-    this.loading.createAndPresent();
-    this.loading.dismiss();
+    this.loading?.dismiss();
     this.showAll = true;
   }
 

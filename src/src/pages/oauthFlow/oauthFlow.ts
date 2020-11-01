@@ -75,7 +75,7 @@ export class OauthFlow extends BasePage{
     if (!!error) {
       this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
     }
-    this.loading.dismiss();
+    this.loading?.dismiss();
   }
 
   /**
@@ -101,7 +101,7 @@ export class OauthFlow extends BasePage{
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
     this.buildFlowAuth();
-    this.loading.dismiss();
+    this.loading?.dismiss();
     this.showAll = true;
   }
 
