@@ -37,6 +37,7 @@ export class LoadingProvider {
    */
   dismiss(){
     this.loadingAttribute?.dismiss();
+    this.loadingAttribute = null;
   }
 
 }
