@@ -48,6 +48,13 @@
         <service android:name="com.emergya.wifieapconfigurator.ScheduledService"
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
         <receiver android:name="com.emergya.wifieapconfigurator.NotificationReceiver" />
+        <receiver android:name=".AlarmReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"
@@ -78,4 +85,5 @@
     <!--  API 29: NetworkRequest.requestNetwork -->
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 </manifest>
