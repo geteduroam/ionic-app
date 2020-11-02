@@ -46,7 +46,11 @@ export class OauthConfProvider {
         }
         await this.checkForm();
       } else {
-        await this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
+        if (this.validMethod.clientSideCredential?.username && this.validMethod.clientSideCredential?.password) {
+          await this.checkForm();
+        } else {
+          await this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
+        }
       }
     } else {
       await this.notValidProfile(); 
@@ -87,13 +91,18 @@ export class OauthConfProvider {
    * Method to create configuration to plugin WifiEapConfigurator
    */
   configConnection() {
+    // Non-EAP < 0 < EAP
+    let innerNonEapMethod: number = this.validMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
+    let innerEapMethod: number = this.validMethod?.innerAuthenticationMethod?.eapMethod?.type;
+    let auth: number = innerEapMethod * 1 || innerNonEapMethod * -1;
+
     return {
       ssid: [],
-      username: '',
-      password: '',
+      username: this.validMethod.clientSideCredential?.username,
+      password: this.validMethod.clientSideCredential?.password,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
       servername: this.validMethod.serverSideCredential.serverID,
-      auth: null,
+      auth,
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
       clientCertificate: this.validMethod.clientSideCredential.clientCertificate,
