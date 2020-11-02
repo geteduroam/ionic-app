@@ -13,6 +13,21 @@ page-client-certificate-passphrase {
     height: 40px;
   }
 
+  .content-terms {
+
+    ion-checkbox {
+      margin: 14px 0 0 20px !important;
+    }
+
+    ion-label {
+      font-family: Helvetica, sans-serif;
+      font-size: 15px !important;
+
+    }
+  }
+  .content-button button {
+    height: 45px;
+  }
   .error-msg {
     font-size: 11px;
     color: $color-danger;
@@ -22,36 +37,32 @@ page-client-certificate-passphrase {
   }
 
   img.imgLogo {
-    width: calc(90% - 40px) !important;
-    height: 100% !important
+    width: 100% !important;
+    max-width: 160px;
+    max-height: 40px;
   }
 
   .footer-form {
     height: auto !important;
-    position: absolute !important;
-    bottom: 1px;
-    width: 100% !important;
-  }
-  .footer-form-focus {
-    height: auto !important;
-    bottom: 1px;
-    width: 100% !important;
-    position: relative !important;
-
-    .disabled-button {
-      opacity: .4;
-      pointer-events: none;
-    }
+    position: relative;
+    width: 100%;
+    top: 10px;
   }
 
-  .button-control {
-    width: 100% !important;
+
+  .only-tittle {
+    margin-top: 50% !important;
   }
 
-  .bottom-button {
-    margin: 20px 17px 10px 15px;
+  .only-header {
+    margin-top: 25% !important;
   }
 
+  .note-msg {
+    font-size: 10px;
+    text-align: left;
+    color: #404B52;
+  }
 }
 
 //---------------------------------//

@@ -1,30 +1,49 @@
 <div *ngIf="showAll" class="profile-content">
-  <div class="header-content" margin-top padding-top>
-    <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" margin />
-    <h1>{{providerInfo.displayName}}</h1>
-  </div>
+    <div class="header-content" [ngClass]="!showInput && !logo ? 'only-tittle' : !showInput && !!logo ? 'only-header' : ''" margin-top padding-top>
+        <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting"
+             margin/>
+        <h1>{{providerInfo.displayName}}</h1>
+    </div>
 
-  <div class="content-form" margin-bottom margin-top text-center>
+    <div class="content-form" margin-bottom margin-top text-center>
 
-    <form (ngSubmit)="sendPassphrase()">
+        <form (ngSubmit)="sendPassphrase()">
 
-      <div  class="content-profile" padding-top margin-top>
-        <ion-label class="label-conf" text-left>{{getString('label', 'passphrase')}}</ion-label>
+            <div *ngIf="showInput" class="content-profile" padding-top margin-top>
+                <ion-label class="label-conf" text-left>{{getString('label', 'passphrase')}}</ion-label>
 
-        <input id="input" (blur)="blur()" [(ngModel)]="passphrase" [ngClass]="!validPassPhrase ? 'error-validation' : ''" (focus)="getFocus()"
-               autocomplete="on" class="input-profile" name="passphrase" padding-left type="text" />
+                <input id="input" (keydown)="resetError()" [(ngModel)]="passphrase"
+                       [ngClass]="showError ? 'error-validation' : ''" (focus)="getFocus()"
+                       autocomplete="on" class="input-profile" name="passphrase" padding-left type="text"/>
 
-        <p *ngIf="!validPassPhrase" class="error-msg">
-          {{getString('error', 'passphrase')}} </p>
-      </div>
-    </form>
-  </div>
+                <p *ngIf="showError" class="error-msg">
+                    {{getString('error', 'passphrase')}} </p>
+            </div>
 
-  <div id="footer" [ngClass]="!focus ? 'footer-form' : 'footer-form-focus'">
-    <form (ngSubmit)="sendPassphrase()">
-      <div class="content-button bottom-button">
-        <button [ngClass]="!enableButton ? 'disabled-button' : ''" class="button-control" ion-button text-capitalize type="submit">{{getString('button', 'connect')}}</button>
-      </div>
-    </form>
-  </div>
+            <!-- Terms of use -->
+            <div *ngIf="termsOfUse" class="content-terms" ion-row>
+                <ion-checkbox [(ngModel)]="termsAccepted" col-1 color="primary" name="terms" no-margin
+                              no-padding></ion-checkbox>
+                <ion-label no-padding text-left>{{getString('label', 'accept')}}<a class="terms"
+                                                                                         (click)="termsModal(providerInfo.termsOfUse)">{{getString('label', 'terms')}}</a>
+                </ion-label>
+
+                <span *ngIf="!termsAccepted" class="error-msg content-profile" margin-left>
+                    {{getString('error', 'terms')}} </span>
+            </div>
+        </form>
+    </div>
+
+    <div id="footer">
+        <form (ngSubmit)="sendPassphrase()">
+            <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
+                <button class="button-control" ion-button col-11 type="submit">{{getString('button', 'connect')}}</button>
+            </div>
+        </form>
+    </div>
+    <div *ngIf="helpDesk" class="help-desk" margin>
+        <ion-label no-padding text-left>{{getString('label', 'help')}}
+            <a class="support" (click)="modalSupport()">{{getString('label', 'support')}}</a>
+        </ion-label>
+    </div>
 </div>

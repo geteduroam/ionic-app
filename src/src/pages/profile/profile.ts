@@ -130,9 +130,9 @@ export class ProfilePage extends BasePage{
    */
   getPlaceholder() {
     if (this.suffixIdentity !== '' && !!this.hintIdentity) {
-      return `username@${this.suffixIdentity}`;
+      return this.getString('placeholder', 'example') + `@${this.suffixIdentity}`;
     } else if (this.suffixIdentity !== '' && !this.hintIdentity) {
-      return `username@${this.suffixIdentity}`;
+      return this.getString('placeholder', 'example') + `@${this.suffixIdentity}`;
     } else {
       return this.getString('placeholder', 'example');
     }
@@ -157,7 +157,7 @@ export class ProfilePage extends BasePage{
         await this.navCtrl.setRoot(ConfigurationScreen);
       }else if (checkRequest.message.includes('error.network.mobileconfig')) {
         await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'mobileconfig'), false, '', '', true);
+            this.dictionary.getTranslation('error', 'mobileconfig'), false, '', 'retryConfiguration', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
@@ -328,7 +328,7 @@ export class ProfilePage extends BasePage{
     // Non-EAP < 0 < EAP
     let innerNonEapMethod: number = this.validMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
     let innerEapMethod: number = this.validMethod?.innerAuthenticationMethod?.eapMethod?.type;
-    let auth = innerEapMethod || innerNonEapMethod * -1;
+    let auth: number = innerEapMethod * 1 || innerNonEapMethod * -1;
 
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24

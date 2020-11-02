@@ -42,11 +42,12 @@ export class GeteduroamServices {
         if (data.instances) {
           return data.instances;
         } else {
-          await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-institution'), false);
+          await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', true);
         }
 
     } catch (e) {
-        await this.errorHandler.handleError(e.error,false);
+      // Error is not dismissable, so disable for now
+      await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', true);
     }
   }
 
@@ -108,6 +109,16 @@ export class GeteduroamServices {
       let result:Object = {};
       let ssidAux = [];
       let oidAux = [];
+
+      // Remove after July 2021
+      // Needed because of cat.eduroam.de
+      // After this date, a missing iEEE80211 is an error!
+      if (!credentialApplicabilityAux.iEEE80211) {
+        result['ssid'] = ['eduroam'];
+        result['oid'] = ['001bc50460'];
+        return result;
+      }
+
       for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
         let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
         if(iEEE80211Aux['ConsortiumOID']){
@@ -352,6 +363,10 @@ export class GeteduroamServices {
         if (innerNonEapMethod) break; 
         // iOS can also handle EAP-MSCHAPv2
         if (isApple && innerEapMethod === '26') break;
+        // We will temporary allow this for Android as well,
+        // due to the bug in CAT; Android will configure TTLS-MSCHAPv2 instead
+        // please re-evaluate after July 2021, currently both cat.eduroam.org and cat.eduroam.de are broken.
+        if (isAndroid && innerEapMethod === '26') break;
         // Android supports TTLS-GTC, but CAT doesn't
         return false;
       case '25': // EAP-PEAP

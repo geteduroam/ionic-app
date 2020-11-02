@@ -16,7 +16,7 @@ import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-se
 import {OAuth2Client} from '@byteowls/capacitor-oauth2';
 
 declare var Capacitor;
-const { Toast, Network, App } = Plugins;
+const { Toast, Network, App, Device } = Plugins;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
 @Component({
@@ -107,12 +107,6 @@ export class GeteduroamApp {
 
       await this.errorHandler.handleError(
         this.dictionary.getTranslation('error', 'duplicate'), false, '', 'removeConnection', true);
-
-    } else {
-
-      await this.errorHandler.handleError(
-        this.dictionary.getTranslation('error', 'duplicate') + '\n' +
-        this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', false);
     }
   }
 
@@ -120,18 +114,6 @@ export class GeteduroamApp {
    * This method add listeners needed to app
    */
   addListeners() {
-    // Listening to changes in network states, it show toast message when status changed
-    Network.addListener('networkStatusChange', async () => {
-      let connectionStatus: NetworkStatus = await this.statusConnection();
-      if (!this.checkExtFile) {
-        this.connectionEvent(connectionStatus);
-
-        !connectionStatus.connected ?
-          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on')) :
-          this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
-      }
-    });
-
     if (this.global.isAndroid()){
       this.platform.registerBackButtonAction(() => {
         // get current active page
@@ -193,9 +175,6 @@ export class GeteduroamApp {
 
       if (!isAssociated.success && !isAssociated.overridable) {
         this.removeAssociatedManually();
-
-      } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'turn-on'), false, '', 'enableAccess', true);
       }
     }
   }
@@ -264,8 +243,8 @@ export class GeteduroamApp {
    * This method sets the global dictionary
    *  Default: 'en'
    */
-  private setDictionary(){
-    this.dictionary.loadDictionary('en');
+  private async setDictionary(){
+    this.dictionary.loadDictionary((await Device.getLanguageCode())?.value || 'en')
   }
 }
 

@@ -10,6 +10,7 @@ import {NavController} from "ionic-angular";
 import {WifiConfirmation} from "../../pages/wifiConfirmation/wifiConfirmation";
 import {OauthFlow} from "../../pages/oauthFlow/oauthFlow";
 import {ClientCertificatePassphrasePage} from "../../pages/clientCertificatePassphrase/clientCertificatePassphrase";
+import {ProfilePage} from "../../pages/profile/profile";
 import {ConfigurationScreen} from "../../pages/configScreen/configScreen";
 
 @Injectable()
@@ -38,14 +39,21 @@ export class OauthConfProvider {
     this.providerInfo = provInfo;
     if (validProfile) {
       this.validMethod = this.global.getAuthenticationMethod();
-      if (typeof this.validMethod.clientSideCredential.passphrase === 'undefined') {
-        await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
-        return;
+      if (this.validMethod.eapMethod.type == 13) {
+        if (typeof this.validMethod.clientSideCredential.passphrase === 'undefined') {
+          await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
+          return;
+        }
+        await this.checkForm();
+      } else {
+        if (this.validMethod.clientSideCredential?.username && this.validMethod.clientSideCredential?.password) {
+          await this.checkForm();
+        } else {
+          await this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
+        }
       }
-      await this.checkForm();
-
     } else {
-      await this.notValidProfile();
+      await this.notValidProfile(); 
     }
   }
 
@@ -60,7 +68,7 @@ export class OauthConfProvider {
     }
     let config = this.configConnection();
     const checkRequest = await this.getEduroamServices.connectProfile(config);
-    this.loading.dismiss();
+    this.loading?.dismiss();
 
     if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
       this.getEduroamServices.saveInstitutionId();
@@ -72,7 +80,7 @@ export class OauthConfProvider {
       await this.navCtrl.setRoot(ConfigurationScreen);
     }else if (checkRequest.message.includes('error.network.mobileconfig')) {
       await this.errorHandler.handleError(
-          this.dictionary.getTranslation('error', 'mobileconfig'), false, '', '', true);
+          this.dictionary.getTranslation('error', 'mobileconfig'), false, '', 'retryConfiguration', true);
     } else if (checkRequest.message.includes('error.network.userCancelled')) {
       await this.navCtrl.pop();
     } else {
@@ -85,13 +93,18 @@ export class OauthConfProvider {
    * Method to create configuration to plugin WifiEapConfigurator
    */
   configConnection() {
+    // Non-EAP < 0 < EAP
+    let innerNonEapMethod: number = this.validMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
+    let innerEapMethod: number = this.validMethod?.innerAuthenticationMethod?.eapMethod?.type;
+    let auth: number = innerEapMethod * 1 || innerNonEapMethod * -1;
+
     return {
       ssid: [],
-      username: '',
-      password: '',
+      username: this.validMethod.clientSideCredential?.username,
+      password: this.validMethod.clientSideCredential?.password,
       eap: parseInt(this.validMethod.eapMethod.type.toString()),
       servername: this.validMethod.serverSideCredential.serverID,
-      auth: null,
+      auth,
       anonymous: this.validMethod.clientSideCredential.anonymousIdentity,
       caCertificate: this.validMethod.serverSideCredential.ca,
       clientCertificate: this.validMethod.clientSideCredential.clientCertificate,

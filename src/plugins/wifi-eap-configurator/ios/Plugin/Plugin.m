@@ -8,4 +8,5 @@ CAP_PLUGIN(WifiEapConfigurator, "WifiEapConfigurator",
            CAP_PLUGIN_METHOD(isNetworkAssociated, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(isConnectedSSID, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(removeNetwork, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(validatePassPhrase, CAPPluginReturnPromise);
 )

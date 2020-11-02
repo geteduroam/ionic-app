@@ -14,7 +14,7 @@
     <div class="content-form" margin-top text-center>
         <ion-label class="label-conf" text-left>{{getString('label', 'institution')}}</ion-label>
 
-        <div *ngIf="this.institutions" class="row">
+        <div class="row">
 
             <ion-searchbar #instituteSearchBar (click)="searchBarClicked($event)" [(ngModel)]="institutionName" cancelButtonText debounce="500"
                            class="searchbar-input" no-padding placeholder="{{getString('placeholder', 'institution')}}">

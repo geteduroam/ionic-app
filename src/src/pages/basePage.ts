@@ -57,7 +57,7 @@ export abstract class BasePage {
    * Method called to remove loading spinner
    */
   protected removeSpinner() {
-    this.loading.dismiss();
+    this.loading?.dismiss();
   }
 
   /**
@@ -124,8 +124,6 @@ export abstract class BasePage {
 
   shortenAddress(address?: string) {
     if (address) {
-      console.log("REPLACING");
-      console.log(address);
       return address.replace(/^https:\/\/([^/]+)\/.*?\/.*?([^/]+\/?)$/, '$1/…/$2');
     }
   }

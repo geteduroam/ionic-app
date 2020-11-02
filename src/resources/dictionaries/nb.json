@@ -1,0 +1,72 @@
+{
+  "header": {
+    "config": "eduroam-konfigurasjon",
+    "profile": "Fyll ut informasjon",
+    "confirmation": "eduroam er satt opp!",
+    "error": "Feil"
+  },
+  "label": {
+    "institution": "Institusjon",
+    "username": "Brukernavn",
+    "accept": "Godkjenn ",
+    "terms": "brukerbetingelser",
+    "profile": "Profil",
+    "password": "Passord",
+    "passphrase": "Passfrase",
+    "note": "*Merk: hvis tilkoblingen feiler sjekk passordet ditt",
+    "help": "Trenger hjelp?",
+    "support": "Klikk her for brukerstøtte"
+  },
+  "placeholder": {
+    "institution": "Velg institusjon...",
+    "profile": "Velg profil...",
+    "example": "brukernavn"
+  },
+  "modalSupport": {
+    "title": "Brukerstøtte",
+    "message": "Velg et kontaktpunkt",
+    "web": "Nett: ",
+    "email": "Epost: ",
+    "phone": "Telefon: ",
+    "help": "Brukerstøtte",
+    "cancel": "Avbryt",
+    "terms": "brukerbetingelser"
+  },
+  "button": {
+    "next": "Neste",
+    "ok": "ok",
+    "more": "Finn ut mer",
+    "email": "Send epost",
+    "back": "Tilbake",
+    "done": "Ferdig",
+    "reconfigure": "Bytt konfigurasjon",
+    "configure" : "Konfigurer",
+    "no-thanks": "Nei, takk",
+    "close": "Lukk",
+    "connect": "Koble til nettverket"
+  },
+  "error": {
+    "username": "Brukernavnet må følge mønster ",
+    "domain": "Brukernavnet må slutte med ",
+    "password": "Passwordet er feil",
+    "turn-on": "Vennligst skru på mobilnett",
+    "duplicate": "Nettverket er allerede tilgjengelig på denne enheten.\nGå til Innstillinger > Wi-Fi Networks og slett det først.",
+    "mobileconfig": "Din enhet er konfigurert med en konfigurasjonsprofil.\nGå til Innstillinger -> Generelt -> Profiler og slett den først.",
+    "invalid-eap": "Ugyldig profil valgt. Hvis feilen vedvarer, ta kontakt med din helpdesk",
+    "invalid-method": "Ingen støttet innloggingsmetode tilgjengelig i den valgte profilen",
+    "invalid-profile": "Ugyldig profil valgt.",
+    "invalid-oauth": "Innloggingen ver ikke godkjent, vennligst prøv på nytt",
+    "invalid-institution": "Institusjonen støttes ikke",
+    "passphrase": "Passfrasen er feil",
+    "terms": "Du må godkjenne brukerbetingelsene"
+  },
+  "text": {
+    "configured": "Wi-Fi er nå satt opp.",
+    "configure": "Nå kan du installere Wi-Fi nettverksprofilen.",
+    "configure1": "Fortsett konfigurering",
+    "reconfigure": "Det ser ut som enheten din er allerede satt opp.\nVil du sette den opp på nytt?",
+    "network-available": "Nettilgang tilgjengelig",
+    "configuring": "Henter konfigurasjon, vennligst vent"
+  },
+  "defaultError": "Key not found"
+}

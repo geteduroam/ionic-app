@@ -27,22 +27,17 @@ export class LoadingProvider {
    * Method to create and initialize loading spinner
    */
   createAndPresent(){
+    this.dismiss();
     this.create();
-    this.present();
-  }
-
-  /**
-   * Method to initialize loading spinner
-   */
-  present(){
-    this.loadingAttribute.present();
+    this.loadingAttribute?.present();
   }
 
   /**
    * Method to remove loading spinner
    */
   dismiss(){
-    this.loadingAttribute.dismiss();
+    this.loadingAttribute?.dismiss();
+    this.loadingAttribute = null;
   }
 
 }

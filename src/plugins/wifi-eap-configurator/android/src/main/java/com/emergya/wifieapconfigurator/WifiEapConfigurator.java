@@ -213,6 +213,17 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
+        for(String ssid : ssids) {
+            try {
+                removeNetwork(ssid);
+            } catch (Throwable _) {
+                /* ignore exceptions when removing the network,
+                 * since many Android versions don't let us remove them,
+                 * but allow us to override them
+                 */
+            }
+        }
+
         if (res) {
             for (int i = 0 ; i < ssids.length ; i++) {
                 res = getNetworkAssociated(call, ssids[i]);
@@ -368,6 +379,41 @@ public class WifiEapConfigurator extends Plugin {
         }*/
     }
 
+    @PluginMethod
+    public void validatePassPhrase(PluginCall call) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+
+        String clientCertificate = call.getString("certificate");
+        String passPhrase = call.getString("passPhrase");
+
+        if (clientCertificate == null || passPhrase == null) {
+	        JSObject object = new JSObject();
+	        object.put("success", false);
+	        object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
+	        call.success(object);
+	        return;
+        }
+
+        KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
+
+        byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        InputStream in = new BufferedInputStream(b);
+
+        try {
+            pkcs12ks.load(in, passPhrase.toCharArray());
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.passphrase.validation");
+            call.success(object);
+        } catch(Exception e) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
+            call.success(object);
+        }
+
+    }
+
     private void removePasspoint(String id, PluginCall call) {
         List passpointsConfigurated = new ArrayList();
         WifiManager wifiManager = getWifiManager();
@@ -496,8 +542,15 @@ public class WifiEapConfigurator extends Plugin {
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
         config.enterpriseConfig = enterpriseConfig;
 
+        int wifiIndex = -1;
         try {
-            int wifiIndex = myWifiManager.addNetwork(config);
+            wifiIndex = myWifiManager.addNetwork(config);
+        } catch (java.lang.SecurityException e) {
+            wifiIndex = -1; // redundant
+            e.printStackTrace();
+            Log.e("error", e.getMessage());
+        }
+        if (wifiIndex != -1) {
             myWifiManager.disconnect();
             myWifiManager.enableNetwork(wifiIndex, true);
             myWifiManager.reconnect();
@@ -508,13 +561,11 @@ public class WifiEapConfigurator extends Plugin {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.linked");
             call.success(object);
-        } catch (java.lang.SecurityException e) {
+        } else {
             JSObject object = new JSObject();
             object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.network.linked");
+            object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
             call.success(object);
-            e.printStackTrace();
-            Log.e("error", e.getMessage());
         }
     }
 
@@ -622,20 +673,26 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     @PluginMethod
-    public boolean removeNetwork(PluginCall call) {
-        String ssid = null;
-        boolean res = false;
+    public void removeNetwork(PluginCall call) {
+        String ssid = call.getString("ssid");
+        JSObject object = new JSObject();
 
-        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
-            ssid = call.getString("ssid");
-        } else {
-            JSObject object = new JSObject();
+        if (null == ssid || "".equals(ssid)) {
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
             call.success(object);
-            return res;
+        } else if (removeNetwork(ssid)) {
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.network.removed");
+            call.success(object);
+        } else {
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
+            call.success(object);
         }
-
+    }
+    public boolean removeNetwork(String ssid) {
+        boolean res = false;
         WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
@@ -644,28 +701,13 @@ public class WifiEapConfigurator extends Plugin {
             if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
                 wifi.removeNetwork(conf.networkId);
                 wifi.saveConfiguration();
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.network.removed");
-                call.success(object);
                 res = true;
             }
         }
         /*} else {
             wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.network.removed");
-            call.success(object);
             res = true;
         }*/
-
-        if (!res) {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.success.network.missing");
-            call.success(object);
-        }
 
         return res;
     }
@@ -902,11 +944,16 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     private Integer getAuthMethod(Integer auth) {
+        if (auth == null) {
+            return WifiEnterpriseConfig.Phase2.MSCHAPV2;
+        }
         switch (auth) {
             case -1: return WifiEnterpriseConfig.Phase2.PAP;
             case -2: return WifiEnterpriseConfig.Phase2.MSCHAP;
             case -3:
-            case 26: /* Android cannot do PEAP-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try PEAP-MSCHAPv2 instead */
+            case 26: /* Android cannot do TTLS-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try TTLS-MSCHAPv2 instead */
+	            // This currently DOES happen because CAT has a bug where it reports TTLS-MSCHAPv2 as TTLS-EAP-MSCHAPv2,
+	            // so denying this would prevent profiles from being sideloaded
                 return WifiEnterpriseConfig.Phase2.MSCHAPV2;
             /*
             case _:
