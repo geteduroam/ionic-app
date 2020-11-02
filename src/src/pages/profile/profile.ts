@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import {Events, NavController, NavParams, ViewController} from 'ionic-angular';
 import { WifiConfirmation } from '../wifiConfirmation/wifiConfirmation';
 import { GeteduroamServices } from '../../providers/geteduroam-services/geteduroam-services';
@@ -12,6 +12,10 @@ import { ProvideModel } from '../../shared/models/provide-model';
 import { GlobalProvider } from '../../providers/global/global';
 import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
+import {ConfigurationScreen} from "../configScreen/configScreen";
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
+import { Plugins } from '@capacitor/core';
+const { Keyboard } = Plugins;
 
 @Component({
   selector: 'page-profile',
@@ -21,6 +25,8 @@ import { DictionaryServiceProvider } from "../../providers/dictionary-service/di
 export class ProfilePage extends BasePage{
 
   showAll: boolean = false;
+
+  showForm: boolean = false;
 
   /**
    * The profile which is received as a navigation parameter
@@ -51,7 +57,10 @@ export class ProfilePage extends BasePage{
    * Check terms of use
    */
   termsOfUse: boolean = false;
-
+  /**
+   * Check help desk
+   */
+  helpDesk: boolean = false;
   /**
    * Link url of terms of use
    */
@@ -87,10 +96,22 @@ export class ProfilePage extends BasePage{
    */
   enableButton: boolean = false;
 
+  /**
+   * DOM Sanitizer
+   */
+  converted_image: SafeResourceUrl;
+
+  /**
+   * It checks if provider has a logo
+   */
+  logo: boolean = false;
+
+  @ViewChild('imgLogo') imgLogo: ElementRef;
+
   constructor(private navCtrl: NavController, private navParams: NavParams, protected loading: LoadingProvider,
               private getEduroamServices: GeteduroamServices, private errorHandler: ErrorHandlerProvider,
               private validator: ValidatorProvider, protected global: GlobalProvider, protected dictionary: DictionaryServiceProvider,
-              protected event: Events, private viewCtrl: ViewController) {
+              protected event: Events, private sanitizer: DomSanitizer, private viewCtrl: ViewController) {
     super(loading, dictionary, event, global);
 
   }
@@ -109,9 +130,9 @@ export class ProfilePage extends BasePage{
    */
   getPlaceholder() {
     if (this.suffixIdentity !== '' && !!this.hintIdentity) {
-      return `username@${this.suffixIdentity}`;
+      return this.getString('placeholder', 'example') + `@${this.suffixIdentity}`;
     } else if (this.suffixIdentity !== '' && !this.hintIdentity) {
-      return `username@${this.suffixIdentity}`;
+      return this.getString('placeholder', 'example') + `@${this.suffixIdentity}`;
     } else {
       return this.getString('placeholder', 'example');
     }
@@ -130,11 +151,16 @@ export class ProfilePage extends BasePage{
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(
-            this.dictionary.getTranslation('error', 'duplicate'), false, '', '', true);
+            this.dictionary.getTranslation('error', 'duplicate'), false, '', 'retryConfiguration', true);
+        await this.navCtrl.setRoot(ConfigurationScreen);
+      }else if (checkRequest.message.includes('error.network.mobileconfig')) {
+        await this.errorHandler.handleError(
+            this.dictionary.getTranslation('error', 'mobileconfig'), false, '', 'retryConfiguration', true);
       } else if (checkRequest.message.includes('error.network.userCancelled')) {
         this.showAll = true;
       } else {
-        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), true, '');
+        await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-eap'), false, '', 'retryConfiguration', true);
+        await this.navCtrl.setRoot(ConfigurationScreen);
       }
     }
   }
@@ -257,31 +283,40 @@ export class ProfilePage extends BasePage{
    *  Lifecycle method executed when the class did enter
    */
   async ionViewDidEnter() {
+    this.providerInfo = this.global.getProviderInfo();
+    if(this.providerInfo.providerLogo) {
+      this.logo = true;
+      this.getLogo();
+    }
+    if (!!this.providerInfo.termsOfUse) this.createTerms();
+    if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||
+        !!this.providerInfo.helpdesk.phone) this.helpDesk = true;
     if (this.validMethod.clientSideCredential.username && this.validMethod.clientSideCredential.password) {
       this.provide.email = this.validMethod.clientSideCredential.username;
       this.provide.pass = this.validMethod.clientSideCredential.password;
       this.enableButton = true;
-      await this.checkForm();
     } else {
       this.removeSpinner();
-      this.showAll = true;
+      this.showForm = true;
     }
+    this.showAll = true;
   }
 
   /**
    * Method to activate terms of use on view.
    */
   protected createTerms() {
-    if (this.providerInfo.termsOfUse !== '') {
-
       // Activate checkbox on view
       this.termsOfUse = true;
       const terms = this.providerInfo.termsOfUse.toString();
+      try {
+        // Get the web address within the terms of use
+        this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
+          !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
+      } catch (e) {
+        this.termsOfUse = false;
+      }
 
-      // Get the web address within the terms of use
-      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
-        !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
-    }
   }
 
   /**
@@ -289,19 +324,9 @@ export class ProfilePage extends BasePage{
    */
   private configConnection() {
     // Non-EAP < 0 < EAP
-    let innerNonEapMethod: number = this.validMethod.innerAuthenticationMethod
-        ? this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod
-          ? +this.validMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
-          : 0
-        : 0
-        ;
-    let innerEapMethod: number = this.validMethod.innerAuthenticationMethod
-        ? this.validMethod.innerAuthenticationMethod.eapMethod
-          ? +this.validMethod.innerAuthenticationMethod.eapMethod.type
-          : 0
-        : 0
-        ;
-    let auth = innerEapMethod || innerNonEapMethod * -1;
+    let innerNonEapMethod: number = this.validMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
+    let innerEapMethod: number = this.validMethod?.innerAuthenticationMethod?.eapMethod?.type;
+    let auth: number = innerEapMethod * 1 || innerNonEapMethod * -1;
 
     return {
       // TODO: // Use the SSDI from the Profile according to https://github.com/geteduroam/ionic-app/issues/24
@@ -322,4 +347,13 @@ export class ProfilePage extends BasePage{
     this.viewCtrl.dismiss();
   }
 
+  getLogo() {
+    let imageData = this.providerInfo.providerLogo._;
+    let mimeType = this.providerInfo.providerLogo.$.mime;
+    let encoding = this.providerInfo.providerLogo.$.encoding;
+
+    const data = `data:${mimeType};${encoding},${imageData}`;
+
+    this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
+  }
 }

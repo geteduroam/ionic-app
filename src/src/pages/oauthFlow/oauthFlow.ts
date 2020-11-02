@@ -12,7 +12,6 @@ import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler"
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
 import { Plugins } from '@capacitor/core';
 const { OAuth2Client } = Plugins;
-declare var window: any;
 
 @Component({
   selector: 'page-oauthFlow',
@@ -72,11 +71,11 @@ export class OauthFlow extends BasePage{
 
   closeEventBrowser(error?: boolean) {
     this.loading.create();
+    this.navCtrl.pop();
     if (!!error) {
       this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-oauth'), false, '', '', true);
-      this.navCtrl.pop();
     }
-    this.loading.dismiss();
+    this.loading?.dismiss();
   }
 
   /**
@@ -85,8 +84,6 @@ export class OauthFlow extends BasePage{
    * @param res url to get token
    */
   async handleOAuthResponse(res) {
-    this.showSpinner();
-
     this.profile.token = res['access_token'];
 
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
@@ -102,14 +99,7 @@ export class OauthFlow extends BasePage{
     this.loading.createAndPresent();
     this.profile = this.navParams.get('profile');
     this.buildFlowAuth();
-    this.loading.dismiss();
+    this.loading?.dismiss();
     this.showAll = true;
-  }
-
-  /**
-   * Method to build spinner loading
-   */
-  showSpinner() {
-    this.loading.createAndPresent();
   }
 }

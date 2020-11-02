@@ -32,22 +32,22 @@ export class ConfigurationScreen extends BasePage{
   /**
    * All the institutions retrieved by the service [GeteduroamServices]{@link ../injectables/GeteduroamServices.html}
    */
-  instances: Object[];
+  institutions: Object[];
 
   /**
    * Set of institutions filtered by what is written in the search-bar
    */
-  filteredInstances: Object[];
+  filteredinstitutions: Object[];
 
   /**
    * Selected institution
    */
-  instance: Object;
+  institution: Object;
 
   /**
    * Name of the selected institution used in the search-bar
    */
-  instanceName: string = '';
+  institutionName: string = '';
 
   /**
    * Selected profile
@@ -72,7 +72,7 @@ export class ConfigurationScreen extends BasePage{
   /**
    * Property to decide whether or not to show the institutions list
    */
-  showInstanceItems: boolean = false;
+  showinstitutionItems: boolean = false;
 
   /**
    * Property to show button
@@ -93,16 +93,9 @@ export class ConfigurationScreen extends BasePage{
               private errorHandler: ErrorHandlerProvider) {
     super(loading, dictionary, event, global);
 
-    // When the institute search bar gets focus, a keyboard may popup
-    // Hiding it is slow, so we mark it readOnly, but we keep this hack here
-    // in case the readOnly hack stops working at some point.
-    Keyboard.addListener('keyboardWillShow', async () => {
-      await Keyboard.hide();
-    });
-
     this.event.subscribe('connection', async (res: any) => {
       if (!!res.connected && !this.global.discovery) {
-        this.chargeDiscovery()
+        await this.chargeDiscovery()
       }
     });
   }
@@ -114,24 +107,12 @@ export class ConfigurationScreen extends BasePage{
     this.showModal();
   }
   async showModal() {
-    if (!!this.instances) {
+    if (!!this.institutions) {
       let searchModal = this.modalCtrl.create(InstitutionSearch, {
-        instanceName: this.instanceName
+        institutionName: this.institutionName
       });
 
-      searchModal.onDidDismiss((data) => {
-
-        data = this.instances.filter((res: any) => {
-           if (res.name === data) return res
-        });
-
-        if (data !== undefined) {
-          this.instance = data[0];
-          this.instanceName = data[0].name;
-
-          this.initializeProfiles(this.instance);
-        }
-      });
+      searchModal.onDidDismiss(institution => this.initializeProfiles(institution));
 
       return await searchModal.present();
     } else {
@@ -168,21 +149,24 @@ export class ConfigurationScreen extends BasePage{
    * @param {any} institution the selected institution.
    */
   initializeProfiles(institution: any) {
-    if (institution.profiles.length > 1 ) {
-      // Check default profile and sort array for highlighting default profile
-      institution.profiles.forEach((profile, index) => {
-        if (!!profile.default) {
-          institution.profiles.splice(index,1);
-          this.defaultProfile = profile;
-          institution.profiles.unshift(this.defaultProfile);
-        }
-      });
-    } else {
-      this.defaultProfile = institution.profiles[0];
-    }
-    this.profiles = institution.profiles;
+    if (institution !== null) {
+      this.institutionName = institution.name;
+      if (institution.profiles.length > 1 ) {
+        // Check default profile and sort array for highlighting default profile
+        institution.profiles.forEach((profile, index) => {
+          if (!!profile.default) {
+            institution.profiles.splice(index,1);
+            this.defaultProfile = profile;
+            institution.profiles.unshift(this.defaultProfile);
+          }
+        });
+      } else {
+        this.defaultProfile = institution.profiles[0];
+      }
+      this.profiles = institution.profiles;
 
-    this.checkProfiles();
+      this.checkProfiles();
+    }
   }
 
   /**
@@ -191,23 +175,29 @@ export class ConfigurationScreen extends BasePage{
    * [selectedProfileId]{@link #selectedProfileId} and [defaultProfile]{@link #defaultProfile},
    */
   checkProfiles(){
-    if (this.profiles.length === 1) {
-      this.profile = this.profiles[0];
-      this.profileName = this.profile.name;
-      this.selectedProfileId = this.profile.id;
-      this.defaultProfile = null;
-    } else {
-      let filteredProfiles = this.profiles.filter((item:any) => {
-        return (item.default == true);
-      });
-
-      this.defaultProfile = filteredProfiles[0];
-
-      if (!!this.defaultProfile) {
-        this.profile = this.defaultProfile;
+    switch(this.profiles.length) {
+      case 0:
+        this.resetValues();
+        return;
+      case 1:
+        this.profile = this.profiles[0];
         this.profileName = this.profile.name;
         this.selectedProfileId = this.profile.id;
-      }
+        this.defaultProfile = null;
+        return;
+      default:
+        let filteredProfiles = this.profiles.filter((item:any) => {
+          return (item.default == true);
+        });
+
+        this.defaultProfile = filteredProfiles[0];
+
+        if (!!this.defaultProfile) {
+          this.profile = this.defaultProfile;
+          this.profileName = this.profile.name;
+          this.selectedProfileId = this.profile.id;
+        }
+        return;
     }
   }
   navigateAndroid(e: Event) {
@@ -238,20 +228,21 @@ export class ConfigurationScreen extends BasePage{
         !!this.global.isAndroid() ? App.exitApp() : this.showAll = true
 
       }
-
     } else{
      await this.alertConnectionDisabled();
     }
-    this.resetValues();
   }
 
   async ngOnInit() {
-    await this.getDiscovery();
-    console.log('global-discovery: ', this.global.discovery);
+    this.institutions = this.global.discovery;
+    this.event.subscribe('connection', () => this.chargeDiscovery());
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     this.loading.create();
+    if (!this.global.discovery) {
+      await this.chargeDiscovery();
+    }
   }
   /**
    *  Lifecycle when entering a page, before it becomes the active one
@@ -278,7 +269,7 @@ export class ConfigurationScreen extends BasePage{
 
   async getDiscovery() {
     const firstResponse = await this.getEduroamServices.discovery();
-    this.instances = await this.waitingSpinner(firstResponse);
+    this.institutions = await this.waitingSpinner(firstResponse);
   }
 
   resetValues() {
@@ -288,7 +279,7 @@ export class ConfigurationScreen extends BasePage{
       this.defaultProfile = null;
       this.selectedProfileId = null;
       this.profileName = null;
-      this.instanceName = '';
+      this.institutionName = '';
 
     });
   }
@@ -317,7 +308,7 @@ export class ConfigurationScreen extends BasePage{
 
   async chargeDiscovery() {
     await this.getDiscovery();
-    this.global.setDiscovery(this.instances)
+    this.global.setDiscovery(this.institutions)
   }
 
   /**

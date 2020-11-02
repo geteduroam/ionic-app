@@ -12,6 +12,7 @@ import { InstitutionSearch } from './institutionSearch/institutionSearch';
 import { ValidatorProvider } from '../providers/validator/validator';
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {ConfigFilePage} from "./configFile/configFile";
+import {ClientCertificatePassphrasePage} from "./clientCertificatePassphrase/clientCertificatePassphrase";
 
 const Pages = [
   ReconfigurePage,
@@ -21,7 +22,8 @@ const Pages = [
   InstitutionSearch,
   ConfigurationScreen,
   WifiConfirmation,
-  ConfigFilePage
+  ConfigFilePage,
+  ClientCertificatePassphrasePage
 ];
 
 @NgModule({

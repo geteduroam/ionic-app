@@ -1,3 +1,4 @@
+import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
@@ -40,7 +41,6 @@ export class GeteduroamServices {
     const headers = {};
 
     try {
-
       const response = await Http.request({
         method: 'GET',
         url,
@@ -54,7 +54,8 @@ export class GeteduroamServices {
         await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'invalid-institution'), false);
       }
     } catch (e) {
-        await this.errorHandler.handleError(e.error,false);
+      // Error is not dismissable, so disable for now
+      await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', false);
     }
   }
 
@@ -128,6 +129,16 @@ export class GeteduroamServices {
       let result:Object = {};
       let ssidAux = [];
       let oidAux = [];
+
+      // Remove after July 2021
+      // Needed because of cat.eduroam.de
+      // After this date, a missing iEEE80211 is an error!
+      if (!credentialApplicabilityAux.iEEE80211) {
+        result['ssid'] = ['eduroam'];
+        result['oid'] = ['001bc50460'];
+        return result;
+      }
+
       for (let i = 0; i < credentialApplicabilityAux.iEEE80211.length; i++) {
         let iEEE80211Aux : IEEE80211 = credentialApplicabilityAux.iEEE80211[i];
         if(iEEE80211Aux['ConsortiumOID']){
@@ -349,21 +360,9 @@ export class GeteduroamServices {
   }
 
   supportsAuthenticationMethod(authenticationMethod): boolean {
-    let outerEapMethod = authenticationMethod.eapMethod.type;
-    // TODO we are not certain that "type" exists.
-    // Apparently that's a problem, since we're getting promise errors when connecting to EAP-TLS if this check is removed.
-    let innerNonEapMethod = authenticationMethod.innerAuthenticationMethod
-        ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod
-          ? authenticationMethod.innerAuthenticationMethod.nonEAPAuthMethod.type
-          : ''
-        : ''
-        ;
-    let innerEapMethod = authenticationMethod.innerAuthenticationMethod
-        ? authenticationMethod.innerAuthenticationMethod.eapMethod
-          ? authenticationMethod.innerAuthenticationMethod.eapMethod.type
-          : ''
-        : ''
-        ;
+    let outerEapMethod = authenticationMethod?.eapMethod?.type;
+    let innerNonEapMethod = authenticationMethod?.innerAuthenticationMethod?.nonEAPAuthMethod?.type;
+    let innerEapMethod = authenticationMethod?.innerAuthenticationMethod?.eapMethod?.type;
 
     let isAndroid = this.global.isAndroid();
     let isApple = !isAndroid;
@@ -384,7 +383,12 @@ export class GeteduroamServices {
         if (innerNonEapMethod) break;
         // iOS can also handle EAP-MSCHAPv2
         if (isApple && innerEapMethod === '26') break;
+        // We will temporary allow this for Android as well,
+        // due to the bug in CAT; Android will configure TTLS-MSCHAPv2 instead
+        // please re-evaluate after July 2021, currently both cat.eduroam.org and cat.eduroam.de are broken.
+        if (isAndroid && innerEapMethod === '26') break;
         // Android supports TTLS-GTC, but CAT doesn't
+        return false;
       case '25': // EAP-PEAP
         // The inner method must be 26 on any platform
         if (innerEapMethod === '26') break;
