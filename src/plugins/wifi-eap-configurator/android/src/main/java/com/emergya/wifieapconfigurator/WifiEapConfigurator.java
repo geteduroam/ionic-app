@@ -10,6 +10,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -35,6 +36,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import android.os.SystemClock;
+import androidx.preference.PreferenceManager;
 import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
@@ -1037,61 +1039,30 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     @PluginMethod()
-    public void writeToFile(PluginCall call) {
+    public void writeToSharedPref(PluginCall call) {
         String data = call.getString("id");
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(getContext().openFileOutput("config.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.writing");
-            call.success(object);
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.writing");
-            call.success(object);
-        }
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("institutionId", data);
+        editor.apply();
+        JSObject object = new JSObject();
+        object.put("success", true);
+        object.put("message", "plugin.wifieapconfigurator.success.writing");
+        call.success(object);
     }
 
     @PluginMethod()
-    public void readFromFile(PluginCall call) {
-
-        String ret = "";
-
-        try {
-            InputStream inputStream = getContext().openFileInput("config.txt");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append("\n").append(receiveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("message", "plugin.wifieapconfigurator.success.reading");
-                object.put("id", ret);
-                call.success(object);
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
+    public void readFromSharedPref(PluginCall call) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String ret = sharedPref.getString("institutionId", "");
+        if (ret != "") {
             JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.reading");
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.reading");
+            object.put("id", ret);
             call.success(object);
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
+        } else {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.reading");

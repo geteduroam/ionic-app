@@ -361,7 +361,7 @@ export class ConfigurationScreen extends BasePage{
     console.log(checkRequest.fromNotification);
     if (checkRequest.fromNotification === true) {
       this.global.setIsReconfigure(true);
-      const read = await WifiEapConfigurator.readFromFile();
+      const read = await WifiEapConfigurator.readFromSharedPref();
       if (read.success === true) {
         this.global.setIdInstitution(read.id.replace(/[\n\r]+/g, ''));
       } else {

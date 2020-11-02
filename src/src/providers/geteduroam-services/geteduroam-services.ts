@@ -386,7 +386,7 @@ export class GeteduroamServices {
 
   saveInstitutionId() {
     const config = { id: this.global.getIdInstitution()};
-    WifiEapConfigurator.writeToFile(config);
+    WifiEapConfigurator.writeToSharedPref(config);
   }
 
   setTimeToExpire(ms?: string) {
