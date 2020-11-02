@@ -10,6 +10,6 @@ public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        ScheduledService.enqueueWork(context, new Intent());
+        ScheduledService.enqueueWork(context, new Intent().putExtra("title", intent.getStringExtra("title")).putExtra("message", intent.getStringExtra("message")));
     }
 }

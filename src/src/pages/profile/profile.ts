@@ -148,8 +148,12 @@ export class ProfilePage extends BasePage{
       const checkRequest = await this.getEduroamServices.connectProfile(config);
 
       if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
-        this.getEduroamServices.saveInstitutionId();
-        this.getEduroamServices.setTimeToExpire(31556952000);
+        if (this.global.getIdInstitution()) {
+          this.getEduroamServices.saveInstitutionId();
+        }
+        if (this.global.getValidUntil()) {
+          this.getEduroamServices.setTimeToExpire();
+        }
         await this.navigateTo();
       }else if (checkRequest.message.includes('error.network.alreadyAssociated')) {
         await this.errorHandler.handleError(

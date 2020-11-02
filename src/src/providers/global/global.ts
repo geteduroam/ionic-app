@@ -28,6 +28,7 @@ export class GlobalProvider {
   private authenticationMethod: AuthenticationMethod;
   private providerInfo: ProviderInfo;
   private credentialApplicability: CredentialApplicability;
+  private validUntil;
 
   /*
    * Client ID of the application. Must match the following strings:
@@ -145,5 +146,13 @@ export class GlobalProvider {
 
   getIsReconfigure() {
     return this.reconfigure;
+  }
+
+  setValidUntil(valid) {
+    this.validUntil = valid;
+  }
+
+  getValidUntil() {
+    return this.validUntil;
   }
 }

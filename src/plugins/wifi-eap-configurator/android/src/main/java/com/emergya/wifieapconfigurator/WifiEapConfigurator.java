@@ -39,6 +39,7 @@ import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
 
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -1022,12 +1023,17 @@ public class WifiEapConfigurator extends Plugin {
     }
 
     @PluginMethod
-    public void sendNotification(PluginCall call) {
+    public void sendNotification(PluginCall call) throws JSONException {
+        String time = call.getString("delay");
+        String title = call.getString("title");
+        String message = call.getString("message");
+        Long delay = Long.parseLong(time);
         AlarmManager mgr = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(getContext(), NotificationReceiver.class);
+        i.putExtra("title", title);
+        i.putExtra("message", message);
         PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, 0);
-        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + call.getInt("delay"), pi);
-
+        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);
     }
 
     @PluginMethod()

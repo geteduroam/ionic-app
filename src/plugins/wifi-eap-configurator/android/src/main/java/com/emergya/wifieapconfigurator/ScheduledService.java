@@ -45,8 +45,8 @@ public class ScheduledService extends JobIntentService {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel1");
 
         mBuilder.setSmallIcon(R.drawable.ic_transparent)
-                .setContentTitle("Test")
-                .setContentText("Testing second flow")
+                .setContentTitle(intent.getStringExtra("title"))
+                .setContentText(intent.getStringExtra("message"))
                 .setContentIntent(resultPendingIntent)
                 .setAutoCancel(true);
 

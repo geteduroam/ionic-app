@@ -224,6 +224,7 @@ export class ConfigurationScreen extends BasePage{
     if (!!this.activeNavigation) {
       this.showAll = false;
       if (!this.profile.redirect && !!profile.oauth) {
+        this.global.setIdInstitution(this.selectedProfileId);
         await this.navCtrl.push(OauthFlow, {profile}, {animation: 'transition'});
       } else if (!this.profile.redirect && !profile.oauth) {
         if (await this.checkEap(profile)) {
@@ -363,6 +364,8 @@ export class ConfigurationScreen extends BasePage{
       const read = await WifiEapConfigurator.readFromFile();
       if (read.success === true) {
         this.global.setIdInstitution(read.id.replace(/[\n\r]+/g, ''));
+      } else {
+        this.global.setIsReconfigure(false);
       }
     } else {
       this.global.setIsReconfigure(false);
