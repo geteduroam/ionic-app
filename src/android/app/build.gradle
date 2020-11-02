@@ -6,8 +6,8 @@ android {
         applicationId "app.eduroam.geteduroam"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "1.0.15"
+        versionCode 16
+        versionName "1.0.16"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = ["appAuthRedirectScheme": "app.eduroam.geteduroam"]
     }
