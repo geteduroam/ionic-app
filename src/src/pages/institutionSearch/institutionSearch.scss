@@ -1,18 +1,38 @@
-page-institution-search {
-  //---------------------------
-  // ion-item custom style
-  //---------------------------
-  .list-institution {
-    background-color: white;
-  }
-  .label-institution {
-    font-size: 17px;
-    padding-left: 16px;
+@media (prefers-color-scheme: dark) {
+  page-institution-search {
+    .toolbar-background-ios {
+      background-color: #222;
+    }
+    .searchbar-ios .searchbar-search-icon {
+      background-image: url("data:image/svg+xml;charset=utf-8,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2013%2013'><path%20fill='rgba(255,255,255,0.5)'%20d='M5,1c2.2,0,4,1.8,4,4S7.2,9,5,9S1,7.2,1,5S2.8,1,5,1%20M5,0C2.2,0,0,2.2,0,5s2.2,5,5,5s5-2.2,5-5S7.8,0,5,0%20L5,0z'/><line%20stroke='rgba(255,255,255,0.5)'%20stroke-miterlimit='10'%20x1='12.6'%20y1='12.6'%20x2='8.2'%20y2='8.2'/></svg>");
+    }
+    .searchbar-ios .searchbar-clear-icon {
+      background-image: url("data:image/svg+xml;charset=utf-8,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'><path%20fill='rgba(255,255,255,0.5)'%20d='M403.1,108.9c-81.2-81.2-212.9-81.2-294.2,0s-81.2,212.9,0,294.2c81.2,81.2,212.9,81.2,294.2,0S484.3,190.1,403.1,108.9z%20M352,340.2L340.2,352l-84.4-84.2l-84,83.8L160,339.8l84-83.8l-84-83.8l11.8-11.8l84,83.8l84.4-84.2l11.8,11.8L267.6,256L352,340.2z'/></svg>");
+    }
+    .toolbar .searchbar-ios .searchbar-input {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255,255,255,.75);
+    }
+    .toolbar .searchbar-ios .searchbar-input::placeholder {
+      color: rgba(255,255,255,.50);
+    }
 
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-    overflow: hidden;
-    color: #444;
+    .item-ios {
+      background-color: #111;
+      color: rgba(255,255,255,.75);
+    }
+    .list-ios .item-block .item-inner,
+    .list-ios .item-block
+     {
+      border-color: #444 !important;
+    }
   }
+
+}
+
+/* The arrow does not work, so override */
+.ion-md-arrow-back:before {
+  content: url('data:image/svg+xml,<svg width="1.6em" height="1.6em" viewBox="0 0 16 16" class="bi bi-arrow-left-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/></svg>');
+  position: relative;
+  top: .1em;
 }

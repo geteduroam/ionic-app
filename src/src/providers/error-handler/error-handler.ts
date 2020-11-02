@@ -1,5 +1,5 @@
 import { ErrorHandler, Injectable } from '@angular/core';
-import {ModalController, NavController} from 'ionic-angular';
+import { ModalController } from 'ionic-angular';
 import { ErrorsPage } from '../../pages/errors/errors';
 
 

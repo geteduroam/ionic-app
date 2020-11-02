@@ -210,12 +210,18 @@ public class WifiEapConfigurator: CAPPlugin {
 		var counter = -1 /* we will call the worker with a constructed "nil" (no)error, which is configuration -1 */
 		var errors: [String] = []
 		func handler(error: Error?) -> Void {
-			counter += 1
 			switch(error?.code) {
 			case nil:
 				break;
 			case NEHotspotConfigurationError.alreadyAssociated.rawValue:
-				errors.append("plugin.wifieapconfigurator.error.network.alreadyAssociated")
+				if configurations[counter].ssid != "" {
+					// This should not happen, since we just removed the network
+					// If it happens, you have the network from a different source.
+					errors.append("plugin.wifieapconfigurator.error.network.alreadyAssociated")
+				} else {
+					// TODO what should we do for duplicate HS20 networks?
+					// It seems that duplicate RCOI fields (oid) will trigger this error
+				}
 				break
 			case NEHotspotConfigurationError.userDenied.rawValue:
 				errors.append("plugin.wifieapconfigurator.error.network.userCancelled")
@@ -228,9 +234,14 @@ public class WifiEapConfigurator: CAPPlugin {
 				// Are you running in an emulator?
 				errors.append("plugin.wifieapconfigurator.error.network.internal")
 				break
+			case NEHotspotConfigurationError.systemConfiguration.rawValue:
+				// There is a conflicting mobileconfig installed
+				errors.append("plugin.wifieapconfigurator.error.network.mobileconfig")
+				break
 			default:
 				errors.append("plugin.wifieapconfigurator.error.network.other." + String(error!.code))
 			}
+			counter += 1
 
 			if (counter < configurations.count) {
 				let config = configurations[counter]
@@ -307,7 +318,7 @@ public class WifiEapConfigurator: CAPPlugin {
 					return buildSettingsWithClientCertificate(
 						pkcs12: clientCertificate!,
 						passphrase: passphrase!
-					)!
+					)
 				}
 				NSLog("☠️ buildSettings: Failed precondition for EAPTLS")
 				break
@@ -322,7 +333,7 @@ public class WifiEapConfigurator: CAPPlugin {
 						innerAuthType: innerAuthType,
 						username: username!,
 						password: password!
-					)!
+					)
 				}
 				NSLog("☠️ buildSettings: Failed precondition for EAPPEAP/EAPFAST")
 				break
@@ -572,6 +583,27 @@ public class WifiEapConfigurator: CAPPlugin {
 			return nil
 		}
 		return identity
+	}
+
+	@objc func validatePassPhrase(_ call: CAPPluginCall) {
+		let passPhrase = call.getString("passPhrase")
+		let certificate = call.getString("certificate")
+		let options = [ kSecImportExportPassphrase as String: passPhrase ]
+		var rawItems: CFArray?
+		let certBase64 = certificate
+		/*If */let data = Data(base64Encoded: certBase64!)!
+
+		let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
+		guard statusImport == errSecSuccess else {
+			return call.success([
+				"message": "plugin.wifieapconfigurator.error.passphrase.invalid",
+				"success": false,
+			])
+		}
+		return call.success([
+			"message": "plugin.wifieapconfigurator.valid.passphrase",
+			"success": true,
+		])
 	}
 
 	/**

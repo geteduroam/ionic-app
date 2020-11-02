@@ -31,7 +31,7 @@ ion-content {
     box-shadow: 0 0 4px 4px rgba(20, 20, 20, 0.04);
     border-radius: 0 0 4px 4px;
     position: relative;
-    height: calc(90% - 70px);
+    min-height: calc(90% - 65px);
     margin-top: 0;
     border-top: none;
 
@@ -40,6 +40,7 @@ ion-content {
     }
 
     .arrow-back {
+      height: 0;
       display: block;
       text-align: left;
       background-color: transparent !important;
@@ -49,7 +50,7 @@ ion-content {
         padding: 5px;
         height: 100%;
         box-shadow: none;
-        margin: 10px 0 0 0;
+        margin: 25px 0 0 0;
 
         span {
           padding: 5px 0 0 15px;
@@ -62,11 +63,11 @@ ion-content {
     }
 
     .container-content {
-      background: #FFFFFF;
-      height: calc(100% - 26%);
+      background: white;
     }
 
     .header-content {
+      min-height: 15vh;
 
       img {
         width: 57px;
@@ -83,7 +84,7 @@ ion-content {
     }
 
     .content-info {
-      height: calc(50% - 20px);
+      min-height: calc(50% - 20px);
 
       .info-text {
         height: 100%;
@@ -99,17 +100,13 @@ ion-content {
 
         .message {
           overflow: hidden;
-          height: calc(80% - 30px);
+          min-height: calc(80% - 30px);
         }
       }
     }
 
     .content-form {
-      height: calc(60% - 30px);
-
-      .row {
-        height: calc(35% - 10px)
-      }
+      min-height: 35vh;
 
       //---------------------------
       // ion-label custom style
@@ -123,15 +120,15 @@ ion-content {
       }
     }
 
-    .footer-info {
-      height: calc(30% - 10px);
-
+    .content-button {
+      min-height: 9vh;
+    }
+    .footer-info, .footer-form {
       .content-button {
         position: relative;
         height: 30%;
 
         button {
-          width: 147px;
           height: 45px;
           font-family: Helvetica, sans-serif;
           font-size: 16px;
@@ -139,7 +136,14 @@ ion-content {
           letter-spacing: 0;
           text-align: center;
         }
+        .disabled-button {
+          opacity: .4;
+          pointer-events: none;
+        }
       }
+    }
+    .footer-info {
+      min-height: calc(30% - 10px);
 
       .text-bottom {
 
@@ -158,27 +162,19 @@ ion-content {
         }
       }
     }
-
     .footer-form {
-      height: calc(20% - 10px);
+      min-height: calc(20% - 10px);
+    }
 
-      .content-button {
-        position: relative;
-        height: 30%;
+    .help-desk {
+      position: relative;
+      display: inline-block;
 
-        button {
-          width: 147px;
-          height: 45px;
-          font-family: Helvetica, sans-serif;
-          font-size: 16px;
-          color: #FFFFFF;
-          letter-spacing: 0;
-          text-align: center;
+      ion-label {
+        text-align: center;
 
-        }
-        .disabled-button {
-          opacity: .4;
-          pointer-events: none;
+        a {
+          text-decoration: underline;
         }
       }
     }
@@ -213,20 +209,14 @@ ion-content {
 //// Change background to black on dark mode
 ////---------------------------------
 @media (prefers-color-scheme: dark) {
-  ion-content {
+  ion-content, ion-content .content-ios {
     background: black !important;
     .logo {
       background-image: url('../assets/imgs/eduroam-dark.svg');
     }
   }
-  /*
-   * The discovery uses the background color as separation lines,
-   * so we revert this back to the light theme, since we don't have a dark theme for this
-   */
-  page-institution-search {
-    ion-content {
-      background: #f6f4f3 !important;
-    }
+  page-institution-search > ion-content {
+    background: black !important;
   }
 }
 
@@ -253,4 +243,34 @@ ion-app, ion-alert div:last-child {
 ////-------------------------------------
 .nav-decor {
   display: none !important;
+}
+
+// Remove some elements on very small screens
+@media (max-height: 536px) {
+  .app-root > ion-content {
+    background: white !important;
+
+    .logo {
+      margin: 4px auto !important;
+      height: 46px;
+      width: 105px;
+    }
+    .bar-upped {
+      display: none;
+    }
+    .base-content {
+      margin: 0 !important;
+      box-shadow: none;
+
+      .header-content {
+        img {
+          width: 42px;
+          height: 50px;
+        }
+        h1 {
+          margin: 0;
+        }
+      }
+    }
+  }
 }
