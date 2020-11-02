@@ -55,7 +55,7 @@ export class GeteduroamServices {
       }
     } catch (e) {
       // Error is not dismissable, so disable for now
-      await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', false);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'enable-acess'),  false);
     }
   }
 

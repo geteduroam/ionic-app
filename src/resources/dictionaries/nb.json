@@ -58,7 +58,8 @@
     "invalid-oauth": "Innloggingen ver ikke godkjent, vennligst prøv på nytt",
     "invalid-institution": "Institusjonen støttes ikke",
     "passphrase": "Passfrasen er feil",
-    "terms": "Du må godkjenne brukerbetingelsene"
+    "terms": "Du må godkjenne brukerbetingelsene",
+    "enable-access": "We need a network connection to load the list of institutions. Please enable networking."
   },
   "text": {
     "configured": "Wi-Fi er nå satt opp.",

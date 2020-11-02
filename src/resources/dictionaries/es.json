@@ -57,7 +57,9 @@
     "invalid-oauth": "Debe autorizar la aplicación para poder configurar la conexión WiFi",
     "invalid-institution": "Esta institución no está soportada",
     "passphrase": "La contraseña del certificado es incorrecta",
-    "terms": "Debes aceptar los términos de uso"
+    "terms": "Debes aceptar los términos de uso",
+    "enable-access": "Necesitamos una conexión a Internet para cargar la lista de instituciones. Por favor, habilite la conexión."
+
   },
   "text": {
     "configured": "Wi-Fi ya está cinfugurada en tu dispositivo.",

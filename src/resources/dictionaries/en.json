@@ -58,7 +58,8 @@
     "invalid-oauth": "You have to authorize the app to be able to configure the WiFi connection",
     "invalid-institution": "This institution is not supported",
     "passphrase": "The Passphrase is incorrect",
-    "terms": "You need accept terms of use"
+    "terms": "You need accept terms of use",
+    "enable-access": "We need a network connection to load the list of institutions. Please enable networking."
   },
   "text": {
     "configured": "Wi-Fi is now configured on your device.",

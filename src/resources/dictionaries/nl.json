@@ -58,7 +58,8 @@
     "invalid-oauth": "Je moet de app autoriseren om de Wi-Fi verbinding te kunnen instellen",
     "invalid-institution": "Deze organisatie wordt niet ondersteund",
     "passphrase": "Het wachtwoord is onjuist",
-    "terms": "Je moet de gebruiksvoorwaarden accepteren"
+    "terms": "Je moet de gebruiksvoorwaarden accepteren",
+    "enable-access": "We hebben een netwerkverbinding nodig om de lijst met instellingen te laden. Schakel netwerken in."
   },
   "text": {
     "configured": "Wi-Fi is nu ingesteld op dit apparaat.",
