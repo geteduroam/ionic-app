@@ -42,12 +42,12 @@ export class GeteduroamServices {
         if (data.instances) {
           return data.instances;
         } else {
-          await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', true);
+          await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking.', false);
         }
 
     } catch (e) {
       // Error is not dismissable, so disable for now
-      await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', true);
+      await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking.', false);
     }
   }
 
@@ -360,7 +360,7 @@ export class GeteduroamServices {
         return false;
       case '21': // EAP-TTLS
         // Android and Apple can handle any Non-EAP type here
-        if (innerNonEapMethod) break; 
+        if (innerNonEapMethod) break;
         // iOS can also handle EAP-MSCHAPv2
         if (isApple && innerEapMethod === '26') break;
         // We will temporary allow this for Android as well,

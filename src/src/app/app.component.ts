@@ -112,6 +112,17 @@ export class GeteduroamApp {
    * This method add listeners needed to app
    */
   addListeners() {
+    // Listening to changes in network states, it show toast message when status changed
+    Network.addListener('networkStatusChange', async () => {
+      let connectionStatus: NetworkStatus = await this.statusConnection();
+      if (!this.checkExtFile) {
+        this.connectionEvent(connectionStatus);
+
+        !connectionStatus.connected ?
+          this.alertConnection(this.dictionary.getTranslation('error', 'turn-on')) :
+          this.alertConnection(this.dictionary.getTranslation('text', 'network-available'));
+      }
+    });
     if (this.global.isAndroid()){
       this.platform.registerBackButtonAction(() => {
         // get current active page
