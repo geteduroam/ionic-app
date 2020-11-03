@@ -1,0 +1,72 @@
+{
+	"header": {
+		"config": "Cài đặt eduroam",
+		"profile": "Điền vào thông tin dưới đây",
+		"confirmation": "eduroam cài đặt thành công!",
+		"error": "Lỗi"
+	},
+	"label": {
+		"institution": "Cơ sở giáo dục",
+		"username": "Tên tài khoản",
+		"accept": "Chấp nhận ",
+		"terms": "Điều khoản sử dụng",
+		"profile": "Profile",
+		"password": "Mật khẩu",
+		"passphrase": "Passphrase",
+		"note": "*Lưu ý: Nếu kết nối bị lỗi, kiểm tra lại mật khẩu",
+		"help": "Cần được giúp đỡ?",
+		"support": "Bấm vào đây để được giúo đỡ"
+	},
+	"placeholder": {
+		"institution": "Chọn cơ sở giáo dục...",
+		"profile": "Chọn profile...",
+		"example": "username"
+	},
+	"modalSupport": {
+		"title": "Thông tin giúp đỡ",
+		"message": "Chọn một trong những thông tin sau",
+		"web": "Web: ",
+		"email": "Email: ",
+		"phone": "Điện thoại: ",
+		"help": "Thông tin giúp đỡ",
+		"cancel": "Bỏ qua",
+		"terms": "Điều khoản sử dụng"
+	},
+	"button": {
+		"next": "Tiếp theo",
+		"ok": "OK",
+		"more": "Thêm thông tin",
+		"email": "Gởi email",
+		"back": "Quay lại",
+		"done": "Hoàn thành",
+		"reconfigure": "Cài đặt lại",
+		"configure" : "Cài đặt",
+		"no-thanks": "Không",
+		"close": "Đóng",
+		"connect": "Kết nối mạng"
+	},
+	"error": {
+		"username": "Tên tài khoản phải theo mẫu sau: ",
+		"domain": "Tên tài khoản phải kết thúc với ",
+		"password": "Sai mật khẩu",
+		"turn-on": "Vui lòng bật dữ liệu di động",
+		"duplicate": "This network is already available in the device.\nPlease go to Settings > Wi-Fi Networks and remove it first",
+		"mobileconfig": "Your device is configured through a configuration profile.\nPlease go to Settings > General > Profile and remove it",
+		"invalid-eap": "Invalid selected profile, if the error persists, contact with the admin please",
+		"invalid-method": "No valid authentication method available from the selected profile",
+		"invalid-profile": "The selected profile is wrong",
+		"invalid-oauth": "Bạn đã cho phép ứng dụng cài đặt kết nối Wifi",
+		"invalid-institution": "Cơ sở giáo dục không được hỗ trợ",
+		"passphrase": "Passphrase không đúng",
+		"terms": "Bạn cần phải đồng ý với Điều khoản sử dụng"
+	},
+	"text": {
+		"configured": "Wi-Fi is now configured on your device.",
+		"configure": "You are about to install a Wi-Fi network profile.",
+		"configure1": "Continue configuring",
+		"reconfigure": "Hi, It seems you have configured this device already.\nDo you want to reconfigure it?",
+		"network-available": "External access available",
+		"configuring": "Receiving network configuration, please wait"
+	},
+	"defaultError": "Key not found"
+}

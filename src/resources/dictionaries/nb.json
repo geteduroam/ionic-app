@@ -55,7 +55,7 @@
     "invalid-eap": "Ugyldig profil valgt. Hvis feilen vedvarer, ta kontakt med din helpdesk",
     "invalid-method": "Ingen støttet innloggingsmetode tilgjengelig i den valgte profilen",
     "invalid-profile": "Ugyldig profil valgt.",
-    "invalid-oauth": "Innloggingen ver ikke godkjent, vennligst prøv på nytt",
+    "invalid-oauth": "Innloggingen var ikke godkjent, vennligst prøv på nytt",
     "invalid-institution": "Institusjonen støttes ikke",
     "passphrase": "Passfrasen er feil",
     "terms": "Du må godkjenne brukerbetingelsene"
