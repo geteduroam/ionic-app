@@ -82,8 +82,11 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -1026,7 +1029,7 @@ public class WifiEapConfigurator extends Plugin {
 
     @PluginMethod
     public void sendNotification(PluginCall call) throws JSONException {
-        String time = call.getString("delay");
+        /*String time = call.getString("delay");
         String title = call.getString("title");
         String message = call.getString("message");
         Long delay = Long.parseLong(time);
@@ -1035,7 +1038,18 @@ public class WifiEapConfigurator extends Plugin {
         i.putExtra("title", title);
         i.putExtra("message", message);
         PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, 0);
-        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);
+        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);*/
+
+        String stringDate = call.getString("date");
+        String title = call.getString("title");
+        String message = call.getString("message");
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("date", stringDate);
+        editor.putString("title", title);
+        editor.putString("message", message);
+        editor.apply();
+        StartNotifications.enqueueWorkStart(getContext(), new Intent());
     }
 
     @PluginMethod()

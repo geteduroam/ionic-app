@@ -5,11 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class NotificationReceiver extends BroadcastReceiver {
+public class NotificationsActivator extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
-        ScheduledService.enqueueWorkSchedule(context, new Intent().putExtra("title", intent.getStringExtra("title")).putExtra("message", intent.getStringExtra("message")));
+        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            StartNotifications.enqueueWorkStart(context, new Intent());
+        }
     }
 }

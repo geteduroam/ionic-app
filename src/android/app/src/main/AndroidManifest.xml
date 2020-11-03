@@ -45,7 +45,14 @@
         </activity>
         <service android:name="com.emergya.wifieapconfigurator.ScheduledService"
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
+        <service android:name="com.emergya.wifieapconfigurator.StartNotifications"
+            android:permission="android.permission.BIND_JOB_SERVICE"></service>
         <receiver android:name="com.emergya.wifieapconfigurator.NotificationReceiver" />
+        <receiver android:name="com.emergya.wifieapconfigurator.NotificationsActivator">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"
@@ -58,6 +65,7 @@
     </application>
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Camera, Photos, input file -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!-- Geolocation API -->

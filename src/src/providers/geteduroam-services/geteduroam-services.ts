@@ -394,10 +394,9 @@ export class GeteduroamServices {
     const title = this.dictionary.getTranslation('text', 'title');
     const message = this.dictionary.getTranslation('text', 'message');
     if (ms) {
-      config = { delay: ms.toString(), title: title, message: message};
+      config = { date: ms, title: title, message: message};
     } else {
-      const delay = this.global.getValidUntil() - Date.now() - 432000000;
-      config = { delay: delay.toString(), title: title, message: message};
+      config = { date: this.global.getValidUntil(), title: title, message: message};
     }
     WifiEapConfigurator.sendNotification(config);
   }

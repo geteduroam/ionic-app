@@ -18,9 +18,9 @@ import java.security.SecureRandom;
 
 public class ScheduledService extends JobIntentService {
 
-    public static final int JOB_ID = 1;
+    public static final int JOB_ID = 2;
 
-    public static void enqueueWork(Context context, Intent work) {
+    public static void enqueueWorkSchedule(Context context, Intent work) {
         enqueueWork(context, ScheduledService.class, JOB_ID, work);
     }
 
@@ -28,7 +28,7 @@ public class ScheduledService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         // First we create the channel of the notifications
         NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
-        channel1.setDescription("This is channel 1");
+        channel1.setDescription("GetEduroam App");
 
         NotificationManager manager = getApplicationContext().getSystemService(NotificationManager.class);
         manager.createNotificationChannel(channel1);
