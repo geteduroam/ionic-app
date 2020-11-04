@@ -13,7 +13,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     let vc = window?.rootViewController as! CAPBridgeViewController
-    
+		// For the Mac, remove the title bar and navigation bar.
+		#if targetEnvironment(macCatalyst)
+			vc.accessibilityActivate()
+		#endif
+	
     return handleOpenUrl(app, open: url)
   }
     
