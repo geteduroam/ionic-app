@@ -66,7 +66,9 @@
     "configure1": "Fortsett konfigurering",
     "reconfigure": "Det ser ut som enheten din er allerede satt opp.\nVil du sette den opp på nytt?",
     "network-available": "Nettilgang tilgjengelig",
-    "configuring": "Henter konfigurasjon, vennligst vent"
+    "configuring": "Henter konfigurasjon, vennligst vent",
+    "title": "Reconfigure geteduroam",
+    "message": "There are 5 days left for your geteduroam profile to expire, click to reconfigure it"
   },
   "defaultError": "Key not found"
 }
