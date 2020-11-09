@@ -252,7 +252,16 @@ public class WifiEapConfigurator extends Plugin {
 
             try {
                 certFactory = CertificateFactory.getInstance("X.509");
-                certificates.add((X509Certificate) certFactory.generateCertificate(b));
+                X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(b);
+                boolean[] usage = certificate.getKeyUsage();
+                // https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#getKeyUsage()
+                // 5 is KeyUsage keyCertSign, which indicates the certificate is a CA
+                if (usage[5]) certificates.add(certificate);
+                // We really shouldn't expect any certificate here to NOT be a CA,
+                // CAT shows a nice red warning when you try to configure this,
+                // but experience shows that sometimes this is not enough of a deterrent.
+                // We may very well block profiles like this, but then it should be done BEFORE
+                // the user enters their username/password, not after.
             } catch (CertificateException e) {
                 JSObject object = new JSObject();
                 object.put("success", false);
