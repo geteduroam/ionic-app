@@ -1,20 +1,17 @@
 package com.emergya.wifieapconfigurator;
 
-import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+
 import com.emergya.wifieapconfigurator.wifieapconfigurator.R;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
-
-import java.security.SecureRandom;
 
 public class ScheduledService extends JobIntentService {
 
@@ -44,7 +41,8 @@ public class ScheduledService extends JobIntentService {
         // Create the notification
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "channel1");
 
-        mBuilder.setSmallIcon(R.drawable.ic_transparent)
+        mBuilder.setSmallIcon(R.drawable.ic_notifications)
+                .setColor(0x005da9)
                 .setContentTitle(intent.getStringExtra("title"))
                 .setContentText(intent.getStringExtra("message"))
                 .setContentIntent(resultPendingIntent)

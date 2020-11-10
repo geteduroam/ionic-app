@@ -149,7 +149,7 @@ export class GlobalProvider {
   }
 
   setValidUntil(valid) {
-    this.validUntil = valid;
+    this.validUntil = valid.toString();
   }
 
   getValidUntil() {
