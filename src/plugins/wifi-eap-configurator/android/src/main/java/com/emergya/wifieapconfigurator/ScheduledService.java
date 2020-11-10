@@ -24,8 +24,8 @@ public class ScheduledService extends JobIntentService {
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         // First we create the channel of the notifications
-        NotificationChannel channel1 = new NotificationChannel("channel1", "Channel 1", NotificationManager.IMPORTANCE_HIGH);
-        channel1.setDescription("GetEduroam App");
+        NotificationChannel channel1 = new NotificationChannel("channel1", "geteduroam", NotificationManager.IMPORTANCE_HIGH);
+        channel1.setDescription("geteduroam App");
 
         NotificationManager manager = getApplicationContext().getSystemService(NotificationManager.class);
         manager.createNotificationChannel(channel1);

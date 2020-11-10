@@ -67,8 +67,8 @@
     "reconfigure": "Hi, It seems you have configured this device already.\nDo you want to reconfigure it?",
     "network-available": "External access available",
     "configuring": "Receiving network configuration, please wait",
-    "title": "Reconfigure network",
-    "message": "There are 5 days left for your network to expire, click to reconfigure it"
+    "title": "Reconfigure geteduroam",
+    "message": "There are 5 days left for your geteduroam profile to expire, click to reconfigure it"
   },
   "defaultError": "Key not found"
 }
