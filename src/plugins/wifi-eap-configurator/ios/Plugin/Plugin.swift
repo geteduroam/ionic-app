@@ -606,6 +606,48 @@ public class WifiEapConfigurator: CAPPlugin {
 		])
 	}
 
+	@objc func sendNotification(_ call: CAPPluginCall) {
+        let stringDate = call.getString("date")
+        let title = call.getString("title")
+        let message = call.getString("message")
+
+        let preferences = NSUserDefaults.standardUserDefaults()
+        preferences.setInteger(stringDate, forKey: "date")
+        preferences.setInteger(title, forKey: "title")
+        preferences.setInteger(message, forKey: "message")
+
+        //  Save to disk
+        let didSave = preferences.synchronize()
+
+        if !didSave {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.shared.not.saved",
+                "success": false
+            ])
+        }
+
+
+        //Seeting the alarm
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = message
+        let realDate = Int(stringDate) - 432000000
+        NSDate *date = [NSDate dateWithTimeIntervalSince1970:(realDate / 1000.0)];
+
+        // Create the request
+        let uuidString = UUID().uuidString
+        let request = UNNotificationRequest(identifier: uuidString,
+                    content: content, trigger: trigger)
+
+        // Schedule the request with the system.
+        let notificationCenter = UNUserNotificationCenter.current()
+        notificationCenter.add(request) { (error) in
+           if error != nil {
+              // Handle any errors.
+           }
+        }
+	}
+
 	/**
 	@function isConnectedSSID
 	@abstract capacitor call to check if SSID is connected
