@@ -66,7 +66,9 @@
     "configure1": "Einstellung fortsetzen",
     "reconfigure": "Sie haben dieses Gerät bereits konfiguriert.\nMöchten Sie neu konfigurieren?",
     "network-available": "Netzwerk ist verfügbar",
-    "configuring": "Die Netzwerkkonfiguration wird heruntergeladen, bitte warten..."
+    "configuring": "Die Netzwerkkonfiguration wird heruntergeladen, bitte warten...",
+    "title": "Neu konfigurieren geteduroam",
+    "message": "In 5 Tagen läuft das geteduroam WiFi-profil ab, klicken Sie hier, um es neu zu konfigurieren"
   },
   "defaultError": "Unbekannter Fehler"
 }

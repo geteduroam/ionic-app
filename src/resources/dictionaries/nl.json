@@ -66,7 +66,9 @@
     "configure1": "Ga door met instellen",
     "reconfigure": "Het lijkt er op dat je dit apparaat al hebt ingesteld.\nWil je het opnieuw configureren?",
     "network-available": "Externe toegang beschikbaar",
-    "configuring": "Netwerk configuratie ophalen, even geduld"
+    "configuring": "Netwerk configuratie ophalen, even geduld",
+    "title": "Opnieuw instellen geteduroam",
+    "message": "Over 5 dagen verloopt het geteduroam profiel, klik hier om het opnieuw in te stellen"
   },
   "defaultError": "Onbekende foutmelding"
 }

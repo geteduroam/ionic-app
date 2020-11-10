@@ -236,32 +236,36 @@ export class GeteduroamServices {
                 returnValue = returnValue && credentialApplicability.fillEntity(credentialApplicabilityAux);
               }
             }
-          }
-        }
-      }
-        //------------------------
-        // AUTHENTICATION METHODS
-        //------------------------
-        if (jsonAux != null && returnValue) {
 
-          for (let i in jsonAux) {
-
-            if (!!jsonAux[i] && returnValue) {
-
-              let authenticationMethodAux = new AuthenticationMethod();
-
-              try {
-                returnValue = returnValue && authenticationMethodAux.fillEntity(jsonAux[i]);
-
-                if (returnValue) {
-                  authenticationMethods.push(authenticationMethodAux);
-                }
-              } catch (e) {
-                returnValue = false;
-              }
+            if (this.readJson(jsonAux, 'ValidUntil')) {
+              this.global.setValidUntil(new Date(this.readJson(jsonAux, 'ValidUntil')[0]).getTime());
             }
           }
         }
+      }
+      //------------------------
+      // AUTHENTICATION METHODS
+      //------------------------
+      if (jsonAux != null && returnValue) {
+
+        for (let i in jsonAux) {
+
+          if (!!jsonAux[i] && returnValue) {
+
+            let authenticationMethodAux = new AuthenticationMethod();
+
+            try {
+              returnValue = returnValue && authenticationMethodAux.fillEntity(jsonAux[i]);
+
+              if (returnValue) {
+                authenticationMethods.push(authenticationMethodAux);
+              }
+            } catch (e) {
+              returnValue = false;
+            }
+          }
+        }
+      }
 
     } else {
         returnValue = false;
@@ -360,7 +364,7 @@ export class GeteduroamServices {
         return false;
       case '21': // EAP-TTLS
         // Android and Apple can handle any Non-EAP type here
-        if (innerNonEapMethod) break; 
+        if (innerNonEapMethod) break;
         // iOS can also handle EAP-MSCHAPv2
         if (isApple && innerEapMethod === '26') break;
         // We will temporary allow this for Android as well,
@@ -378,5 +382,22 @@ export class GeteduroamServices {
     }
 
     return true;
+  }
+
+  saveInstitutionId() {
+    const config = { id: this.global.getIdInstitution()};
+    WifiEapConfigurator.writeToSharedPref(config);
+  }
+
+  setTimeToExpire(ms?: string) {
+    let config;
+    const title = this.dictionary.getTranslation('text', 'title');
+    const message = this.dictionary.getTranslation('text', 'message');
+    if (ms) {
+      config = { date: ms, title: title, message: message};
+    } else {
+      config = { date: this.global.getValidUntil(), title: title, message: message};
+    }
+    WifiEapConfigurator.sendNotification(config);
   }
 }

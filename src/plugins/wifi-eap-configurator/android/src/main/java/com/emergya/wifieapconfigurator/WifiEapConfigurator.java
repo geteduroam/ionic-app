@@ -2,12 +2,19 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.hotspot2.ConfigParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -21,13 +28,20 @@ import android.net.wifi.WifiManager;
 //import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 
+import com.emergya.wifieapconfigurator.wifieapconfigurator.R;
+
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import android.os.SystemClock;
+import androidx.preference.PreferenceManager;
 import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
 
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -45,6 +59,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
@@ -54,6 +70,7 @@ import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
@@ -65,7 +82,11 @@ import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -1015,4 +1036,73 @@ public class WifiEapConfigurator extends Plugin {
         return longest;
     }
 
+    @PluginMethod
+    public void sendNotification(PluginCall call) throws JSONException {
+        /*String time = call.getString("delay");
+        String title = call.getString("title");
+        String message = call.getString("message");
+        Long delay = Long.parseLong(time);
+        AlarmManager mgr = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(getContext(), NotificationReceiver.class);
+        i.putExtra("title", title);
+        i.putExtra("message", message);
+        PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, 0);
+        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);*/
+
+        String stringDate = call.getString("date");
+        String title = call.getString("title");
+        String message = call.getString("message");
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("date", stringDate);
+        editor.putString("title", title);
+        editor.putString("message", message);
+        editor.apply();
+        StartNotifications.enqueueWorkStart(getContext(), new Intent());
+    }
+
+    @PluginMethod()
+    public void writeToSharedPref(PluginCall call) {
+        String data = call.getString("id");
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("institutionId", data);
+        editor.apply();
+        JSObject object = new JSObject();
+        object.put("success", true);
+        object.put("message", "plugin.wifieapconfigurator.success.writing");
+        call.success(object);
+    }
+
+    @PluginMethod()
+    public void readFromSharedPref(PluginCall call) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String ret = sharedPref.getString("institutionId", "");
+        if (ret != "") {
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.reading");
+            object.put("id", ret);
+            call.success(object);
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.reading");
+            call.success(object);
+        }
+    }
+
+    @PluginMethod()
+    public void checkIfOpenThroughNotifications(PluginCall call) {
+        Boolean openFromNot;
+        if (getActivity().getComponentName().getClassName().contains("MainActivity")) {
+            openFromNot = false;
+        } else {
+            openFromNot = true;
+        }
+        JSObject object = new JSObject();
+        object.put("fromNotification", openFromNot);
+        call.success(object);
+    }
 }
