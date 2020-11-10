@@ -610,7 +610,7 @@ public class WifiEapConfigurator: CAPPlugin {
         let stringDate = call.getString("date")
         let title = call.getString("title")
         let message = call.getString("message")
-
+ /*
         let preferences = NSUserDefaults.standardUserDefaults()
         preferences.setInteger(stringDate, forKey: "date")
         preferences.setInteger(title, forKey: "title")
@@ -626,13 +626,22 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
 
-
+*/
+       
         //Seeting the alarm
         let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = message
-        let realDate = Int(stringDate) - 432000000
-        NSDate *date = [NSDate dateWithTimeIntervalSince1970:(realDate / 1000.0)];
+        content.title = title ?? ""
+        content.body = message ?? ""
+        let dateCompare = Int(stringDate!)
+        let realDate =  dateCompare! - 432000000
+        let date = Date.init(timeIntervalSince1970: (Double(realDate) / 1000.00))
+        var dateComponent = DateComponents()
+        let calendar = Calendar.current
+        dateComponent.hour = calendar.component(.hour, from: date)
+        dateComponent.minute = calendar.component(.minute, from: date)
+        
+    
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponent, repeats: false)
 
         // Create the request
         let uuidString = UUID().uuidString
