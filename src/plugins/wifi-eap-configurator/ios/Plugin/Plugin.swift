@@ -675,7 +675,7 @@ public class WifiEapConfigurator: CAPPlugin {
         // Then you could use that additional information to perform any kind of action when the notification is opened by the user
         content.userInfo = ["CustomData": "You will be able to include any kind of information here"]
 
-        let yourDate = Calendar.current.date(byAdding: .second, value: 30, to: Date())!
+        let yourDate = Calendar.current.date(byAdding: .second, value: 100, to: Date())!
 
         let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: yourDate.timeIntervalSinceNow, repeats: false)
 

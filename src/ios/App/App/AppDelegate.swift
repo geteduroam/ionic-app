@@ -7,11 +7,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
   let notifCenter = UNUserNotificationCenter.current()
+	
+	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+   UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: {didAllow, error in})
 
-  if #available(iOS 10.0, *) {
-    return true
-  }
-    
+		notifCenter.getNotificationSettings { (settings) in
+	 if settings.authorizationStatus != .authorized {
+	   // Notifications not allowed
+	 }
+   }
+
+   return true
+	}
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     requestAuthForLocalNotifications()
     scheduleLocalNotification()
@@ -22,7 +29,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   func requestAuthForLocalNotifications() {
-      notifCenter.delegate = self
       notifCenter.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
           if error != nil {
               // Something went wrong
@@ -52,7 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
       let center = UNUserNotificationCenter.current()
       center.add(request)
-      userNotificationCenter()
+      // userNotificationCenter()
   }
     
   func applicationWillResignActive(_ application: UIApplication) {
