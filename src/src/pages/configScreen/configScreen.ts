@@ -260,6 +260,7 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewDidEnter() {
+    /*
     // Check if the application is opened through a notification
     await this.isReconfigured();
     if (!!this.global.getIsReconfigure()) {
@@ -282,6 +283,8 @@ export class ConfigurationScreen extends BasePage{
         elem.readOnly = true;
       }, 0);
     }
+     */
+    this.showAll = true;
     this.removeSpinner();
   }
 
@@ -357,6 +360,7 @@ export class ConfigurationScreen extends BasePage{
   }
 
   private async isReconfigured() {
+    /*
     const checkRequest = await WifiEapConfigurator.checkIfOpenThroughNotifications();
     console.log(checkRequest.fromNotification);
     if (checkRequest.fromNotification === true) {
@@ -370,5 +374,7 @@ export class ConfigurationScreen extends BasePage{
     } else {
       this.global.setIsReconfigure(false);
     }
+
+     */
   }
 }

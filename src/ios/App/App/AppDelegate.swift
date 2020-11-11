@@ -1,10 +1,12 @@
 import UIKit
 import Capacitor
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
+  let notificationCenter = UNUserNotificationCenter.current()
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
@@ -74,6 +76,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
 #endif
+	
+	
 
 }
 

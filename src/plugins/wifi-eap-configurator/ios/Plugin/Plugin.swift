@@ -4,6 +4,7 @@ import NetworkExtension
 import SystemConfiguration.CaptiveNetwork
 import UIKit
 import CoreLocation
+import UserNotifications
 
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
@@ -607,45 +608,56 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
-        let stringDate = call.getString("date")
+        let stringDate = call.getString("date")!
         let title = call.getString("title")
         let message = call.getString("message")
+        
+        /*
+            let preferences = NSUserDefaults.standardUserDefaults()
+            preferences.setInteger(stringDate, forKey: "date")
+            preferences.setInteger(title, forKey: "title")
+            preferences.setInteger(message, forKey: "message")
 
-        let preferences = NSUserDefaults.standardUserDefaults()
-        preferences.setInteger(stringDate, forKey: "date")
-        preferences.setInteger(title, forKey: "title")
-        preferences.setInteger(message, forKey: "message")
+            //  Save to disk
+            let didSave = preferences.synchronize()
 
-        //  Save to disk
-        let didSave = preferences.synchronize()
-
-        if !didSave {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.shared.not.saved",
-                "success": false
-            ])
+            if !didSave {
+                return call.success([
+                    "message": "plugin.wifieapconfigurator.error.shared.not.saved",
+                    "success": false
+                ])
+            }
+         */
+        
+        // Schedule the request with the system.
+        let notificationCenter = UNUserNotificationCenter.current()
+        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
+        notificationCenter.requestAuthorization(options: options) {
+            (didAllow, error) in
+            if !didAllow {
+                print("User has declined notifications")
+            }
         }
-
-
+        notificationCenter.getNotificationSettings { (settings) in
+          if settings.authorizationStatus != .authorized {
+            // Notifications not allowed
+          }
+        }
         //Seeting the alarm
         let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = message
-        let realDate = Int(stringDate) - 432000000
-        NSDate *date = [NSDate dateWithTimeIntervalSince1970:(realDate / 1000.0)];
+        content.title = title ?? ""
+        content.body = message ?? ""
+        let realDate = Int(stringDate)! - 432000000
+        let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
+        let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
+
 
         // Create the request
         let uuidString = UUID().uuidString
         let request = UNNotificationRequest(identifier: uuidString,
                     content: content, trigger: trigger)
-
-        // Schedule the request with the system.
-        let notificationCenter = UNUserNotificationCenter.current()
-        notificationCenter.add(request) { (error) in
-           if error != nil {
-              // Handle any errors.
-           }
-        }
+        
 	}
 
 	/**
