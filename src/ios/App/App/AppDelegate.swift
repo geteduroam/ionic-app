@@ -5,7 +5,8 @@ import Capacitor
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
-
+  var manager: HotspotManager! = nil
+     
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
     return true
@@ -13,6 +14,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     let vc = window?.rootViewController as! CAPBridgeViewController
+	
+	// Create and retain our model-level controller.  This vends hotspot
+	 // data in a way that’s easier for our view controller to use.
+
+	 self.manager = HotspotManager()
+	 
+	 // Create the main view controller (HotspotsViewController), inject
+	 // our manager into that, and then use it as the root of our navigation
+	 // hierarchy.
+	 
+	 let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+	 let hotspots = mainStoryboard.instantiateViewController(withIdentifier: "hotspots") as! HotspotsViewController
+	 hotspots.manager = self.manager
+	 (self.window!.rootViewController! as! UINavigationController).viewControllers = [ hotspots ]
+	 
+	 return true
 		// For the Mac, remove the title bar and navigation bar.
 		#if targetEnvironment(macCatalyst)
 			vc.accessibilityActivate()
