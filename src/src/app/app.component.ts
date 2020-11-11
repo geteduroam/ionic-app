@@ -70,7 +70,7 @@ export class GeteduroamApp {
       // Add listeners to app
       await this.addListeners();
 
-      this.getEduroamServices.setTimeToExpire('1605528300000');
+      this.getEduroamServices.setTimeToExpire('1605544200000');
     });
   }
 
