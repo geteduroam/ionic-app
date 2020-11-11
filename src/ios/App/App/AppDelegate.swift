@@ -8,17 +8,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
   let notifCenter = UNUserNotificationCenter.current()
 	
-	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-   UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: {didAllow, error in})
+   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: {didAllow, error in})
 
 		notifCenter.getNotificationSettings { (settings) in
-	 if settings.authorizationStatus != .authorized {
-	   // Notifications not allowed
-	 }
+	        if settings.authorizationStatus != .authorized {
+	        // Notifications not allowed
+	        }
+        }
+
+    return true
    }
 
-   return true
-	}
    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     requestAuthForLocalNotifications()
 
@@ -91,9 +94,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     NotificationCenter.default.post(name: Notification.Name(CAPNotifications.DidFailToRegisterForRemoteNotificationsWithError.name()), object: error)
   }
 
-#endif
-	
-	
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+  // Override point for customization after application launch.
 
+  // When the app launch after user tap on notification (originally was not running / not in background)
+  if(launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] != nil){
+      print("The app was open doing tap in the notification")
+  }
+
+    return true
+  }
+
+#endif
+
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate{
+
+  // This function will be called when the app receive notification
+  func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+
+    // show the notification alert (banner), and with sound
+    completionHandler([.alert, .sound])
+  }
+
+  // This function will be called right after user tap on the notification
+  func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    let application = UIApplication.shared
+
+    if(application.applicationState == .active){
+      print("user tapped the notification bar when the app is in foreground")
+    }
+
+    if(application.applicationState == .inactive){
+      print("user tapped the notification bar when the app is in background")
+    }
+    // tell the app that we have finished processing the user’s action / response
+    completionHandler()
+  }
 }
 

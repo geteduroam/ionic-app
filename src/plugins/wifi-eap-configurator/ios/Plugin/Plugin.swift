@@ -614,7 +614,7 @@ public class WifiEapConfigurator: CAPPlugin {
         content.title = call.getString("title") ?? ""
         content.body = call.getString("message") ?? ""
         content.sound = UNNotificationSound.default
-
+        content.badge = 1
         
         let realDate = Int(stringDate)! - 432000000
         let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
