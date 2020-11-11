@@ -19,9 +19,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
    return true
 	}
-  func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     requestAuthForLocalNotifications()
-    scheduleLocalNotification()
 
     let vc = window?.rootViewController as! CAPBridgeViewController
 
@@ -36,31 +35,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       }
   }
 
-  func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-      completionHandler(UNNotificationPresentationOptions.init(arrayLiteral: [.alert, .badge]))
-  }
-
-  func scheduleLocalNotification() {
-      let content = UNMutableNotificationContent()
-      content.title = "The title of your local notification"
-      content.body = "A long description of your notification"
-      content.sound = UNNotificationSound.default
-
-      // You can use the user info array if you need to include additional information in your local notification.
-      // Then you could use that additional information to perform any kind of action when the notification is opened by the user
-      content.userInfo = ["CustomData": "You will be able to include any kind of information here"]
-
-      let yourDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
-
-      let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: yourDate.timeIntervalSinceNow, repeats: false)
-
-      let request = UNNotificationRequest.init(identifier: "your-notification-identifier", content: content, trigger: trigger)
-
-      let center = UNUserNotificationCenter.current()
-      center.add(request)
-      // userNotificationCenter()
-  }
-    
   func applicationWillResignActive(_ application: UIApplication) {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
