@@ -4,6 +4,7 @@ import NetworkExtension
 import SystemConfiguration.CaptiveNetwork
 import UIKit
 import CoreLocation
+import UserNotifications
 
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
@@ -607,14 +608,13 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
-        let stringDate = call.getString("date")
+        let stringDate = call.getString("date")!
         let title = call.getString("title")
         let message = call.getString("message")
- /*
-        let preferences = NSUserDefaults.standardUserDefaults()
-        preferences.setInteger(stringDate, forKey: "date")
-        preferences.setInteger(title, forKey: "title")
-        preferences.setInteger(message, forKey: "message")
+
+        UserDefaults.standard.set(stringDate, forKey: "date")
+        UserDefaults.standard.set(title, forKey: "title")
+        UserDefaults.standard.set(message, forKey: "message")
 
         //  Save to disk
         let didSave = preferences.synchronize()
@@ -626,23 +626,31 @@ public class WifiEapConfigurator: CAPPlugin {
             ])
         }
 
-*/
-       
         //Seeting the alarm
         let content = UNMutableNotificationContent()
         content.title = title ?? ""
         content.body = message ?? ""
-        let dateCompare = Int(stringDate!)
-        let realDate =  dateCompare! - 432000000
-        let date = Date.init(timeIntervalSince1970: (Double(realDate) / 1000.00))
-        var dateComponent = DateComponents()
-        let calendar = Calendar.current
-        dateComponent.hour = calendar.component(.hour, from: date)
-        dateComponent.minute = calendar.component(.minute, from: date)
-        
-    
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponent, repeats: false)
+        content.sound = UNNotificationSound.default ?? ""
+        content.badge = 1 ?? ""
+        /* let realDate = Int(stringDate)! - 432000000
+        let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
+        let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)*/
 
+        let date = Date(timeIntervalSinceNow: 3600)
+        let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
+
+        let identifier = "Local Notification"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        notificationCenter.add(request) { (error) in
+            if let error = error {
+                print("Error \(error.localizedDescription)")
+            }
+        }
+
+        /*
         // Create the request
         let uuidString = UUID().uuidString
         let request = UNNotificationRequest(identifier: uuidString,
@@ -655,6 +663,7 @@ public class WifiEapConfigurator: CAPPlugin {
               // Handle any errors.
            }
         }
+        */
 	}
 
 	/**

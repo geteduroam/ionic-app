@@ -260,16 +260,14 @@ export class ConfigurationScreen extends BasePage{
    *  Load the discovery data and show the spinner
    */
   async ionViewDidEnter() {
-    // Check if the application is opened through a notification
     /*
+    // Check if the application is opened through a notification
     await this.isReconfigured();
     if (!!this.global.getIsReconfigure()) {
       this.selectedProfileId = this.global.getIdInstitution();
       this.selectProfileFromExternal();
       this.global.isAndroid ? this.navigateAndroid() : await this.navigateTo(this.profile);
     } else {
-
-     */
       this.showAll = true;
       // The instituteSearchBar is not loaded in this context, but when we set a timeout it will be when it fires.
       // Taken from https://angular.io/api/core/ViewChild
@@ -284,7 +282,9 @@ export class ConfigurationScreen extends BasePage{
         // which means we don't have to hide it, which speeds up loading of the discovery significantly.
         elem.readOnly = true;
       }, 0);
-   // }
+    }
+     */
+    this.showAll = true;
     this.removeSpinner();
   }
 
@@ -374,6 +374,7 @@ export class ConfigurationScreen extends BasePage{
     } else {
       this.global.setIsReconfigure(false);
     }
+
      */
   }
 }

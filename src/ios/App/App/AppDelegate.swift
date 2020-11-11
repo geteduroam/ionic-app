@@ -1,19 +1,29 @@
 import UIKit
 import Capacitor
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
+  let notificationCenter = UNUserNotificationCenter.current()
 
-  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-
+  if #available(iOS 10.0, *) {
     return true
   }
     
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
     let vc = window?.rootViewController as! CAPBridgeViewController
-	UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: {didAllow, error in})
+
+    let notificationCenter = UNUserNotificationCenter.current()
+    let options: UNAuthorizationOptions = [.alert, .sound, .badge]
+    notificationCenter.requestAuthorization(options: options) {
+    	(didAllow, error) in
+    	if !didAllow {
+    		print("User has declined notifications")
+    	}
+    }
+
     return handleOpenUrl(app, open: url)
   }
     
@@ -74,6 +84,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
 #endif
+	
+	
 
 }
 
