@@ -608,7 +608,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
-        let stringDate = call.getString("date")!
+        /*let stringDate = call.getString("date")!
         let title = call.getString("title")
         let message = call.getString("message")
 
@@ -648,7 +648,7 @@ public class WifiEapConfigurator: CAPPlugin {
             if let error = error {
                 print("Error \(error.localizedDescription)")
             }
-        }
+        }*/
 
         /*
         // Create the request
@@ -664,6 +664,25 @@ public class WifiEapConfigurator: CAPPlugin {
            }
         }
         */
+
+
+        let content = UNMutableNotificationContent()
+        content.title = "The title of your local notification"
+        content.body = "A long description of your notification"
+        content.sound = UNNotificationSound.default
+
+        // You can use the user info array if you need to include additional information in your local notification.
+        // Then you could use that additional information to perform any kind of action when the notification is opened by the user
+        content.userInfo = ["CustomData": "You will be able to include any kind of information here"]
+
+        let yourDate = Calendar.current.date(byAdding: .second, value: 30, to: Date())!
+
+        let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: yourDate.timeIntervalSinceNow, repeats: false)
+
+        let request = UNNotificationRequest.init(identifier: "your-notification-identifier", content: content, trigger: trigger)
+
+        let center = UNUserNotificationCenter.current()
+        center.add(request)
 	}
 
 	/**

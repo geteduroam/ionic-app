@@ -6,25 +6,53 @@ import UserNotifications
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
-  let notificationCenter = UNUserNotificationCenter.current()
+  let notifCenter = UNUserNotificationCenter.current()
 
   if #available(iOS 10.0, *) {
     return true
   }
     
   func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    requestAuthForLocalNotifications()
+    scheduleLocalNotification()
+
     let vc = window?.rootViewController as! CAPBridgeViewController
 
-    let notificationCenter = UNUserNotificationCenter.current()
-    let options: UNAuthorizationOptions = [.alert, .sound, .badge]
-    notificationCenter.requestAuthorization(options: options) {
-    	(didAllow, error) in
-    	if !didAllow {
-    		print("User has declined notifications")
-    	}
-    }
-
     return handleOpenUrl(app, open: url)
+  }
+
+  func requestAuthForLocalNotifications() {
+      notifCenter.delegate = self
+      notifCenter.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
+          if error != nil {
+              // Something went wrong
+          }
+      }
+  }
+
+  func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+      completionHandler(UNNotificationPresentationOptions.init(arrayLiteral: [.alert, .badge]))
+  }
+
+  func scheduleLocalNotification() {
+      let content = UNMutableNotificationContent()
+      content.title = "The title of your local notification"
+      content.body = "A long description of your notification"
+      content.sound = UNNotificationSound.default
+
+      // You can use the user info array if you need to include additional information in your local notification.
+      // Then you could use that additional information to perform any kind of action when the notification is opened by the user
+      content.userInfo = ["CustomData": "You will be able to include any kind of information here"]
+
+      let yourDate = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+
+      let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: yourDate.timeIntervalSinceNow, repeats: false)
+
+      let request = UNNotificationRequest.init(identifier: "your-notification-identifier", content: content, trigger: trigger)
+
+      let center = UNUserNotificationCenter.current()
+      center.add(request)
+      userNotificationCenter()
   }
     
   func applicationWillResignActive(_ application: UIApplication) {
