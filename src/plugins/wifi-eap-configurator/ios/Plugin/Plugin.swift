@@ -626,19 +626,15 @@ public class WifiEapConfigurator: CAPPlugin {
         let realDate = Int(stringDate)! - 432000000
         let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
         let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
-        
-        // You can use the user info array if you need to include additional information in your local notification.
-        // Then you could use that additional information to perform any kind of action when the notification is opened by the user
-        content.userInfo = ["CustomData": "You will be able to include any kind of information here"]
 
-        let yourDate = Calendar.current.date(byAdding: .second, value: 100, to: Date())!
+        if date.timeIntervalSinceNow > 0 {
+            let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: date.timeIntervalSinceNow, repeats: false)
 
-        let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: date.timeIntervalSinceNow, repeats: false)
+            let request = UNNotificationRequest.init(identifier: "getEduroamApp", content: content, trigger: trigger)
 
-        let request = UNNotificationRequest.init(identifier: "your-notification-identifier", content: content, trigger: trigger)
-
-        let center = UNUserNotificationCenter.current()
-        center.add(request)
+            let center = UNUserNotificationCenter.current()
+            center.add(request)
+        }
 	}
 
 	@objc func writeToSharedPref(_ call: CAPPluginCall) {
