@@ -610,9 +610,26 @@ public class WifiEapConfigurator: CAPPlugin {
 	@objc func sendNotification(_ call: CAPPluginCall) {
         
         let stringDate = call.getString("date")!
+        let title = call.getString("title")!
+        let message = call.getString("message")!
+
+        UserDefaults.standard.set(stringDate, forKey: "date")
+        UserDefaults.standard.set(title, forKey: "title")
+        UserDefaults.standard.set(message, forKey: "message")
+
+        //  Save to disk
+        let didSave = preferences.synchronize()
+
+        if !didSave {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.shared.not.saved",
+                "success": false
+            ])
+        }
+
         let content = UNMutableNotificationContent()
-        content.title = call.getString("title") ?? ""
-        content.body = call.getString("message") ?? ""
+        content.title = title ?? ""
+        content.body = message ?? ""
         content.sound = UNNotificationSound.default
         content.badge = 1
         
@@ -632,63 +649,52 @@ public class WifiEapConfigurator: CAPPlugin {
 
         let center = UNUserNotificationCenter.current()
         center.add(request)
-        /*
-        let title =
-        let message =
+	}
 
-        UserDefaults.standard.set(stringDate, forKey: "date")
-        UserDefaults.standard.set(title, forKey: "title")
-        UserDefaults.standard.set(message, forKey: "message")
+	@objc func writeToSharedPref(_ call: CAPPluginCall) {
+	    let data = call.getString("id")!
+
+	    UserDefaults.standard.set(message, forKey: "institutionId")
 
         //  Save to disk
         let didSave = preferences.synchronize()
 
         if !didSave {
             return call.success([
-                "message": "plugin.wifieapconfigurator.error.shared.not.saved",
+                "message": "plugin.wifieapconfigurator.error.writing",
                 "success": false
             ])
+        } else {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.success.writing",
+                "success": true
+            ])
         }
+	}
 
-        //Seeting the alarm
-        let content = UNMutableNotificationContent()
-        content.title = title ?? ""
-        content.body = message ?? ""
-        content.sound = UNNotificationSound.default ?? ""
-        content.badge = 1 ?? ""
-        /* let realDate = Int(stringDate)! - 432000000
-        let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
-        let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)*/
+	@objc func readFromSharedPref(_ call: CAPPluginCall) {
+         let id = UserDefaults.standard.string(forKey: "institutionId") ?? ""
 
-        let date = Date(timeIntervalSinceNow: 3600)
-        let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
+         if id == "" {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.reading",
+                "success": false
+            ])
+         } else {
+            return call.success([
+                "id": id,
+                "message": "plugin.wifieapconfigurator.success.reading",
+                "success": true
+            ])
+         }
+	}
 
-        let identifier = "Local Notification"
-        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+	@objc func checkIfOpenThroughNotifications(_ call: CAPPluginCall) {
+	    let openFrom = UserDefaults.standard.bool(forKey: "initFromNotification") ?? ""
 
-        notificationCenter.add(request) { (error) in
-            if let error = error {
-                print("Error \(error.localizedDescription)")
-            }
-        }*/
-
-        /*
-        // Create the request
-        let uuidString = UUID().uuidString
-        let request = UNNotificationRequest(identifier: uuidString,
-                    content: content, trigger: trigger)
-
-        // Schedule the request with the system.
-        let notificationCenter = UNUserNotificationCenter.current()
-        notificationCenter.add(request) { (error) in
-           if error != nil {
-              // Handle any errors.
-           }
-        }
-        */
-
+	    return call.success([
+            "fromNotification": openFrom
+        ])
 	}
 
 	/**
