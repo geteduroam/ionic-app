@@ -617,16 +617,6 @@ public class WifiEapConfigurator: CAPPlugin {
         UserDefaults.standard.set(title, forKey: "title")
         UserDefaults.standard.set(message, forKey: "message")
 
-        //  Save to disk
-        let didSave = preferences.synchronize()
-
-        if !didSave {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.shared.not.saved",
-                "success": false
-            ])
-        }
-
         let content = UNMutableNotificationContent()
         content.title = title ?? ""
         content.body = message ?? ""
@@ -655,21 +645,6 @@ public class WifiEapConfigurator: CAPPlugin {
 	    let data = call.getString("id")!
 
 	    UserDefaults.standard.set(message, forKey: "institutionId")
-
-        //  Save to disk
-        let didSave = preferences.synchronize()
-
-        if !didSave {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.error.writing",
-                "success": false
-            ])
-        } else {
-            return call.success([
-                "message": "plugin.wifieapconfigurator.success.writing",
-                "success": true
-            ])
-        }
 	}
 
 	@objc func readFromSharedPref(_ call: CAPPluginCall) {
