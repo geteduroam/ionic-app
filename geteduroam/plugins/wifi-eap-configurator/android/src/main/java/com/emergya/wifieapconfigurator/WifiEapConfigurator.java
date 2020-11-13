@@ -10,6 +10,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
@@ -24,12 +25,13 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-//import android.net.wifi.WifiNetworkSuggestion;
+import android.net.wifi.WifiNetworkSuggestion;
 //import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 
 import com.emergya.wifieapconfigurator.wifieapconfigurator.R;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -91,6 +93,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+
+import android.content.BroadcastReceiver;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
