@@ -9,6 +9,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   let notifCenter = UNUserNotificationCenter.current()
 	
    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+		requestAuthForLocalNotifications()
 		UNUserNotificationCenter.current().delegate = self
 		UserDefaults.standard.set(false, forKey: "initFromNotification")
 
@@ -20,7 +21,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		UserDefaults.standard.set(true, forKey: "initFromNotification")
    }
    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-		requestAuthForLocalNotifications()
 		UserDefaults.standard.set(false, forKey: "initFromNotification")
 		let vc = window?.rootViewController as! CAPBridgeViewController
 		return handleOpenUrl(app, open: url)
