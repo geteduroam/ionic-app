@@ -370,7 +370,11 @@ public class WifiEapConfigurator extends Plugin {
 
         if (ssids.length > 0) {
             for (String ssid : ssids) {
-                connectWifiBySsid(ssid, enterpriseConfig, call, displayName);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    connectWifiAndroidQ(ssid, enterpriseConfig, call);
+                } else {
+                    connectWifiBySsid(ssid, enterpriseConfig, call, displayName);
+                }
             }
         }
 
@@ -633,21 +637,20 @@ public class WifiEapConfigurator extends Plugin {
 
     }*/
 
-    /*
-    private boolean connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig) {
-        boolean configured = false;
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call) {
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
             ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-            WifiNetworkSuggestion.Builder suggestionBuilder =  new WifiNetworkSuggestion.Builder();
+            WifiNetworkSuggestion suggestion =  new WifiNetworkSuggestion.Builder()
+                    .setSsid(ssid)
+                    .setWpa2EnterpriseConfig(enterpriseConfig)
+                    .setIsAppInteractionRequired(true)
+                    .build();
 
-            suggestionBuilder.setSsid(ssid);
-            suggestionBuilder.setWpa2EnterpriseConfig(enterpriseConfig);
-
-            if (passpointConfig != null) {
+            /*if (passpointConfig != null) {
                 suggestionBuilder.setPasspointConfig(passpointConfig);
-            }
-            final WifiNetworkSuggestion suggestion = suggestionBuilder.build();
+            }*/
 
             // WifiNetworkSuggestion approach
             suggestions.add(suggestion);
@@ -670,14 +673,37 @@ public class WifiEapConfigurator extends Plugin {
                 };
                 getContext().registerReceiver(broadcastReceiver, intentFilter);
 
-                configured = true;
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("message", "plugin.wifieapconfigurator.success.network.linked");
+                call.success(object);
             } else {
-                Log.d("STATUS ERROR", "" + status);
-                configured = false;
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
+                call.success(object);
             }
+
+            /*
+            WifiNetworkSpecifier wifiNetworkSpecifier = suggestionBuilder.build();
+            NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
+            NetworkRequest networkRequest = networkRequestBuilder.build();
+            final ConnectivityManager cm = (ConnectivityManager)
+                    getContext().getApplicationContext()
+                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                cm.requestNetwork(networkRequest, new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(@NonNull Network network) {
+                        super.onAvailable(network);
+                        cm.bindProcessToNetwork(network);
+                    }});
+            }*/
         }
-        return configured;
-    }*/
+
+    }
 
     private void sendClientCertificateError(Exception e, PluginCall call) {
         JSObject object = new JSObject();
@@ -1038,17 +1064,6 @@ public class WifiEapConfigurator extends Plugin {
 
     @PluginMethod
     public void sendNotification(PluginCall call) throws JSONException {
-        /*String time = call.getString("delay");
-        String title = call.getString("title");
-        String message = call.getString("message");
-        Long delay = Long.parseLong(time);
-        AlarmManager mgr = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(getContext(), NotificationReceiver.class);
-        i.putExtra("title", title);
-        i.putExtra("message", message);
-        PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, i, 0);
-        mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);*/
-
         String stringDate = call.getString("date");
         String title = call.getString("title");
         String message = call.getString("message");
