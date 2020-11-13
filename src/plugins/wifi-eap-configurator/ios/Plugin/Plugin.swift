@@ -640,7 +640,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	@objc func writeToSharedPref(_ call: CAPPluginCall) {
 	    let data = call.getString("id")!
 
-	    UserDefaults.standard.set(message, forKey: "institutionId")
+	    UserDefaults.standard.set(data, forKey: "institutionId")
 	}
 
 	@objc func readFromSharedPref(_ call: CAPPluginCall) {
@@ -661,7 +661,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func checkIfOpenThroughNotifications(_ call: CAPPluginCall) {
-	    let openFrom = UserDefaults.standard.bool(forKey: "initFromNotification") ?? ""
+	    let openFrom = UserDefaults.standard.bool(forKey: "initFromNotification")
 
 	    return call.success([
             "fromNotification": openFrom

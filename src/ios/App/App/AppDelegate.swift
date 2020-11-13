@@ -10,38 +10,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	
    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 		UNUserNotificationCenter.current().delegate = self
-		UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge], completionHandler: {didAllow, error in})
+		UserDefaults.standard.set(false, forKey: "initFromNotification")
 
-		application.applicationIconBadgeNumber = 0
-
-		notifCenter.getNotificationSettings { (settings) in
-		   if settings.authorizationStatus != .authorized {
-		   // Notifications not allowed
-		   }
-		}
-		if(launchOptions?[UIApplication.LaunchOptionsKey.remoteNotification] != nil){
-			  print("The app was open doing tap in the notification")
-		}
-
-		UserDefaults.standard.set(true, forKey: "initFromNotification")
-
-		return handleOpenUrl(app, open: url)
-	    //return true
+		return true
    }
-
+	
+   func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+		application.applicationIconBadgeNumber = 0
+		UserDefaults.standard.set(true, forKey: "initFromNotification")
+   }
    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-	requestAuthForLocalNotifications()
-	UserDefaults.standard.set(false, forKey: "initFromNotification")
-	let vc = window?.rootViewController as! CAPBridgeViewController
-	return handleOpenUrl(app, open: url)
+		requestAuthForLocalNotifications()
+		UserDefaults.standard.set(false, forKey: "initFromNotification")
+		let vc = window?.rootViewController as! CAPBridgeViewController
+		return handleOpenUrl(app, open: url)
   }
 
   func requestAuthForLocalNotifications() {
-	  notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
+		notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
 		  if error != nil {
 			  // Something went wrong
 		  }
-	  }
+		}
   }
 
   func applicationWillResignActive(_ application: UIApplication) {
@@ -112,15 +102,15 @@ extension AppDelegate: UNUserNotificationCenterDelegate{
 
   // This function will be called right after user tap on the notification
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-	let application = UIApplication.shared
-	application.applicationIconBadgeNumber = 0
+	// Remove badge icon
+	UIApplication.shared.applicationIconBadgeNumber = 0
+	// Set navigation to configured profile
 	UserDefaults.standard.set(true, forKey: "initFromNotification")
-	if(application.applicationState == .active){
-	  print("user tapped the notification bar when the app is in foreground")
-	}
-	if(application.applicationState == .inactive){
-	  print("user tapped the notification bar when the app is in background")
-	}
+	// State foreground
+	if(UIApplication.shared.applicationState == .active){}
+	// State background
+	if(UIApplication.shared.applicationState == .inactive){}
+
 	// tell the app that we have finished processing the user’s action / response
 	completionHandler()
   }
