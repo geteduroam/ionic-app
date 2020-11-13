@@ -372,21 +372,26 @@ public class WifiEapConfigurator extends Plugin {
             }
         }
 
+        PasspointConfiguration config = null;
+
+        if (oids.length > 0) {
+            config = this.createPasspointConfig(id, displayName, oids, enterpriseConfig, key);
+        }
+
         if (ssids.length > 0) {
             for (String ssid : ssids) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    connectWifiAndroidQ(ssid, enterpriseConfig, call);
+                    connectWifiAndroidQ(ssid, enterpriseConfig, call, config);
                 } else {
                     connectWifiBySsid(ssid, enterpriseConfig, call, displayName);
+                    if (config != null) {
+                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                            removePasspoint(id, call);
+                        }
+                        connectPasspoint(config, call);
+                    }
                 }
             }
-        }
-
-        if (oids.length > 0) {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                removePasspoint(id, call);
-            }
-            connectPasspoint(id, displayName, oids, enterpriseConfig, call, key);
         }
 
         /*if (connectWifiAndroidQ(ssid, enterpriseConfig, passpointConfig)) {
@@ -468,8 +473,27 @@ public class WifiEapConfigurator extends Plugin {
         }
     }
 
-    private void connectPasspoint(String id, String displayName, String[] oid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PrivateKey key) {
+    private void connectPasspoint(PasspointConfiguration config, PluginCall call) {
+        try {
+            wifiManager.addOrUpdatePasspointConfiguration(config);
+            JSObject object = new JSObject();
+            object.put("success", true);
+            object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
+            call.success(object);
+        } catch (Exception e) {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
+            call.success(object);
+        }
+    }
 
+    private PasspointConfiguration createPasspointConfig(String id, String displayName, String[] oid, WifiEnterpriseConfig enterpriseConfig, PrivateKey key) {
         PasspointConfiguration config = new PasspointConfiguration();
 
         HomeSp homeSp = new HomeSp();
@@ -531,28 +555,11 @@ public class WifiEapConfigurator extends Plugin {
                 cred.setUserCredential(us);
                 break;
             default:
-                return; // this is probably not what we should do..
         }
 
         config.setCredential(cred);
 
-        try {
-            wifiManager.addOrUpdatePasspointConfiguration(config);
-            JSObject object = new JSObject();
-            object.put("success", true);
-            object.put("message", "plugin.wifieapconfigurator.success.passpoint.linked");
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.linked");
-            call.success(object);
-        } catch (Exception e) {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.passpoint.not.enabled");
-            call.success(object);
-        }
+        return config;
     }
 
     private void connectWifiBySsid(String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, String displayName) {
@@ -592,72 +599,30 @@ public class WifiEapConfigurator extends Plugin {
         }
     }
 
-    /*private boolean createSuggestion(WifiManager wifiManager, String ssid, WifiEnterpriseConfig enterpriseConfig, PasspointConfiguration passpointConfig){
-            boolean configured = false;
-            if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
-
-                ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-                WifiNetworkSuggestion.Builder suggestionBuilder =  new WifiNetworkSuggestion.Builder();
-
-                if (ssid != null) {
-                    suggestionBuilder.setSsid(ssid);
-                }
-                suggestionBuilder.setWpa2EnterpriseConfig(enterpriseConfig);
-
-                if (passpointConfig != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-                    suggestionBuilder.setPasspointConfig(passpointConfig);
-                }
-                final WifiNetworkSuggestion suggestion = suggestionBuilder.build();
-
-                // WifiNetworkSuggestion approach
-                suggestions.add(suggestion);
-
-                wifiManager.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
-                int status = wifiManager.addNetworkSuggestions(suggestions);
-
-                if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
-
-                    final IntentFilter intentFilter =
-                            new IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
-
-                    final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            if (!intent.getAction().equals(
-                                    WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
-                                return;
-                            }
-                        }
-                    };
-                    getContext().registerReceiver(broadcastReceiver, intentFilter);
-
-                    configured = true;
-                } else {
-                    Log.d("STATUS ERROR", "" + status);
-                    configured = false;
-                }
-            }
-            return configured;
-
-    }*/
-
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call) {
+    private void connectWifiAndroidQ(String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PasspointConfiguration config) {
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 
             ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
+
+            // SSID configuration
             WifiNetworkSuggestion suggestion =  new WifiNetworkSuggestion.Builder()
                     .setSsid(ssid)
                     .setWpa2EnterpriseConfig(enterpriseConfig)
                     .setIsAppInteractionRequired(true)
                     .build();
 
-            /*if (passpointConfig != null) {
-                suggestionBuilder.setPasspointConfig(passpointConfig);
-            }*/
-
-            // WifiNetworkSuggestion approach
             suggestions.add(suggestion);
+
+            // Passpoint Configuration
+            WifiNetworkSuggestion.Builder suggestionBuilder =  new WifiNetworkSuggestion.Builder();
+
+            if (config != null) {
+                suggestionBuilder.setPasspointConfig(config);
+            }
+
+            suggestions.add(suggestionBuilder.build());
+
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             int status = wifiManager.addNetworkSuggestions(suggestions);
 
