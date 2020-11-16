@@ -261,10 +261,6 @@ public class WifiEapConfigurator: CAPPlugin {
 			}
 		}
 
-		// if errors.count == 0 {
-		//    requestAuthForLocalNotifications()
-		// }
-
 		handler(error: nil)
 	}
 
