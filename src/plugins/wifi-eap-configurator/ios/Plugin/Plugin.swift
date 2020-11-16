@@ -608,7 +608,9 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
-        
+
+        requestAuthForLocalNotifications()
+
         let stringDate = call.getString("date")!
         let title = call.getString("title")!
         let message = call.getString("message")!
@@ -667,6 +669,15 @@ public class WifiEapConfigurator: CAPPlugin {
             "fromNotification": openFrom
         ])
 	}
+
+	func requestAuthForLocalNotifications() {
+	    let notifCenter = UNUserNotificationCenter.current()
+    	notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
+    		    if error != nil {
+    			// Something went wrong
+    	    }
+        }
+    }
 
 	/**
 	@function isConnectedSSID

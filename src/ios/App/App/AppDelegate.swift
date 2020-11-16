@@ -5,11 +5,9 @@ import UserNotifications
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-  var window: UIWindow?
-  let notifCenter = UNUserNotificationCenter.current()
+   var window: UIWindow?
 	
    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-		requestAuthForLocalNotifications()
 		UNUserNotificationCenter.current().delegate = self
 		UserDefaults.standard.set(false, forKey: "initFromNotification")
 
@@ -24,14 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		UserDefaults.standard.set(false, forKey: "initFromNotification")
 		let vc = window?.rootViewController as! CAPBridgeViewController
 		return handleOpenUrl(app, open: url)
-  }
-
-  func requestAuthForLocalNotifications() {
-		notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
-		  if error != nil {
-			  // Something went wrong
-		  }
-		}
   }
 
   func applicationWillResignActive(_ application: UIApplication) {
