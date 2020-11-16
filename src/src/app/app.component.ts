@@ -69,8 +69,6 @@ export class GeteduroamApp {
       await this.associatedNetwork();
       // Add listeners to app
       await this.addListeners();
-
-      this.getEduroamServices.setTimeToExpire('1605544200000');
     });
   }
 
