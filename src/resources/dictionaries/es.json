@@ -43,7 +43,8 @@
     "configure" : "Configurar",
     "no-thanks": "No, gracias",
     "close": "Cerrar",
-    "connect": "Conectarse a la red"
+    "connect": "Conectarse a la red",
+    "start-over": "Comenzar de nuevo"
   },
   "error": {
     "username": "El usuario debe seguir el patron ",

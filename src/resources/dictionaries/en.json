@@ -43,7 +43,8 @@
     "configure" : "Configure",
     "no-thanks": "No, thanks",
     "close": "Close",
-    "connect": "Connect to network"
+    "connect": "Connect to network",
+    "start-over": "Start over"
   },
   "error": {
     "username": "The username must follow the pattern ",

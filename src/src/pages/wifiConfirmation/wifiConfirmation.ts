@@ -1,10 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import {Events, NavParams, Platform, ViewController} from 'ionic-angular';
+import { Events, NavController, NavParams, Platform, ViewController } from 'ionic-angular';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
+import { ConfigurationScreen } from '../configScreen/configScreen';
 
 
 @Component({
@@ -35,7 +36,7 @@ export class WifiConfirmation extends BasePage implements OnInit {
    */
   @ViewChild('imgLogo') imgLogo: ElementRef;
 
-  constructor(private navParams: NavParams, private platform: Platform,
+  constructor(private navParams: NavParams, private platform: Platform, private navCtrl: NavController,
               protected loading: LoadingProvider, private sanitizer: DomSanitizer,
               protected dictionary:DictionaryServiceProvider, protected global: GlobalProvider,
               protected event: Events, private viewCtrl: ViewController) {
@@ -49,6 +50,11 @@ export class WifiConfirmation extends BasePage implements OnInit {
 
   exitApp() {
       this.platform.exitApp();
+  }
+
+  // iOS flow to expired certificates
+  async startOver() {
+    await this.navCtrl.push(ConfigurationScreen, {}, {animation: 'transition'});
   }
 
   /**
