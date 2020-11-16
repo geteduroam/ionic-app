@@ -43,7 +43,8 @@
     "configure" : "Konfigurieren",
     "no-thanks": "Nein, danke",
     "close": "Schließen",
-    "connect": "mit Netzwerk verbinden"
+    "connect": "mit Netzwerk verbinden",
+    "start-over": "Neu anfangen"
   },
   "error": {
     "username": "Benutzername ist ähnlich wie ",

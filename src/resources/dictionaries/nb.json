@@ -43,7 +43,8 @@
     "configure" : "Konfigurer",
     "no-thanks": "Nei, takk",
     "close": "Lukk",
-    "connect": "Koble til nettverket"
+    "connect": "Koble til nettverket",
+    "start-over": "Start over"
   },
   "error": {
     "username": "Brukernavnet må følge mønster ",
