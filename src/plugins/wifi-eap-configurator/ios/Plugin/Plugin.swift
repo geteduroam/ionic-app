@@ -608,35 +608,40 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
+            requestAuthForLocalNotifications()
 
-        requestAuthForLocalNotifications()
+            NSLog("in sendNotification")
+            let notifCenter = UNUserNotificationCenter.current()
+            notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, _) in
 
-        let stringDate = call.getString("date")!
-        let title = call.getString("title")!
-        let message = call.getString("message")!
+                NSLog("asked permission, sendNotification")
+                let stringDate = call.getString("date")!
+                let title = call.getString("title")!
+                let message = call.getString("message")!
 
-        UserDefaults.standard.set(stringDate, forKey: "date")
-        UserDefaults.standard.set(title, forKey: "title")
-        UserDefaults.standard.set(message, forKey: "message")
+                UserDefaults.standard.set(stringDate, forKey: "date")
+                UserDefaults.standard.set(title, forKey: "title")
+                UserDefaults.standard.set(message, forKey: "message")
 
-        let content = UNMutableNotificationContent()
-        content.title = title ?? ""
-        content.body = message ?? ""
-        content.sound = UNNotificationSound.default
-        content.badge = 1
+                let content = UNMutableNotificationContent()
+                content.title = title ?? ""
+                content.body = message ?? ""
+                content.sound = UNNotificationSound.default
+                content.badge = 1
         
-        let realDate = Int(stringDate)! - 432000000
-        let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
-        let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
+                let realDate = Int(stringDate)! - 432000000
+                let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
+                //let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
 
-        if date.timeIntervalSinceNow > 0 {
-            let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: date.timeIntervalSinceNow, repeats: false)
+                if date.timeIntervalSinceNow > 0 {
+                    let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: date.timeIntervalSinceNow, repeats: false)
 
-            let request = UNNotificationRequest.init(identifier: "getEduroamApp", content: content, trigger: trigger)
+                    let request = UNNotificationRequest.init(identifier: "getEduroamApp", content: content, trigger: trigger)
 
-            let center = UNUserNotificationCenter.current()
-            center.add(request)
-        }
+                    let center = UNUserNotificationCenter.current()
+                    center.add(request)
+                }
+            }
 	}
 
 	@objc func writeToSharedPref(_ call: CAPPluginCall) {
