@@ -612,13 +612,8 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
-            //requestAuthForLocalNotifications()
-
-            NSLog("in sendNotification")
             let notifCenter = UNUserNotificationCenter.current()
             notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, _) in
-
-                NSLog("asked permission, sendNotification")
                 let stringDate = call.getString("date")!
                 let title = call.getString("title")!
                 let message = call.getString("message")!
