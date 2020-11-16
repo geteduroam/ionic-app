@@ -261,6 +261,10 @@ public class WifiEapConfigurator: CAPPlugin {
 			}
 		}
 
+		// if errors.count == 0 {
+		//    requestAuthForLocalNotifications()
+		// }
+
 		handler(error: nil)
 	}
 
@@ -608,7 +612,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
-            requestAuthForLocalNotifications()
+            //requestAuthForLocalNotifications()
 
             NSLog("in sendNotification")
             let notifCenter = UNUserNotificationCenter.current()
@@ -675,14 +679,14 @@ public class WifiEapConfigurator: CAPPlugin {
         ])
 	}
 
-	func requestAuthForLocalNotifications() {
+	/* func requestAuthForLocalNotifications() {
 	    let notifCenter = UNUserNotificationCenter.current()
     	notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
     		    if error != nil {
     			// Something went wrong
     	    }
         }
-    }
+    } */
 
 	/**
 	@function isConnectedSSID
