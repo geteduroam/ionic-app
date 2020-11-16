@@ -261,6 +261,10 @@ public class WifiEapConfigurator: CAPPlugin {
 			}
 		}
 
+		if errors.count == 0 {
+		    requestAuthForLocalNotifications()
+		}
+
 		handler(error: nil)
 	}
 
@@ -608,8 +612,6 @@ public class WifiEapConfigurator: CAPPlugin {
 	}
 
 	@objc func sendNotification(_ call: CAPPluginCall) {
-
-        requestAuthForLocalNotifications()
 
         let stringDate = call.getString("date")!
         let title = call.getString("title")!
