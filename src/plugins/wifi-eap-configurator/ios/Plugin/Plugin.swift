@@ -670,14 +670,6 @@ public class WifiEapConfigurator: CAPPlugin {
         ])
 	}
 
-	/* func requestAuthForLocalNotifications() {
-	    let notifCenter = UNUserNotificationCenter.current()
-    	notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, error) in
-    		    if error != nil {
-    			// Something went wrong
-    	    }
-        }
-    } */
 
 	/**
 	@function isConnectedSSID
