@@ -224,7 +224,7 @@ export class ConfigurationScreen extends BasePage{
           await this.notValidProfile(providerInfo);
         }
       } else {
-        window.cordova.InAppBrowser.open(this.profile.redirect, '_system',"location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
+       // window.cordova.InAppBrowser.open(this.profile.redirect, '_system',"location=yes,clearsessioncache=no,clearcache=no,hidespinner=yes");
         !!this.global.isAndroid() ? App.exitApp() : this.showAll = true
 
       }

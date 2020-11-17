@@ -154,6 +154,7 @@ export abstract class BasePage {
       </style>
       ${terms}`;
     const pageContentUrl = 'data:text/html;base64,' + btoa(htmlView);
+    /*
     const browser = window.cordova.InAppBrowser.open(
       pageContentUrl,
       '_blank',
@@ -168,5 +169,7 @@ export abstract class BasePage {
         setTimeout(() => browser.close(), 1000);
       }
     });
+
+     */
   }
 }

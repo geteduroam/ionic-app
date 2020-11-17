@@ -1,0 +1,14 @@
+{
+  "name": "geteduroam",
+  "short_name": "geteduroam",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [{
+    "src": "assets/imgs/geteduroam.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }],
+  "background_color": "#f6f4f3",
+  "theme_color": "#f6f4f3"
+}
