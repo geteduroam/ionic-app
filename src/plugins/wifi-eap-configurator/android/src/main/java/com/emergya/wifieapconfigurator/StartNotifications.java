@@ -33,7 +33,6 @@ public class StartNotifications extends JobIntentService {
             String title = sharedPref.getString("title", "");
             String message = sharedPref.getString("message", "");
 
-
             Long dateUntil = Long.parseLong(stringDate);
             Date dateNow = new Date();
             Long millisNow = dateNow.getTime();

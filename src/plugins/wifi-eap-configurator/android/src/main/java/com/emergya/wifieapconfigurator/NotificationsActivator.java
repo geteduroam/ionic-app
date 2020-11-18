@@ -12,5 +12,8 @@ public class NotificationsActivator extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             StartNotifications.enqueueWorkStart(context, new Intent());
         }
+        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            StartNotifications.enqueueWorkStart(context, new Intent().putExtra("expiration", true));
+        }
     }
 }

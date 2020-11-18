@@ -47,6 +47,8 @@
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
         <service android:name="com.emergya.wifieapconfigurator.StartNotifications"
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
+        <service android:name="com.emergya.wifieapconfigurator.StartRemoveNetwork"
+            android:permission="android.permission.BIND_JOB_SERVICE"></service>
         <receiver android:name="com.emergya.wifieapconfigurator.NotificationReceiver" />
         <receiver android:name="com.emergya.wifieapconfigurator.NotificationsActivator">
             <intent-filter>

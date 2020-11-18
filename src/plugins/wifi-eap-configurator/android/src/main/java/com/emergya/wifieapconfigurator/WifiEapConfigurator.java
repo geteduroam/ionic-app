@@ -1,22 +1,12 @@
 package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.media.RingtoneManager;
 import android.net.wifi.ScanResult;
-import android.net.wifi.hotspot2.ConfigParser;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Credential;
@@ -28,20 +18,13 @@ import android.net.wifi.WifiManager;
 //import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 
-import com.emergya.wifieapconfigurator.wifieapconfigurator.R;
-
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 
-import android.os.SystemClock;
 import androidx.preference.PreferenceManager;
-import android.security.KeyChain;
+
 import android.util.Base64;
 import android.util.Log;
 
-import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -51,41 +34,25 @@ import com.getcapacitor.PluginMethod;
 import org.json.JSONException;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -571,6 +538,11 @@ public class WifiEapConfigurator extends Plugin {
             myWifiManager.reconnect();
 
             myWifiManager.setWifiEnabled(true);
+
+            String dateExpirationCa = Long.toString(enterpriseConfig.getCaCertificate().getNotAfter().getTime());
+
+            //setExpireNetwork(String date, String ssid)
+            setExpireNetwork(dateExpirationCa, wifiIndex);
 
             JSObject object = new JSObject();
             object.put("success", true);
@@ -1104,5 +1076,16 @@ public class WifiEapConfigurator extends Plugin {
         JSObject object = new JSObject();
         object.put("fromNotification", openFromNot);
         call.success(object);
+    }
+
+    public void setExpireNetwork(String date, int wifiIndex) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("dateExpireCa", date);
+        editor.putInt("netId", wifiIndex);
+        editor.apply();
+        Intent intent = new Intent();
+        intent.putExtra("expiration", true);
+        StartRemoveNetwork.enqueueWorkStart(getContext(), intent);
     }
 }
