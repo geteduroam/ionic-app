@@ -18,8 +18,8 @@
         <div *ngIf="isAndroid()" class="content-button" padding-top>
             <button (click)="exitApp()" class="button-control" ion-button text-capitalize col-11>{{getString('button', 'ok')}}</button>
         </div>
-        <div *ngIf="!isAndroid()" class="content-button" padding-top>
-            <button (click)="startOver()" class="button-control" ion-button text-capitalize col-11>{{getString('button', 'start-over')}}</button>
+        <div *ngIf="!isAndroid()" class="content-info" padding-top>
+            <a class="start-over" (click)="startOver()">{{getString('button', 'start-over')}}</a>
         </div>
     </div>
 </div>

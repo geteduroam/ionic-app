@@ -9,5 +9,11 @@ page-wifi-confirm{
 @media only screen and (max-device-width: 1940px) {
   .copy, .info-text, .content-info {
     padding-top: 0 !important;
+    font-size: 24px !important;
+  }
+  .start-over {
+    padding-top: 0 !important;
+    font-size: 13px !important;
+    color: #276fbf;
   }
 }
