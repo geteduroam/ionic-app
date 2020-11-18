@@ -62,7 +62,7 @@
     "terms": "You need accept terms of use"
   },
   "text": {
-    "configured": "Wi-Fi is now configured on your device.",
+    "configured": "Wi-Fi is now configured",
     "configure": "You are about to install a Wi-Fi network profile.",
     "configure1": "Continue configuring",
     "reconfigure": "Hi, It seems you have configured this device already.\nDo you want to reconfigure it?",
