@@ -101,6 +101,9 @@ import android.content.BroadcastReceiver;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
+/**
+ * Its the class responsable of communicate with ionic
+ */
 @NativePlugin(
         permissions = {
                 Manifest.permission.ACCESS_WIFI_STATE,
@@ -113,13 +116,18 @@ public class WifiEapConfigurator extends Plugin {
 
     private WifiManager wifiManager;
 
+    /**
+     * Its the responsable of call to the methods for configure the networks
+     * @param call
+     * @throws JSONException
+     */
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @PluginMethod()
     public void configureAP(PluginCall call) throws JSONException {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
         List config = new ArrayList();
         List<JSObject> result = new ArrayList();
-        config = android.configureAP(call, getContext());
+        config = netMan.configureAP(call, getContext());
 
         if (config != null) {
             String[] oids = (String[]) config.get(3);
@@ -127,7 +135,7 @@ public class WifiEapConfigurator extends Plugin {
 
             if (ssids.length > 0 || oids.length > 0) {
                 for (String ssid : ssids) {
-                    result = android.connectNetwork(getContext(), ssid, (WifiEnterpriseConfig) config.get(0), call, (PasspointConfiguration) config.get(1), (String) config.get(4), (String) config.get(5), getActivity());
+                    result = netMan.connectNetwork(getContext(), (WifiEnterpriseConfig) config.get(0), call, (PasspointConfiguration) config.get(1), getActivity(), ssid);
                     for (JSObject res: result) {
                         if (res.getBool("success")) {
                             call.success(res);
@@ -135,73 +143,73 @@ public class WifiEapConfigurator extends Plugin {
                     }
                 }
             }
+            call.success(result.get(0));
         }
-        call.success(result.get(0));
     }
 
     @PluginMethod
     public void validatePassPhrase(PluginCall call) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.validatePassPhrase(call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.validatePassPhrase(call);
     }
 
     @PluginMethod
     public void removeNetwork(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.removeNetwork(getContext(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.removeNetwork(getContext(), call);
     }
 
     @PluginMethod
     public void enableWifi(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.enableWifi(getContext(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.enableWifi(getContext(), call);
     }
 
     @PluginMethod
     public boolean isNetworkAssociated(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        return android.isNetworkAssociated(getContext(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        return netMan.isNetworkAssociated(getContext(), call);
     }
 
     @PluginMethod
     public void reachableSSID(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.reachableSSID(getContext(), getActivity(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.reachableSSID(getContext(), getActivity(), call);
     }
 
     @PluginMethod
     public void isConnectedSSID(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.isConnectedSSID(getContext(), getActivity(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.isConnectedSSID(getContext(), getActivity(), call);
     }
 
     @PluginMethod
     public boolean checkEnabledWifi(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        return android.checkEnabledWifi(getContext(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        return netMan.checkEnabledWifi(getContext(), call);
     }
 
     @PluginMethod
     public void sendNotification(PluginCall call) throws JSONException {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.sendNotification(getContext(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.sendNotification(getContext(), call);
     }
 
     @PluginMethod()
     public void writeToSharedPref(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.writeToSharedPref(getContext(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.writeToSharedPref(getContext(), call);
     }
 
     @PluginMethod()
     public void readFromSharedPref(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.readFromSharedPref(getContext(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.readFromSharedPref(getContext(), call);
     }
 
     @PluginMethod()
     public void checkIfOpenThroughNotifications(PluginCall call) {
-        Android android = FactoryAndroid.getAndroid(Build.VERSION.SDK_INT);
-        android.checkIfOpenThroughNotifications(getActivity(), call);
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.checkIfOpenThroughNotifications(getActivity(), call);
     }
 }

@@ -13,6 +13,9 @@ import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
+/**
+ * Its the class responsable of create the notification and send it
+ */
 public class ScheduledService extends JobIntentService {
 
     public static final int JOB_ID = 2;
