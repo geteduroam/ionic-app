@@ -21,10 +21,28 @@ import com.getcapacitor.PluginCall;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AndroidR extends Android {
+/**
+ * NetworkManagerP is the responsable of implement the abstract methods of NetworkManager. This class
+ * implements the methods to work in all devices with API greater and equal than API 29.
+ */
+public class NetworkManagerR extends NetworkManager {
 
+    public NetworkManagerR(ProfileDetails profile) {
+        super(profile);
+    }
+
+    /**
+     * Configure the network to work in devices with API 29 or greater.
+     * @param context
+     * @param enterpriseConfig
+     * @param call
+     * @param passpointConfig
+     * @param activity
+     * @param ssid
+     * @return
+     */
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public List connectNetwork(Context context, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PasspointConfiguration config, String displayName, String id, Activity activity) {
+    public List connectNetwork(Context context, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PasspointConfiguration config, Activity activity, String ssid) {
         List result = new ArrayList();
 
         if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE, context, activity)) {

@@ -59,29 +59,41 @@ import java.util.ArrayList;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
+
+/**
+ * NetworkManager is the abstract class responsable of implement the common methods of network configuration.
+ * This class have the neccessary methods to create a configuration and configure it in the device.
+ */
 @NativePlugin(
         permissions = {
                 Manifest.permission.ACCESS_WIFI_STATE,
                 Manifest.permission.CHANGE_WIFI_STATE,
                 Manifest.permission.ACCESS_FINE_LOCATION
         })
-public abstract class Android {
+public abstract class NetworkManager {
 
     private WifiManager wifiManager;
+    protected ProfileDetails profileDetails;
 
+    /**
+     * Initialize the attribute profileDetails that contain all parameter sended from ionic
+     * @param profile
+     */
+    public NetworkManager(ProfileDetails profile) {
+        this.profileDetails = profile;
+    }
+
+    /**
+     * Check if the basic configuration exist to configure a network, and return it
+     * @param call
+     * @param context
+     * @return
+     * @throws JSONException
+     */
     public List configureAP(PluginCall call, Context context) throws JSONException {
-        String[] ssids = new String[call.getArray("ssid").length()];
         boolean res = true;
 
-        String[] oids = new String[call.getArray("oid").length()];
-        if (call.getArray("oid").length() != 0 && call.getArray("oid").get(0) != "") {
-            List aux = call.getArray("oid").toList();
-            for (int i = 0 ; i < aux.size() ; i++) {
-                oids[i] = aux.get(i).toString();
-            }
-        }
-
-        if((call.getArray("ssid").length() == 0 || call.getArray("ssid").get(0) == "") && oids.length == 0) {
+        if((this.profileDetails.getSsids().length == 0 || this.profileDetails.getSsids()[0] == "") && this.profileDetails.getOids().length == 0) {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
@@ -89,38 +101,7 @@ public abstract class Android {
             res = false;
         }
 
-        if (call.getArray("ssid").length() != 0 && call.getArray("ssid").get(0) != "") {
-            List aux = call.getArray("ssid").toList();
-            for (int i = 0 ; i < aux.size() ; i++) {
-                ssids[i] = aux.get(i).toString();
-            }
-        }
-
-        String clientCertificate = null;
-        if (call.getString("clientCertificate") != null && !call.getString("clientCertificate").equals("")) {
-            clientCertificate = call.getString("clientCertificate");
-        }
-
-        String passPhrase = null;
-        if (call.getString("passPhrase") != null && !call.getString("passPhrase").equals("")) {
-            passPhrase = call.getString("passPhrase");
-        }
-
-        String anonymousIdentity = null;
-        if (call.getString("anonymous") != null && !call.getString("anonymous").equals("")) {
-            anonymousIdentity = call.getString("anonymous");
-        }
-
-        String[] caCertificate = new String[call.getArray("caCertificate").length()];
-        if (call.getArray("caCertificate").length() != 0 && call.getArray("caCertificate").get(0) != "") {
-            List aux = call.getArray("caCertificate").toList();
-            for (int i = 0 ; i < aux.size() ; i++) {
-                caCertificate[i] = aux.get(i).toString();
-            }
-        }
-
-        Integer eap = getEapMethod(call.getInt("eap"));
-        if (eap == null) {
+        if (this.profileDetails.getEap() == null) {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.eap.invalid");
@@ -128,31 +109,8 @@ public abstract class Android {
             res = false;
         }
 
-        String[] servername = new String[call.getArray("servername").length()];
-        if (call.getArray("servername").length() != 0 && call.getArray("servername").get(0) != "") {
-            List aux = call.getArray("servername").toList();
-            for (int i = 0 ; i < aux.size() ; i++) {
-                servername[i] = aux.get(i).toString();
-            }
-        }
-
-        String username = null;
-        String password = null;
-        Integer auth = null;
-
-        String id = null;
-        if (call.getString("id") != null && !call.getString("id").equals("")) {
-            id = call.getString("id");
-        }
-        String displayName = null;
-        if (call.getString("displayName") != null && !call.getString("displayName").equals("")) {
-            displayName = call.getString("displayName");
-        }
-
-        if (clientCertificate == null && passPhrase == null) {
-            if (call.getString("username") != null && !call.getString("username").equals("")) {
-                username = call.getString("username");
-            } else {
+        if (this.profileDetails.getClientCertificate() == null && this.profileDetails.getPassPhrase() == null) {
+            if (this.profileDetails.getUsername() == null || this.profileDetails.getUsername().equals("")) {
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.username.missing");
@@ -160,9 +118,7 @@ public abstract class Android {
                 res = false;
             }
 
-            if (call.getString("password") != null && !call.getString("password").equals("")) {
-                password = call.getString("password");
-            } else {
+            if (this.profileDetails.getPassword() == null || this.profileDetails.getPassword().equals("")) {
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.password.missing");
@@ -170,9 +126,7 @@ public abstract class Android {
                 res = false;
             }
 
-
-            auth = getAuthMethod(call.getInt("auth"));
-            if (auth == null) {
+            if (this.profileDetails.getAuth() == null) {
                 JSObject object = new JSObject();
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.error.auth.invalid");
@@ -181,7 +135,7 @@ public abstract class Android {
             }
         }
 
-        for(String ssid : ssids) {
+        for(String ssid : this.profileDetails.getSsids()) {
             try {
                 removeNetwork(ssid, context);
             } catch (Throwable _) {
@@ -193,35 +147,37 @@ public abstract class Android {
         }
 
         if (res) {
-            for (int i = 0 ; i < ssids.length ; i++) {
-                res = getNetworkAssociated(context, call, ssids[i]);
+            for (int i = 0 ; i < this.profileDetails.getSsids().length ; i++) {
+                res = getNetworkAssociated(context, call, this.profileDetails.getSsids()[i]);
             }
         }
 
         List parameters = new ArrayList();
 
         if (res) {
-            parameters = connectAP(ssids, username, password, servername, caCertificate, clientCertificate, passPhrase, eap, auth, anonymousIdentity, displayName, id, oids, call);
-            parameters.add(ssids);
-            parameters.add(oids);
-            parameters.add(displayName);
-            parameters.add(id);
+            parameters = connectAP(call);
+            parameters.add(this.profileDetails.getSsids());
+            parameters.add(this.profileDetails.getOids());
             return parameters;
         }
         return null;
     }
 
-    public List connectAP(String[] ssids, String username, String password, String[] servernames, String[] caCertificates, String clientCertificate, String passPhrase,
-                   Integer eap, Integer auth, String anonymousIdentity, String displayName, String id, String[] oids, PluginCall call) {
+    /**
+     * Return the configuration of SSID and the configuration of the passpoint to configure it
+     * @param call
+     * @return
+     */
+    public List connectAP(PluginCall call) {
 
         WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
 
-        enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
+        enterpriseConfig.setAnonymousIdentity(this.profileDetails.getAnonymousIdentity());
 
-        if (servernames.length != 0) {
+        if (this.profileDetails.getServernames().length != 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
-                enterpriseConfig.setAltSubjectMatch("DNS:" + String.join(";DNS:", servernames));
+                enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(this.profileDetails.getServernames()));
+                enterpriseConfig.setAltSubjectMatch("DNS:" + String.join(";DNS:", this.profileDetails.getServernames()));
             }
         } else {
             JSObject object = new JSObject();
@@ -230,13 +186,13 @@ public abstract class Android {
             call.success(object);
         }
 
-        enterpriseConfig.setEapMethod(eap);
+        enterpriseConfig.setEapMethod(this.profileDetails.getEap());
 
         CertificateFactory certFactory = null;
         X509Certificate[] caCerts = null;
         List<X509Certificate> certificates = new ArrayList<X509Certificate>();
         // building the certificates
-        for (String certString : caCertificates) {
+        for (String certString : this.profileDetails.getCaCertificates()) {
             byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
             ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 
@@ -279,11 +235,11 @@ public abstract class Android {
         // Explicitly reset client certificate, will set later if needed
         enterpriseConfig.setClientKeyEntry(null, null);
 
-        if (eap != WifiEnterpriseConfig.Eap.TLS) {
-            enterpriseConfig.setIdentity(username);
-            enterpriseConfig.setPassword(password);
+        if (this.profileDetails.getEap() != WifiEnterpriseConfig.Eap.TLS) {
+            enterpriseConfig.setIdentity(this.profileDetails.getUsername());
+            enterpriseConfig.setPassword(this.profileDetails.getPassword());
 
-            enterpriseConfig.setPhase2Method(auth);
+            enterpriseConfig.setPhase2Method(this.profileDetails.getAuth());
 
         } else {
             // Explicitly unset unused fields
@@ -294,17 +250,17 @@ public abstract class Android {
             // while for PEAP/TTLS, "identity" is the inner identity,
             // and anonymousIdentity is the outer identity
             // - so we have to do some weird shuffling here.
-            enterpriseConfig.setIdentity(anonymousIdentity);
+            enterpriseConfig.setIdentity(this.profileDetails.getAnonymousIdentity());
 
             KeyStore pkcs12ks = null;
             try {
                 pkcs12ks = KeyStore.getInstance("pkcs12");
 
-                byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+                byte[] bytes = Base64.decode(this.profileDetails.getClientCertificate(), Base64.NO_WRAP);
                 ByteArrayInputStream b = new ByteArrayInputStream(bytes);
                 InputStream in = new BufferedInputStream(b);
                 try {
-                    pkcs12ks.load(in, passPhrase.toCharArray());
+                    pkcs12ks.load(in, this.profileDetails.getPassPhrase().toCharArray());
                 } catch(Exception e) {
                     JSObject object = new JSObject();
                     object.put("success", false);
@@ -317,7 +273,7 @@ public abstract class Android {
                 while (aliases.hasMoreElements()) {
                     String alias = aliases.nextElement();
                     cert = (X509Certificate) pkcs12ks.getCertificate(alias);
-                    key = (PrivateKey) pkcs12ks.getKey(alias, passPhrase.toCharArray());
+                    key = (PrivateKey) pkcs12ks.getKey(alias, this.profileDetails.getPassPhrase().toCharArray());
                     enterpriseConfig.setClientKeyEntry(key, cert);
                 }
 
@@ -333,7 +289,7 @@ public abstract class Android {
             }
         }
 
-        PasspointConfiguration config = this.createPasspointConfig(id, displayName, oids, enterpriseConfig, key);;
+        PasspointConfiguration config = this.createPasspointConfig(enterpriseConfig, key);
 
         List configs = new ArrayList();
         configs.add(enterpriseConfig);
@@ -341,12 +297,17 @@ public abstract class Android {
         return configs;
     }
 
+    /**
+     * Return if the passphrase received through the plugin is correct
+     * @param call
+     * @throws KeyStoreException
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
     public void validatePassPhrase(PluginCall call) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
 
-        String clientCertificate = call.getString("certificate");
-        String passPhrase = call.getString("passPhrase");
-
-        if (clientCertificate == null || passPhrase == null) {
+        if (this.profileDetails.getClientCertificate() == null || this.profileDetails.getPassPhrase() == null) {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
@@ -356,12 +317,12 @@ public abstract class Android {
 
         KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
 
-        byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+        byte[] bytes = Base64.decode(this.profileDetails.getClientCertificate(), Base64.NO_WRAP);
         ByteArrayInputStream b = new ByteArrayInputStream(bytes);
         InputStream in = new BufferedInputStream(b);
 
         try {
-            pkcs12ks.load(in, passPhrase.toCharArray());
+            pkcs12ks.load(in, this.profileDetails.getPassPhrase().toCharArray());
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.passphrase.validation");
@@ -375,21 +336,27 @@ public abstract class Android {
 
     }
 
-    private PasspointConfiguration createPasspointConfig(String id, String displayName, String[] oid, WifiEnterpriseConfig enterpriseConfig, PrivateKey key) {
+    /**
+     * Create the configuration necessary to configure a passpoint and returns it
+     * @param enterpriseConfig
+     * @param key
+     * @return
+     */
+    private PasspointConfiguration createPasspointConfig(WifiEnterpriseConfig enterpriseConfig, PrivateKey key) {
         PasspointConfiguration config = new PasspointConfiguration();
 
         HomeSp homeSp = new HomeSp();
         homeSp.setFqdn(enterpriseConfig.getDomainSuffixMatch());
 
-        if (displayName != null) {
-            homeSp.setFriendlyName(displayName);
+        if (this.profileDetails.getDisplayName() != null) {
+            homeSp.setFriendlyName(this.profileDetails.getDisplayName());
         } else {
-            homeSp.setFriendlyName(id + " via Passpoint");
+            homeSp.setFriendlyName(this.profileDetails.getId() + " via Passpoint");
         }
 
-        long[] roamingConsortiumOIDs = new long[oid.length];
+        long[] roamingConsortiumOIDs = new long[this.profileDetails.getOids().length];
         int index = 0;
-        for (String roamingConsortiumOIDString : oid) {
+        for (String roamingConsortiumOIDString : profileDetails.getOids()) {
             if (!roamingConsortiumOIDString.startsWith("0x")) {
                 roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
             }
@@ -400,7 +367,7 @@ public abstract class Android {
 
         config.setHomeSp(homeSp);
         Credential cred = new Credential();
-        cred.setRealm(id);
+        cred.setRealm(this.profileDetails.getId());
         cred.setCaCertificate(enterpriseConfig.getCaCertificate());
 
         switch(enterpriseConfig.getEapMethod()) {
@@ -444,10 +411,24 @@ public abstract class Android {
         return config;
     }
 
-
+    /**
+     * Abstract method that configure the network depending of the device API version
+     * @param context
+     * @param enterpriseConfig
+     * @param call
+     * @param config
+     * @param activity
+     * @param ssid
+     * @return
+     */
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public abstract List connectNetwork(Context context, String ssid, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PasspointConfiguration config, String displayName, String id, Activity activity);
+    public abstract List connectNetwork(Context context, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PasspointConfiguration config, Activity activity, String ssid);
 
+    /**
+     * Send error when the client certificate is invalid
+     * @param e
+     * @param call
+     */
     private void sendClientCertificateError(Exception e, PluginCall call) {
         JSObject object = new JSObject();
         object.put("success", false);
@@ -456,15 +437,19 @@ public abstract class Android {
         Log.e("error", e.getMessage());
     }
 
+    /**
+     * Call to the remove network if the ssid sended through the plugin is correct, otherwise returns an error
+     * @param context
+     * @param call
+     */
     public void removeNetwork(Context context, PluginCall call) {
-        String ssid = call.getString("ssid");
         JSObject object = new JSObject();
 
-        if (null == ssid || "".equals(ssid)) {
+        if (null == this.profileDetails.getSsid() || "".equals(this.profileDetails.getSsid())) {
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
             call.success(object);
-        } else if (removeNetwork(ssid, context)) {
+        } else if (removeNetwork(this.profileDetails.getSsid(), context)) {
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.removed");
             call.success(object);
@@ -474,6 +459,13 @@ public abstract class Android {
             call.success(object);
         }
     }
+
+    /**
+     * Remove the network of the SSID sended
+     * @param ssid
+     * @param context
+     * @return
+     */
     public boolean removeNetwork(String ssid, Context context) {
         boolean res = false;
         WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -495,6 +487,11 @@ public abstract class Android {
         return res;
     }
 
+    /**
+     * Returns an WifiManager
+     * @param context
+     * @return
+     */
     WifiManager getWifiManager(Context context) {
         if (wifiManager == null) {
             wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -502,6 +499,11 @@ public abstract class Android {
         return wifiManager;
     }
 
+    /**
+     * Enable wifi of the device
+     * @param context
+     * @param call
+     */
     public void enableWifi(Context context, PluginCall call) {
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         WifiManager wifiManager = getWifiManager(context);
@@ -524,14 +526,18 @@ public abstract class Android {
         }*/
     }
 
+    /**
+     * Check if the SSID sended from ionic is configured in the device
+     * @param context
+     * @param call
+     * @return
+     */
     public boolean isNetworkAssociated(Context context, PluginCall call) {
         String ssid = null;
         boolean res = false, isOverridable = false;
 
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
-            ssid = call.getString("ssid");
-        } else {
+        if (this.profileDetails.getSsid() == null || this.profileDetails.getSsid().equals("")) {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
@@ -576,12 +582,15 @@ public abstract class Android {
         return res;
     }
 
+    /**
+     * Check if the SSID sended from ionic is reachable or not
+     * @param context
+     * @param activity
+     * @param call
+     */
     public void reachableSSID(Context context, Activity activity, PluginCall call) {
-        String ssid = null;
         boolean isReachable = false;
-        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
-            ssid = call.getString("ssid");
-        } else {
+        if (this.profileDetails.getSsid() == null || this.profileDetails.getSsid().equals("")) {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
@@ -605,7 +614,7 @@ public abstract class Android {
 
             while (isReachable == false && results.hasNext()) {
                 ScanResult s = results.next();
-                if (s.SSID.equals(ssid) || s.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
+                if (s.SSID.equals(this.profileDetails.getSsid()) || s.SSID.equals("\"" + this.profileDetails.getSsid() + "\"")) { // TODO document why ssid can be surrounded by quotes
                     isReachable = true;
                 }
             }
@@ -625,12 +634,15 @@ public abstract class Android {
         }
     }
 
+    /**
+     * Check if the current network connected belong to the SSID sended from ionic
+     * @param context
+     * @param activity
+     * @param call
+     */
     public void isConnectedSSID(Context context, Activity activity, PluginCall call) {
-        String ssid = null;
         boolean isConnected = false;
-        if (call.getString("ssid") != null && !call.getString("ssid").equals("")) {
-            ssid = call.getString("ssid");
-        } else {
+        if (this.profileDetails.getSsid() == null || this.profileDetails.getSsid().equals("")) {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
@@ -651,7 +663,7 @@ public abstract class Android {
             WifiManager wifiManager = getWifiManager(context);
             WifiInfo info = wifiManager.getConnectionInfo();
             String currentlySsid = info.getSSID();
-            if (currentlySsid != null && (currentlySsid.equals("\"" + ssid + "\"") || currentlySsid.equals(ssid))) { // TODO document why ssid can be surrounded by quotes
+            if (currentlySsid != null && (currentlySsid.equals("\"" + this.profileDetails.getSsid() + "\"") || currentlySsid.equals(this.profileDetails.getSsid()))) { // TODO document why ssid can be surrounded by quotes
                 isConnected = true;
             }
 
@@ -671,6 +683,13 @@ public abstract class Android {
 
     }
 
+    /**
+     * Returns if the network with the SSID sended its configured in the device
+     * @param context
+     * @param call
+     * @param ssid
+     * @return
+     */
     private boolean getNetworkAssociated(Context context, PluginCall call, String ssid) {
         boolean res = true, isOverridable = false;
 
@@ -698,6 +717,12 @@ public abstract class Android {
         return res;
     }
 
+    /**
+     * Check if the WIfi is enabled in the device
+     * @param context
+     * @param call
+     * @return
+     */
     public boolean checkEnabledWifi(Context context, PluginCall call) {
         boolean res = true;
         WifiManager wifi = getWifiManager(context);
@@ -712,35 +737,13 @@ public abstract class Android {
         return res;
     }
 
-    private Integer getEapMethod(Integer eap) {
-        switch (eap) {
-            case 13: return WifiEnterpriseConfig.Eap.TLS;
-            case 21: return WifiEnterpriseConfig.Eap.TTLS;
-            case 25: return WifiEnterpriseConfig.Eap.PEAP;
-            default: return null;
-        }
-    }
-
-    private Integer getAuthMethod(Integer auth) {
-        if (auth == null) {
-            return WifiEnterpriseConfig.Phase2.MSCHAPV2;
-        }
-        switch (auth) {
-            case -1: return WifiEnterpriseConfig.Phase2.PAP;
-            case -2: return WifiEnterpriseConfig.Phase2.MSCHAP;
-            case -3:
-            case 26: /* Android cannot do TTLS-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try TTLS-MSCHAPv2 instead */
-                // This currently DOES happen because CAT has a bug where it reports TTLS-MSCHAPv2 as TTLS-EAP-MSCHAPv2,
-                // so denying this would prevent profiles from being sideloaded
-                return WifiEnterpriseConfig.Phase2.MSCHAPV2;
-            /*
-            case _:
-                return WifiEnterpriseConfig.Phase2.GTC;
-            */
-            default: return null;
-        }
-    }
-
+    /**
+     * Requests permission to the app
+     * @param permission
+     * @param context
+     * @param activity
+     * @return
+     */
     boolean getPermission(String permission, Context context, Activity activity) {
         boolean res = true;
         if (!(checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED)) {
@@ -751,6 +754,12 @@ public abstract class Android {
         return res;
     }
 
+    /**
+     * Verify if the CaCertificate its valid for Android looking for in the AndroidCaStore
+     * @param caCert
+     * @throws GeneralSecurityException
+     * @throws IOException
+     */
     private void verifyCaCert(X509Certificate caCert)
             throws GeneralSecurityException, IOException {
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
@@ -764,6 +773,11 @@ public abstract class Android {
         validator.validate(path, params);
     }
 
+    /**
+     * Returns fingerprint of the certificate
+     * @param certChain
+     * @return
+     */
     private byte[] getFingerprint(X509Certificate certChain) {
 
         MessageDigest digester = null;
@@ -778,6 +792,11 @@ public abstract class Android {
         return fingerprint;
     }
 
+    /**
+     *
+     * @param strings
+     * @return
+     */
     private static String getLongestSuffix(String[] strings) {
         if (strings.length == 0) return "";
         if (strings.length == 1) return strings[0];
@@ -799,25 +818,31 @@ public abstract class Android {
         return longest;
     }
 
+    /**
+     * Send a notification with the attributes sended from ionic
+     * @param context
+     * @param call
+     * @throws JSONException
+     */
     public void sendNotification(Context context, PluginCall call) throws JSONException {
-        String stringDate = call.getString("date");
-        String title = call.getString("title");
-        String message = call.getString("message");
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("date", stringDate);
-        editor.putString("title", title);
-        editor.putString("message", message);
+        editor.putString("date", this.profileDetails.getStringDate());
+        editor.putString("title", this.profileDetails.getTitle());
+        editor.putString("message", this.profileDetails.getMessage());
         editor.apply();
         StartNotifications.enqueueWorkStart(context, new Intent());
     }
 
+    /**
+     * Writes the datas sended from ionic to the SharedPref of the app
+     * @param context
+     * @param call
+     */
     public void writeToSharedPref(Context context, PluginCall call) {
-        String data = call.getString("id");
-
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("institutionId", data);
+        editor.putString("institutionId", this.profileDetails.getInstitutionId());
         editor.apply();
         JSObject object = new JSObject();
         object.put("success", true);
@@ -825,6 +850,11 @@ public abstract class Android {
         call.success(object);
     }
 
+    /**
+     * Reads the institutionId saved in the SharedPref of the app
+     * @param context
+     * @param call
+     */
     public void readFromSharedPref(Context context, PluginCall call) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         String ret = sharedPref.getString("institutionId", "");
@@ -842,6 +872,11 @@ public abstract class Android {
         }
     }
 
+    /**
+     * Returns if the app is opened through a notification
+     * @param activity
+     * @param call
+     */
     public void checkIfOpenThroughNotifications(Activity activity, PluginCall call) {
         Boolean openFromNot;
         if (activity.getComponentName().getClassName().contains("MainActivity")) {

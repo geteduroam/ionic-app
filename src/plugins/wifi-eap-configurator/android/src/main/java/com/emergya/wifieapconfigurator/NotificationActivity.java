@@ -9,7 +9,9 @@ import com.getcapacitor.Plugin;
 
 import java.util.ArrayList;
 
-
+/**
+ * Its the class secondary responsable of init the app flow when the app is opened through a notification
+ */
 public class NotificationActivity extends BridgeActivity {
 
     public static String NOTIFICATION_ID = "1523";
