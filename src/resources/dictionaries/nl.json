@@ -43,7 +43,8 @@
     "configure" : "Instellen",
     "no-thanks": "Nee, bedankt",
     "close": "Sluiten",
-    "connect": "Verbind met netwerk"
+    "connect": "Verbind met netwerk",
+    "start-over": "Opnieuw beginnen"
   },
   "error": {
     "username": "De gebruikersnaam moet lijken op het patroon ",
@@ -61,7 +62,7 @@
     "terms": "Je moet de gebruiksvoorwaarden accepteren"
   },
   "text": {
-    "configured": "Wi-Fi is nu ingesteld op dit apparaat.",
+    "configured": "Wi-Fi is nu ingesteld",
     "configure": "Je staat op het punt een Wi-Fi-netwerkprofiel te installeren.",
     "configure1": "Ga door met instellen",
     "reconfigure": "Het lijkt er op dat je dit apparaat al hebt ingesteld.\nWil je het opnieuw configureren?",

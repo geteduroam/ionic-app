@@ -43,7 +43,8 @@
     "configure" : "Konfigurieren",
     "no-thanks": "Nein, danke",
     "close": "Schließen",
-    "connect": "mit Netzwerk verbinden"
+    "connect": "mit Netzwerk verbinden",
+    "start-over": "Neu anfangen"
   },
   "error": {
     "username": "Benutzername ist ähnlich wie ",
@@ -61,7 +62,7 @@
     "terms": "Sie müssen die Nutzungsbedingungen akzeptieren"
   },
   "text": {
-    "configured": "Wi-Fi ist jetzt konfiguriert.",
+    "configured": "Wi-Fi ist jetzt konfiguriert",
     "configure": "Sie werden ein Wi-Fi-Netzwerk Profil installieren.",
     "configure1": "Einstellung fortsetzen",
     "reconfigure": "Sie haben dieses Gerät bereits konfiguriert.\nMöchten Sie neu konfigurieren?",

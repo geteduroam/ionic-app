@@ -43,7 +43,8 @@
     "configure" : "Konfigurer",
     "no-thanks": "Nei, takk",
     "close": "Lukk",
-    "connect": "Koble til nettverket"
+    "connect": "Koble til nettverket",
+    "start-over": "Begynne på nytt"
   },
   "error": {
     "username": "Brukernavnet må følge mønster ",
@@ -67,8 +68,8 @@
     "reconfigure": "Det ser ut som enheten din er allerede satt opp.\nVil du sette den opp på nytt?",
     "network-available": "Nettilgang tilgjengelig",
     "configuring": "Henter konfigurasjon, vennligst vent",
-    "title": "Reconfigure geteduroam",
-    "message": "There are 5 days left for your geteduroam profile to expire, click to reconfigure it"
+    "title": "Konfigurer geteduroam på nytt",
+    "message": "Profilen utløper om 5 dager. Klikk her for å erstatte den."
   },
   "defaultError": "Key not found"
 }

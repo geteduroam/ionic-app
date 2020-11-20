@@ -4,6 +4,7 @@ import NetworkExtension
 import SystemConfiguration.CaptiveNetwork
 import UIKit
 import CoreLocation
+import UserNotifications
 
 @objc(WifiEapConfigurator)
 public class WifiEapConfigurator: CAPPlugin {
@@ -605,6 +606,70 @@ public class WifiEapConfigurator: CAPPlugin {
 			"success": true,
 		])
 	}
+
+	@objc func sendNotification(_ call: CAPPluginCall) {
+            let notifCenter = UNUserNotificationCenter.current()
+            notifCenter.requestAuthorization(options: [.alert, .sound, .badge]) { (granted, _) in
+                let stringDate = call.getString("date")!
+                let title = call.getString("title")!
+                let message = call.getString("message")!
+
+                UserDefaults.standard.set(stringDate, forKey: "date")
+                UserDefaults.standard.set(title, forKey: "title")
+                UserDefaults.standard.set(message, forKey: "message")
+
+                let content = UNMutableNotificationContent()
+                content.title = title ?? ""
+                content.body = message ?? ""
+                content.sound = UNNotificationSound.default
+                content.badge = 1
+        
+                let realDate = Int(stringDate)! - 432000000
+                let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
+                //let triggerDate = Calendar.current.dateComponents([.year,.month,.day,.hour,.minute,.second,], from: date)
+
+                if date.timeIntervalSinceNow > 0 {
+                    let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: date.timeIntervalSinceNow, repeats: false)
+
+                    let request = UNNotificationRequest.init(identifier: "getEduroamApp", content: content, trigger: trigger)
+
+                    let center = UNUserNotificationCenter.current()
+                    center.add(request)
+                }
+            }
+	}
+
+	@objc func writeToSharedPref(_ call: CAPPluginCall) {
+	    let data = call.getString("id")!
+
+	    UserDefaults.standard.set(data, forKey: "institutionId")
+	}
+
+	@objc func readFromSharedPref(_ call: CAPPluginCall) {
+         let id = UserDefaults.standard.string(forKey: "institutionId") ?? ""
+
+         if id == "" {
+            return call.success([
+                "message": "plugin.wifieapconfigurator.error.reading",
+                "success": false
+            ])
+         } else {
+            return call.success([
+                "id": id,
+                "message": "plugin.wifieapconfigurator.success.reading",
+                "success": true
+            ])
+         }
+	}
+
+	@objc func checkIfOpenThroughNotifications(_ call: CAPPluginCall) {
+	    let openFrom = UserDefaults.standard.bool(forKey: "initFromNotification")
+
+	    return call.success([
+            "fromNotification": openFrom
+        ])
+	}
+
 
 	/**
 	@function isConnectedSSID

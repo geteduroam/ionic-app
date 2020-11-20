@@ -1,0 +1,75 @@
+{
+  "header": {
+    "config": "Configuration eduroam",
+    "profile": "Fournir les informations",
+    "confirmation": "Bonne utilisation du service eduroam!",
+    "error": "Erreur"
+  },
+  "label": {
+    "institution": "Etablissement",
+    "username": "Nom d'utilisateur",
+    "accept": "Accepter ",
+    "terms": "conditions d'utilisation",
+    "profile": "Profil",
+    "password": "Mot de passe",
+    "passphrase": "Phrase secrète",
+    "note": "*Note: si la connexion échoue, merci de vérifier votre mot de passe",
+    "help": "Besoin d'aide ?",
+    "support": "Cliquez ici pour obtenir de l'aide"
+  },
+  "placeholder": {
+    "institution": "Sélectionnez un établissement...",
+    "profile": "Sélectionnez un profil...",
+    "example": "nom d'utilisateur"
+  },
+  "modalSupport": {
+    "title": "Options d'assistance",
+    "message": "Sélectionnez une option",
+    "web": "Web: ",
+    "email": "Email: ",
+    "phone": "Téléphone: ",
+    "help": "Support help",
+    "cancel": "Annuler",
+    "terms": "Conditions d'utilisation"
+  },
+  "button": {
+    "next": "Suivant",
+    "ok": "ok",
+    "more": "En savoir plus",
+    "email": "Envoyer un e-mail",
+    "back": "Retour",
+    "done": "Terminé",
+    "reconfigure": "Reconfigurer",
+    "configure" : "Configurer",
+    "no-thanks": "Non, merci",
+    "close": "Fermer",
+    "connect": "Se Connecter au réseau",
+    "start-over": "Recommencer depuis le début"
+  },
+  "error": {
+    "username": "Le nom d'utilisateur doit correspondre au modèle ",
+    "domain": "Le nom d'utilisateur doit se terminer avec ",
+    "password": "Mot de passe incorrect",
+    "turn-on": "S'il vous plait, activez les données mobiles",
+    "duplicate": "Ce réseau est déjà activé sur votre équipement.\nAllez dans dans Paramètres > Connexions Wi-Fi et supprimez le",
+    "mobileconfig": "Cet équipement a déjà été configuré avec un profil.\nAllez dans Paramètres > Général > Profils et supprimez le",
+    "invalid-eap": "Le profil sélectionné non valable. Si l'erreur persiste veuillez contacter votre administrateur",
+    "invalid-method": "Aucune méthode d'authentification valide disponible à partir du profil sélectionné",
+    "invalid-profile": "Le profil sélectionné est erroné",
+    "invalid-oauth": "Vous devez authoriser cette application à configurer une connexion Wi-Fi",
+    "invalid-institution": "Cet établissement n'est pas supporté",
+    "passphrase": "La phrase secrète est incorrecte",
+    "terms": "Vous devez accepter les conditions d'utilisation"
+  },
+  "text": {
+    "configured": "Le Wi-Fi est maintenant configuré",
+    "configure": "Vous êtes sur le point d'installer un profil réseau Wi-Fi.",
+    "configure1": "Continuer la configuration",
+    "reconfigure": "Bonjour, il semble que vous ayez déjà configuré cet appareil.\n Voulez-vous le reconfigurer ?",
+    "network-available": "Accès externe disponible",
+    "configuring": "Réception de la configuration réseau, veuillez patienter",
+    "title": "Reconfigurer geteduroam",
+    "message": "Il reste 5 jours avant l'expiration de votre profil 'geteduroam', cliquez pour le reconfigurer"
+  },
+  "defaultError": "Erreur inconnue"
+}
