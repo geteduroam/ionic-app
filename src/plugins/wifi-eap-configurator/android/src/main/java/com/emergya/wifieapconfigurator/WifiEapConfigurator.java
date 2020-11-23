@@ -2,6 +2,7 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -39,6 +40,8 @@ import androidx.core.content.ContextCompat;
 
 import android.os.SystemClock;
 import androidx.preference.PreferenceManager;
+
+import android.provider.Settings;
 import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
@@ -624,6 +627,28 @@ public class WifiEapConfigurator extends Plugin {
             suggestions.add(suggestionBuilder.build());
 
             WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+            Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
+            intent.putParcelableArrayListExtra(Settings.EXTRA_WIFI_NETWORK_LIST, suggestions);
+            getActivity().startActivityForResult(intent, 1000);
+
+            final Activity activity = new Activity() {
+                @Override
+                protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+                    super.onActivityResult(requestCode, resultCode, data);
+
+                    // check if the request code is same as what is passed  here it is 1
+                    if (requestCode == 1000) {
+                        // Make sure the request was successful
+                        if (resultCode == RESULT_OK) {
+                            System.out.println("The user agree the configuration");
+                        }
+                    }
+                }
+            };
+
+
+            /*WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             int status = wifiManager.addNetworkSuggestions(suggestions);
 
             if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
@@ -651,7 +676,7 @@ public class WifiEapConfigurator extends Plugin {
                 object.put("success", false);
                 object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
                 call.success(object);
-            }
+            }*/
 
             /*
             WifiNetworkSpecifier wifiNetworkSpecifier = suggestionBuilder.build();
