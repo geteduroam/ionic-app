@@ -2,7 +2,6 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -40,8 +39,6 @@ import androidx.core.content.ContextCompat;
 
 import android.os.SystemClock;
 import androidx.preference.PreferenceManager;
-
-import android.provider.Settings;
 import android.security.KeyChain;
 import android.util.Base64;
 import android.util.Log;
