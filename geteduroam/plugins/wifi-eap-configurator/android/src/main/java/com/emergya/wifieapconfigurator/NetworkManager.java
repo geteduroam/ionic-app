@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiNetworkSuggestion;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Credential;
@@ -348,11 +349,13 @@ public abstract class NetworkManager {
 		HomeSp homeSp = new HomeSp();
 		homeSp.setFqdn(enterpriseConfig.getDomainSuffixMatch());
 
-		if (this.profileDetails.getDisplayName() != null) {
+		/*if (this.profileDetails.getDisplayName() != null) {
 			homeSp.setFriendlyName(this.profileDetails.getDisplayName());
 		} else {
 			homeSp.setFriendlyName(this.profileDetails.getId() + " via Passpoint");
-		}
+		}*/
+
+		homeSp.setFriendlyName(this.profileDetails.getId() + " via Passpoint");
 
 		long[] roamingConsortiumOIDs = new long[this.profileDetails.getOids().length];
 		int index = 0;
@@ -832,6 +835,7 @@ public abstract class NetworkManager {
 		editor.putString("message", this.profileDetails.getMessage());
 		editor.apply();
 		StartNotifications.enqueueWorkStart(context, new Intent());
+		this.setExpireNetwork(context);
 	}
 
 	/**
@@ -887,5 +891,11 @@ public abstract class NetworkManager {
 		JSObject object = new JSObject();
 		object.put("fromNotification", openFromNot);
 		call.success(object);
+	}
+
+	public void setExpireNetwork(Context context) {
+		Intent intent = new Intent();
+		intent.putExtra("expiration", true);
+		StartRemoveNetwork.enqueueWorkStart(context, intent);
 	}
 }

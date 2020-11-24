@@ -13,6 +13,10 @@ public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        ScheduledService.enqueueWorkSchedule(context, new Intent().putExtra("title", intent.getStringExtra("title")).putExtra("message", intent.getStringExtra("message")));
+        if (intent.getBooleanExtra("expiration", false) == true) {
+            ScheduledService.enqueueWorkSchedule(context, new Intent().putExtra("expiration", true).putExtra("netId", intent.getIntExtra("netId", -1)).putExtra("fqdn", intent.getStringExtra("fqdn")));
+        } else {
+            ScheduledService.enqueueWorkSchedule(context, new Intent().putExtra("title", intent.getStringExtra("title")).putExtra("message", intent.getStringExtra("message")));
+        }
     }
 }

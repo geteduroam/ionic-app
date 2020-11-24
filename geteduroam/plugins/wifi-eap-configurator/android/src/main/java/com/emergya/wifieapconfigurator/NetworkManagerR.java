@@ -36,14 +36,25 @@ public class NetworkManagerR extends NetworkManager {
 	 * @param context
 	 * @param enterpriseConfig
 	 * @param call
-	 * @param passpointConfig
+	 * @param config
 	 * @param activity
 	 * @param ssid
 	 * @return
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.Q)
 	public List connectNetwork(Context context, WifiEnterpriseConfig enterpriseConfig, PluginCall call, PasspointConfiguration config, Activity activity, String ssid) {
+		WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 		List result = new ArrayList();
+
+		List<WifiNetworkSuggestion> configured = wifiManager.getNetworkSuggestions();
+
+		for (WifiNetworkSuggestion conf: configured) {
+			if (conf.getPasspointConfig() != null) {
+				List<WifiNetworkSuggestion> sug = new ArrayList();
+				sug.add(conf);
+				wifiManager.removeNetworkSuggestions(sug);
+			}
+		}
 
 		if (getPermission(Manifest.permission.CHANGE_NETWORK_STATE, context, activity)) {
 
@@ -67,8 +78,7 @@ public class NetworkManagerR extends NetworkManager {
 
 			suggestions.add(suggestionBuilder.build());
 
-			WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-			@SuppressLint("MissingPermission") int status = wifiManager.addNetworkSuggestions(suggestions);
+			int status = wifiManager.addNetworkSuggestions(suggestions);
 
 			if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
 
@@ -84,6 +94,7 @@ public class NetworkManagerR extends NetworkManager {
 						}
 					}
 				};
+
 				context.registerReceiver(broadcastReceiver, intentFilter);
 
 				JSObject object = new JSObject();
@@ -96,6 +107,30 @@ public class NetworkManagerR extends NetworkManager {
 				object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
 				result.add(object);
 			}
+
+			 /*
+			// NEW APPROACH
+			WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+			Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
+			intent.putParcelableArrayListExtra(Settings.EXTRA_WIFI_NETWORK_LIST, suggestions);
+			getActivity().startActivityForResult(intent, 1000);
+
+			final Activity activity = new Activity() {
+				@Override
+				protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+					super.onActivityResult(requestCode, resultCode, data);
+
+					// check if the request code is same as what is passed  here it is 1
+					if (requestCode == 1000) {
+						// Make sure the request was successful
+						if (resultCode == RESULT_OK) {
+							System.out.println("The user agree the configuration");
+						}
+					}
+				}
+			};
+			 */
 
 			/*
 			WifiNetworkSpecifier wifiNetworkSpecifier = suggestionBuilder.build();
