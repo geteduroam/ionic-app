@@ -2,12 +2,15 @@ package com.emergya.wifieapconfigurator;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiManager;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Build;
 import android.util.Log;
+
+import androidx.preference.PreferenceManager;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
@@ -71,10 +74,11 @@ public class NetworkManagerP extends NetworkManager {
 
                 myWifiManager.setWifiEnabled(true);
 
-                String dateExpirationCa = Long.toString(enterpriseConfig.getCaCertificate().getNotAfter().getTime());
-
-                //setExpireNetwork(String date, String ssid)
-                setExpireNetwork(context, dateExpirationCa, wifiIndex);
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putInt("netId", wifiIndex);
+                editor.putString("fqdn", passpointConfig.getHomeSp().getFqdn());
+                editor.apply();
 
                 JSObject object = new JSObject();
                 object.put("success", true);

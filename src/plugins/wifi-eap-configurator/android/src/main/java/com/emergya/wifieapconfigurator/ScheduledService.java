@@ -34,12 +34,20 @@ public class ScheduledService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         if (intent.getBooleanExtra("expiration", false) == true) {
             int netId = intent.getIntExtra("netId", -1);
+            String fqdn = intent.getStringExtra("fqdn");
             WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P || netId < 0) {
                 List<WifiNetworkSuggestion> suggestionList = new ArrayList();
                 wm.removeNetworkSuggestions(suggestionList);
             } else {
-                wm.removeNetwork(netId);
+                try {
+                    wm.removeNetwork(netId);
+                } catch(Exception e) {}
+                if (!fqdn.equals("")) {
+                    try {
+                        wm.removePasspointConfiguration(fqdn);
+                    } catch(Exception e) {}
+                }
             }
         } else {
             // First we create the channel of the notifications

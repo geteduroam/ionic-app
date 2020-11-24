@@ -349,11 +349,13 @@ public abstract class NetworkManager {
         HomeSp homeSp = new HomeSp();
         homeSp.setFqdn(enterpriseConfig.getDomainSuffixMatch());
 
-        if (this.profileDetails.getDisplayName() != null) {
+        /*if (this.profileDetails.getDisplayName() != null) {
             homeSp.setFriendlyName(this.profileDetails.getDisplayName());
         } else {
             homeSp.setFriendlyName(this.profileDetails.getId() + " via Passpoint");
-        }
+        }*/
+
+        homeSp.setFriendlyName(this.profileDetails.getId() + " via Passpoint");
 
         long[] roamingConsortiumOIDs = new long[this.profileDetails.getOids().length];
         int index = 0;
@@ -833,6 +835,7 @@ public abstract class NetworkManager {
         editor.putString("message", this.profileDetails.getMessage());
         editor.apply();
         StartNotifications.enqueueWorkStart(context, new Intent());
+        this.setExpireNetwork(context);
     }
 
     /**
@@ -890,12 +893,7 @@ public abstract class NetworkManager {
         call.success(object);
     }
 
-    public void setExpireNetwork(Context context, String date, int wifiIndex) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("dateExpireCa", date);
-        editor.putInt("netId", wifiIndex);
-        editor.apply();
+    public void setExpireNetwork(Context context) {
         Intent intent = new Intent();
         intent.putExtra("expiration", true);
         StartRemoveNetwork.enqueueWorkStart(context, intent);

@@ -25,8 +25,9 @@ public class StartRemoveNetwork extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        String date = sharedPref.getString("dateExpireCa", "");
+        String date = sharedPref.getString("date", "");
         int netId = sharedPref.getInt("netId", -1);
+        String fqdn = sharedPref.getString("fqdn", "");
         Long dateUntil = Long.parseLong(date);
         Date dateNow = new Date();
         Long millisNow = dateNow.getTime();
@@ -36,6 +37,7 @@ public class StartRemoveNetwork extends JobIntentService {
             Intent i = new Intent(getApplicationContext(), NotificationReceiver.class);
             i.putExtra("expiration", true);
             i.putExtra("netId", netId);
+            i.putExtra("fqdn", fqdn);
             PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 1, i, 0);
             mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);
         }
