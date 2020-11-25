@@ -42,12 +42,12 @@ export class GeteduroamServices {
         if (data.instances) {
           return data.instances;
         } else {
-          await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', true);
+          await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'need-network'), true);
         }
 
     } catch (e) {
       // Error is not dismissable, so disable for now
-      await this.errorHandler.handleError('We need a network connection to load the list of institutions. Please enable networking and restart the application.', true);
+      await this.errorHandler.handleError(this.dictionary.getTranslation('error', 'need-network'), true);
     }
   }
 

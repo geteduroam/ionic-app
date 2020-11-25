@@ -51,6 +51,7 @@
     "domain": "Benutzername muss enden auf ",
     "password": "Passwort ist falsch",
     "turn-on": "Bitte schalten Sie mobile Daten ein",
+    "need-network": "Zum Laden der Liste der Organisationen ist eine Netzwerkverbindung erforderlich. Bitte aktivieren Sie die Netzwerkverbindung und starten Sie die App neu.",
     "duplicate": "Es gibt eine Konfiguration für dieses Wi-Fi-Netzwerk.\nBitte entfernen Sie es im Menü Einstellungen > Wi-Fi-Netzwerke",
     "mobileconfig": "Ihr Gerät wird über ein Konfigurationsprofil konfiguriert.\nBitte gehen Sie zu Einstellungen > Allgemein > Profil um es zu entfernen",
     "invalid-eap": "Ungültiges Profil. Wenn der Fehler weiterhin besteht, wenden Sie sich bitte an den Administrator.",
