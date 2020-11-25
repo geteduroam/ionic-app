@@ -94,13 +94,27 @@ extension AppDelegate: UNUserNotificationCenterDelegate{
 	func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
 		// Remove badge icon
 		UIApplication.shared.applicationIconBadgeNumber = 0
-		// Set navigation to configured profile
-		UserDefaults.standard.set(true, forKey: "initFromNotification")
-		// State foreground
-		if(UIApplication.shared.applicationState == .active){}
-		// State background
-		if(UIApplication.shared.applicationState == .inactive){}
 		
+		let dateExpired = UserDefaults.standard.object(forKey: "expireDate") as! Date
+		let ssidExpired = UserDefaults.standard.array(forKey: "ssidToExpire") as! [String]
+		let domainExpired = UserDefaults.standard.array(forKey: "domainToExpire") as! [String]
+		let dateNow = Date()
+		
+		if (ssidExpired.count > 0 && dateNow > dateExpired){
+			//Remove
+			print("Remove connections: ", domainExpired)
+			print("Remove connections: ", ssidExpired)
+		}
+		else {
+			// Set navigation to configured profile
+			UserDefaults.standard.set(true, forKey: "initFromNotification")
+			// State foreground
+			if(UIApplication.shared.applicationState == .active){}
+			// State background
+			if(UIApplication.shared.applicationState == .inactive){}
+			
+		
+		}
 		// tell the app that we have finished processing the user’s action / response
 		completionHandler()
 	}
