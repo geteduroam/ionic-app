@@ -65,7 +65,7 @@
     "configured": "Le Wi-Fi est maintenant configuré",
     "configure": "Vous êtes sur le point d'installer un profil réseau Wi-Fi.",
     "configure1": "Continuer la configuration",
-    "reconfigure": "Bonjour, il semble que vous ayez déjà configuré cet appareil.\n Voulez-vous le reconfigurer ?",
+    "reconfigure": "Bonjour, il semble que vous ayez déjà configuré cet appareil.\nVoulez-vous le reconfigurer?",
     "network-available": "Accès externe disponible",
     "configuring": "Réception de la configuration réseau, veuillez patienter",
     "title": "Reconfigurer geteduroam",
