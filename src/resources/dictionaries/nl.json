@@ -69,7 +69,9 @@
     "network-available": "Externe toegang beschikbaar",
     "configuring": "Netwerk configuratie ophalen, even geduld",
     "title": "Opnieuw instellen geteduroam",
-    "message": "Over 5 dagen verloopt het geteduroam profiel, klik hier om het opnieuw in te stellen"
+    "message": "Over 5 dagen verloopt het geteduroam profiel, klik hier om het opnieuw in te stellen",
+    "titleExpire": "Your eduroam account is expired",
+    "messageExpire": "Launch geteduroam to renew your account"
   },
   "defaultError": "Onbekende foutmelding"
 }

@@ -69,7 +69,9 @@
     "network-available": "Nettilgang tilgjengelig",
     "configuring": "Henter konfigurasjon, vennligst vent",
     "title": "Konfigurer geteduroam på nytt",
-    "message": "Profilen utløper om 5 dager. Klikk her for å erstatte den."
+    "message": "Profilen utløper om 5 dager. Klikk her for å erstatte den.",
+    "titleExpire": "Your eduroam account is expired",
+    "messageExpire": "Launch geteduroam to renew your account"
   },
   "defaultError": "Key not found"
 }

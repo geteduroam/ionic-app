@@ -86,7 +86,7 @@ public class WifiEapConfigurator: CAPPlugin {
     @objc func configureAP(_ call: CAPPluginCall) {
         let domain = call.getString("domain") ?? call.getString("id")!
         let ssids = call.getArray("ssid", String.self) ?? []
-        UserDefaults.standard.set(domain, forKey: "domainToExpire")
+        UserDefaults.standard.set(call.getArray("oid", String.self) ?? [], forKey: "domainToExpire")
         // At this point, we're not certain this configuration can work,
         // but we can't do this any step later, because createNetworkConfigurations will import things to the keychain.
         // TODO only remove keychain items that match these networks
@@ -622,7 +622,8 @@ public class WifiEapConfigurator: CAPPlugin {
                 UserDefaults.standard.set(stringDate, forKey: "date")
                 UserDefaults.standard.set(title, forKey: "title")
                 UserDefaults.standard.set(message, forKey: "message")
-                
+               
+                // Advise to renew certificate
                 let content = UNMutableNotificationContent()
                 content.title = title
                 content.body = message
@@ -631,25 +632,26 @@ public class WifiEapConfigurator: CAPPlugin {
                 let realDate = Int(stringDate)! - 432000000
                 let date = Date(timeIntervalSince1970: Double((realDate) / 1000))
                 
-                // Expire date certificate
-                let contentExpired = UNMutableNotificationContent()
-                contentExpired.title = "Warning!"
-                contentExpired.body = "Your certificate is expired"
-                contentExpired.sound = UNNotificationSound.default
-                contentExpired.badge = 1
-              
-                let expireDate = Date(timeIntervalSince1970: Double(Int(stringDate)!) / 1000)
-                UserDefaults.standard.set(expireDate, forKey: "expireDate")
-                
                 let center = UNUserNotificationCenter.current()
-                print("date saved: ", Date(timeIntervalSince1970: Double(Int(stringDate)!) / 1000))
-               
+
                 if date.timeIntervalSinceNow > 0 {
                     let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: date.timeIntervalSinceNow, repeats: false)
                     let request = UNNotificationRequest.init(identifier: "getEduroamApp", content: content, trigger: trigger)
 
                     center.add(request)
                 }
+            
+                // Expire date certificate
+                let contentExpired = UNMutableNotificationContent()
+                contentExpired.title = call.getString("titleExpire")!
+                contentExpired.body = call.getString("messageExpire")!
+                contentExpired.sound = UNNotificationSound.default
+                contentExpired.badge = 1
+              
+                let expireDate = Date(timeIntervalSince1970: Double(Int(stringDate)! / 1000))
+                
+                UserDefaults.standard.set(expireDate, forKey: "expireDate")
+                
                 if expireDate.timeIntervalSinceNow > 0 {
                     let triggerExpired = UNTimeIntervalNotificationTrigger.init(timeInterval: expireDate.timeIntervalSinceNow, repeats: false)
                     let requestCertExpired = UNNotificationRequest.init(identifier: "expireCertificate", content: contentExpired, trigger: triggerExpired)

@@ -393,10 +393,12 @@ export class GeteduroamServices {
     let config;
     const title = this.dictionary.getTranslation('text', 'title');
     const message = this.dictionary.getTranslation('text', 'message');
-    if (ms) {
-      config = { date: ms, title: title, message: message};
+    const titleExpire = this.dictionary.getTranslation('text', 'titleExpire');
+    const messageExpire = this.dictionary.getTranslation('text', 'messageExpire');
+    if (!!this.global.isAndroid()) {
+      config = { date: ms ? ms : this.global.getValidUntil(), title, message};
     } else {
-      config = { date: this.global.getValidUntil(), title: title, message: message};
+      config = { date: ms ? ms : this.global.getValidUntil(), title, message, titleExpire, messageExpire};
     }
     WifiEapConfigurator.sendNotification(config);
   }

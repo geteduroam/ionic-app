@@ -68,7 +68,9 @@
     "network-available": "Acceso remoto disponible",
     "configuring": "Recibiendo la configuracion de la red, espera porfavor",
     "title": "Reconfigurar red",
-    "message": "Quedan 5 dias para que tu red se caduque, haz click para reconfigurarla"
+    "message": "Quedan 5 dias para que tu red se caduque, haz click para reconfigurarla",
+    "titleExpire": "Su cuenta de eduroam ha expirado",
+    "messageExpire": "Lanza geteduroam para renovar tu cuenta"
   },
   "defaultError": "Clave no encontrada"
 }

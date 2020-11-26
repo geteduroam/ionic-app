@@ -69,7 +69,9 @@
     "network-available": "Netzwerk ist verfügbar",
     "configuring": "Die Netzwerkkonfiguration wird heruntergeladen, bitte warten...",
     "title": "Neu konfigurieren geteduroam",
-    "message": "In 5 Tagen läuft das geteduroam WiFi-profil ab, klicken Sie hier, um es neu zu konfigurieren"
+    "message": "In 5 Tagen läuft das geteduroam WiFi-profil ab, klicken Sie hier, um es neu zu konfigurieren",
+    "titleExpire": "Your eduroam account is expired",
+    "messageExpire": "Launch geteduroam to renew your account"
   },
   "defaultError": "Unbekannter Fehler"
 }

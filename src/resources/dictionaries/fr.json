@@ -69,7 +69,9 @@
     "network-available": "Accès externe disponible",
     "configuring": "Réception de la configuration réseau, veuillez patienter",
     "title": "Reconfigurer geteduroam",
-    "message": "Il reste 5 jours avant l'expiration de votre profil 'geteduroam', cliquez pour le reconfigurer"
+    "message": "Il reste 5 jours avant l'expiration de votre profil 'geteduroam', cliquez pour le reconfigurer",
+    "titleExpire": "Your eduroam account is expired",
+    "messageExpire": "Launch geteduroam to renew your account"
   },
   "defaultError": "Erreur inconnue"
 }

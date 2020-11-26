@@ -69,7 +69,9 @@
     "network-available": "External access available",
     "configuring": "Receiving network configuration, please wait",
     "title": "Reconfigure geteduroam",
-    "message": "There are 5 days left for your geteduroam profile to expire, click to reconfigure it"
+    "message": "There are 5 days left for your geteduroam profile to expire, click to reconfigure it",
+    "titleExpire": "Your eduroam account is expired",
+    "messageExpire": "Launch geteduroam to renew your account"
   },
   "defaultError": "Key not found"
 }
