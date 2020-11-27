@@ -12,6 +12,7 @@
 		3025BA0B257007C500BC50A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3025BA0A257007C500BC50A0 /* Assets.xcassets */; };
 		3025BA0E257007C500BC50A0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3025BA0C257007C500BC50A0 /* Main.storyboard */; };
 		30869F392570EFCF00F33495 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30869F382570EFCF00F33495 /* NetworkExtension.framework */; };
+		30869F3C257129CA00F33495 /* Discovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30869F3B257129CA00F33495 /* Discovery.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		3025BA0F257007C500BC50A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3025BA10257007C500BC50A0 /* geteduroam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = geteduroam.entitlements; sourceTree = "<group>"; };
 		30869F382570EFCF00F33495 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
+		30869F3B257129CA00F33495 /* Discovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Discovery.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				3025BA0C257007C500BC50A0 /* Main.storyboard */,
 				3025BA0F257007C500BC50A0 /* Info.plist */,
 				3025BA10257007C500BC50A0 /* geteduroam.entitlements */,
+				30869F3B257129CA00F33495 /* Discovery.swift */,
 			);
 			path = geteduroam;
 			sourceTree = "<group>";
@@ -144,6 +147,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30869F3C257129CA00F33495 /* Discovery.swift in Sources */,
 				3025BA09257007C300BC50A0 /* ViewController.swift in Sources */,
 				3025BA07257007C300BC50A0 /* AppDelegate.swift in Sources */,
 			);

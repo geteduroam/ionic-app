@@ -8,13 +8,18 @@ import Foundation
 import Cocoa
 import CoreWLAN
 
+
 class ViewController: NSViewController {
 
     @IBOutlet weak var ssidField: NSTextField!
     @IBOutlet weak var passField: NSTextField!
+    @IBOutlet weak var userField: NSTextField!
+    @IBOutlet weak var caField: NSTextField!
     
     var ssidValue = ""
     var passValue = ""
+    var userValue = ""
+    var caValue = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,29 +32,50 @@ class ViewController: NSViewController {
         }
     }
 
+// FIELDS ACTIONS //
+    
     @IBAction func ssidAction(_ sender: NSTextField) {
         ssidValue = sender.stringValue
+        print("ssidValue: ", ssidValue)
     }
     
     @IBAction func passAction(_ sender: NSTextField) {
         passValue = sender.stringValue
+        print("passValue: ", passValue)
     }
+    
+    @IBAction func userAction(_ sender: NSTextField) {
+        userValue = sender.stringValue
+        print("userValue: ", userValue)
+    }
+    
+    @IBAction func caAction(_ sender: NSTextField) {
+        caValue = sender.stringValue
+        print("userValue: ", caValue)
+    }
+    
+// BUTTONS ACTIONS //
     
     @IBAction func connect(_ sender: NSButton) {
         print("ssid: ", ssidValue)
         print("pass: ", passValue)
+        print("pass: ", userValue)
         var isEqual = false
         let client = CWWiFiClient.shared()
         let interface = client.interface()!
+       
         if let discovery = Discovery() {
             print(" Wifi scan ")
             print("------------")
             for network in discovery.networks {
                 let wifiSSID: String = network.ssid!.description as String
-                print(wifiSSID.description)
+//  print(wifiSSID.description)
                  isEqual = (wifiSSID.description == ssidValue)
-                if(isEqual){
+                if(isEqual && userValue == "") {
                     try! interface.associate(to: network, password: passValue)
+                } else if (isEqual && userValue != "") {
+                    // TODO: Fix identity, The identity to use for IEEE 802.1X authentication. Holds the corresponding client certificate.
+                    try! interface.associate(toEnterpriseNetwork: network, identity: nil, username: userValue, password: passValue)
                 }
             }
         }
@@ -57,39 +83,4 @@ class ViewController: NSViewController {
     }
  
     
-}
-
-class Discovery {
-
-    var currentInterface: CWInterface
-    var interfacesNames: [String] = []
-    var networks: Set<CWNetwork> = []
-
-    // Failable init using default interface
-    init?() {
-        if let defaultInterface = CWWiFiClient.shared().interface(),
-           let name = defaultInterface.interfaceName {
-            self.currentInterface = defaultInterface
-            self.interfacesNames.append(name)
-            self.findNetworks()
-        } else {
-            return nil
-        }
-    }
-
-    // Init with the literal interface name, like "en1"
-    init(interfaceWithName name: String) {
-        self.currentInterface = CWInterface(interfaceName: name)
-        self.interfacesNames.append(name)
-        self.findNetworks()
-    }
-
-    // Fetch detectable WIFI networks
-   func findNetworks() {
-        do {
-            self.networks = try currentInterface.scanForNetworks(withSSID: nil)
-        } catch let error as NSError {
-            print("Error: \(error.localizedDescription)")
-        }
-    }
 }
