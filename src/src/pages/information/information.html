@@ -1,0 +1,55 @@
+<ion-header transparent>
+</ion-header>
+<ion-content fullscreen>
+    <div class="mb-5">
+        <h1 text-center>{{getString('header', 'information')}}</h1>
+    </div>
+    <div *ngIf="showAll">
+        <div *ngIf="informationNetwork.ssid" class="no-tech">
+            SSID:
+            <p class="p-info">{{informationNetwork.ssid}}</p>
+        </div>
+        <div *ngIf="informationNetwork.institution" class="no-tech">
+            {{getString('label', 'institution')}}:
+            <p class="p-info">{{informationNetwork.institution}}</p>
+        </div>
+        <div *ngIf="informationNetwork.validUntil" class="no-tech">
+            {{getString('label', 'valid-until')}}:
+            <p class="p-info">{{informationNetwork.validUntil}}</p>
+        </div>
+        <div *ngIf="informationNetwork.username" class="no-tech">
+            {{getString('label', 'username')}}:
+            <p class="p-info">{{informationNetwork.username}}</p>
+        </div>
+        <div *ngIf="showTechnicalInformation">
+            <div *ngIf="informationNetwork.authentication" class="no-tech">
+                {{getString('label', 'authentication')}}:
+                <p class="p-info">{{informationNetwork.authentication}}</p>
+            </div>
+            <div *ngIf="informationNetwork.suffix" class="no-tech">
+                {{getString('label', 'suffix')}}:
+                <p class="p-info">{{informationNetwork.suffix}}</p>
+            </div>
+            <div *ngIf="informationNetwork.eap" class="no-tech">
+                {{getString('label', 'eap')}}:
+                <p class="p-info">{{informationNetwork.eap}}</p>
+            </div>
+            <div *ngIf="informationNetwork.auth" class="no-tech">
+                {{getString('label', 'auth')}}:
+                <p class="p-info">{{informationNetwork.auth}}</p>
+            </div>
+            <div *ngIf="informationNetwork.oids" class="no-tech">
+                {{getString('label', 'oids')}}:
+                <p class="p-info">{{informationNetwork.oids}}</p>
+            </div>
+        </div>
+        <div class="footer-form">
+            <div class="content-button" margin>
+                <button (click)="showTechnicalInformation = !showTechnicalInformation" class="button-control" ion-button col-11 mb-5
+                        type="submit">{{getString('button', 'show-technical')}}</button>
+                <button (click)="close()" class="button-control" ion-button col-11
+                        type="submit">{{getString('button', 'close')}}</button>
+            </div>
+        </div>
+    </div>
+</ion-content>

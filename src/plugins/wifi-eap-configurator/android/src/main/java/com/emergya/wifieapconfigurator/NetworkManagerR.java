@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -14,6 +15,7 @@ import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
+import androidx.preference.PreferenceManager;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
@@ -152,6 +154,22 @@ public class NetworkManagerR extends NetworkManager {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean removeNetwork(String ssid, Context context) {
+        WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        try {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString("institutionId", "");
+            editor.apply();
+            List<WifiNetworkSuggestion> suggestionList = new ArrayList();
+            wm.removeNetworkSuggestions(suggestionList);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

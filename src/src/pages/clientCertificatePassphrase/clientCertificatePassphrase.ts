@@ -46,6 +46,8 @@ export class ClientCertificatePassphrasePage extends BasePage{
 
   termsAccepted: boolean = true;
 
+  data: string;
+
   /**
    * DOM Sanitizer
    */
@@ -125,12 +127,12 @@ export class ClientCertificatePassphrasePage extends BasePage{
       if (this.showInput) {
         await this.checkPassPhrase();
         if (this.validPassPhrase) {
-          await this.oauthConf.checkForm(this.passphrase);
+          await this.oauthConf.checkForm(this.data, this.passphrase);
         } else {
           this.showError = true;
         }
       } else {
-        await this.oauthConf.checkForm();
+        await this.oauthConf.checkForm(this.data);
       }
     }
   }
@@ -140,9 +142,9 @@ export class ClientCertificatePassphrasePage extends BasePage{
     let mimeType = this.providerInfo.providerLogo.$.mime;
     let encoding = this.providerInfo.providerLogo.$.encoding;
 
-    const data = `data:${mimeType};${encoding},${imageData}`;
+    this.data = `data:${mimeType};${encoding},${imageData}`;
 
-    this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
+    this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(this.data);
   }
 
   protected createTerms() {

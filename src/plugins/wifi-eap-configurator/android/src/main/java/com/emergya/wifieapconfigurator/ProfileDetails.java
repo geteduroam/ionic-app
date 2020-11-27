@@ -28,6 +28,15 @@ public class ProfileDetails {
     private String title;
     private String message;
     private String institutionId;
+    private String authentication;
+    private String logo;
+    private String suffix;
+    private String institution;
+    private String institutionName;
+    private String webAddress;
+    private String emailAddress;
+    private String phone;
+    private String oid;
 
     /**
      * Initializes all attributtes that come from ionic
@@ -76,6 +85,15 @@ public class ProfileDetails {
         this.message = call.getString("message");
         this.institutionId = call.getString("id");
         this.ssid = call.getString("ssid");
+        this.authentication = call.getString("authentication");
+        this.logo = call.getString("logo");
+        this.suffix = call.getString("suffix");
+        this.institution = call.getString("institution");
+        this.institutionName = call.getString("institutionName");
+        this.webAddress = call.getString("webAddress");
+        this.emailAddress = call.getString("emailAddress");
+        this.phone = call.getString("phone");
+        this.oid = call.getString("oid");
     }
 
     /**
@@ -260,4 +278,70 @@ public class ProfileDetails {
     public String getSsid() {
         return ssid;
     }
+
+    /**
+     * Returns the authentication type
+     * @return
+     */
+    public String getAuthentication() {
+        return authentication;
+    }
+
+    /**
+     * Returns the url of the logo
+     * @return
+     */
+    public String getLogo() {
+        return logo;
+    }
+
+    /**
+     * Returns the suffix of the institution
+     * @return
+     */
+    public String getSuffix() {
+        return suffix;
+    }
+
+    /**
+     * Returns the name of the institution profile
+     * @return
+     */
+    public String getInstitution() { return institution; }
+
+    /**
+     * Returns the name of the institution
+     * @return
+     */
+    public String getInstitutionName() { return institutionName; }
+
+    /**
+     * Returns the web address
+     * @return
+     */
+    public String getWebAddress() {
+        return webAddress;
+    }
+
+    /**
+     * Returns the email address
+     * @return
+     */
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    /**
+     * Returns the phone number
+     * @return
+     */
+    public String getPhone() {
+        return phone;
+    }
+
+    /**
+     * Returns the oids in string format
+     * @return
+     */
+    public String getOid() { return oid; }
 }

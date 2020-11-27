@@ -209,4 +209,16 @@ public class WifiEapConfigurator extends Plugin {
         NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
         netMan.checkIfOpenThroughNotifications(getActivity(), call);
     }
+
+    @PluginMethod()
+    public void alreadyConfigured(PluginCall call) {
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.alreadyConfigured(getContext(), call);
+    }
+
+    @PluginMethod
+    public void saveInformation(PluginCall call) {
+        NetworkManager netMan = FactoryNetworkManager.getInstance(Build.VERSION.SDK_INT, call);
+        netMan.saveInformation(getContext());
+    }
 }

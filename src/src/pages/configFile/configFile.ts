@@ -7,6 +7,7 @@ import {GlobalProvider} from "../../providers/global/global";
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
 import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam-services";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
+import {ProviderInfo} from "../../shared/entities/providerInfo";
 
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
@@ -36,6 +37,10 @@ export class ConfigFilePage extends BasePage{
    */
   isAndroid: boolean;
 
+  providerInfo: ProviderInfo;
+
+  data: string;
+
   constructor(protected loading: LoadingProvider, protected dictionary: DictionaryServiceProvider,
               protected event: Events, protected global: GlobalProvider, private getEduroamServices: GeteduroamServices,
               private errorHandler: ErrorHandlerProvider, private navCtrl: NavController, private platform: Platform) {
@@ -57,7 +62,9 @@ export class ConfigFilePage extends BasePage{
    */
   async configure(){
     const oauthConf: OauthConfProvider = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);
-    oauthConf.manageProfileValidation(true, this.global.getProviderInfo())
+    this.providerInfo = this.global.getProviderInfo();
+    this.getLogo();
+    oauthConf.manageProfileValidation(true, this.global.getProviderInfo(), this.data)
   }
 
   /**
@@ -66,6 +73,14 @@ export class ConfigFilePage extends BasePage{
    */
   exitApp() {
     this.platform.exitApp();
+  }
+
+  getLogo() {
+    let imageData = this.providerInfo.providerLogo._;
+    let mimeType = this.providerInfo.providerLogo.$.mime;
+    let encoding = this.providerInfo.providerLogo.$.encoding;
+
+    this.data = `data:${mimeType};${encoding},${imageData}`;
   }
 
 }

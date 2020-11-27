@@ -14,6 +14,7 @@ import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
 import {ConfigFilePage} from "../pages/configFile/configFile";
 import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
 import {OAuth2Client} from '@byteowls/capacitor-oauth2';
+import {StartScreenPage} from "../pages/startScreen/startScreen";
 
 declare var Capacitor;
 const { Toast, Network, App, Device } = Plugins;
@@ -40,6 +41,10 @@ export class GeteduroamApp {
 
   protected checkExtFile: boolean = false;
 
+  existNetwork: boolean = false;
+
+  openNotification: boolean = false;
+
   lastTimeBackPress = 0;
 
   timePeriodToExit = 2000;
@@ -57,10 +62,14 @@ export class GeteduroamApp {
       // Transition provider, to navigate between pages
       this.config.setTransition('transition', Transition);
       // Setting the dictionary
-      this.setDictionary();
+      await this.setDictionary();
       // ScreenOrientation plugin require first unlock screen and locked it after in mode portrait orientation
       this.screenOrientation.unlock();
       await this.screenOrientation.lock(this.screenOrientation.ORIENTATIONS.PORTRAIT_PRIMARY);
+      // Check if open from notification
+      await this.openFromNotification();
+      // Check if a network already configured
+      await this.existNetworkConfigured();
       // Listener to get external file
       await this.checkExternalOpen();
       // Listener to get status connection, apply when change status network
@@ -85,7 +94,11 @@ export class GeteduroamApp {
     if (this.platform.is('android')) {
       this.enableWifi();
     }
-    if (!this.checkExtFile) {
+    if (this.openNotification) {
+      this.rootPage = ConfigurationScreen
+    } else if (this.existNetwork) {
+      this.rootPage = StartScreenPage;
+    } else if (!this.checkExtFile) {
       this.rootPage = ConfigurationScreen;
     }
   }
@@ -245,6 +258,15 @@ export class GeteduroamApp {
    */
   private async setDictionary(){
     this.dictionary.loadDictionary((await Device.getLanguageCode())?.value || 'en')
+  }
+
+  async existNetworkConfigured(){
+    this.existNetwork = await this.getEduroamServices.networkConnected();
+  }
+
+  async openFromNotification(){
+    const result = await WifiEapConfigurator.checkIfOpenThroughNotifications();
+    this.openNotification = result.fromNotification;
   }
 }
 

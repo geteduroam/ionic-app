@@ -469,26 +469,7 @@ public abstract class NetworkManager {
      * @param context
      * @return
      */
-    public boolean removeNetwork(String ssid, Context context) {
-        boolean res = false;
-        WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-        /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { */
-        List<WifiConfiguration> configuredNetworks = wifi.getConfiguredNetworks();
-        for (WifiConfiguration conf : configuredNetworks) {
-            if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
-                wifi.removeNetwork(conf.networkId);
-                wifi.saveConfiguration();
-                res = true;
-            }
-        }
-        /*} else {
-            wifi.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
-            res = true;
-        }*/
-
-        return res;
-    }
+    public abstract boolean removeNetwork(String ssid, Context context);
 
     /**
      * Returns an WifiManager
@@ -538,14 +519,21 @@ public abstract class NetworkManager {
     public boolean isNetworkAssociated(Context context, PluginCall call) {
         String ssid = null;
         boolean res = false, isOverridable = false;
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
         //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         if (this.profileDetails.getSsid() == null || this.profileDetails.getSsid().equals("")) {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
-            call.success(object);
-            return res;
+            if (sharedPref.getString("ssid", "").equals("")) {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
+                call.success(object);
+                return res;
+            } else {
+                ssid = sharedPref.getString("ssid", "");
+            }
+        } else {
+            ssid = this.profileDetails.getSsid();
         }
 
         WifiManager wifi = getWifiManager(context);
@@ -559,17 +547,19 @@ public abstract class NetworkManager {
                     isOverridable = true;
                 }
 
-                JSObject object = new JSObject();
-                object.put("success", false);
-                object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
-                object.put("overridable", isOverridable);
-                call.success(object);
+                if (this.profileDetails.getSsid() != null && !this.profileDetails.getSsid().equals("")) {
+                    JSObject object = new JSObject();
+                    object.put("success", false);
+                    object.put("message", "plugin.wifieapconfigurator.error.network.alreadyAssociated");
+                    object.put("overridable", isOverridable);
+                    call.success(object);
+                }
                 res = true;
                 break;
             }
         }
 
-        if (!res) {
+        if (!res && this.profileDetails.getSsid() != null && !this.profileDetails.getSsid().equals("")) {
             JSObject object = new JSObject();
             object.put("success", true);
             object.put("message", "plugin.wifieapconfigurator.success.network.missing");
@@ -897,5 +887,79 @@ public abstract class NetworkManager {
         Intent intent = new Intent();
         intent.putExtra("expiration", true);
         StartRemoveNetwork.enqueueWorkStart(context, intent);
+    }
+
+    public void alreadyConfigured(Context context, PluginCall call) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String ret = sharedPref.getString("institutionId", "");
+        if (!ret.equals("")) {
+            Boolean associated = this.isNetworkAssociated(context, call);
+            if( associated ) {
+                String ssid = sharedPref.getString("ssid", "");
+                String institution = sharedPref.getString("institution", "");
+                String institutionName = sharedPref.getString("institutionName", "");
+                String authentication = sharedPref.getString("authentication", "");
+                String suffix = sharedPref.getString("suffix", "");
+                String logo = sharedPref.getString("logo", "");
+                String webAddress = sharedPref.getString("webAddress", "");
+                String emailAddress = sharedPref.getString("emailAddress", "");
+                String phone = sharedPref.getString("phone", "");
+                String date = sharedPref.getString("date", "");
+                String eap = sharedPref.getString("eap", "");
+                String auth = sharedPref.getString("auth", "");
+                String username = sharedPref.getString("username", "");
+                String oid = sharedPref.getString("oid", "");
+                JSObject object = new JSObject();
+                object.put("success", true);
+                object.put("ssid", ssid);
+                object.put("institutionName", institutionName);
+                object.put("institution", institution);
+                object.put("authentication", authentication);
+                object.put("suffix", suffix);
+                object.put("logo", logo);
+                if (!webAddress.equals("")) {
+                    object.put("webAddress", webAddress);
+                }
+                if (!emailAddress.equals("")) {
+                    object.put("emailAddress", emailAddress);
+                }
+                if (!phone.equals("")) {
+                    object.put("phone", phone);
+                }
+                object.put("date", date);
+                object.put("eap", eap);
+                object.put("auth", auth);
+                object.put("username", username);
+                object.put("oid", oid);
+                call.success(object);
+            } else {
+                JSObject object = new JSObject();
+                object.put("success", false);
+                call.success(object);
+            }
+        } else {
+            JSObject object = new JSObject();
+            object.put("success", false);
+            call.success(object);
+        }
+    }
+
+    public void saveInformation(Context context) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("ssid", this.profileDetails.getSsid());
+        editor.putString("institutionName", this.profileDetails.getInstitutionName());
+        editor.putString("institution", this.profileDetails.getInstitution());
+        editor.putString("authentication", this.profileDetails.getAuthentication());
+        editor.putString("suffix", this.profileDetails.getSuffix());
+        editor.putString("logo", this.profileDetails.getLogo());
+        editor.putString("webAddress", this.profileDetails.getWebAddress());
+        editor.putString("emailAddress", this.profileDetails.getEmailAddress());
+        editor.putString("phone", this.profileDetails.getPhone());
+        editor.putString("eap", this.profileDetails.getEap().toString());
+        editor.putString("auth", this.profileDetails.getAuth().toString());
+        editor.putString("username", this.profileDetails.getUsername());
+        editor.putString("oid", this.profileDetails.getOid());
+        editor.apply();
     }
 }

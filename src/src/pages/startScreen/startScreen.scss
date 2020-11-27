@@ -1,0 +1,38 @@
+page-start-screen {
+
+  .profile-content {
+    background-color: white;
+  }
+
+  .content-button button {
+    height: 50px;
+  }
+
+  img.imgLogo {
+    width: auto !important;
+    height: auto !important;
+    max-width: 42vw;
+    max-height: 10vh;
+  }
+
+  .footer-form {
+    height: auto !important;
+    position: relative;
+    width: 100%;
+    top: 10px;
+  }
+
+  .note-msg {
+    font-size: 10px;
+    text-align: left;
+    color: #404B52;
+  }
+}
+
+//---------------------------------//
+// Show all elements to tap input  //
+//---------------------------------//
+ion-app, ion-nav, ion-tab, ion-tabs, .app-root, .ion-page {
+  contain: unset !important;
+  overflow: unset !important;
+}

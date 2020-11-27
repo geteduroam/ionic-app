@@ -4,6 +4,7 @@ import {AuthenticationMethod} from "../../shared/entities/authenticationMethod";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import { Platform } from 'ionic-angular';
 import {CredentialApplicability} from "../../shared/entities/credentialApplicability";
+import {InformationNetwork} from "../../shared/entities/information";
 
 @Injectable()
 export class GlobalProvider {
@@ -28,7 +29,10 @@ export class GlobalProvider {
   private authenticationMethod: AuthenticationMethod;
   private providerInfo: ProviderInfo;
   private credentialApplicability: CredentialApplicability;
+  private informationNetwork: InformationNetwork;
+  private institutionName: string;
   private validUntil;
+
 
   /*
    * Client ID of the application. Must match the following strings:
@@ -154,5 +158,21 @@ export class GlobalProvider {
 
   getValidUntil() {
     return this.validUntil;
+  }
+
+  setInformationNetwork(informationNetwork: InformationNetwork) {
+    this.informationNetwork = informationNetwork;
+  }
+
+  getInformationNetwork() {
+    return this.informationNetwork;
+  }
+
+  getInstitutionName(): string {
+    return this.institutionName;
+  }
+
+  setInstitutionName(value: string) {
+    this.institutionName = value;
   }
 }

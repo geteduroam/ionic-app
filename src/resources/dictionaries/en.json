@@ -3,7 +3,8 @@
     "config": "eduroam configuration",
     "profile": "Provide information",
     "confirmation": "Enjoy using eduroam!",
-    "error": "Error"
+    "error": "Error",
+    "information": "Information"
   },
   "label": {
     "institution": "Institution",
@@ -15,7 +16,13 @@
     "passphrase": "Passphrase",
     "note": "*Note: if the connection fails, please check your password",
     "help": "Need help ?",
-    "support": "Click here for support"
+    "support": "Click here for support",
+    "valid-until": "Valid until",
+    "authentication": "Authentication",
+    "suffix": "Suffix",
+    "eap": "Eap",
+    "auth": "Auth",
+    "oids": "Oids"
   },
   "placeholder": {
     "institution": "Select an institution...",
@@ -44,7 +51,11 @@
     "no-thanks": "No, thanks",
     "close": "Close",
     "connect": "Connect to network",
-    "start-over": "Start over"
+    "start-over": "Start over",
+    "renoval": "Renoval",
+    "remove": "Remove",
+    "showInformation": "Show Information",
+    "show-technical": "Show Technical Information"
   },
   "error": {
     "username": "The username must follow the pattern ",

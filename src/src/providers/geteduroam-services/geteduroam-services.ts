@@ -12,6 +12,8 @@ import {DictionaryServiceProvider} from "../dictionary-service/dictionary-servic
 import {GlobalProvider} from "../global/global";
 import {isArray, isObject} from "ionic-angular/util/util";
 import {IEEE80211} from "../../shared/entities/iEEE80211";
+import {InformationNetwork} from "../../shared/entities/information";
+import {Helpdesk} from "../../shared/entities/helpdesk";
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
@@ -399,5 +401,40 @@ export class GeteduroamServices {
       config = { date: this.global.getValidUntil(), title: title, message: message};
     }
     WifiEapConfigurator.sendNotification(config);
+  }
+
+  async networkConnected() {
+    const result = await WifiEapConfigurator.alreadyConfigured();
+    if (result.success) {
+      let informationNetwork: InformationNetwork = new InformationNetwork();
+      informationNetwork.fillEntity(result);
+      let providerInfo: ProviderInfo = new ProviderInfo();
+      providerInfo.setHelpDesk(informationNetwork.getHelpDesk());
+      this.global.setProviderInfo(providerInfo);
+      this.global.setInformationNetwork(informationNetwork);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async saveInformationNetwork(ssid: string, institutionName: string, name: string, authentication: string, suffix: string,
+                               logo: string, eap: number, auth: number, username: string, oids: string[]) {
+    const information = {
+      ssid: ssid,
+      institutionName: institutionName,
+      institution: name,
+      authentication: authentication,
+      suffix: suffix,
+      logo: logo,
+      webAddress: this.global.getProviderInfo().helpdesk.webAddress ? this.global.getProviderInfo().helpdesk.webAddress : '',
+      emailAddress: this.global.getProviderInfo().helpdesk.emailAddress ? this.global.getProviderInfo().helpdesk.emailAddress : '',
+      phone: this.global.getProviderInfo().helpdesk.phone ? this.global.getProviderInfo().helpdesk.phone : '',
+      eap: eap,
+      auth: auth,
+      username: username,
+      oid: oids
+    };
+    WifiEapConfigurator.saveInformation(information);
   }
 }

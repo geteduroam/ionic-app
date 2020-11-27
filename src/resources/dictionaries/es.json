@@ -3,7 +3,8 @@
     "config": "Configuración de eduroam",
     "profile": "Proporciona información",
     "confirmation": "¡Disfruta eduroam!",
-    "error": "Error"
+    "error": "Error",
+    "information": "Informacion"
   },
   "label": {
     "institution": "Institución",
@@ -15,7 +16,13 @@
     "passphrase": "Contraseña del certificado",
     "note": "*Nota: si la conexión falló, verifique su contraseña",
     "help": "¿ Necesitas ayuda ?",
-    "support": "Haga click aquí para obtener ayuda"
+    "support": "Haga click aquí para obtener ayuda",
+    "valid-until": "Valido hasta",
+    "authentication": "Autenticacion",
+    "suffix": "Sufijo",
+    "eap": "Eap",
+    "auth": "Auth",
+    "oids": "Oids"
   },
   "placeholder": {
     "institution": "Selecciona una institución...",
@@ -44,7 +51,11 @@
     "no-thanks": "No, gracias",
     "close": "Cerrar",
     "connect": "Conectarse a la red",
-    "start-over": "Comenzar de nuevo"
+    "start-over": "Comenzar de nuevo",
+    "renoval": "Renovar",
+    "remove": "Eliminar",
+    "showInformation": "Mostrar Informacion",
+    "show-technical": "Mostrar Informacion Tecnica"
   },
   "error": {
     "username": "El usuario debe seguir el patron ",

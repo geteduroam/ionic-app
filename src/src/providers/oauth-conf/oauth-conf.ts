@@ -35,7 +35,7 @@ export class OauthConfProvider {
    * Method to manage validation profile
    * @param validProfile check if profile is valid
    */
-  async manageProfileValidation(validProfile: boolean, provInfo: ProviderInfo) {
+  async manageProfileValidation(validProfile: boolean, provInfo: ProviderInfo, data?: string) {
     this.providerInfo = provInfo;
     if (validProfile) {
       this.validMethod = this.global.getAuthenticationMethod();
@@ -44,10 +44,10 @@ export class OauthConfProvider {
           await this.navCtrl.push(ClientCertificatePassphrasePage, '', {animation: 'transition'});
           return;
         }
-        await this.checkForm();
+        await this.checkForm(data);
       } else {
         if (this.validMethod.clientSideCredential?.username && this.validMethod.clientSideCredential?.password) {
-          await this.checkForm();
+          await this.checkForm(data);
         } else {
           await this.navCtrl.push(ProfilePage, '', {animation: 'transition'});
         }
@@ -60,7 +60,7 @@ export class OauthConfProvider {
   /**
    * Method to check form, create connection with plugin WifiEapConfigurator and navigate.
    */
-  async checkForm(passphrase? : string) {
+  async checkForm(data: string, passphrase? : string) {
     if (typeof passphrase !== 'undefined') {
       this.validMethod = this.global.getAuthenticationMethod();
       this.providerInfo = this.global.getProviderInfo();
@@ -71,6 +71,9 @@ export class OauthConfProvider {
     this.loading?.dismiss();
 
     if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
+      await this.getEduroamServices.saveInformationNetwork(config.ssid.toString(), this.global.getInstitutionName(),
+          this.global.getProfile().name,'Client certificate', '', data, config.eap,
+          config.auth, '', this.getEduroamServices.getSSID_OID(this.global.getCredentialApplicability())['oid'].toString());
       if (this.global.getIdInstitution()) {
         this.getEduroamServices.saveInstitutionId();
       }

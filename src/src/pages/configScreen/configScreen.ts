@@ -152,6 +152,7 @@ export class ConfigurationScreen extends BasePage{
   initializeProfiles(institution: any) {
     if (institution !== null) {
       this.institutionName = institution.name;
+      this.global.setInstitutionName(this.institutionName);
       if (institution.profiles.length > 1 ) {
         // Check default profile and sort array for highlighting default profile
         institution.profiles.forEach((profile, index) => {
@@ -225,10 +226,12 @@ export class ConfigurationScreen extends BasePage{
       this.showAll = false;
       if (!this.profile.redirect && !!profile.oauth) {
         this.global.setIdInstitution(this.selectedProfileId);
+        this.global.setProfile(this.profile);
         await this.navCtrl.push(OauthFlow, {profile}, {animation: 'transition'});
       } else if (!this.profile.redirect && !profile.oauth) {
         if (await this.checkEap(profile)) {
           this.global.setIdInstitution(this.selectedProfileId);
+          this.global.setProfile(this.profile);
           this.redirectToFlow();
         } else {
           const providerInfo = this.global.getProviderInfo();

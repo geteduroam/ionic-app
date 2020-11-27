@@ -33,7 +33,10 @@ export class ProviderInfo extends BaseJson {
 
     return returnValue;
 
+  }
 
+  setHelpDesk(helpDesk: Helpdesk) {
+    this.helpdesk = helpDesk;
   }
 
 

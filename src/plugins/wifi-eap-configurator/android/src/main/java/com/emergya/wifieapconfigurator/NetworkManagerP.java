@@ -1,5 +1,6 @@
 package com.emergya.wifieapconfigurator;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -93,6 +94,35 @@ public class NetworkManagerP extends NetworkManager {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean removeNetwork(String ssid, Context context) {
+        WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String fqdn = sharedPref.getString("fqdn", "");
+        try {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString("institutionId", "");
+            editor.apply();
+            @SuppressLint("MissingPermission") List<WifiConfiguration> configuredNetworks = wm.getConfiguredNetworks();
+            for (WifiConfiguration conf : configuredNetworks) {
+                if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
+                    wm.removeNetwork(conf.networkId);
+                    wm.saveConfiguration();
+                }
+            }
+            if (!fqdn.equals("")) {
+                try {
+                    wm.removePasspointConfiguration(fqdn);
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+            return true;
+        } catch(Exception ex) {
+            return false;
+        }
     }
 
     /**

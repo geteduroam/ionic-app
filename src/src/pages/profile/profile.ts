@@ -28,6 +28,8 @@ export class ProfilePage extends BasePage{
 
   showForm: boolean = false;
 
+  data: string;
+
   /**
    * The profile which is received as a navigation parameter
    */
@@ -148,6 +150,9 @@ export class ProfilePage extends BasePage{
       const checkRequest = await this.getEduroamServices.connectProfile(config);
 
       if (checkRequest.message.includes('success') || checkRequest.message.includes('error.network.linked')) {
+        await this.getEduroamServices.saveInformationNetwork(config.ssid.toString(), this.global.getInstitutionName(),
+            this.global.getProfile().name,'Username & Password', this.suffixIdentity, this.data, config.eap,
+            config.auth, config.username, this.getEduroamServices.getSSID_OID(this.global.getCredentialApplicability())['oid'].toString());
         if (this.global.getIdInstitution()) {
           this.getEduroamServices.saveInstitutionId();
         }
@@ -358,8 +363,8 @@ export class ProfilePage extends BasePage{
     let mimeType = this.providerInfo.providerLogo.$.mime;
     let encoding = this.providerInfo.providerLogo.$.encoding;
 
-    const data = `data:${mimeType};${encoding},${imageData}`;
+    this.data = `data:${mimeType};${encoding},${imageData}`;
 
-    this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
+    this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(this.data);
   }
 }

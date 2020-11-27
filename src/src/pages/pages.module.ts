@@ -13,6 +13,8 @@ import { ValidatorProvider } from '../providers/validator/validator';
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {ConfigFilePage} from "./configFile/configFile";
 import {ClientCertificatePassphrasePage} from "./clientCertificatePassphrase/clientCertificatePassphrase";
+import {StartScreenPage} from "./startScreen/startScreen";
+import {InformationPage} from "./information/information";
 
 const Pages = [
   ReconfigurePage,
@@ -23,7 +25,9 @@ const Pages = [
   ConfigurationScreen,
   WifiConfirmation,
   ConfigFilePage,
-  ClientCertificatePassphrasePage
+  ClientCertificatePassphrasePage,
+  StartScreenPage,
+  InformationPage
 ];
 
 @NgModule({

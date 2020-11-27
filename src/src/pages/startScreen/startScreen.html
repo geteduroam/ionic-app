@@ -1,0 +1,25 @@
+<div *ngIf="showAll" class="profile-content" id="dismissable-back">
+  <div class="header-content" margin-top>
+    <img *ngIf="converted_image" #imgLogo [ngClass]="!!logo ? 'imgLogo' : ''" [src]="converted_image" alt="setting" />
+    <h1>{{informationNetwork.institutionName}}</h1>
+  </div>
+
+  <div id="footer" >
+    <div>
+      <button class="button-control content-button" (click)="reconfigure()" ion-button btn-success col-5 type="button">{{getString('button', 'renoval')}}</button>
+      <button class="button-control content-button" (click)="removeNetwork()" ion-button btn-danger col-5 type="button">{{getString('button', 'remove')}}</button>
+    </div>
+    <form (ngSubmit)="showInformation()">
+      <button class="button-control content-button" ion-button col-10 type="submit">{{getString('button', 'showInformation')}}</button>
+    </form>
+  </div>
+
+  <div *ngIf="helpDesk" class="help-desk">
+    <ion-label no-margin text-left>{{getString('label', 'help')}}
+      <a class="support" (click)="modalSupport()">{{getString('label', 'support')}}</a>
+    </ion-label>
+  </div>
+</div>
+
+
+
