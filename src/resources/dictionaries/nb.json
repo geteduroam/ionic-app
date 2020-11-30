@@ -44,13 +44,14 @@
     "no-thanks": "Nei, takk",
     "close": "Lukk",
     "connect": "Koble til nettverket",
-    "start-over": "Begynne på nytt"
+    "start-over": "Start på nytt"
   },
   "error": {
     "username": "Brukernavnet må følge mønster ",
     "domain": "Brukernavnet må slutte med ",
     "password": "Passwordet er feil",
     "turn-on": "Vennligst skru på mobilnett",
+    "need-network": "En nettforbindelse kreves for å hente institusjonslista. Koble til et midlertidig nett og start applikasjonen på nytt.",
     "duplicate": "Nettverket er allerede tilgjengelig på denne enheten.\nGå til Innstillinger > Wi-Fi Networks og slett det først.",
     "mobileconfig": "Din enhet er konfigurert med en konfigurasjonsprofil.\nGå til Innstillinger -> Generelt -> Profiler og slett den først.",
     "invalid-eap": "Ugyldig profil valgt. Hvis feilen vedvarer, ta kontakt med din helpdesk",

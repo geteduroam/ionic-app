@@ -51,6 +51,7 @@
     "domain": "El nombre de usuario debe terminar en ",
     "password": "Contraseña errónea",
     "turn-on": "Por favor, active los datos móviles",
+    "need-network": "Se requiere una conexión para cargar la lista de organizaciones. Por favor, habilite la red y reinicie la aplicación.",
     "duplicate": "Una conexión de red llamada eduroam se encuentra ya disponible en el dispositivo.\nPor favor vaya a Configuración > Redes e Internet > Wi-Fi y elimine la configuración para reconfigurar eduroam.",
     "invalid-eap": "El perfil seleccionado es erróneo",
     "invalid-method": "Ningún método válido de autenticación en el perfil seleccionado",
