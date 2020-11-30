@@ -46,7 +46,7 @@
         <div class="footer-form">
             <div class="content-button" margin>
                 <button (click)="showTechnicalInformation = !showTechnicalInformation" class="button-control" ion-button col-11 mb-5
-                        type="submit">{{getString('button', 'show-technical')}}</button>
+                        type="submit">{{!showTechnicalInformation ? getString('button', 'show-technical') : getString('button', 'hide-technical')}}</button>
                 <button (click)="close()" class="button-control" ion-button col-11
                         type="submit">{{getString('button', 'close')}}</button>
             </div>

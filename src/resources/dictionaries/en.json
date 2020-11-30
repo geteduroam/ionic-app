@@ -55,7 +55,8 @@
     "renoval": "Renoval",
     "remove": "Remove",
     "showInformation": "Show Information",
-    "show-technical": "Show Technical Information"
+    "show-technical": "Show Technical Information",
+    "hide-technical": "Hide Technical Information"
   },
   "error": {
     "username": "The username must follow the pattern ",

@@ -55,7 +55,8 @@
     "renoval": "Renovar",
     "remove": "Eliminar",
     "showInformation": "Mostrar Informacion",
-    "show-technical": "Mostrar Informacion Tecnica"
+    "show-technical": "Mostrar Informacion Tecnica",
+    "hide-technical": "Ocultar Informacion Tecnica"
   },
   "error": {
     "username": "El usuario debe seguir el patron ",

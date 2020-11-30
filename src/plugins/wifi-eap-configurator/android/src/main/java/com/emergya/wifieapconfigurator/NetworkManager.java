@@ -889,60 +889,7 @@ public abstract class NetworkManager {
         StartRemoveNetwork.enqueueWorkStart(context, intent);
     }
 
-    public void alreadyConfigured(Context context, PluginCall call) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        String ret = sharedPref.getString("institutionId", "");
-        if (!ret.equals("")) {
-            Boolean associated = this.isNetworkAssociated(context, call);
-            if( associated ) {
-                String ssid = sharedPref.getString("ssid", "");
-                String institution = sharedPref.getString("institution", "");
-                String institutionName = sharedPref.getString("institutionName", "");
-                String authentication = sharedPref.getString("authentication", "");
-                String suffix = sharedPref.getString("suffix", "");
-                String logo = sharedPref.getString("logo", "");
-                String webAddress = sharedPref.getString("webAddress", "");
-                String emailAddress = sharedPref.getString("emailAddress", "");
-                String phone = sharedPref.getString("phone", "");
-                String date = sharedPref.getString("date", "");
-                String eap = sharedPref.getString("eap", "");
-                String auth = sharedPref.getString("auth", "");
-                String username = sharedPref.getString("username", "");
-                String oid = sharedPref.getString("oid", "");
-                JSObject object = new JSObject();
-                object.put("success", true);
-                object.put("ssid", ssid);
-                object.put("institutionName", institutionName);
-                object.put("institution", institution);
-                object.put("authentication", authentication);
-                object.put("suffix", suffix);
-                object.put("logo", logo);
-                if (!webAddress.equals("")) {
-                    object.put("webAddress", webAddress);
-                }
-                if (!emailAddress.equals("")) {
-                    object.put("emailAddress", emailAddress);
-                }
-                if (!phone.equals("")) {
-                    object.put("phone", phone);
-                }
-                object.put("date", date);
-                object.put("eap", eap);
-                object.put("auth", auth);
-                object.put("username", username);
-                object.put("oid", oid);
-                call.success(object);
-            } else {
-                JSObject object = new JSObject();
-                object.put("success", false);
-                call.success(object);
-            }
-        } else {
-            JSObject object = new JSObject();
-            object.put("success", false);
-            call.success(object);
-        }
-    }
+    public abstract void alreadyConfigured(Context context, PluginCall call);
 
     public void saveInformation(Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
