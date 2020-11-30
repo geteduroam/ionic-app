@@ -1,2 +1,2 @@
-/tools/apk
-/tools/get-docker.sh
+/apk
+/contrib/get-docker.sh

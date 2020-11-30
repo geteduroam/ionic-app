@@ -6,5 +6,5 @@ services:
             context: .
             dockerfile: ./Dockerfile
         volumes:
-            -  ./tools/apk:/home/gradle/final-apk
-            -  ~/.gradle:/home/gradle/.gradle
+            - ./apk:/home/gradle/final-apk
+            - ~/.gradle:/home/gradle/.gradle

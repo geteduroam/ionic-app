@@ -40,14 +40,14 @@ RUN apt-get update &&  \
 # Setup environment
 ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/tools:/opt/gradle/gradle-"$GRADLE_VERSION"/bin
 
-#Copy de sorce folder
+#Copy the source folder
 COPY src/ /home/gradle/myApp/
 
-#Copy de key from tools to sign the apk
-COPY tools/release-key.jks /release-key.jks
+#Copy the Snakeoil key to sign the apk
+COPY contrib/release-key.jks /release-key.jks
 
 #Copy the entrypoint from tools to let the docker work
-COPY tools/entrypoint.sh /entrypoint.sh
+COPY contrib/entrypoint.sh /entrypoint.sh
 
 #Run the entry point
 ENTRYPOINT ["/bin/bash","/entrypoint.sh"]

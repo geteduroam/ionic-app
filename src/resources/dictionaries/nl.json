@@ -51,6 +51,7 @@
     "domain": "De gebruikersnaam moet eindigen met ",
     "password": "Wachtwoord is onjuist",
     "turn-on": "Zet mobiele verbinding aan",
+    "need-network": "Een netwerkverbinding is nodig om de lijst van organisaties te laden. Maak verbinding met een netwerk en herstart de applicatie.",
     "duplicate": "Dit netwerk is al beschikbaar op het apparaat.\nGa naar de Instellingen > Verbindingen > Wi-Fi en verwijder deze eerst",
     "mobileconfig": "Dit apparaat is al geconfigureerd met een profiel.\nGa naar Instellingen > Algemeen > Profielen en verwijder deze",
     "invalid-eap": "Onjuist profiel gekozen; Als de foutmelding blijft, neem contact op met de beheerder",

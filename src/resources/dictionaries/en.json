@@ -62,6 +62,7 @@
     "domain": "The username must end with ",
     "password": "Password is incorrect",
     "turn-on": "Please, turn on mobile data",
+    "need-network": "We need a network connection to load the list of institutions. Please enable networking and restart the application.",
     "duplicate": "This network is already available in the device.\nPlease go to Settings > Wi-Fi Networks and remove it first",
     "mobileconfig": "Your device is configured through a configuration profile.\nPlease go to Settings > General > Profile and remove it",
     "invalid-eap": "Invalid selected profile, if the error persists, contact with the admin please",

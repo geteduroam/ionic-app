@@ -42,7 +42,7 @@ echo "npx cap add android"
 npx cap add android
 
 echo "copy from android_bk overriding"
-\cp -rf android_bk/* android
+cp -rf android_bk/* android
 
 echo "npx cap sync android"
 npx cap sync android
@@ -72,7 +72,3 @@ echo "Signing the APK"
 $ANDROID_HOME/build-tools/${ANDROID_SDK_VERSION}/apksigner sign --ks /release-key.jks --ks-pass pass:${PASS_PHRASE} --key-pass pass:${PASS_PHRASE} --out geteduroam.apk app-debug-aligned.apk
 
 cp geteduroam.apk /home/gradle/final-apk/
-
-
-
-
