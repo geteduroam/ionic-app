@@ -152,6 +152,7 @@ export class ConfigurationScreen extends BasePage{
   initializeProfiles(institution: any) {
     if (institution !== null) {
       this.institutionName = institution.name;
+      this.global.setInstitutionName(this.institutionName);
       if (institution.profiles.length > 1 ) {
         // Check default profile and sort array for highlighting default profile
         institution.profiles.forEach((profile, index) => {
@@ -224,11 +225,18 @@ export class ConfigurationScreen extends BasePage{
     if (!!this.activeNavigation) {
       this.showAll = false;
       if (!this.profile.redirect && !!profile.oauth) {
-        this.global.setIdInstitution(this.selectedProfileId);
-        await this.navCtrl.push(OauthFlow, {profile}, {animation: 'transition'});
+        if (this.validateOauth(this.profile.eapconfig_endpoint)) {
+          this.global.setIdInstitution(this.selectedProfileId);
+          this.global.setProfile(this.profile);
+          await this.navCtrl.push(OauthFlow, {profile}, {animation: 'transition'});
+        } else {
+          const providerInfo = this.global.getProviderInfo();
+          await this.notValidProfile(providerInfo);
+        }
       } else if (!this.profile.redirect && !profile.oauth) {
         if (await this.checkEap(profile)) {
           this.global.setIdInstitution(this.selectedProfileId);
+          this.global.setProfile(this.profile);
           this.redirectToFlow();
         } else {
           const providerInfo = this.global.getProviderInfo();
@@ -240,7 +248,7 @@ export class ConfigurationScreen extends BasePage{
 
       }
     } else{
-     await this.alertConnectionDisabled();
+      await this.alertConnectionDisabled();
     }
   }
 
@@ -369,6 +377,14 @@ export class ConfigurationScreen extends BasePage{
       }
     } else {
       this.global.setIsReconfigure(false);
+    }
+  }
+
+  private validateOauth(eap_config) {
+    if (eap_config.startsWith('https://')) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

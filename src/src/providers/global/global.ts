@@ -29,6 +29,7 @@ export class GlobalProvider {
   private providerInfo: ProviderInfo;
   private credentialApplicability: CredentialApplicability;
   private validUntil;
+  private institutionName: string;
 
   /*
    * Client ID of the application. Must match the following strings:
@@ -154,5 +155,13 @@ export class GlobalProvider {
 
   getValidUntil() {
     return this.validUntil;
+  }
+
+  getInstitutionName(): string {
+    return this.institutionName;
+  }
+
+  setInstitutionName(value: string) {
+    this.institutionName = value;
   }
 }
