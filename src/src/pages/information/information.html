@@ -1,10 +1,12 @@
-<ion-header transparent>
-</ion-header>
-<ion-content fullscreen>
-    <div class="mb-5">
+<ion-content class="container" *ngIf="showAll" fullscreen>
+    <div class="logo"><!-- CSS takes care of dark mode --></div>
+
+    <div class="bar-upped" margin></div>
+    <div class="base-content" margin-bottom margin-end margin-left margin-right padding>
+    <div class="header-info">
         <h1 text-center>{{getString('header', 'information')}}</h1>
     </div>
-    <div *ngIf="showAll">
+    <div *ngIf="showAll" class="content-information">
         <div *ngIf="informationNetwork.ssid" class="no-tech">
             SSID:
             <p class="p-info">{{informationNetwork.ssid}}</p>
@@ -43,13 +45,14 @@
                 <p class="p-info">{{informationNetwork.oids}}</p>
             </div>
         </div>
-        <div class="footer-form">
-            <div class="content-button" margin>
-                <button (click)="showTechnicalInformation = !showTechnicalInformation" class="button-control" ion-button col-11 mb-5
-                        type="submit">{{!showTechnicalInformation ? getString('button', 'show-technical') : getString('button', 'hide-technical')}}</button>
-                <button (click)="close()" class="button-control" ion-button col-11
-                        type="submit">{{getString('button', 'close')}}</button>
-            </div>
+    </div>
+    <div class="footer-form" text-center>
+        <div class="content-button" margin>
+            <button (click)="showTechnicalInformation = !showTechnicalInformation" class="button-control" ion-button col-11 mb-5
+                    type="submit">{{!showTechnicalInformation ? getString('button', 'show-technical') : getString('button', 'hide-technical')}}</button>
+            <button (click)="close()" class="button-control" ion-button col-11
+                    type="submit">{{getString('button', 'close')}}</button>
         </div>
+    </div>
     </div>
 </ion-content>

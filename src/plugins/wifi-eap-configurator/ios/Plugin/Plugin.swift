@@ -670,43 +670,72 @@ public class WifiEapConfigurator: CAPPlugin {
         ])
 	}
     
+    func getAssociated() ->  Bool {
+        var iterator = false
+        let ssidToCheck = UserDefaults.standard.string(forKey: "ssid")
+        NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
+            for ssid in ssids {
+                if ssidToCheck == ssid {
+                    iterator = true
+                }
+            }
+        }
+        return iterator
+    }
+
     @objc func alreadyConfigured(_ call: CAPPluginCall) {
         let institutionId = UserDefaults.standard.string(forKey: "institutionId")!
-        if (institutionId != ""){
-     
-            let ssid = UserDefaults.standard.string(forKey: "ssid")
-            let institution = UserDefaults.standard.string(forKey: "institution")
-            let institutionName = UserDefaults.standard.string(forKey: "institutionName")
-            let authentication = UserDefaults.standard.string(forKey: "authentication")
-            let suffix = UserDefaults.standard.string(forKey: "suffix")
-            let logo = UserDefaults.standard.string(forKey: "logo")
-            let webAddress = UserDefaults.standard.string(forKey: "webAddress")
-            let emailAddress = UserDefaults.standard.string(forKey: "emailAddress")
-            let phone = UserDefaults.standard.string(forKey: "phone")
-            let date = UserDefaults.standard.string(forKey: "date")
-            let eap = UserDefaults.standard.string(forKey: "eap")
-            let auth = UserDefaults.standard.string(forKey: "auth")
-            let username = UserDefaults.standard.string(forKey: "username")
-            let oid = UserDefaults.standard.string(forKey: "oid")
-            
-            return call.success([
-                "success": true,
-                "ssid": ssid ?? "",
-                "institutionName": institutionName ?? "",
-                "institution": institution ?? "",
-                "authentication": authentication ?? "",
-                "suffix": suffix ?? "",
-                "logo": logo ?? "",
-                "webAddress": webAddress ?? "",
-                "emailAddress": emailAddress ?? "",
-                "phone": phone ?? "",
-                "date": date ?? "",
-                "eap": eap ?? "",
-                "auth": auth ?? "",
-                "username": username ?? "",
-                "oid": oid ?? "",
-                               
-            ])
+        
+        if (institutionId != "") {
+            let group = DispatchGroup()
+               group.enter()
+
+               // avoid deadlocks by not using .main queue here
+               DispatchQueue.global().async {
+
+                let ssidToCheck = UserDefaults.standard.string(forKey: "ssid")
+                NEHotspotConfigurationManager.shared.getConfiguredSSIDs { (ssids) in
+                    for ssid in ssids {
+                        if ssidToCheck == ssid {
+                            let ssid = UserDefaults.standard.string(forKey: "ssid")
+                            let institution = UserDefaults.standard.string(forKey: "institution")
+                            let institutionName = UserDefaults.standard.string(forKey: "institutionName")
+                            let authentication = UserDefaults.standard.string(forKey: "authentication")
+                            let suffix = UserDefaults.standard.string(forKey: "suffix")
+                            let logo = UserDefaults.standard.string(forKey: "logo")
+                            let webAddress = UserDefaults.standard.string(forKey: "webAddress")
+                            let emailAddress = UserDefaults.standard.string(forKey: "emailAddress")
+                            let phone = UserDefaults.standard.string(forKey: "phone")
+                            let date = UserDefaults.standard.string(forKey: "date")
+                            let eap = UserDefaults.standard.string(forKey: "eap")
+                            let auth = UserDefaults.standard.string(forKey: "auth")
+                            let username = UserDefaults.standard.string(forKey: "username")
+                            let oid = UserDefaults.standard.string(forKey: "oid")
+                            return call.success([
+                                "success": true,
+                                "ssid": ssid ?? "",
+                                "institutionName": institutionName ?? "",
+                                "institution": institution ?? "",
+                                "authentication": authentication ?? "",
+                                "suffix": suffix ?? "",
+                                "logo": logo ?? "",
+                                "webAddress": webAddress ?? "",
+                                "emailAddress": emailAddress ?? "",
+                                "phone": phone ?? "",
+                                "date": date ?? "",
+                                "eap": eap ?? "",
+                                "auth": auth ?? "",
+                                "username": username ?? "",
+                                "oid": oid ?? ""
+                                ])
+                        } else {
+                            return call.success([
+                                "success": false,
+                            ])
+                        }
+                    }
+                }
+               }
         } else {
             return call.success([
                 "success": false,
