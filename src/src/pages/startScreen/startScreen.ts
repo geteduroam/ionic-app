@@ -74,7 +74,11 @@ export class StartScreenPage extends BasePage{
   }
 
   async removeNetwork() {
-    const result = await this.getEduroamServices.removeNetwork({ssid: this.informationNetwork.ssid});
+    if (this.global.isAndroid()) {
+      await this.getEduroamServices.removeNetwork({ssid: this.informationNetwork.ssid});
+    } else {
+      await this.getEduroamServices.removeNetwork({ssid: [this.informationNetwork.ssid], domain: null});
+    }
     await this.navCtrl.push(ConfigurationScreen, {}, {animation: 'transition'});
   }
 
