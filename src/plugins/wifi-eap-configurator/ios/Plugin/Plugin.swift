@@ -669,7 +669,69 @@ public class WifiEapConfigurator: CAPPlugin {
             "fromNotification": openFrom
         ])
 	}
+    
+    @objc func alreadyConfigured(_ call: CAPPluginCall) {
+        let institutionId = UserDefaults.standard.string(forKey: "institutionId")!
+        if (institutionId != ""){
+     
+            let ssid = UserDefaults.standard.string(forKey: "ssid")
+            let institution = UserDefaults.standard.string(forKey: "institution")
+            let institutionName = UserDefaults.standard.string(forKey: "institutionName")
+            let authentication = UserDefaults.standard.string(forKey: "authentication")
+            let suffix = UserDefaults.standard.string(forKey: "suffix")
+            let logo = UserDefaults.standard.string(forKey: "logo")
+            let webAddress = UserDefaults.standard.string(forKey: "webAddress")
+            let emailAddress = UserDefaults.standard.string(forKey: "emailAddress")
+            let phone = UserDefaults.standard.string(forKey: "phone")
+            let date = UserDefaults.standard.string(forKey: "date")
+            let eap = UserDefaults.standard.string(forKey: "eap")
+            let auth = UserDefaults.standard.string(forKey: "auth")
+            let username = UserDefaults.standard.string(forKey: "username")
+            let oid = UserDefaults.standard.string(forKey: "oid")
+            
+            return call.success([
+                "success": true,
+                "ssid": ssid ?? "",
+                "institutionName": institutionName ?? "",
+                "institution": institution ?? "",
+                "authentication": authentication ?? "",
+                "suffix": suffix ?? "",
+                "logo": logo ?? "",
+                "webAddress": webAddress ?? "",
+                "emailAddress": emailAddress ?? "",
+                "phone": phone ?? "",
+                "date": date ?? "",
+                "eap": eap ?? "",
+                "auth": auth ?? "",
+                "username": username ?? "",
+                "oid": oid ?? "",
+                               
+            ])
+        } else {
+            return call.success([
+                "success": false,
+            ])
+        }
+    }
+    
+    @objc func saveInformation(_ call: CAPPluginCall) {
+        UserDefaults.standard.set(call.getString("ssid"), forKey: "ssid")
+        UserDefaults.standard.set(call.getString("institutionName"), forKey: "institutionName")
+        UserDefaults.standard.set(call.getString("institution"), forKey: "institution")
+        UserDefaults.standard.set(call.getString("authentication"), forKey: "authentication")
+        UserDefaults.standard.set(call.getString("suffix"), forKey: "suffix")
+        UserDefaults.standard.set(call.getString("logo"), forKey: "logo")
+        UserDefaults.standard.set(call.getString("webAddress"), forKey: "webAddress")
+        UserDefaults.standard.set(call.getString("emailAddress"), forKey: "emailAddress")
+        UserDefaults.standard.set(call.getString("phone"), forKey: "phone")
+        UserDefaults.standard.set(call.getString("eap"), forKey: "eap")
+        UserDefaults.standard.set(call.getString("auth"), forKey: "auth")
+        UserDefaults.standard.set(call.getString("username"), forKey: "username")
+        UserDefaults.standard.set(call.getString("oid"), forKey: "oid")
 
+    }
+
+    
 
 	/**
 	@function isConnectedSSID

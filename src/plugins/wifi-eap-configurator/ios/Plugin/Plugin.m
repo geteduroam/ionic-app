@@ -13,4 +13,6 @@ CAP_PLUGIN(WifiEapConfigurator, "WifiEapConfigurator",
            CAP_PLUGIN_METHOD(writeToSharedPref, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(readFromSharedPref, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(checkIfOpenThroughNotifications, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(alreadyConfigured, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(saveInformation, CAPPluginReturnPromise);
 )
