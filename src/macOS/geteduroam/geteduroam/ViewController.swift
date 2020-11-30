@@ -15,11 +15,13 @@ class ViewController: NSViewController {
     @IBOutlet weak var passField: NSTextField!
     @IBOutlet weak var userField: NSTextField!
     @IBOutlet weak var caField: NSTextField!
+    @IBOutlet weak var clientCertField: NSTextField!
     
     var ssidValue = ""
     var passValue = ""
     var userValue = ""
     var caValue = ""
+    var clientCertValue = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,15 +53,19 @@ class ViewController: NSViewController {
     
     @IBAction func caAction(_ sender: NSTextField) {
         caValue = sender.stringValue
-        print("userValue: ", caValue)
+        print("caValue: ", caValue)
     }
     
-// BUTTONS ACTIONS //
+    @IBAction func clientCertAction(_ sender: NSTextField) {
+        clientCertValue = sender.stringValue
+        print("clientCertValue: ", clientCertValue)
+    }
+    // BUTTONS ACTIONS //
     
     @IBAction func connect(_ sender: NSButton) {
         print("ssid: ", ssidValue)
         print("pass: ", passValue)
-        print("pass: ", userValue)
+        print("user: ", userValue)
         var isEqual = false
         let client = CWWiFiClient.shared()
         let interface = client.interface()!
@@ -82,5 +88,30 @@ class ViewController: NSViewController {
         
     }
  
+    @IBAction func connectWithCerts(_ sender: Any) {
+        print("ssid: ", ssidValue)
+        print("pass: ", passValue)
+        print("ca: ", caValue)
+        print("clientCertValue: ", clientCertValue)
+        var isEqual = false
+        let client = CWWiFiClient.shared()
+        let interface = client.interface()!
+       
+        if let discovery = Discovery() {
+            print(" Wifi scan ")
+            print("------------")
+            for network in discovery.networks {
+                let wifiSSID: String = network.ssid!.description as String
+//  print(wifiSSID.description)
+                 isEqual = (wifiSSID.description == ssidValue)
+                if(isEqual && clientCertValue == "") {
+                    // TODO: CONNECT WITH CA
+                } else if (isEqual && clientCertValue != "") {
+                    // TODO: CONNECT BASED ON CERTIFICATES
+                }
+            }
+        }
+    }
+    
     
 }
