@@ -28,7 +28,7 @@
             <!-- MIME Type registration -->
             <intent-filter>
                 <data android:scheme="content"
-                      android:mimeType="*/*"
+                      android:mimeType="application/octet-stream"
                       android:pathPattern=".*\\.eap-config"/>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
