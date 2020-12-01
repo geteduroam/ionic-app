@@ -19,10 +19,10 @@
     "support": "Klicken Sie hier für Unterstützung",
     "valid-until": "Valid until",
     "authentication": "Authentication",
-    "suffix": "Suffix",
+    "suffix": "Domain",
     "eap": "EAP",
     "auth": "Auth",
-    "oids": "Roaming networks"
+    "oids": "Roaming-Netzwerke"
   },
   "placeholder": {
     "institution": "Wählen Sie Ihre Organisation...",
@@ -52,11 +52,11 @@
     "close": "Schließen",
     "connect": "mit Netzwerk verbinden",
     "start-over": "Neu anfangen",
-    "renew": "Renew",
-    "remove": "Remove",
-    "showInformation": "Show Information",
-    "show-technical": "Show Technical Information",
-    "hide-technical": "Hide Technical Information"
+    "renew": "Erneuern",
+    "remove": "Löschen",
+    "showInformation": "Informationen anzeigen",
+    "show-technical": "Technische Daten anzeigen",
+    "hide-technical": "Technische Daten ausblenden"
   },
   "error": {
     "username": "Benutzername ist ähnlich wie ",

@@ -22,7 +22,7 @@
     "suffix": "Domein",
     "eap": "EAP",
     "auth": "Auth",
-    "oids": "Roaming netwerken"
+    "oids": "Roaming Netwerken"
   },
   "placeholder": {
     "institution": "Kies een organisatie...",
@@ -52,11 +52,11 @@
     "close": "Sluiten",
     "connect": "Verbind met netwerk",
     "start-over": "Opnieuw beginnen",
-    "renew": "Renew",
-    "remove": "Remove",
-    "showInformation": "Show Information",
-    "show-technical": "Show Technical Information",
-    "hide-technical": "Hide Technical Information"
+    "renew": "Vernieuw",
+    "remove": "Verwijder",
+    "showInformation": "Toon informatie",
+    "show-technical": "Toon technische informatie",
+    "hide-technical": "Verberg technische informatie"
   },
   "error": {
     "username": "De gebruikersnaam moet lijken op het patroon ",

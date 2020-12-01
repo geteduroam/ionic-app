@@ -19,10 +19,10 @@
     "support": "Cliquez ici pour obtenir de l'aide",
     "valid-until": "Valid until",
     "authentication": "Authentication",
-    "suffix": "Suffix",
+    "suffix": "Suffixe",
     "eap": "EAP",
     "auth": "Auth",
-    "oids": "Roaming networks"
+    "oids": "Réseaux Itinérants"
   },
   "placeholder": {
     "institution": "Sélectionnez un établissement...",
@@ -52,11 +52,11 @@
     "close": "Fermer",
     "connect": "Se Connecter au réseau",
     "start-over": "Recommencer depuis le début",
-    "renew": "Renew",
-    "remove": "Remove",
-    "showInformation": "Show Information",
-    "show-technical": "Show Technical Information",
-    "hide-technical": "Hide Technical Information"
+    "renew": "Remplacer",
+    "remove": "Retirer",
+    "showInformation": "Afficher les informations",
+    "show-technical": "Afficher les informations techniques",
+    "hide-technical": "Masquer les informations techniques"
   },
   "error": {
     "username": "Le nom d'utilisateur doit correspondre au modèle ",
