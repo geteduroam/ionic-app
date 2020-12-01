@@ -20,9 +20,9 @@
     "valid-until": "Valid until",
     "authentication": "Authentication",
     "suffix": "Suffix",
-    "eap": "Eap",
+    "eap": "EAP",
     "auth": "Auth",
-    "oids": "Oids"
+    "oids": "Roaming networks"
   },
   "placeholder": {
     "institution": "Select an institution...",
@@ -52,7 +52,7 @@
     "close": "Close",
     "connect": "Connect to network",
     "start-over": "Start over",
-    "renoval": "Renoval",
+    "renew": "Renew",
     "remove": "Remove",
     "showInformation": "Show Information",
     "show-technical": "Show Technical Information",

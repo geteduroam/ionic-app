@@ -3,7 +3,8 @@
     "config": "Configuration eduroam",
     "profile": "Fournir les informations",
     "confirmation": "Bonne utilisation du service eduroam!",
-    "error": "Erreur"
+    "error": "Erreur",
+    "information": "Information"
   },
   "label": {
     "institution": "Etablissement",
@@ -15,7 +16,13 @@
     "passphrase": "Phrase secrète",
     "note": "*Note: si la connexion échoue, merci de vérifier votre mot de passe",
     "help": "Besoin d'aide ?",
-    "support": "Cliquez ici pour obtenir de l'aide"
+    "support": "Cliquez ici pour obtenir de l'aide",
+    "valid-until": "Valid until",
+    "authentication": "Authentication",
+    "suffix": "Suffix",
+    "eap": "EAP",
+    "auth": "Auth",
+    "oids": "Roaming networks"
   },
   "placeholder": {
     "institution": "Sélectionnez un établissement...",
@@ -44,7 +51,12 @@
     "no-thanks": "Non, merci",
     "close": "Fermer",
     "connect": "Se Connecter au réseau",
-    "start-over": "Recommencer depuis le début"
+    "start-over": "Recommencer depuis le début",
+    "renew": "Renew",
+    "remove": "Remove",
+    "showInformation": "Show Information",
+    "show-technical": "Show Technical Information",
+    "hide-technical": "Hide Technical Information"
   },
   "error": {
     "username": "Le nom d'utilisateur doit correspondre au modèle ",

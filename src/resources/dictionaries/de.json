@@ -3,7 +3,8 @@
     "config": "eduroam Konfiguration",
     "profile": "Information eingeben",
     "confirmation": "Viel Spaß mit eduroam!",
-    "error": "Fehler"
+    "error": "Fehler",
+    "information": "Information"
   },
   "label": {
     "institution": "Organisation",
@@ -15,7 +16,13 @@
     "passphrase": "Passwort",
     "note": "*Anmerkung: keine Verbindung? Bitte Passwort prüfen",
     "help": "Brauchen Sie Hilfe?",
-    "support": "Klicken Sie hier für Unterstützung"
+    "support": "Klicken Sie hier für Unterstützung",
+    "valid-until": "Valid until",
+    "authentication": "Authentication",
+    "suffix": "Suffix",
+    "eap": "EAP",
+    "auth": "Auth",
+    "oids": "Roaming networks"
   },
   "placeholder": {
     "institution": "Wählen Sie Ihre Organisation...",
@@ -44,7 +51,12 @@
     "no-thanks": "Nein, danke",
     "close": "Schließen",
     "connect": "mit Netzwerk verbinden",
-    "start-over": "Neu anfangen"
+    "start-over": "Neu anfangen",
+    "renew": "Renew",
+    "remove": "Remove",
+    "showInformation": "Show Information",
+    "show-technical": "Show Technical Information",
+    "hide-technical": "Hide Technical Information"
   },
   "error": {
     "username": "Benutzername ist ähnlich wie ",

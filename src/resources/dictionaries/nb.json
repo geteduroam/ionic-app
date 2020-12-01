@@ -3,7 +3,8 @@
     "config": "eduroam-konfigurasjon",
     "profile": "Fyll ut informasjon",
     "confirmation": "eduroam er satt opp!",
-    "error": "Feil"
+    "error": "Feil",
+    "information": "Information"
   },
   "label": {
     "institution": "Institusjon",
@@ -15,7 +16,13 @@
     "passphrase": "Passfrase",
     "note": "*Merk: hvis tilkoblingen feiler sjekk passordet ditt",
     "help": "Trenger hjelp?",
-    "support": "Klikk her for brukerstøtte"
+    "support": "Klikk her for brukerstøtte",
+    "valid-until": "Valid until",
+    "authentication": "Authentication",
+    "suffix": "Suffix",
+    "eap": "EAP",
+    "auth": "Auth",
+    "oids": "Roaming networks"
   },
   "placeholder": {
     "institution": "Velg institusjon...",
@@ -44,7 +51,12 @@
     "no-thanks": "Nei, takk",
     "close": "Lukk",
     "connect": "Koble til nettverket",
-    "start-over": "Start på nytt"
+    "start-over": "Start på nytt",
+    "renew": "Renew",
+    "remove": "Remove",
+    "showInformation": "Show Information",
+    "show-technical": "Show Technical Information",
+    "hide-technical": "Hide Technical Information"
   },
   "error": {
     "username": "Brukernavnet må følge mønster ",

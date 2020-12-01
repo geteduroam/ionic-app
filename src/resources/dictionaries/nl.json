@@ -3,7 +3,8 @@
     "config": "eduroam configuratie",
     "profile": "Verstrek informatie",
     "confirmation": "Veel plezier met eduroam!",
-    "error": "Fout"
+    "error": "Fout",
+    "information": "Informatie"
   },
   "label": {
     "institution": "Organisatie",
@@ -15,7 +16,13 @@
     "passphrase": "Wachtwoord",
     "note": "*Let op: controleer het wachtwoord als de verbinding niet werkt",
     "help": "Hulp nodig ?",
-    "support": "Klik hier voor ondersteuning"
+    "support": "Klik hier voor ondersteuning",
+    "valid-until": "Geldig tot",
+    "authentication": "Authenticatie",
+    "suffix": "Domein",
+    "eap": "EAP",
+    "auth": "Auth",
+    "oids": "Roaming netwerken"
   },
   "placeholder": {
     "institution": "Kies een organisatie...",
@@ -44,7 +51,12 @@
     "no-thanks": "Nee, bedankt",
     "close": "Sluiten",
     "connect": "Verbind met netwerk",
-    "start-over": "Opnieuw beginnen"
+    "start-over": "Opnieuw beginnen",
+    "renew": "Renew",
+    "remove": "Remove",
+    "showInformation": "Show Information",
+    "show-technical": "Show Technical Information",
+    "hide-technical": "Hide Technical Information"
   },
   "error": {
     "username": "De gebruikersnaam moet lijken op het patroon ",
