@@ -5,7 +5,9 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
-import { ConfigurationScreen } from '../configScreen/configScreen';
+//import { ConfigurationScreen } from '../configScreen/configScreen';
+import {StartScreenPage} from "../startScreen/startScreen";
+
 
 
 @Component({
@@ -54,7 +56,7 @@ export class WifiConfirmation extends BasePage implements OnInit {
 
   // iOS flow to expired certificates
   async startOver() {
-    await this.navCtrl.push(ConfigurationScreen, {}, {animation: 'transition'});
+    await this.navCtrl.push(StartScreenPage, {}, {animation: 'transition'});
   }
 
   /**
