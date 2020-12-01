@@ -690,7 +690,7 @@
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
-                        <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
                         <connections>
                             <outlet property="delegate" destination="B8D-0N-5wS" id="98r-iN-zZc"/>
                         </connections>
@@ -1046,7 +1046,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="connect:" target="XfG-lQ-9wD" id="pMc-Uu-bNd"/>
+                                    <action selector="connectWithCerts:" target="yEK-C7-ENa" id="LLA-YE-Kf8"/>
                                 </connections>
                             </button>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9DC-NA-U7u">
@@ -1226,7 +1226,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="connectWithCerts:" target="f8E-4P-1Yz" id="t7j-GD-h7k"/>
+                                    <action selector="connectWithCerts:" target="f8E-4P-1Yz" id="RpT-kK-c2j"/>
                                 </connections>
                             </button>
                         </subviews>
