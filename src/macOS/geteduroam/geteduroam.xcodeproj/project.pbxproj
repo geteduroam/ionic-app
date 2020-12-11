@@ -15,6 +15,7 @@
 		30869F3C257129CA00F33495 /* Discovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30869F3B257129CA00F33495 /* Discovery.swift */; };
 		30ABA1FE25836B2400DC6247 /* XMLMapper in Frameworks */ = {isa = PBXBuildFile; productRef = 30ABA1FD25836B2400DC6247 /* XMLMapper */; };
 		30ABA20125836B9B00DC6247 /* EAP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30ABA20025836B9B00DC6247 /* EAP.swift */; };
+		30ABA2052583CF0800DC6247 /* EAPView.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 30ABA2032583CF0800DC6247 /* EAPView.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		30869F382570EFCF00F33495 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		30869F3B257129CA00F33495 /* Discovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Discovery.swift; sourceTree = "<group>"; };
 		30ABA20025836B9B00DC6247 /* EAP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EAP.swift; sourceTree = "<group>"; };
+		30ABA2042583CF0800DC6247 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = geteduroam/Base.lproj/EAPView.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +48,7 @@
 		3025B9FA257007C300BC50A0 = {
 			isa = PBXGroup;
 			children = (
+				30ABA2032583CF0800DC6247 /* EAPView.storyboard */,
 				3025BA05257007C300BC50A0 /* geteduroam */,
 				3025BA04257007C300BC50A0 /* Products */,
 				30869F372570EFCF00F33495 /* Frameworks */,
@@ -147,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3025BA0B257007C500BC50A0 /* Assets.xcassets in Resources */,
+				30ABA2052583CF0800DC6247 /* EAPView.storyboard in Resources */,
 				3025BA0E257007C500BC50A0 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -174,6 +178,14 @@
 				3025BA0D257007C500BC50A0 /* Base */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		30ABA2032583CF0800DC6247 /* EAPView.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				30ABA2042583CF0800DC6247 /* Base */,
+			);
+			name = EAPView.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
