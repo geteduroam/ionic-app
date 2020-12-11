@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,8 @@
 		3025BA0E257007C500BC50A0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3025BA0C257007C500BC50A0 /* Main.storyboard */; };
 		30869F392570EFCF00F33495 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30869F382570EFCF00F33495 /* NetworkExtension.framework */; };
 		30869F3C257129CA00F33495 /* Discovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30869F3B257129CA00F33495 /* Discovery.swift */; };
+		30ABA1FE25836B2400DC6247 /* XMLMapper in Frameworks */ = {isa = PBXBuildFile; productRef = 30ABA1FD25836B2400DC6247 /* XMLMapper */; };
+		30ABA20125836B9B00DC6247 /* EAP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30ABA20025836B9B00DC6247 /* EAP.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +27,7 @@
 		3025BA10257007C500BC50A0 /* geteduroam.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = geteduroam.entitlements; sourceTree = "<group>"; };
 		30869F382570EFCF00F33495 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		30869F3B257129CA00F33495 /* Discovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Discovery.swift; sourceTree = "<group>"; };
+		30ABA20025836B9B00DC6247 /* EAP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EAP.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +36,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				30869F392570EFCF00F33495 /* NetworkExtension.framework in Frameworks */,
+				30ABA1FE25836B2400DC6247 /* XMLMapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,6 +70,7 @@
 				3025BA0F257007C500BC50A0 /* Info.plist */,
 				3025BA10257007C500BC50A0 /* geteduroam.entitlements */,
 				30869F3B257129CA00F33495 /* Discovery.swift */,
+				30ABA20025836B9B00DC6247 /* EAP.swift */,
 			);
 			path = geteduroam;
 			sourceTree = "<group>";
@@ -94,6 +99,9 @@
 			dependencies = (
 			);
 			name = geteduroam;
+			packageProductDependencies = (
+				30ABA1FD25836B2400DC6247 /* XMLMapper */,
+			);
 			productName = geteduroam;
 			productReference = 3025BA03257007C300BC50A0 /* geteduroam.app */;
 			productType = "com.apple.product-type.application";
@@ -121,6 +129,9 @@
 				Base,
 			);
 			mainGroup = 3025B9FA257007C300BC50A0;
+			packageReferences = (
+				30ABA1FC25836B2400DC6247 /* XCRemoteSwiftPackageReference "XMLMapper" */,
+			);
 			productRefGroup = 3025BA04257007C300BC50A0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -149,6 +160,7 @@
 			files = (
 				30869F3C257129CA00F33495 /* Discovery.swift in Sources */,
 				3025BA09257007C300BC50A0 /* ViewController.swift in Sources */,
+				30ABA20125836B9B00DC6247 /* EAP.swift in Sources */,
 				3025BA07257007C300BC50A0 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -346,6 +358,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		30ABA1FC25836B2400DC6247 /* XCRemoteSwiftPackageReference "XMLMapper" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gcharita/XMLMapper.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		30ABA1FD25836B2400DC6247 /* XMLMapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 30ABA1FC25836B2400DC6247 /* XCRemoteSwiftPackageReference "XMLMapper" */;
+			productName = XMLMapper;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3025B9FB257007C300BC50A0 /* Project object */;
 }
