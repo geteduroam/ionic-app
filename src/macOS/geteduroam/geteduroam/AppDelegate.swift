@@ -13,7 +13,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func application(_ sender: NSApplication, openFile filename: String) -> Bool {
         // Parsing file
         let string = try! String(contentsOfFile: filename, encoding: String.Encoding.utf8)
-        print(string)
         
         // Class EAP defining eapObject
         let eapObject = EAP(XMLString: string)
