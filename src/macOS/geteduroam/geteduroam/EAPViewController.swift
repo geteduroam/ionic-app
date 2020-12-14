@@ -10,6 +10,8 @@ import Cocoa
 
 class EAPViewController: NSViewController {
     
+    @IBOutlet weak var testField: NSTextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.

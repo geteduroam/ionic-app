@@ -17,6 +17,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Class EAP defining eapObject
         let eapObject = EAP(XMLString: string)
         
+        var myWindow: NSWindow? = nil
+        let storyboard = NSStoryboard(name: NSStoryboard.Name("Main"),bundle: nil)
+        let controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("EAPView")) as! NSViewController
+        myWindow = NSWindow(contentViewController: controller)
+        let vc = NSWindowController(window: myWindow)
+        vc.showWindow(self)
+        
         // TODO: Catch error when parsing eap file thrown a nil value
         
         print("Data extract")
