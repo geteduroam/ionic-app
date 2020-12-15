@@ -205,8 +205,16 @@ class ViewController: NSViewController {
 
     func fillInfo() {
         // SSID
-        if(eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID != nil && ssidField != nil) {
-            ssidField.stringValue = (eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID) ?? ""
+        if(eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211 != nil && ssidField != nil) {
+            eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211!.forEach{ res in
+                if (res.SSID != nil) {
+                    ssidField.stringValue = res.SSID ?? ""
+                }
+                
+            }
+            
+            
+           
         }
         // Client certificate
         if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil && clientCertField != nil){
