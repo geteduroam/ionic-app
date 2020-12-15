@@ -1337,7 +1337,10 @@
                         </subviews>
                     </view>
                     <connections>
+                        <outlet property="caField" destination="F8Z-nU-daZ" id="g9Z-99-3kZ"/>
                         <outlet property="clientCertField" destination="dqs-GZ-Jiu" id="fst-f8-kCU"/>
+                        <outlet property="passField" destination="vDv-dA-hST" id="3sA-3R-dTf"/>
+                        <outlet property="ssidField" destination="RgN-uu-dUK" id="Y7W-c9-SvY"/>
                     </connections>
                 </viewController>
                 <customObject id="xTG-wI-ZVo" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

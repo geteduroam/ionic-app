@@ -24,12 +24,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let storyboard = NSStoryboard(name: NSStoryboard.Name("Main"),bundle: nil)
         var controller: NSViewController
         
-        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential != nil){
+        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil){
             controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("PassphraseViewController")) as! NSViewController
             eapView = NSWindow(contentViewController: controller)
       
-        }
-        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ServerSideCredential.CA  != nil){
+        } else if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ServerSideCredential.CA  != nil){
             controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("CAViewController")) as! NSViewController
             eapView = NSWindow(contentViewController: controller)
         }

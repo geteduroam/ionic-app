@@ -199,7 +199,12 @@ class ViewController: NSViewController {
         func fillInfo() {
         
             if(eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID != nil && ssidField != nil) {
+               
                 ssidField.stringValue = (eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID) ?? ""
+            }
+            
+            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil && clientCertField != nil){
+                clientCertField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate?.clientCertificate)!
             }
        
             if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix != nil && userField != nil) {
