@@ -11,20 +11,24 @@ import CoreWLAN
 
 class ViewController: NSViewController {
     let appDelegate = NSApplication.shared.delegate as! AppDelegate
-    var eapObject: EAP? = nil
+ 
+    // Fields
     @IBOutlet weak var ssidField: NSTextField!
     @IBOutlet weak var passField: NSTextField!
     @IBOutlet weak var userField: NSTextField!
     @IBOutlet weak var caField: NSTextField!
     @IBOutlet weak var clientCertField: NSTextField!
+    
+    var eapObject: EAP? = nil
     var ssidValue = ""
     var outerIdentity = ""
     
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
      if (appDelegate.eapObject != nil) {
+        // eapObject from eap-config file
           eapObject = appDelegate.eapObject
        
           fillInfo()
@@ -37,8 +41,7 @@ class ViewController: NSViewController {
         }
     }
 
-// FIELDS ACTIONS //
-    
+    // FIELDS ACTIONS //
     @IBAction func ssidAction(_ sender: NSTextField) {
         print("ssidValue: ", sender.stringValue)
         ssidValue = sender.stringValue
@@ -59,8 +62,8 @@ class ViewController: NSViewController {
     @IBAction func clientCertAction(_ sender: NSTextField) {
         print("clientCertValue: ", sender.stringValue)
     }
-    // BUTTONS ACTIONS //
     
+    // BUTTONS ACTIONS //
     @IBAction func connect(_ sender: NSButton) {
         var isEqual = false
         let client = CWWiFiClient.shared()
@@ -199,32 +202,29 @@ class ViewController: NSViewController {
         //NSLog("🦊 configureAP: All caCertificateStrings handled")
         return certificates
     }
-    
-        func fillInfo() {
-            // SSID
-            if(eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID != nil && ssidField != nil) {
-               
-                ssidField.stringValue = (eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID) ?? ""
+
+    func fillInfo() {
+        // SSID
+        if(eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID != nil && ssidField != nil) {
+            ssidField.stringValue = (eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID) ?? ""
+        }
+        // Client certificate
+        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil && clientCertField != nil){
+            clientCertField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate?.clientCertificate)!
+           
+            // OuterIdentity
+            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity != nil){
+                outerIdentity = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity)!
             }
-            // Client certificate
-            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil && clientCertField != nil){
-                clientCertField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate?.clientCertificate)!
-                
-                if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity != nil){
-                    outerIdentity = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity)!
-                }
-            }
-       
-            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix != nil && userField != nil) {
-                userField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix) ?? ""
-            }
-            
-            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first!.ServerSideCredential != nil && caField != nil) {
-                
-                caField.stringValue =  (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first!.ServerSideCredential?.CA?.first?.CACert) ?? "Not found"
- 
-            }
-          }
-        
-    
+        }
+        // InnerIdentitySuffix
+        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix != nil && userField != nil) {
+            userField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix) ?? ""
+        }
+        // CA certificate
+        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first!.ServerSideCredential != nil && caField != nil) {
+            caField.stringValue =  (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first!.ServerSideCredential?.CA?.first?.CACert) ?? "Not found"
+
+        }
+      }
 }
