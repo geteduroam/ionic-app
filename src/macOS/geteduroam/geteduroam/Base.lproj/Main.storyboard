@@ -680,7 +680,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="0.0"/>
+            <point key="canvasLocation" x="144" y="86"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -784,10 +784,10 @@
             </objects>
             <point key="canvasLocation" x="-1824" y="390"/>
         </scene>
-        <!--View Controller-->
+        <!--userViewController-->
         <scene sceneID="FqT-5e-HJO">
             <objects>
-                <viewController id="mBF-4W-jaB" customClass="ViewController" customModule="geteduroam" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="userViewController" id="mBF-4W-jaB" customClass="ViewController" customModule="geteduroam" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="L6f-xt-oRz">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -893,20 +893,11 @@
             <objects>
                 <viewController title="EAPView" storyboardIdentifier="EAPView" id="jfg-xw-4xx" customClass="EAPViewController" customModule="geteduroam" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="AKa-17-Ch3">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="492" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UaN-CL-Bc0">
-                                <rect key="frame" x="207" y="239" width="39" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" title="Hello!" id="HtJ-nT-n5D">
-                                    <font key="font" usesAppearanceFont="YES"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0eD-Sx-CnU">
-                                <rect key="frame" x="196" y="84" width="60" height="32"/>
+                                <rect key="frame" x="397" y="13" width="60" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="Quit" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="v4E-NA-B6X">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -917,23 +908,83 @@
                                 </connections>
                             </button>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gHj-6G-F84">
-                                <rect key="frame" x="177" y="180" width="96" height="21"/>
+                                <rect key="frame" x="327" y="246" width="138" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="NJP-z8-b2Q">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
+                                <connections>
+                                    <action selector="actionID:" target="jfg-xw-4xx" id="DQD-md-kae"/>
+                                </connections>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NY8-rO-RWD">
+                                <rect key="frame" x="291" y="249" width="21" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="ID:" id="vJD-hL-IaC">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="95F-WE-les">
+                                <rect key="frame" x="259" y="208" width="71" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="ServerID:" id="8TT-19-31L">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="9Cs-Nm-NKJ">
+                                <rect key="frame" x="327" y="205" width="138" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="6xP-sb-yVJ">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <connections>
+                                    <action selector="actionServer:" target="jfg-xw-4xx" id="dvv-Re-VnM"/>
+                                </connections>
+                            </textField>
+                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8y5-Fk-yEv">
+                                <rect key="frame" x="327" y="174" width="138" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="Tu7-Ly-ofn">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="B1A-lp-yOt">
+                                <rect key="frame" x="255" y="174" width="61" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" title="validUntil" id="StT-SH-Ow2">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="P4q-Vy-zpU">
+                                <rect key="frame" x="20" y="174" width="216" height="113"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="KdP-c9-M3W"/>
+                            </imageView>
                         </subviews>
                     </view>
                     <connections>
+                        <outlet property="IDfield" destination="gHj-6G-F84" id="ob1-E8-VOi"/>
+                        <outlet property="imageView" destination="P4q-Vy-zpU" id="5Nl-2O-Ll5"/>
+                        <outlet property="serverField" destination="9Cs-Nm-NKJ" id="L1d-HU-0Ef"/>
                         <outlet property="testField" destination="gHj-6G-F84" id="aBt-sc-pYC"/>
+                        <outlet property="validField" destination="8y5-Fk-yEv" id="7yC-xu-ys7"/>
                     </connections>
                 </viewController>
                 <customObject id="yjs-mG-nIQ" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="251" y="-360"/>
+            <point key="canvasLocation" x="230" y="-360"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
@@ -1011,32 +1062,21 @@
                     </view>
                     <connections>
                         <segue destination="jfg-xw-4xx" kind="custom" id="zl8-JV-Fzw"/>
+                        <segue destination="yEK-C7-ENa" kind="custom" id="WYI-0i-z7u"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-454" y="-57"/>
         </scene>
-        <!--View Controller-->
+        <!--geteduroam-->
         <scene sceneID="uje-pP-2UN">
             <objects>
-                <viewController id="yEK-C7-ENa" customClass="ViewController" customModule="geteduroam" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="ldo-vb-yrs">
+                <viewController title="geteduroam" storyboardIdentifier="CAViewController" id="yEK-C7-ENa" customClass="ViewController" customModule="geteduroam" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" identifier="CAViewController" id="ldo-vb-yrs">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iC9-Bz-nBq">
-                                <rect key="frame" x="174" y="264" width="202" height="16"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="WIFI username + PASS + CA" id="M7d-N7-fLm">
-                                    <font key="font" usesAppearanceFont="YES"/>
-                                    <color key="textColor" name="AccentColor"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                    <connections>
-                                        <accessibilityConnection property="title" destination="iC9-Bz-nBq" id="b0S-Ao-jdx"/>
-                                    </connections>
-                                </textFieldCell>
-                            </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dei-Mq-FRy">
                                 <rect key="frame" x="45" y="226" width="41" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -1132,20 +1172,35 @@
                                     <action selector="caAction:" target="yEK-C7-ENa" id="chR-ob-e36"/>
                                 </connections>
                             </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iC9-Bz-nBq">
+                                <rect key="frame" x="124" y="264" width="202" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="WIFI username + PASS + CA" id="M7d-N7-fLm">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="AccentColor"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <connections>
+                                        <accessibilityConnection property="title" destination="iC9-Bz-nBq" id="b0S-Ao-jdx"/>
+                                    </connections>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                     </view>
                     <connections>
                         <outlet property="caField" destination="xd6-8z-Fa4" id="y3k-gQ-Qvk"/>
+                        <outlet property="passField" destination="vOV-wr-Zd5" id="IeM-xf-UBN"/>
+                        <outlet property="ssidField" destination="g49-Tv-INy" id="sRZ-cd-CSO"/>
+                        <outlet property="userField" destination="9DC-NA-U7u" id="sHU-qO-Q8d"/>
                     </connections>
                 </viewController>
                 <customObject id="3KT-S9-7Y4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-810" y="393"/>
         </scene>
-        <!--View Controller-->
+        <!--geteduroam-->
         <scene sceneID="OI5-Qf-pET">
             <objects>
-                <viewController id="f8E-4P-1Yz" customClass="ViewController" customModule="geteduroam" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="geteduroam" storyboardIdentifier="PassphraseViewController" id="f8E-4P-1Yz" customClass="ViewController" customModule="geteduroam" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="mRt-X4-eS7">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1290,6 +1345,9 @@
             <point key="canvasLocation" x="-278" y="393"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="Otd-eY-9Sp"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <namedColor name="AccentColor">
             <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

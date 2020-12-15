@@ -7,32 +7,41 @@
 
 import Cocoa
 
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
+    // Object defined by EAP Class
+    var eapObject: EAP? = nil
     
+    // Initialized by eap-config file.
     func application(_ sender: NSApplication, openFile filename: String) -> Bool {
-        // Parsing file
+        // Parsing file to EAP Class
         let string = try! String(contentsOfFile: filename, encoding: String.Encoding.utf8)
+        eapObject = EAP(XMLString: string)
         
-        // Class EAP defining eapObject
-        let eapObject = EAP(XMLString: string)
-        
-        var myWindow: NSWindow? = nil
+        // Load eapView Scene
+        var eapView: NSWindow? = nil
         let storyboard = NSStoryboard(name: NSStoryboard.Name("Main"),bundle: nil)
-        let controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("EAPView")) as! NSViewController
-        myWindow = NSWindow(contentViewController: controller)
-        let vc = NSWindowController(window: myWindow)
+        var controller: NSViewController
+        
+        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential != nil){
+            controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("PassphraseViewController")) as! NSViewController
+            eapView = NSWindow(contentViewController: controller)
+      
+        }
+        if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ServerSideCredential.CA  != nil){
+            controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("CAViewController")) as! NSViewController
+            eapView = NSWindow(contentViewController: controller)
+        }
+    
+      //  eapView = NSWindow(contentViewController: controller)
+        
+        
+        
+        
+        let vc = NSWindowController(window: eapView)
         vc.showWindow(self)
-        
-        // TODO: Catch error when parsing eap file thrown a nil value
-        
-        print("Data extract")
-        print("----------------")
-        print("ID: ", eapObject?.EAPIdentityProvider?.ID as Any)
-        print("validUntil: ", eapObject?.EAPIdentityProvider?.ValidUntil?.date as Any)
-        print("eapType: ", eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first?.EAPMethod?.EapType.eap as Any)
-        print("ServerID: ", eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first?.ServerSideCredential.ServerID as Any)
-        print("CA: ", eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first?.ServerSideCredential?.CA?.first?.CACert as Any)
+
         return true
     }
 

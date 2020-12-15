@@ -170,12 +170,30 @@ class ClientSideCredential: XMLMappable {
 
     var InnerIdentitySuffix: String?
     var InnerIdentityHint: String?
+    var OuterIdentity: String?
+    var ClientCertificate: ClientCertficate?
    
     required init?(map: XMLMap) {}
 
     func mapping(map: XMLMap) {
         InnerIdentitySuffix <- map["InnerIdentitySuffix"]
         InnerIdentityHint <- map["InnerIdentityHintx"]
+        OuterIdentity <- map["OuterIdentity"]
+        ClientCertificate <- map["ClientCertificate"]
+    }
+}
+
+class ClientCertficate: XMLMappable {
+    var nodeName: String!
+    
+    var format: String?
+    var clientCertificate: String!
+   
+    required init?(map: XMLMap) {}
+
+    func mapping(map: XMLMap) {
+        format <- map.attributes["format"]
+        clientCertificate <- map.innerText
     }
 }
 class InnerAuthenticationMethod: XMLMappable {

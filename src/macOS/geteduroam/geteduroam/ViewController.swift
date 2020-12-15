@@ -10,22 +10,24 @@ import CoreWLAN
 
 
 class ViewController: NSViewController {
-
+    let appDelegate = NSApplication.shared.delegate as! AppDelegate
+    var eapObject: EAP? = nil
     @IBOutlet weak var ssidField: NSTextField!
     @IBOutlet weak var passField: NSTextField!
     @IBOutlet weak var userField: NSTextField!
     @IBOutlet weak var caField: NSTextField!
     @IBOutlet weak var clientCertField: NSTextField!
-    
     var ssidValue = ""
-    var passValue = ""
-    var userValue = ""
-    var caValue = ""
-    var clientCertValue = ""
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+     if (appDelegate.eapObject != nil) {
+          eapObject = appDelegate.eapObject
+       
+          fillInfo()
+     }
     }
 
     override var representedObject: Any? {
@@ -37,35 +39,28 @@ class ViewController: NSViewController {
 // FIELDS ACTIONS //
     
     @IBAction func ssidAction(_ sender: NSTextField) {
+        print("ssidValue: ", sender.stringValue)
         ssidValue = sender.stringValue
-        print("ssidValue: ", ssidValue)
     }
     
     @IBAction func passAction(_ sender: NSTextField) {
-        passValue = sender.stringValue
-        print("passValue: ", passValue)
+        print("passValue: ", sender.stringValue)
     }
     
     @IBAction func userAction(_ sender: NSTextField) {
-        userValue = sender.stringValue
-        print("userValue: ", userValue)
+        print("userValue: ", sender.stringValue)
     }
     
     @IBAction func caAction(_ sender: NSTextField) {
-        caValue = sender.stringValue
-        print("caValue: ", caValue)
+        print("caValue: ", sender.stringValue)
     }
     
     @IBAction func clientCertAction(_ sender: NSTextField) {
-        clientCertValue = sender.stringValue
-        print("clientCertValue: ", clientCertValue)
+        print("clientCertValue: ", sender.stringValue)
     }
     // BUTTONS ACTIONS //
     
     @IBAction func connect(_ sender: NSButton) {
-        print("ssid: ", ssidValue)
-        print("pass: ", passValue)
-        print("user: ", userValue)
         var isEqual = false
         let client = CWWiFiClient.shared()
         let interface = client.interface()!
@@ -76,24 +71,20 @@ class ViewController: NSViewController {
             for network in discovery.networks {
                 let wifiSSID: String = network.ssid!.description as String
 //  print(wifiSSID.description)
-                 isEqual = (wifiSSID.description == ssidValue)
-                if(isEqual && userValue == "") {
-                    try! interface.associate(to: network, password: passValue)
-                } else if (isEqual && userValue != "") {
-                    let identity = addCertificate(certificate: userValue, passphrase: passValue)
-                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userValue, password: passValue)
+                isEqual = (wifiSSID.description == ssidField.stringValue)
+                if(isEqual && userField == nil) {
+                    try! interface.associate(to: network, password: passField.stringValue)
+                } else if (isEqual && userField != nil) {
+                    let identity = addCertificate(certificate: userField.stringValue, passphrase: passField.stringValue)
+                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userField.stringValue, password: passField.stringValue)
                
                 }
             }
         }
         
     }
- 
+    
     @IBAction func connectWithCerts(_ sender: Any) {
-        print("ssid: ", ssidValue)
-        print("pass: ", passValue)
-        print("ca: ", caValue)
-        print("clientCertValue: ", clientCertValue)
         var isEqual = false
         let client = CWWiFiClient.shared()
         let interface = client.interface()!
@@ -104,16 +95,16 @@ class ViewController: NSViewController {
             for network in discovery.networks {
                 let wifiSSID: String = network.ssid!.description as String
 //  print(wifiSSID.description)
-                 isEqual = (wifiSSID.description == ssidValue)
-                if(isEqual && clientCertValue == "") {
-                    let identity = addCertificate(certificate: clientCertValue, passphrase: passValue)
-                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userValue, password: passValue)
-                } else if (isEqual && clientCertValue != "") {
+                isEqual = (wifiSSID.description == ssidValue)
+                if(isEqual && clientCertField == nil) {
+                    let identity = addCertificate(certificate: caField.stringValue, passphrase: passField.stringValue)
+                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userField.stringValue, password: passField.stringValue)
+                } else if (isEqual && clientCertField != nil) {
                     // TODO: CONNECT BASED ON CERTIFICATES
-                    let certificates = [caValue, clientCertValue]
-                    let certificate = importCACertificates(certificateStrings: certificates, pass: passValue)
-                    let identity = addCertificate(certificate: clientCertValue, passphrase: passValue)
-                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userValue, password: passValue)
+                    let certificates = [caField.stringValue, clientCertField.stringValue]
+                    let certificate = importCACertificates(certificateStrings: certificates, pass: passField.stringValue)
+                    let identity = addCertificate(certificate: clientCertField.stringValue, passphrase: passField.stringValue)
+                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userField.stringValue, password: passField.stringValue)
                 }
             }
         }
@@ -204,4 +195,23 @@ class ViewController: NSViewController {
         //NSLog("🦊 configureAP: All caCertificateStrings handled")
         return certificates
     }
+    
+        func fillInfo() {
+        
+            if(eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID != nil && ssidField != nil) {
+                ssidField.stringValue = (eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID) ?? ""
+            }
+       
+            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix != nil && userField != nil) {
+                userField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix) ?? ""
+            }
+            
+            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ServerSideCredential != nil && caField != nil) {
+                
+                caField.stringValue =  (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ServerSideCredential?.CA?.first?.CACert) ?? "Not found"
+ 
+            }
+          }
+        
+    
 }
