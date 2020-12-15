@@ -18,6 +18,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var caField: NSTextField!
     @IBOutlet weak var clientCertField: NSTextField!
     var ssidValue = ""
+    var outerIdentity = ""
     
     
     override func viewDidLoad() {
@@ -101,10 +102,13 @@ class ViewController: NSViewController {
                     _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userField.stringValue, password: passField.stringValue)
                 } else if (isEqual && clientCertField != nil) {
                     // TODO: CONNECT BASED ON CERTIFICATES
+                    if (outerIdentity == "") {
+                        outerIdentity = userField.stringValue
+                    }
                     let certificates = [caField.stringValue, clientCertField.stringValue]
                     let certificate = importCACertificates(certificateStrings: certificates, pass: passField.stringValue)
                     let identity = addCertificate(certificate: clientCertField.stringValue, passphrase: passField.stringValue)
-                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: userField.stringValue, password: passField.stringValue)
+                    _ = try? interface.associate(toEnterpriseNetwork: network, identity: identity, username: outerIdentity, password: passField.stringValue)
                 }
             }
         }
@@ -205,6 +209,10 @@ class ViewController: NSViewController {
             
             if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil && clientCertField != nil){
                 clientCertField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate?.clientCertificate)!
+                
+                if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity != nil){
+                    outerIdentity = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity) as! String
+                }
             }
        
             if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix != nil && userField != nil) {
