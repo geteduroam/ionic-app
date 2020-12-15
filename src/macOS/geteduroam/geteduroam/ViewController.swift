@@ -201,17 +201,17 @@ class ViewController: NSViewController {
     }
     
         func fillInfo() {
-        
+            // SSID
             if(eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID != nil && ssidField != nil) {
                
                 ssidField.stringValue = (eapObject?.EAPIdentityProvider.CredentialApplicability.IEEE80211?.first?.SSID) ?? ""
             }
-            
+            // Client certificate
             if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil && clientCertField != nil){
                 clientCertField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate?.clientCertificate)!
                 
                 if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity != nil){
-                    outerIdentity = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity) as! String
+                    outerIdentity = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.OuterIdentity)!
                 }
             }
        
@@ -219,9 +219,9 @@ class ViewController: NSViewController {
                 userField.stringValue = (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential?.InnerIdentitySuffix) ?? ""
             }
             
-            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ServerSideCredential != nil && caField != nil) {
+            if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first!.ServerSideCredential != nil && caField != nil) {
                 
-                caField.stringValue =  (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ServerSideCredential?.CA?.first?.CACert) ?? "Not found"
+                caField.stringValue =  (eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod?.first!.ServerSideCredential?.CA?.first?.CACert) ?? "Not found"
  
             }
           }

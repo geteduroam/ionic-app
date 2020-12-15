@@ -24,6 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let storyboard = NSStoryboard(name: NSStoryboard.Name("Main"),bundle: nil)
         var controller: NSViewController
         
+        // Filter view connection with client certificate or CA certificate
         if(eapObject?.EAPIdentityProvider.AuthenticationMethods.AuthenticationMethod.first?.ClientSideCredential.ClientCertificate != nil){
             controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("PassphraseViewController")) as! NSViewController
             eapView = NSWindow(contentViewController: controller)
@@ -32,11 +33,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             controller = storyboard.instantiateController(withIdentifier: NSStoryboard.SceneIdentifier("CAViewController")) as! NSViewController
             eapView = NSWindow(contentViewController: controller)
         }
-    
-      //  eapView = NSWindow(contentViewController: controller)
-        
-        
-        
         
         let vc = NSWindowController(window: eapView)
         vc.showWindow(self)
