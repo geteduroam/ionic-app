@@ -41,7 +41,7 @@ RUN apt-get update &&  \
 ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:/opt/tools:/opt/gradle/gradle-"$GRADLE_VERSION"/bin
 
 #Copy the source folder
-COPY src/ /home/gradle/myApp/
+COPY geteduroam/ /home/gradle/myApp/
 
 #Copy the Snakeoil key to sign the apk
 COPY contrib/release-key.jks /release-key.jks

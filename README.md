@@ -27,5 +27,5 @@ remove all generated files using
 
 If you want to build manually, follow these instructions
 
-* [Manually build Android app](DEV-ANDROID.md)
-* [Manually build iOS app](DEV-IOS.md)
+* [Manually build Android app](DEV_ANDROID.md)
+* [Manually build iOS app](DEV_IOS.md)

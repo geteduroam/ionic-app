@@ -13,9 +13,9 @@
 
 		sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
 
-* Navigate to `src` folder
+* Navigate to **geteduroam** folder
 
-		cd src
+		cd geteduroam
 
 * Install Dependencies and build (nodeJS dependencies)
 

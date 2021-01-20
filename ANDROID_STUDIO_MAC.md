@@ -16,4 +16,4 @@ Use these steps to get it working.
 	export JAVA_HOME="/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home"
 	JAVA_HOME="/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home" ~/Library/Android/sdk/tools/bin/sdkmanager --licenses
 
-6. Follow the [development instructions](DEV-ANDROID.md)
+6. Follow the [development instructions](DEV_ANDROID.md)

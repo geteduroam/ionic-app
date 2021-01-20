@@ -26,15 +26,18 @@ If needed, [`install-docker.sh`](contrib/install-docker.sh) will install both.
 * [Node.js](https://nodejs.org/en/)
 * [Android-SDK](https://developer.android.com/studio#downloads)
 
+NOTE: If you're developing on MacOS, check the guide for
+[installing Android Studion on MacOS](ANDROID_STUDIO_MAC.md)
+
 
 ### Building
 
 NOTE: It's easier to build with Docker using `make apk`  
 This describes how to build manually.
 
-* Navigate to `src` folder
+* Navigate to **geteduroam** folder
 
-		cd src
+		cd geteduroam
 
 * Install Dependencies and build (nodeJS dependencies)
 
