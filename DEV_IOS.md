@@ -7,6 +7,9 @@
 * [Node.js](https://nodejs.org/en/)
 * [CocoaPods](https://cocoapods.org)
 
+NOTE: Currently, on M1 Macs, CocoaPods will fail to run due to a missing dependency.
+Install using `arch -x86_64 sudo gem install cocoapods ffi`
+
 ## Building
 
 * Make sure you have the correct command line tools installed
