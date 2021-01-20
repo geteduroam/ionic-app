@@ -12,6 +12,7 @@ open-xcode: check-js geteduroam/ios/App/public
 .PHONY: start-xcode
 
 open-android: check-js geteduroam/android/app/src/main/assets/public
+	cd geteduroam && npx cap open android
 .PHONY: start-android
 
 # Dependency checking
@@ -51,7 +52,7 @@ geteduroam/ios/App/public: check-js geteduroam/www
 	# This also does pod install, not needed to do manually
 	cd geteduroam && npx cap sync ios
 
-geteduroam/android/app/src/main/assets/public:
+geteduroam/android/app/src/main/assets/public: geteduroam/www
 	cd geteduroam && npx cap sync android
 
 # Compatibility with old make targets
