@@ -29,6 +29,8 @@ npm-debug.log*
 /tsconfig.spec.json
 /documentation
 /android/gradle
+/android/gradlew
+/android/gradlew.bat
 /android/app/build
 /android/app/release
 /android/app/src/androidTest
