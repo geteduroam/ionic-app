@@ -14,8 +14,12 @@ The Android app can be built using Docker via the [Makefile]
 
 Without Docker, you can also set up the project using the Makefile
 
-Install the dependencies for [Android](DEV_ANDROID.md) and/or [iOS](DEV_IOS.md),
-and run one or both of the following commands:
+You must install these dependencies before running `make`
+
+* [Android-SDK](https://developer.android.com/studio#downloads) (for Android only)
+* [Node.js](https://nodejs.org/en/) (for both Android and iOS)
+* [XCode](https://developer.apple.com/xcode/) (for iOS only)
+* [CocoaPods](https://cocoapods.org) (for iOS only)
 
 	make open-android # To start Android Studio
 	make open-xcode # To start XCode on MacOS
