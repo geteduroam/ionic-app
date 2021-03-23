@@ -21,8 +21,10 @@ You must install these dependencies before running `make`
 * [XCode](https://developer.apple.com/xcode/) (for iOS only)
 * [CocoaPods](https://cocoapods.org) (for iOS only)
 
-	make open-android # To start Android Studio
-	make open-xcode # To start XCode on MacOS
+Then start Android Studio or XCode
+
+	make open-android		# To start Android Studio
+	make open-xcode  		# To start XCode on MacOS
 
 
 If you want to ensure you're rebuilding the project,
