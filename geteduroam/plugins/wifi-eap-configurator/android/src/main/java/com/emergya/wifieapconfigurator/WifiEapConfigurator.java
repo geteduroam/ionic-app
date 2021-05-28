@@ -248,17 +248,21 @@ public class WifiEapConfigurator extends Plugin {
 
         enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
 
-        if (servernames.length != 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
-                enterpriseConfig.setAltSubjectMatch("DNS:" + String.join(";DNS:", servernames));
-            }
-        } else {
+        if (servernames.length == 0) {
             JSObject object = new JSObject();
             object.put("success", false);
             object.put("message", "plugin.wifieapconfigurator.error.ca.missing");
             call.success(object);
             return;
+        }
+
+        enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
+        // Some certificates use CN, which fails with the following call,
+        // so only use it when there is more than one CN
+        if (servernames.length > 1) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                enterpriseConfig.setAltSubjectMatch("DNS:" + String.join(";DNS:", servernames));
+            }
         }
 
         enterpriseConfig.setEapMethod(eap);
