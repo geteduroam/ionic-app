@@ -255,7 +255,12 @@ public class WifiEapConfigurator extends Plugin {
             call.success(object);
             return;
         }
-        enterpriseConfig.setDomainSuffixMatch(String.join(";", servernames));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            enterpriseConfig.setDomainSuffixMatch(String.join(";", servernames));
+        } else {
+            enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
+        }
 
         enterpriseConfig.setEapMethod(eap);
 
