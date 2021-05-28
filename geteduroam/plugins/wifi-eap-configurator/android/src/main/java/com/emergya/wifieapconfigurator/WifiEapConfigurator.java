@@ -281,7 +281,16 @@ public class WifiEapConfigurator extends Plugin {
                 boolean[] usage = certificate.getKeyUsage();
                 // https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#getKeyUsage()
                 // 5 is KeyUsage keyCertSign, which indicates the certificate is a CA
-                if (usage[5]) certificates.add(certificate);
+                if (usage != null && usage[5]) {
+                    // Find out if this a CA according to KeyUsage
+                    certificates.add(certificate);
+                } else {
+                    // Find out if this a CA according to Basic Constraints
+                    byte[] extension = certificate.getExtensionValue("2.5.29.19");
+                    if (extension != null && extension.length > 1 && extension[0] != 0) {
+                        certificates.add(certificate);
+                    }
+                }
                 // We really shouldn't expect any certificate here to NOT be a CA,
                 // CAT shows a nice red warning when you try to configure this,
                 // but experience shows that sometimes this is not enough of a deterrent.
