@@ -255,15 +255,7 @@ public class WifiEapConfigurator extends Plugin {
             call.success(object);
             return;
         }
-
-        enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
-        // Some certificates use CN, which fails with the following call,
-        // so only use it when there is more than one CN
-        if (servernames.length > 1) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                enterpriseConfig.setAltSubjectMatch("DNS:" + String.join(";DNS:", servernames));
-            }
-        }
+        enterpriseConfig.setDomainSuffixMatch(String.join(";", servernames));
 
         enterpriseConfig.setEapMethod(eap);
 
