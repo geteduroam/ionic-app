@@ -256,7 +256,7 @@ public class WifiEapConfigurator extends Plugin {
             return;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             enterpriseConfig.setDomainSuffixMatch(String.join(";", servernames));
         } else {
             enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(servernames));
