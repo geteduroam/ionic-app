@@ -167,7 +167,6 @@ public class ProfileDetails {
 			WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
 					.setSsid(ssid)
 					.setWpa2EnterpriseConfig(enterpriseConfig)
-					.setIsAppInteractionRequired(true)
 					.build();
 
 			suggestions.add(suggestion);
@@ -296,7 +295,7 @@ public class ProfileDetails {
 				boolean[] usage = certificate.getKeyUsage();
 				// https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#getKeyUsage()
 				// 5 is KeyUsage keyCertSign, which indicates the certificate is a CA
-				if (usage != null && usage[5]) {
+				if (usage != null && usage.length > 5 && usage[5]) {
 					// Find out if this a CA according to KeyUsage
 					certificates.add(certificate);
 				} else {
