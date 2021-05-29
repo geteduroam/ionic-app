@@ -372,12 +372,12 @@ public class ProfileDetails {
 		passpointConfig.setHomeSp(homeSp);
 		Credential cred = new Credential();
 		cred.setRealm(id);
-		if (getCaCertificates().size() == 1)
-			cred.setCaCertificate(getCaCertificates().get(0));
-		else {
-			Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to too many CAs in the profile (1 supported, " + getCaCertificates().size() + " given)");
-			return null;
-		}
+		if (getCaCertificates().size() > 1)
+			Log.w(getClass().getSimpleName(), "Passpoint profile may have wrong CA (1 supported, " + getCaCertificates().size() + " given, took the first one)");
+		// Just use the first CA for Passpoint
+		// TODO Add support for multiple CAs
+		cred.setCaCertificate(getCaCertificates().get(0));
+		// TODO Set server name check somehow
 
 		switch(eap) {
 			case WifiEnterpriseConfig.Eap.TLS:
