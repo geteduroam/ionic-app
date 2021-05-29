@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator;
+package com.emergya.wifieapconfigurator.config;
 
 import android.Manifest;
 import android.app.Activity;
@@ -12,6 +12,10 @@ import android.net.wifi.WifiManager;
 
 import androidx.annotation.RequiresPermission;
 import androidx.preference.PreferenceManager;
+
+import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
+import com.emergya.wifieapconfigurator.notification.StartNotifications;
+import com.emergya.wifieapconfigurator.notification.StartRemoveNetwork;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -28,10 +32,11 @@ import java.util.Iterator;
  * NetworkManager is the abstract class responsable of implement the common methods of network configuration.
  * This class have the neccessary methods to create a configuration and configure it in the device.
  */
-public abstract class NetworkProfileManager {
+public abstract class AbstractConfigurator {
 	protected final Context context;
 	protected final WifiManager wifiManager;
-	protected NetworkProfileManager(Context context) {
+
+	AbstractConfigurator(Context context) {
 		this.context = context;
 		wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 	}

@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator;
+package com.emergya.wifieapconfigurator.config;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,8 +16,8 @@ import androidx.annotation.RequiresApi;
 import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.R)
-public class NetworkProfileManagerIntents extends NetworkProfileManagerSuggestions {
-	NetworkProfileManagerIntents(Context context) {
+public class IntentConfigurator extends SuggestionConfigurator {
+	IntentConfigurator(Context context) {
 		super(context);
 	}
 

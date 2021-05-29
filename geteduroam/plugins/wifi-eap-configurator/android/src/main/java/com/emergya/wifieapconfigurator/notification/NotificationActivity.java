@@ -1,8 +1,9 @@
-package com.emergya.wifieapconfigurator;
+package com.emergya.wifieapconfigurator.notification;
 
 import android.os.Bundle;
 
 import com.byteowls.capacitor.oauth2.OAuth2ClientPlugin;
+import com.emergya.wifieapconfigurator.WifiEapConfigurator;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 

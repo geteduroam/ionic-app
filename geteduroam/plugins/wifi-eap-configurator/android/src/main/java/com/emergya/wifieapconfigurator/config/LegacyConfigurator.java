@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator;
+package com.emergya.wifieapconfigurator.config;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -14,6 +14,8 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 import androidx.preference.PreferenceManager;
 
+import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
+
 import java.util.List;
 
 /**
@@ -22,9 +24,9 @@ import java.util.List;
  */
 @RequiresApi(api = Build.VERSION_CODES.O)
 @TargetApi(Build.VERSION_CODES.P)
-public class NetworkProfileManagerLegacy extends NetworkProfileManager {
+public class LegacyConfigurator extends AbstractConfigurator {
 
-	NetworkProfileManagerLegacy(Context context) {
+	public LegacyConfigurator(Context context) {
 		super(context);
 	}
 
@@ -144,7 +146,7 @@ public class NetworkProfileManagerLegacy extends NetworkProfileManager {
 	 *
 	 * @param config Passpoint configuration
 	 */
-	protected void configurePasspoint(PasspointConfiguration config) throws WifiEapConfiguratorException {
+	public void configurePasspoint(PasspointConfiguration config) throws WifiEapConfiguratorException {
 		try {
 			wifiManager.addOrUpdatePasspointConfiguration(config);
 			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);

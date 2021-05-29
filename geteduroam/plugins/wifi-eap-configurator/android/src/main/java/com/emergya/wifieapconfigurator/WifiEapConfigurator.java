@@ -13,6 +13,10 @@ import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.PermissionChecker;
 
+import com.emergya.wifieapconfigurator.config.AbstractConfigurator;
+import com.emergya.wifieapconfigurator.config.LegacyConfigurator;
+import com.emergya.wifieapconfigurator.config.SuggestionConfigurator;
+import com.emergya.wifieapconfigurator.config.WifiProfile;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -49,7 +53,7 @@ public class WifiEapConfigurator extends Plugin {
 		JSObject object = new JSObject();
 
 		try {
-			ProfileDetails profile = new ProfileDetails(call);
+			WifiProfile profile = new WifiProfile(call);
 
 			// We prefer the legacy method, because it's more stable.
 			// But Android blocks legacy SSID configurations from version Q,
@@ -62,7 +66,7 @@ public class WifiEapConfigurator extends Plugin {
 
 				// Everything must be done with suggestions
 				// TODO We use suggestions directly, should we use intents?
-				NetworkProfileManagerSuggestions configurator = new NetworkProfileManagerSuggestions(getContext());
+				SuggestionConfigurator configurator = new SuggestionConfigurator(getContext());
 
 				ArrayList<WifiNetworkSuggestion> suggestions = profile.makeSuggestions();
 				configurator.installSuggestions(suggestions);
@@ -72,8 +76,8 @@ public class WifiEapConfigurator extends Plugin {
 				}
 
 				// We have to do SSIDs with suggestions and Passpoint with legacy
-				NetworkProfileManagerSuggestions suggestionConfigurator = new NetworkProfileManagerSuggestions(getContext());
-				NetworkProfileManagerLegacy legacyConfigurator = new NetworkProfileManagerLegacy(getContext());
+				SuggestionConfigurator suggestionConfigurator = new SuggestionConfigurator(getContext());
+				LegacyConfigurator legacyConfigurator = new LegacyConfigurator(getContext());
 
 				ArrayList<WifiNetworkSuggestion> suggestions = profile.makeSuggestions();
 				suggestionConfigurator.installSuggestions(suggestions);
@@ -83,7 +87,7 @@ public class WifiEapConfigurator extends Plugin {
 			} else { // Everything below Q (below Android 10, below API version 29)
 				// We get to use the legacy API for everything. YAY!
 
-				NetworkProfileManagerLegacy legacyConfigurator = new NetworkProfileManagerLegacy(getContext());
+				LegacyConfigurator legacyConfigurator = new LegacyConfigurator(getContext());
 				String[] ssids = profile.getSsids();
 
 				WifiEnterpriseConfig enterpriseConfig = profile.createEnterpriseConfig();
@@ -129,7 +133,7 @@ public class WifiEapConfigurator extends Plugin {
 		JSObject object = new JSObject();
 
 		try {
-			boolean success = new ProfileDetails(call).validatePassPhrase();
+			boolean success = new WifiProfile(call).validatePassPhrase();
 
 			object.put("success", success);
 			if (success) {
@@ -302,10 +306,10 @@ public class WifiEapConfigurator extends Plugin {
 		return true;
 	}
 
-	private NetworkProfileManager getManagerForSSID() {
+	private AbstractConfigurator getManagerForSSID() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			return new NetworkProfileManagerSuggestions(getContext());
+			return new SuggestionConfigurator(getContext());
 		}
-		return new NetworkProfileManagerLegacy(getContext());
+		return new LegacyConfigurator(getContext());
 	}
 }

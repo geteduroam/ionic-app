@@ -1,5 +1,7 @@
 package com.emergya.wifieapconfigurator;
 
+import com.emergya.wifieapconfigurator.config.AbstractConfigurator;
+
 import junit.framework.TestCase;
 
 public class SuffixTest extends TestCase {
@@ -12,9 +14,9 @@ public class SuffixTest extends TestCase {
 	}
 	
 	private static void testSuffix(String expected, String[] actual) {
-		assertEquals(expected, NetworkProfileManager.getLongestSuffix(actual));
+		assertEquals(expected, AbstractConfigurator.getLongestSuffix(actual));
 		revert(actual);
-		assertEquals(expected, NetworkProfileManager.getLongestSuffix(actual));
+		assertEquals(expected, AbstractConfigurator.getLongestSuffix(actual));
 	}
 	
 	public void testZero() {

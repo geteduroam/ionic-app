@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator;
+package com.emergya.wifieapconfigurator.config;
 
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
@@ -14,6 +14,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
 import com.getcapacitor.PluginCall;
 
 import org.json.JSONException;
@@ -41,7 +42,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-public class ProfileDetails {
+public class WifiProfile {
 
 	private final String[] ssids;
 	private final String[] oids;
@@ -62,7 +63,7 @@ public class ProfileDetails {
 	 * @param call Wi-Fi profile from ionic
 	 * @throws WifiEapConfiguratorException The profile has issues that were detected before attempting a connect
 	 */
-	public ProfileDetails(PluginCall call) throws WifiEapConfiguratorException {
+	public WifiProfile(PluginCall call) throws WifiEapConfiguratorException {
 		try {
 			this.ssids = objectArrayToStringArray(call.getArray("ssid").toList().toArray());
 			this.oids = objectArrayToStringArray(call.getArray("oid").toList().toArray());
@@ -217,9 +218,9 @@ public class ProfileDetails {
 		// SSID configuration
 		for (String ssid : ssids) {
 			WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
-					.setSsid(ssid)
-					.setWpa2EnterpriseConfig(enterpriseConfig)
-					.build();
+				.setSsid(ssid)
+				.setWpa2EnterpriseConfig(enterpriseConfig)
+				.build();
 
 			suggestions.add(suggestion);
 		}
@@ -262,7 +263,7 @@ public class ProfileDetails {
 		enterpriseConfig.setEapMethod(eap);
 		enterpriseConfig.setCaCertificates(getCaCertificates().toArray(new X509Certificate[0]));
 
-		assert (serverName.length != 0); // Checked in ProfileDetails constructor
+		assert (serverName.length != 0); // Checked in WifiProfile constructor
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			enterpriseConfig.setDomainSuffixMatch(String.join(";", serverName));
 		} else {
@@ -324,8 +325,8 @@ public class ProfileDetails {
 				Certificate[] chain = pkcs12ks.getCertificateChain(alias);
 				if (chain != null && chain.length > 0) try {
 					return new AbstractMap.SimpleEntry<>(
-							(PrivateKey) pkcs12ks.getKey(alias, passphrase),
-							Arrays.copyOf(chain, chain.length, X509Certificate[].class)
+						(PrivateKey) pkcs12ks.getKey(alias, passphrase),
+						Arrays.copyOf(chain, chain.length, X509Certificate[].class)
 					);
 				} catch (ArrayStoreException e) { /* try next entry */ }
 			}

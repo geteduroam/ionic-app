@@ -36,21 +36,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.emergya.wifieapconfigurator.NotificationActivity"
+            android:name="com.emergya.wifieapconfigurator.notification.NotificationActivity"
             android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode">
         </activity>
-        <service android:name="com.emergya.wifieapconfigurator.ScheduledService"
+        <service android:name="com.emergya.wifieapconfigurator.notification.ScheduledService"
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
-        <service android:name="com.emergya.wifieapconfigurator.StartNotifications"
+        <service android:name="com.emergya.wifieapconfigurator.notification.StartNotifications"
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
-        <service android:name="com.emergya.wifieapconfigurator.StartRemoveNetwork"
+        <service android:name="com.emergya.wifieapconfigurator.notification.StartRemoveNetwork"
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
-        <receiver android:name="com.emergya.wifieapconfigurator.NotificationReceiver" />
-        <receiver android:name="com.emergya.wifieapconfigurator.NotificationsActivator">
+        <receiver android:name="com.emergya.wifieapconfigurator.notification.NotificationReceiver" />
+        <receiver android:name="com.emergya.wifieapconfigurator.notification.NotificationsActivator">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator;
+package com.emergya.wifieapconfigurator.notification;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

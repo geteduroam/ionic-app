@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator;
+package com.emergya.wifieapconfigurator.notification;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
