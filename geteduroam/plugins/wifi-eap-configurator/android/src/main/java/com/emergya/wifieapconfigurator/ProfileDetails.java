@@ -352,7 +352,6 @@ public class ProfileDetails {
 
 		HomeSp homeSp = new HomeSp();
 		homeSp.setFqdn(id);
-
 		homeSp.setFriendlyName(id + " via Passpoint");
 
 		long[] roamingConsortiumOIDs = new long[oids.length];
@@ -389,9 +388,24 @@ public class ProfileDetails {
 				String base64 = Base64.encodeToString(passwordBytes, Base64.DEFAULT);
 
 				Credential.UserCredential us = new Credential.UserCredential();
-				us.setUsername(anonymousIdentity);
+				us.setUsername(username);
 				us.setPassword(base64);
-				us.setEapType(21);
+				// TODO set anonymous identity somehow
+				switch(eap) {
+					case WifiEnterpriseConfig.Eap.PEAP:	us.setEapType(25); break;
+					case WifiEnterpriseConfig.Eap.TTLS: us.setEapType(21); break;
+
+					case WifiEnterpriseConfig.Eap.NONE:
+					case WifiEnterpriseConfig.Eap.TLS:
+					case WifiEnterpriseConfig.Eap.PWD:
+					case WifiEnterpriseConfig.Eap.SIM:
+					case WifiEnterpriseConfig.Eap.AKA:
+					case WifiEnterpriseConfig.Eap.AKA_PRIME:
+					case WifiEnterpriseConfig.Eap.UNAUTH_TLS:
+					case WifiEnterpriseConfig.Eap.WAPI_CERT:
+					default:
+						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod.");
+				}
 				switch(auth) {
 					// Strings from android.net.wifi.hotspot2.pps.Credential.UserCredential.AUTH_METHOD_*
 					case WifiEnterpriseConfig.Phase2.MSCHAPV2:
