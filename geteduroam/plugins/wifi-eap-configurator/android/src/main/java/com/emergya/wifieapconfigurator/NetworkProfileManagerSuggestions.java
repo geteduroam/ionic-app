@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -26,6 +27,9 @@ public class NetworkProfileManagerSuggestions extends NetworkProfileManager {
 
 	public void installSuggestions(ArrayList<WifiNetworkSuggestion> suggestions) throws WifiEapConfiguratorException {
 		int status = wifiManager.addNetworkSuggestions(suggestions);
+
+			if (status != 0)
+				Log.d("addNetworkSuggestions", "status: " + status);
 
 		switch (status) {
 			case WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS:

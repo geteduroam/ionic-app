@@ -6,6 +6,7 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
@@ -110,6 +111,7 @@ public class WifiEapConfigurator extends Plugin {
 			object.put("success", true);
 			object.put("message", "plugin.wifieapconfigurator.success.network.linked");
 		} catch (WifiEapConfiguratorException e) {
+			Log.e("WifiEapConfigurator", e.getMessage());
 			object.put("success", false);
 			object.put("message", e.getMessage());
 
