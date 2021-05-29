@@ -281,6 +281,18 @@ public class ProfileDetails {
 		throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.empty");
 	}
 
+	protected final List<X509Certificate> getRootCaCertificates() throws WifiEapConfiguratorException {
+		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificate.length);
+
+		for(X509Certificate c: getCaCertificates()) {
+			if (c.getSubjectDN().equals(c.getIssuerDN())) {
+				rootCertificates.add(c);
+			}
+		}
+
+		return rootCertificates;
+	}
+
 	protected final List<X509Certificate> getCaCertificates() throws WifiEapConfiguratorException {
 		CertificateFactory certFactory;
 		List<X509Certificate> certificates = new ArrayList<>(caCertificate.length);
@@ -372,8 +384,12 @@ public class ProfileDetails {
 		passpointConfig.setHomeSp(homeSp);
 		Credential cred = new Credential();
 		cred.setRealm(id);
-		if (getCaCertificates().size() > 1)
-			Log.w(getClass().getSimpleName(), "Passpoint profile may have wrong CA (1 supported, " + getCaCertificates().size() + " given, took the first one)");
+		if (getRootCaCertificates().size() == 1) {
+			cred.setCaCertificate(getCaCertificates().get(0));
+		} else {
+			Log.e(getClass().getSimpleName(), "Not creating Passpoint configuration due to too many CAs in the profile (1 supported, " + getRootCaCertificates().size() + " given)");
+			return null;
+		}
 		// Just use the first CA for Passpoint
 		// TODO Add support for multiple CAs
 		cred.setCaCertificate(getCaCertificates().get(0));
