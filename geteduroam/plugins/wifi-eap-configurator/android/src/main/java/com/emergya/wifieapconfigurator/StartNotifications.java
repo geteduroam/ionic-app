@@ -11,8 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 import androidx.preference.PreferenceManager;
 
-import com.getcapacitor.JSObject;
-
 import java.util.Date;
 
 /**
@@ -31,17 +29,17 @@ public class StartNotifications extends JobIntentService {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        if (sharedPref.getString("date", "") != "") {
+        if (!"".equals(sharedPref.getString("date", ""))) {
             String stringDate = sharedPref.getString("date", "");
             String title = sharedPref.getString("title", "");
             String message = sharedPref.getString("message", "");
 
 
-            Long dateUntil = Long.parseLong(stringDate);
+            long dateUntil = Long.parseLong(stringDate);
             Date dateNow = new Date();
-            Long millisNow = dateNow.getTime();
-            Long delay = dateUntil - millisNow - 432000000;
-            if ( delay.compareTo(Long.valueOf(0)) > 0 ) {
+            long millisNow = dateNow.getTime();
+            long delay = dateUntil - millisNow - 432000000;
+            if (delay > 0L) {
                 AlarmManager mgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
                 Intent i = new Intent(getApplicationContext(), NotificationReceiver.class);
                 i.putExtra("title", title);

@@ -12,6 +12,7 @@ import android.os.Build;
 import com.emergya.wifieapconfigurator.wifieapconfigurator.R;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
@@ -22,6 +23,7 @@ import java.util.List;
 /**
  * Its the class responsable of create the notification and send it
  */
+@RequiresApi(api = Build.VERSION_CODES.Q)
 public class ScheduledService extends JobIntentService {
 
     public static final int JOB_ID = 2;
@@ -32,21 +34,21 @@ public class ScheduledService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        if (intent.getBooleanExtra("expiration", false) == true) {
+        if (intent.getBooleanExtra("expiration", false)) {
             int netId = intent.getIntExtra("netId", -1);
             String fqdn = intent.getStringExtra("fqdn");
             WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P || netId < 0) {
-                List<WifiNetworkSuggestion> suggestionList = new ArrayList();
+                List<WifiNetworkSuggestion> suggestionList = new ArrayList<>();
                 wm.removeNetworkSuggestions(suggestionList);
             } else {
                 try {
                     wm.removeNetwork(netId);
-                } catch(Exception e) {}
+                } catch(Throwable e) { /* do nothing */ }
                 if (!fqdn.equals("")) {
                     try {
                         wm.removePasspointConfiguration(fqdn);
-                    } catch(Exception e) {}
+                    } catch(Throwable e) { /* do nothing */ }
                 }
             }
         } else {

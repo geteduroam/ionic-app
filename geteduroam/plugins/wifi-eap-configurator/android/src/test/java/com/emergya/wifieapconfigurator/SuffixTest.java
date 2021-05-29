@@ -12,9 +12,9 @@ public class SuffixTest extends TestCase {
 	}
 	
 	private static void testSuffix(String expected, String[] actual) {
-		assertEquals(expected, WifiEapConfigurator.getLongestSuffix(actual));
+		assertEquals(expected, NetworkProfileManager.getLongestSuffix(actual));
 		revert(actual);
-		assertEquals(expected, WifiEapConfigurator.getLongestSuffix(actual));
+		assertEquals(expected, NetworkProfileManager.getLongestSuffix(actual));
 	}
 	
 	public void testZero() {

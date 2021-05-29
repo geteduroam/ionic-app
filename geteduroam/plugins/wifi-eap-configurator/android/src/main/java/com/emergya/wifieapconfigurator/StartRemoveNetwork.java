@@ -28,11 +28,11 @@ public class StartRemoveNetwork extends JobIntentService {
         String date = sharedPref.getString("date", "");
         int netId = sharedPref.getInt("netId", -1);
         String fqdn = sharedPref.getString("fqdn", "");
-        Long dateUntil = Long.parseLong(date);
+        long dateUntil = Long.parseLong(date);
         Date dateNow = new Date();
-        Long millisNow = dateNow.getTime();
-        Long delay = dateUntil - millisNow;
-        if ( delay.compareTo(Long.valueOf(0)) > 0 ) {
+        long millisNow = dateNow.getTime();
+        long  delay = dateUntil - millisNow;
+        if (delay > 0L) {
             AlarmManager mgr = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Intent i = new Intent(getApplicationContext(), NotificationReceiver.class);
             i.putExtra("expiration", true);

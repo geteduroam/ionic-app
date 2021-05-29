@@ -1,6 +1,5 @@
 package com.emergya.wifieapconfigurator;
 
-import android.app.Activity;
 import android.os.Bundle;
 
 import com.byteowls.capacitor.oauth2.OAuth2ClientPlugin;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 public class NotificationActivity extends BridgeActivity {
 
     public static String NOTIFICATION_ID = "1523";
-    public static String NOTIFICATION = "notification";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

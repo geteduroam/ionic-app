@@ -3,11 +3,14 @@ package com.emergya.wifieapconfigurator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 /**
  * Its the class responsable of the init the service of the notifications
  */
+@RequiresApi(api = Build.VERSION_CODES.Q)
 public class NotificationReceiver extends BroadcastReceiver {
 
     @Override

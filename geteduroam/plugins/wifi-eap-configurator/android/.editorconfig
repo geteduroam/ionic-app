@@ -1,0 +1,6 @@
+[*.{java,xml}]
+end_of_line = lf
+insert_final_newline = true
+indent_style = tab
+charset = utf-8
+indent_size = 4
