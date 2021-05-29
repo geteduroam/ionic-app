@@ -10,6 +10,7 @@ import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.os.Build;
 import android.util.Base64;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -363,7 +364,10 @@ public class ProfileDetails {
 			roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
 			index++;
 		}
-		if (index == 0) return null;
+		if (index == 0) {
+			Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to no OIDs set");
+			return null;
+		}
 		homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
 
 		passpointConfig.setHomeSp(homeSp);
@@ -381,33 +385,26 @@ public class ProfileDetails {
 				certCred.setCertSha256Fingerprint(getFingerprint(clientCertificate.getValue()[0]));
 				cred.setCertCredential(certCred);
 				break;
-			case WifiEnterpriseConfig.Eap.PEAP:
-			case WifiEnterpriseConfig.Eap.TTLS:
 			case WifiEnterpriseConfig.Eap.PWD:
+				Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to unsupported EAP type " + eap);
+				return null; // known but unsupported EAP method
+			case WifiEnterpriseConfig.Eap.PEAP:
+				// Fall-through
+				// TODO Android doesn't support PEAP for Passpoint
+				// but we cannot know if the eap-config contained a TTLS profile as well,
+				// so we'll assume it does.
+			case WifiEnterpriseConfig.Eap.TTLS:
 				byte[] passwordBytes = password.getBytes(Charset.defaultCharset()); // TODO explicitly use UTF-8?
 				String base64 = Base64.encodeToString(passwordBytes, Base64.DEFAULT);
 
 				Credential.UserCredential us = new Credential.UserCredential();
 				us.setUsername(username);
 				us.setPassword(base64);
-				// TODO set anonymous identity somehow
-				switch(eap) {
-					case WifiEnterpriseConfig.Eap.PEAP:	us.setEapType(25); break;
-					case WifiEnterpriseConfig.Eap.TTLS: us.setEapType(21); break;
-
-					case WifiEnterpriseConfig.Eap.NONE:
-					case WifiEnterpriseConfig.Eap.TLS:
-					case WifiEnterpriseConfig.Eap.PWD:
-					case WifiEnterpriseConfig.Eap.SIM:
-					case WifiEnterpriseConfig.Eap.AKA:
-					case WifiEnterpriseConfig.Eap.AKA_PRIME:
-					case WifiEnterpriseConfig.Eap.UNAUTH_TLS:
-					case WifiEnterpriseConfig.Eap.WAPI_CERT:
-					default:
-						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod.");
-				}
+				us.setEapType(21);
+				// Android will always use anonymous@ for Passpoint
 				switch(auth) {
 					// Strings from android.net.wifi.hotspot2.pps.Credential.UserCredential.AUTH_METHOD_*
+					// All supported strings are listed in android.net.wifi.hotspot2.pps.Credential.SUPPORTED_AUTH
 					case WifiEnterpriseConfig.Phase2.MSCHAPV2:
 						us.setNonEapInnerMethod("MS-CHAP-V2");
 						break;
@@ -417,7 +414,7 @@ public class ProfileDetails {
 					case WifiEnterpriseConfig.Phase2.MSCHAP:
 						us.setNonEapInnerMethod("MS-CHAP");
 						break;
-					// TODO Do we need a default case here?
+					default: throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.authmethod." + auth);
 				}
 
 				cred.setUserCredential(us);
