@@ -282,7 +282,7 @@ public class ProfileDetails {
 		throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.empty");
 	}
 
-	protected final Collection<X509Certificate> getCaCertificates() throws WifiEapConfiguratorException {
+	protected final List<X509Certificate> getCaCertificates() throws WifiEapConfiguratorException {
 		CertificateFactory certFactory;
 		List<X509Certificate> certificates = new ArrayList<>(caCertificate.length);
 		// building the certificates
@@ -373,7 +373,12 @@ public class ProfileDetails {
 		passpointConfig.setHomeSp(homeSp);
 		Credential cred = new Credential();
 		cred.setRealm(id);
-		//cred.setCaCertificate(enterpriseConfig.getCaCertificate()); // TODO needed?
+		if (getCaCertificates().size() == 1)
+			cred.setCaCertificate(getCaCertificates().get(0));
+		else {
+			Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to too many CAs in the profile (1 supported, " + getCaCertificates().size() + " given)");
+			return null;
+		}
 
 		switch(eap) {
 			case WifiEnterpriseConfig.Eap.TLS:
