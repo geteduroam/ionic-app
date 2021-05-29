@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import com.emergya.wifieapconfigurator.WifiEapConfigurator;
-import com.emergya.wifieapconfigurator.NotificationActivity;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 import java.util.ArrayList;
