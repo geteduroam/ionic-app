@@ -15,6 +15,9 @@ import com.getcapacitor.JSObject;
 
 import java.util.Date;
 
+/**
+ * Its the class responsable of create the alarm to send the notification
+ */
 public class StartNotifications extends JobIntentService {
 
     public static final int JOB_ID = 1;
