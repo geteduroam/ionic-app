@@ -82,7 +82,7 @@ public class ProfileDetails {
 		if (this.ssids.length == 0 && this.oids.length == 0)
 			// TODO also check for empty ssids?
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ssid.missing");
-		if (this.eap <= 0)
+		if (this.eap < 0)
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.eap.invalid");
 		if (this.eap != WifiEnterpriseConfig.Eap.TLS) {
 			// We need a username/password
@@ -215,8 +215,6 @@ public class ProfileDetails {
 			enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(serverName));
 		}
 
-		Map.Entry<PrivateKey,X509Certificate[]> clientCertificate = getClientCertificate();
-
 		// Explicitly reset client certificate, will set later if needed
 		enterpriseConfig.setClientKeyEntry(null, null);
 
@@ -225,6 +223,8 @@ public class ProfileDetails {
 				// Explicitly unset unused fields
 				enterpriseConfig.setPassword("");
 				enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+
+				Map.Entry<PrivateKey,X509Certificate[]> clientCertificate = getClientCertificate();
 				enterpriseConfig.setClientKeyEntry(clientCertificate.getKey(), clientCertificate.getValue()[0]);
 
 				// For TLS, "identity" is used for outer identity,
