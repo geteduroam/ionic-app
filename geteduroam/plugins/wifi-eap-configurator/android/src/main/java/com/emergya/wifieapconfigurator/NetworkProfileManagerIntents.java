@@ -5,13 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.wifi.WifiEnterpriseConfig;
-import android.net.wifi.WifiNetworkSpecifier;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
-import android.provider.ContactsContract;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
@@ -47,10 +43,10 @@ public class NetworkProfileManagerIntents extends NetworkProfileManagerSuggestio
 	}
 
 	public void installNetworkRequests(NetworkRequest... networkRequests) {
-		for(NetworkRequest networkRequest : networkRequests) {
+		for (NetworkRequest networkRequest : networkRequests) {
 			final ConnectivityManager cm = (ConnectivityManager)
-					context.getApplicationContext()
-							.getSystemService(Context.CONNECTIVITY_SERVICE);
+				context.getApplicationContext()
+					.getSystemService(Context.CONNECTIVITY_SERVICE);
 			if (cm != null) {
 				cm.requestNetwork(networkRequest, new ConnectivityManager.NetworkCallback() {
 					@Override

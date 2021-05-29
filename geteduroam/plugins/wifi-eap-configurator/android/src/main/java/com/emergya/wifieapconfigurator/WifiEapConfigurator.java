@@ -30,11 +30,11 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
  * Its the class responsable of communicate with ionic
  */
 @NativePlugin(
-		permissions = {
-				Manifest.permission.ACCESS_WIFI_STATE,
-				Manifest.permission.CHANGE_WIFI_STATE,
-				Manifest.permission.ACCESS_FINE_LOCATION
-		})
+	permissions = {
+		Manifest.permission.ACCESS_WIFI_STATE,
+		Manifest.permission.CHANGE_WIFI_STATE,
+		Manifest.permission.ACCESS_FINE_LOCATION
+	})
 public class WifiEapConfigurator extends Plugin {
 
 	/**
@@ -98,7 +98,7 @@ public class WifiEapConfigurator extends Plugin {
 					 */
 				}
 				for (String ssid : ssids) {
-					if(legacyConfigurator.isNetworkConfigured(ssid) && !legacyConfigurator.isNetworkOverrideable(ssid)) {
+					if (legacyConfigurator.isNetworkConfigured(ssid) && !legacyConfigurator.isNetworkOverrideable(ssid)) {
 						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.alreadyAssociated");
 					}
 				}
@@ -286,7 +286,7 @@ public class WifiEapConfigurator extends Plugin {
 	 */
 	private boolean requestPermission(String... permissions) {
 		ArrayList<String> requestPermissions = new ArrayList<>(permissions.length);
-		for(String permission : permissions) {
+		for (String permission : permissions) {
 			if (!(checkSelfPermission(getContext(), permission) == PermissionChecker.PERMISSION_GRANTED)) {
 				requestPermissions.add(permission);
 			}

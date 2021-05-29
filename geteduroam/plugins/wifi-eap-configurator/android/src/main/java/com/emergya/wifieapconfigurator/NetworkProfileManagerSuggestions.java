@@ -28,19 +28,19 @@ public class NetworkProfileManagerSuggestions extends NetworkProfileManager {
 	public void installSuggestions(ArrayList<WifiNetworkSuggestion> suggestions) throws WifiEapConfiguratorException {
 		int status = wifiManager.addNetworkSuggestions(suggestions);
 
-			if (status != 0)
-				Log.d("addNetworkSuggestions", "status: " + status);
+		if (status != 0)
+			Log.d("addNetworkSuggestions", "status: " + status);
 
 		switch (status) {
 			case WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS:
 				final IntentFilter intentFilter =
-						new IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
+					new IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
 
 				final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 					@Override
 					public void onReceive(Context context, Intent intent) {
 						if (!intent.getAction().equals(
-								WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
+							WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
 							return; // TODO this if statement doesn't do anything..?
 						}
 					}

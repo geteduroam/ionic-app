@@ -7,62 +7,64 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
-import android.net.wifi.hotspot2.PasspointConfiguration;
-import android.net.wifi.hotspot2.pps.HomeSp;
-import android.net.wifi.hotspot2.pps.Credential;
-import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.util.Base64;
 
 import androidx.annotation.RequiresPermission;
 import androidx.preference.PreferenceManager;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * NetworkManager is the abstract class responsable of implement the common methods of network configuration.
  * This class have the neccessary methods to create a configuration and configure it in the device.
  */
 public abstract class NetworkProfileManager {
+	protected final Context context;
+	protected final WifiManager wifiManager;
 	protected NetworkProfileManager(Context context) {
 		this.context = context;
 		wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 	}
 
-	protected final Context context;
-	protected final WifiManager wifiManager;
+	/**
+	 * Verify if the CaCertificate its valid for Android looking for in the AndroidCaStore
+	 *
+	 * @param caCert
+	 * @throws GeneralSecurityException
+	 * @throws IOException
+	 */
+	private static void verifyCaCert(X509Certificate caCert)
+		throws GeneralSecurityException, IOException {
+		CertificateFactory factory = CertificateFactory.getInstance("X.509");
+		CertPathValidator validator =
+			CertPathValidator.getInstance(CertPathValidator.getDefaultType());
+		CertPath path = factory.generateCertPath(Arrays.asList(caCert));
+		KeyStore ks = KeyStore.getInstance("AndroidCAStore");
+		ks.load(null, null);
+		PKIXParameters params = new PKIXParameters(ks);
+		params.setRevocationEnabled(false);
+		validator.validate(path, params);
+	}
+
+	public static void setExpireNetwork(Context context) {
+		Intent intent = new Intent();
+		intent.putExtra("expiration", true);
+		StartRemoveNetwork.enqueueWorkStart(context, intent);
+	}
 
 	/**
 	 * Remove the network of the SSID sended
+	 *
 	 * @param ssids
 	 * @return
 	 */
@@ -70,6 +72,7 @@ public abstract class NetworkProfileManager {
 
 	/**
 	 * Enable wifi of the device
+	 *
 	 * @throws WifiEapConfiguratorException Wi-Fi could not be enabled
 	 */
 	public final void enableWifi() throws WifiEapConfiguratorException {
@@ -80,6 +83,7 @@ public abstract class NetworkProfileManager {
 
 	/**
 	 * Check if the SSID sended from ionic is reachable or not
+	 *
 	 * @param ssid
 	 * @return
 	 */
@@ -92,7 +96,8 @@ public abstract class NetworkProfileManager {
 		LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 		boolean location = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-		if (!location) throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.location.disabled");
+		if (!location)
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.location.disabled");
 
 		Iterator<ScanResult> results = wifiManager.getScanResults().iterator();
 
@@ -107,6 +112,7 @@ public abstract class NetworkProfileManager {
 
 	/**
 	 * Check if the current network connected belong to the SSID sended from ionic
+	 *
 	 * @param ssid
 	 * @param activity
 	 * @return
@@ -120,7 +126,8 @@ public abstract class NetworkProfileManager {
 		LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 		boolean location = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-		if (!location) throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.location.disabled");
+		if (!location)
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.location.disabled");
 
 		WifiInfo info = wifiManager.getConnectionInfo();
 		String currentlySsid = info.getSSID();
@@ -128,7 +135,7 @@ public abstract class NetworkProfileManager {
 	}
 
 	public final boolean areAnyNetworksConfigured(String... ssids) {
-		for(String ssid : ssids) {
+		for (String ssid : ssids) {
 			if (isNetworkConfigured(ssid)) return true;
 		}
 
@@ -153,6 +160,7 @@ public abstract class NetworkProfileManager {
 
 	/**
 	 * Check if the Wi-Fi is enabled on the device
+	 *
 	 * @return Wi-Fi is enabled
 	 */
 	public boolean checkEnabledWifi() {
@@ -160,26 +168,8 @@ public abstract class NetworkProfileManager {
 	}
 
 	/**
-	 * Verify if the CaCertificate its valid for Android looking for in the AndroidCaStore
-	 * @param caCert
-	 * @throws GeneralSecurityException
-	 * @throws IOException
-	 */
-	private static void verifyCaCert(X509Certificate caCert)
-			throws GeneralSecurityException, IOException {
-		CertificateFactory factory = CertificateFactory.getInstance("X.509");
-		CertPathValidator validator =
-				CertPathValidator.getInstance(CertPathValidator.getDefaultType());
-		CertPath path = factory.generateCertPath(Arrays.asList(caCert));
-		KeyStore ks = KeyStore.getInstance("AndroidCAStore");
-		ks.load(null, null);
-		PKIXParameters params = new PKIXParameters(ks);
-		params.setRevocationEnabled(false);
-		validator.validate(path, params);
-	}
-
-	/**
 	 * Writes the datas sended from ionic to the SharedPref of the app
+	 *
 	 * @param institutionID Institution ID to store
 	 */
 	public void writeToSharedPref(String institutionID) {
@@ -191,6 +181,7 @@ public abstract class NetworkProfileManager {
 
 	/**
 	 * Send a notification with the attributes sended from ionic
+	 *
 	 * @param date
 	 * @param title
 	 * @param message
@@ -203,21 +194,16 @@ public abstract class NetworkProfileManager {
 		editor.putString("message", message);
 		editor.apply();
 		StartNotifications.enqueueWorkStart(context, new Intent());
-		this.setExpireNetwork(context);
+		setExpireNetwork(context);
 	}
 
 	/**
 	 * Reads the institutionId saved in the SharedPref of the app
+	 *
 	 * @return Stored institituion ID
 	 */
 	public String readFromSharedPref() {
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 		return sharedPref.getString("institutionId", "");
-	}
-	
-	public static void setExpireNetwork(Context context) {
-		Intent intent = new Intent();
-		intent.putExtra("expiration", true);
-		StartRemoveNetwork.enqueueWorkStart(context, intent);
 	}
 }

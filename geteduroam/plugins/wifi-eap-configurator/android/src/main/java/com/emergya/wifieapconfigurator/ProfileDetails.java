@@ -37,7 +37,6 @@ import java.security.cert.X509Certificate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +58,7 @@ public class ProfileDetails {
 
 	/**
 	 * Initializes all attributtes that come from ionic
+	 *
 	 * @param call Wi-Fi profile from ionic
 	 * @throws WifiEapConfiguratorException The profile has issues that were detected before attempting a connect
 	 */
@@ -105,21 +105,27 @@ public class ProfileDetails {
 
 	/**
 	 * Returns the type of the EAP
+	 *
 	 * @param eap EAP type as used in eap-config
 	 * @return A value from WifiEnterpriseConfig.Eap (TLS,TTLS,PEAP) or -1
 	 */
 	private static int getEapMethod(Integer eap) {
 		if (eap == null) return -1;
 		switch (eap) {
-			case 13: return WifiEnterpriseConfig.Eap.TLS;
-			case 21: return WifiEnterpriseConfig.Eap.TTLS;
-			case 25: return WifiEnterpriseConfig.Eap.PEAP;
-			default: return -1;
+			case 13:
+				return WifiEnterpriseConfig.Eap.TLS;
+			case 21:
+				return WifiEnterpriseConfig.Eap.TTLS;
+			case 25:
+				return WifiEnterpriseConfig.Eap.PEAP;
+			default:
+				return -1;
 		}
 	}
 
 	/**
 	 * Returns the type of the auth method
+	 *
 	 * @param auth Auth method as used in eap-config
 	 * @return ENUM from WifiEnterpriseConfig.Phase2 (PAP/MSCHAP/MSCHAPv2) or -1
 	 */
@@ -128,8 +134,10 @@ public class ProfileDetails {
 			return WifiEnterpriseConfig.Phase2.MSCHAPV2;
 		}
 		switch (auth) {
-			case -1: return WifiEnterpriseConfig.Phase2.PAP;
-			case -2: return WifiEnterpriseConfig.Phase2.MSCHAP;
+			case -1:
+				return WifiEnterpriseConfig.Phase2.PAP;
+			case -2:
+				return WifiEnterpriseConfig.Phase2.MSCHAP;
 			case -3:
 			case 26: /* Android cannot do TTLS-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try TTLS-MSCHAPv2 instead */
 				// This currently DOES happen because CAT has a bug where it reports TTLS-MSCHAPv2 as TTLS-EAP-MSCHAPv2,
@@ -139,8 +147,52 @@ public class ProfileDetails {
 			case _: // TODO Not supported by the eap-config format, so no CAT auth type maps to GTC
 				return WifiEnterpriseConfig.Phase2.GTC;
 			*/
-			default: return -1;
+			default:
+				return -1;
 		}
+	}
+
+	/**
+	 * @param strings A list of host names
+	 * @return The longest common suffix for all given host names
+	 */
+	static String getLongestSuffix(String[] strings) {
+		if (strings.length == 0) return "";
+		if (strings.length == 1) return strings[0];
+		String longest = strings[0];
+		for (String candidate : strings) {
+			int pos = candidate.length();
+			do {
+				pos = candidate.lastIndexOf('.', pos - 2) + 1;
+			} while (pos > 0 && longest.endsWith(candidate.substring(pos)));
+			if (!longest.endsWith(candidate.substring(pos))) {
+				pos = candidate.indexOf('.', pos);
+			}
+			if (pos == -1) {
+				longest = "";
+			} else if (longest.endsWith(candidate.substring(pos))) {
+				longest = candidate.substring(pos == 0 ? 0 : pos + 1);
+			}
+		}
+		return longest;
+	}
+
+	/**
+	 * Returns fingerprint of the certificate
+	 *
+	 * @param certificate The certificate to inspect
+	 * @return The fingerprint of the certificate
+	 */
+	private static byte[] getFingerprint(X509Certificate certificate) {
+		byte[] fingerprint = null;
+		try {
+			MessageDigest digester = MessageDigest.getInstance("SHA-256");
+			digester.reset();
+			fingerprint = digester.digest(certificate.getEncoded());
+		} catch (NoSuchAlgorithmException | CertificateEncodingException e) {
+			e.printStackTrace();
+		}
+		return fingerprint;
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -190,14 +242,16 @@ public class ProfileDetails {
 
 	/**
 	 * Returns array of SSIDs
+	 *
 	 * @return All SSIDs
 	 */
-	public String[] getSsids(){
+	public String[] getSsids() {
 		return this.ssids;
 	}
 
 	/**
 	 * Return the configuration of SSID and the configuration of the passpoint to configure it
+	 *
 	 * @return Enterprise configuration for this profile
 	 */
 	public final WifiEnterpriseConfig createEnterpriseConfig() throws WifiEapConfiguratorException {
@@ -208,7 +262,7 @@ public class ProfileDetails {
 		enterpriseConfig.setEapMethod(eap);
 		enterpriseConfig.setCaCertificates(getCaCertificates().toArray(new X509Certificate[0]));
 
-		assert(serverName.length != 0); // Checked in ProfileDetails constructor
+		assert (serverName.length != 0); // Checked in ProfileDetails constructor
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 			enterpriseConfig.setDomainSuffixMatch(String.join(";", serverName));
 		} else {
@@ -218,13 +272,13 @@ public class ProfileDetails {
 		// Explicitly reset client certificate, will set later if needed
 		enterpriseConfig.setClientKeyEntry(null, null);
 
-		switch(eap) {
+		switch (eap) {
 			case WifiEnterpriseConfig.Eap.TLS:
 				// Explicitly unset unused fields
 				enterpriseConfig.setPassword("");
 				enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
 
-				Map.Entry<PrivateKey,X509Certificate[]> clientCertificate = getClientCertificate();
+				Map.Entry<PrivateKey, X509Certificate[]> clientCertificate = getClientCertificate();
 				enterpriseConfig.setClientKeyEntry(clientCertificate.getKey(), clientCertificate.getValue()[0]);
 
 				// For TLS, "identity" is used for outer identity,
@@ -284,7 +338,7 @@ public class ProfileDetails {
 	protected final List<X509Certificate> getRootCaCertificates() throws WifiEapConfiguratorException {
 		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificate.length);
 
-		for(X509Certificate c: getCaCertificates()) {
+		for (X509Certificate c : getCaCertificates()) {
 			if (c.getSubjectDN().equals(c.getIssuerDN())) {
 				rootCertificates.add(c);
 			}
@@ -332,6 +386,7 @@ public class ProfileDetails {
 
 	/**
 	 * Return if the passphrase received through the plugin is correct
+	 *
 	 * @throws WifiEapConfiguratorException An error occurred during passphrase validation (other than wrong passphrase)
 	 */
 	public final boolean validatePassPhrase() throws WifiEapConfiguratorException {
@@ -357,6 +412,7 @@ public class ProfileDetails {
 
 	/**
 	 * Create the configuration necessary to configure a passpoint and returns it
+	 *
 	 * @return Passpoint configuration for this profile
 	 */
 	public final PasspointConfiguration createPasspointConfig() throws WifiEapConfiguratorException {
@@ -395,11 +451,11 @@ public class ProfileDetails {
 		cred.setCaCertificate(getCaCertificates().get(0));
 		// TODO Set server name check somehow
 
-		switch(eap) {
+		switch (eap) {
 			case WifiEnterpriseConfig.Eap.TLS:
 				Credential.CertificateCredential certCred = new Credential.CertificateCredential();
 				certCred.setCertType("x509v3");
-				Map.Entry<PrivateKey,X509Certificate[]> clientCertificate = getClientCertificate();
+				Map.Entry<PrivateKey, X509Certificate[]> clientCertificate = getClientCertificate();
 				cred.setClientPrivateKey(clientCertificate.getKey());
 				cred.setClientCertificateChain(clientCertificate.getValue());
 				certCred.setCertSha256Fingerprint(getFingerprint(clientCertificate.getValue()[0]));
@@ -422,7 +478,7 @@ public class ProfileDetails {
 				us.setPassword(base64);
 				us.setEapType(21);
 				// Android will always use anonymous@ for Passpoint
-				switch(auth) {
+				switch (auth) {
 					// Strings from android.net.wifi.hotspot2.pps.Credential.UserCredential.AUTH_METHOD_*
 					// All supported strings are listed in android.net.wifi.hotspot2.pps.Credential.SUPPORTED_AUTH
 					case WifiEnterpriseConfig.Phase2.MSCHAPV2:
@@ -434,7 +490,8 @@ public class ProfileDetails {
 					case WifiEnterpriseConfig.Phase2.MSCHAP:
 						us.setNonEapInnerMethod("MS-CHAP");
 						break;
-					default: throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.authmethod." + auth);
+					default:
+						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.authmethod." + auth);
 				}
 
 				cred.setUserCredential(us);
@@ -452,7 +509,7 @@ public class ProfileDetails {
 	public ArrayList<NetworkRequest> createNetworkRequests() throws WifiEapConfiguratorException {
 		WifiEnterpriseConfig enterpriseConfig = createEnterpriseConfig();
 		ArrayList<NetworkRequest> result = new ArrayList<>(ssids.length);
-		for(String ssid: ssids) {
+		for (String ssid : ssids) {
 			WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder();
 			builder.setSsid(ssid);
 			builder.setWpa2EnterpriseConfig(enterpriseConfig);
@@ -463,49 +520,6 @@ public class ProfileDetails {
 			result.add(networkRequestBuilder.build());
 		}
 		return result;
-	}
-
-	/**
-	 *
-	 * @param strings A list of host names
-	 * @return The longest common suffix for all given host names
-	 */
-	static String getLongestSuffix(String[] strings) {
-		if (strings.length == 0) return "";
-		if (strings.length == 1) return strings[0];
-		String longest = strings[0];
-		for(String candidate : strings) {
-			int pos = candidate.length();
-			do {
-				pos = candidate.lastIndexOf('.', pos - 2) + 1;
-			} while (pos > 0 && longest.endsWith(candidate.substring(pos)));
-			if (!longest.endsWith(candidate.substring(pos))) {
-				pos = candidate.indexOf('.', pos);
-			}
-			if (pos == -1) {
-				longest = "";
-			} else if (longest.endsWith(candidate.substring(pos))) {
-				longest = candidate.substring(pos == 0 ? 0 : pos + 1);
-			}
-		}
-		return longest;
-	}
-
-	/**
-	 * Returns fingerprint of the certificate
-	 * @param certificate The certificate to inspect
-	 * @return The fingerprint of the certificate
-	 */
-	private static byte[] getFingerprint(X509Certificate certificate) {
-		byte[] fingerprint = null;
-		try {
-			MessageDigest digester = MessageDigest.getInstance("SHA-256");
-			digester.reset();
-			fingerprint = digester.digest(certificate.getEncoded());
-		} catch (NoSuchAlgorithmException | CertificateEncodingException e) {
-			e.printStackTrace();
-		}
-		return fingerprint;
 	}
 
 }

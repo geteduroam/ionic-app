@@ -30,7 +30,8 @@ public class NetworkProfileManagerLegacy extends NetworkProfileManager {
 
 	/**
 	 * Configure a network profile for devices with API 28 or lower.
-	 * @param ssid Configure a network with this SSID
+	 *
+	 * @param ssid             Configure a network with this SSID
 	 * @param enterpriseConfig Authentication configuration
 	 */
 	public void configureSSID(String ssid, WifiEnterpriseConfig enterpriseConfig) throws WifiEapConfiguratorException {
@@ -78,7 +79,7 @@ public class NetworkProfileManagerLegacy extends NetworkProfileManager {
 	public void removeNetwork(String... ssids) {
 		List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
 		for (WifiConfiguration conf : configuredNetworks) {
-			for(String ssid : ssids) {
+			for (String ssid : ssids) {
 				if (conf.SSID.equals(ssid) || conf.SSID.equals("\"" + ssid + "\"")) { // TODO document why ssid can be surrounded by quotes
 					wifiManager.removeNetwork(conf.networkId);
 					//wifiManager.saveConfiguration(); // not needed, removeNetwork already commits
@@ -123,10 +124,11 @@ public class NetworkProfileManagerLegacy extends NetworkProfileManager {
 
 	/**
 	 * Removes the passpoint configuration if exists in the device
+	 *
 	 * @param id FQDN of the Passpoint configuration
 	 */
 	protected void removePasspoint(String id) {
-		for(PasspointConfiguration conf: wifiManager.getPasspointConfigurations()) {
+		for (PasspointConfiguration conf : wifiManager.getPasspointConfigurations()) {
 			if (id.equals(conf.getHomeSp().getFqdn())) {
 				try {
 					wifiManager.removePasspointConfiguration(id);
@@ -139,6 +141,7 @@ public class NetworkProfileManagerLegacy extends NetworkProfileManager {
 
 	/**
 	 * Configures the passpoint in the device if this have available passpoint
+	 *
 	 * @param config Passpoint configuration
 	 */
 	protected void configurePasspoint(PasspointConfiguration config) throws WifiEapConfiguratorException {
