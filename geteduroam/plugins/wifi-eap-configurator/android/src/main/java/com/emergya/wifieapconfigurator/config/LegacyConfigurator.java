@@ -148,12 +148,15 @@ public class LegacyConfigurator extends AbstractConfigurator {
 	 */
 	public void configurePasspoint(PasspointConfiguration config) throws WifiEapConfiguratorException {
 		try {
+			try {
+				// Remove any existing networks with the same FQDN
+				wifiManager.removePasspointConfiguration(config.getHomeSp().getFqdn());
+			} catch (IllegalArgumentException e) { /* do nothing */ }
 			wifiManager.addOrUpdatePasspointConfiguration(config);
 			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 			SharedPreferences.Editor editor = sharedPref.edit();
 			editor.putString("fqdn", config.getHomeSp().getFqdn());
 			editor.apply();
-			// TODO return somewhere: "plugin.wifieapconfigurator.success.passpoint.linked"
 		} catch (IllegalArgumentException e) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.linked", e);
 		} catch (Exception e) {

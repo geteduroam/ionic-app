@@ -83,7 +83,14 @@ public class WifiEapConfigurator extends Plugin {
 				suggestionConfigurator.installSuggestions(suggestions);
 
 				PasspointConfiguration passpointConfiguration = profile.createPasspointConfig();
-				legacyConfigurator.configurePasspoint(passpointConfiguration);
+				try {
+					legacyConfigurator.configurePasspoint(passpointConfiguration);
+				} catch (WifiEapConfiguratorException e) {
+					if (!"plugin.wifieapconfigurator.error.passpoint.linked".equals(e.getMessage())) {
+						throw e;
+					}
+					Log.w("LegacyConfigurator", "IllegalArgumentException occurred, Passpoint disabled or unsupported on device?");
+				}
 			} else { // Everything below Q (below Android 10, below API version 29)
 				// We get to use the legacy API for everything. YAY!
 
