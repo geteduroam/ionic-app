@@ -53,7 +53,7 @@ public class WifiEapConfigurator extends Plugin {
 		JSObject object = new JSObject();
 
 		try {
-			WifiProfile profile = new WifiProfile(call);
+			WifiProfile profile = new WifiProfile(call.getData());
 
 			// We prefer the legacy method, because it's more stable.
 			// But Android blocks legacy SSID configurations from version Q,

@@ -15,9 +15,10 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 
 import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
-import com.getcapacitor.PluginCall;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -47,36 +48,39 @@ public class WifiProfile {
 	private final String[] ssids;
 	private final String[] oids;
 	private final String clientCertificate;
-	private final String passPhrase;
+	private final String passphrase;
 	private final String anonymousIdentity;
 	private final String[] caCertificate;
-	private final int eap;
-	private final String[] serverName;
+	private final int enterpriseEAP;
+	private final String[] serverNames;
 	private final String username;
 	private final String password;
-	private final int auth;
-	private final String id;
+	private final int enterprisePhase2Auth;
+	private final String fqdn;
 
 	/**
 	 * Initializes all attributtes that come from ionic
 	 *
-	 * @param call Wi-Fi profile from ionic
+	 * @param object Wi-Fi profile from ionic
 	 * @throws WifiEapConfiguratorException The profile has issues that were detected before attempting a connect
 	 */
-	public WifiProfile(PluginCall call) throws WifiEapConfiguratorException {
+	public WifiProfile(JSONObject object) throws WifiEapConfiguratorException {
 		try {
-			this.ssids = objectArrayToStringArray(call.getArray("ssid").toList().toArray());
-			this.oids = objectArrayToStringArray(call.getArray("oid").toList().toArray());
-			this.caCertificate = objectArrayToStringArray(call.getArray("caCertificate").toList().toArray());
-			this.serverName = objectArrayToStringArray(call.getArray("servername").toList().toArray());
-			this.clientCertificate = call.getString("clientCertificate");
-			this.passPhrase = call.getString("passPhrase");
-			this.anonymousIdentity = call.getString("anonymous");
-			this.eap = getEapMethod(call.getInt("eap"));
-			this.id = call.getString("id");
-			this.username = call.getString("username");
-			this.password = call.getString("password");
-			this.auth = getAuthMethod(call.getInt("auth"));
+			// Required fields
+			this.ssids = jsonArrayToStringArray(object.getJSONArray("ssid"));
+			this.oids = jsonArrayToStringArray(object.getJSONArray("oid"));
+			this.caCertificate = jsonArrayToStringArray(object.getJSONArray("caCertificate"));
+			this.serverNames = jsonArrayToStringArray(object.getJSONArray("servername"));
+			this.enterpriseEAP = getEapMethod(object.getInt("eap"));
+			this.fqdn = object.getString("id");
+
+			// Optional fields
+			this.clientCertificate = object.has("clientCertificate") ? object.getString("clientCertificate") : null;
+			this.passphrase = object.has("passPhrase") ? object.getString("passPhrase") : null;
+			this.anonymousIdentity = object.has("anonymous") ? object.getString("anonymous") : null;
+			this.username = object.has("username") ? object.getString("username") : null;
+			this.password = object.has("password") ? object.getString("password") : null;
+			this.enterprisePhase2Auth = object.has("auth") ? getAuthMethod(object.getInt("auth")) : -1;
 		} catch (JSONException | ArrayStoreException e) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.json", e);
 		}
@@ -84,35 +88,37 @@ public class WifiProfile {
 		if (this.ssids.length == 0 && this.oids.length == 0)
 			// TODO also check for empty ssids?
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ssid.missing");
-		if (this.eap < 0)
+		if (this.enterpriseEAP < 0)
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.eap.invalid");
-		if (this.eap != WifiEnterpriseConfig.Eap.TLS) {
+		if (this.enterpriseEAP != WifiEnterpriseConfig.Eap.TLS) {
 			// We need a username/password
 			if (this.username == null)
 				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.username.missing");
 			if (this.password == null)
 				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.password.missing");
-			if (this.auth <= 0)
+			if (this.enterprisePhase2Auth <= 0)
 				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.auth.invalid");
 		}
-		if (this.serverName.length == 0) {
+		if (this.serverNames.length == 0) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.missing");
 		}
 	}
 
-	private static String[] objectArrayToStringArray(Object... array) {
-		return Arrays.copyOf(array, array.length, String[].class);
+	private static String[] jsonArrayToStringArray(JSONArray array) throws JSONException {
+		String[] result = new String[array.length()];
+		for (int i = 0; i < array.length(); i++)
+			result[i] = array.getString(i);
+		return result;
 	}
 
 	/**
 	 * Returns the type of the EAP
 	 *
-	 * @param eap EAP type as used in eap-config
+	 * @param ianaEAPMethod EAP type as used in eap-config
 	 * @return A value from WifiEnterpriseConfig.Eap (TLS,TTLS,PEAP) or -1
 	 */
-	private static int getEapMethod(Integer eap) {
-		if (eap == null) return -1;
-		switch (eap) {
+	private static int getEapMethod(int ianaEAPMethod) {
+		switch (ianaEAPMethod) {
 			case 13:
 				return WifiEnterpriseConfig.Eap.TLS;
 			case 21:
@@ -127,14 +133,11 @@ public class WifiProfile {
 	/**
 	 * Returns the type of the auth method
 	 *
-	 * @param auth Auth method as used in eap-config
+	 * @param catAuthMethod Auth method as used in eap-config
 	 * @return ENUM from WifiEnterpriseConfig.Phase2 (PAP/MSCHAP/MSCHAPv2) or -1
 	 */
-	private static int getAuthMethod(Integer auth) {
-		if (auth == null) {
-			return WifiEnterpriseConfig.Phase2.MSCHAPV2;
-		}
-		switch (auth) {
+	private static int getAuthMethod(int catAuthMethod) {
+		switch (catAuthMethod) {
 			case -1:
 				return WifiEnterpriseConfig.Phase2.PAP;
 			case -2:
@@ -260,20 +263,20 @@ public class WifiProfile {
 		WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
 
 		enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
-		enterpriseConfig.setEapMethod(eap);
+		enterpriseConfig.setEapMethod(enterpriseEAP);
 		enterpriseConfig.setCaCertificates(getCaCertificates().toArray(new X509Certificate[0]));
 
-		assert (serverName.length != 0); // Checked in WifiProfile constructor
+		assert (serverNames.length != 0); // Checked in WifiProfile constructor
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			enterpriseConfig.setDomainSuffixMatch(String.join(";", serverName));
+			enterpriseConfig.setDomainSuffixMatch(String.join(";", serverNames));
 		} else {
-			enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(serverName));
+			enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(serverNames));
 		}
 
 		// Explicitly reset client certificate, will set later if needed
 		enterpriseConfig.setClientKeyEntry(null, null);
 
-		switch (eap) {
+		switch (enterpriseEAP) {
 			case WifiEnterpriseConfig.Eap.TLS:
 				// Explicitly unset unused fields
 				enterpriseConfig.setPassword("");
@@ -296,12 +299,12 @@ public class WifiProfile {
 				enterpriseConfig.setIdentity(username);
 				enterpriseConfig.setPassword(password);
 
-				enterpriseConfig.setPhase2Method(auth);
+				enterpriseConfig.setPhase2Method(enterprisePhase2Auth);
 
 				break;
 
 			default:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod." + eap);
+				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod." + enterpriseEAP);
 		}
 
 		return enterpriseConfig;
@@ -310,7 +313,7 @@ public class WifiProfile {
 	protected final Map.Entry<PrivateKey, X509Certificate[]> getClientCertificate() throws WifiEapConfiguratorException {
 		try {
 			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
-			char[] passphrase = passPhrase == null ? new char[0] : passPhrase.toCharArray();
+			char[] passphrase = this.passphrase == null ? new char[0] : this.passphrase.toCharArray();
 
 			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
 
@@ -391,7 +394,7 @@ public class WifiProfile {
 	 * @throws WifiEapConfiguratorException An error occurred during passphrase validation (other than wrong passphrase)
 	 */
 	public final boolean validatePassPhrase() throws WifiEapConfiguratorException {
-		if (clientCertificate == null || passPhrase == null) {
+		if (clientCertificate == null || passphrase == null) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation");
 		}
 
@@ -402,7 +405,7 @@ public class WifiProfile {
 			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 			InputStream in = new BufferedInputStream(b);
 
-			pkcs12ks.load(in, passPhrase.toCharArray());
+			pkcs12ks.load(in, passphrase.toCharArray());
 		} catch (CertificateException e) {
 			return false;
 		} catch (IOException | NoSuchAlgorithmException | KeyStoreException e) {
@@ -420,8 +423,8 @@ public class WifiProfile {
 		PasspointConfiguration passpointConfig = new PasspointConfiguration();
 
 		HomeSp homeSp = new HomeSp();
-		homeSp.setFqdn(id);
-		homeSp.setFriendlyName(id + " via Passpoint");
+		homeSp.setFqdn(fqdn);
+		homeSp.setFriendlyName(fqdn + " via Passpoint");
 
 		long[] roamingConsortiumOIDs = new long[oids.length];
 		int index = 0;
@@ -440,7 +443,7 @@ public class WifiProfile {
 
 		passpointConfig.setHomeSp(homeSp);
 		Credential cred = new Credential();
-		cred.setRealm(id);
+		cred.setRealm(fqdn);
 		if (getRootCaCertificates().size() == 1) {
 			cred.setCaCertificate(getCaCertificates().get(0));
 		} else {
@@ -452,7 +455,7 @@ public class WifiProfile {
 		cred.setCaCertificate(getCaCertificates().get(0));
 		// TODO Set server name check somehow
 
-		switch (eap) {
+		switch (enterpriseEAP) {
 			case WifiEnterpriseConfig.Eap.TLS:
 				Credential.CertificateCredential certCred = new Credential.CertificateCredential();
 				certCred.setCertType("x509v3");
@@ -463,7 +466,7 @@ public class WifiProfile {
 				cred.setCertCredential(certCred);
 				break;
 			case WifiEnterpriseConfig.Eap.PWD:
-				Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to unsupported EAP type " + eap);
+				Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to unsupported EAP type " + enterpriseEAP);
 				return null; // known but unsupported EAP method
 			case WifiEnterpriseConfig.Eap.PEAP:
 				// Fall-through
@@ -477,9 +480,9 @@ public class WifiProfile {
 				Credential.UserCredential us = new Credential.UserCredential();
 				us.setUsername(username);
 				us.setPassword(base64);
-				us.setEapType(21);
+				us.setEapType(21); // 21 indicates TTLS (RFC 5281)
 				// Android will always use anonymous@ for Passpoint
-				switch (auth) {
+				switch (enterprisePhase2Auth) {
 					// Strings from android.net.wifi.hotspot2.pps.Credential.UserCredential.AUTH_METHOD_*
 					// All supported strings are listed in android.net.wifi.hotspot2.pps.Credential.SUPPORTED_AUTH
 					case WifiEnterpriseConfig.Phase2.MSCHAPV2:
@@ -492,13 +495,13 @@ public class WifiProfile {
 						us.setNonEapInnerMethod("MS-CHAP");
 						break;
 					default:
-						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.authmethod." + auth);
+						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.authmethod." + enterprisePhase2Auth);
 				}
 
 				cred.setUserCredential(us);
 				break;
 			default:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod." + eap);
+				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod." + enterpriseEAP);
 		}
 
 		passpointConfig.setCredential(cred);
