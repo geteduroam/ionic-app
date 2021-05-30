@@ -1,9 +1,7 @@
 package com.emergya.wifieapconfigurator.config;
 
-import android.content.BroadcastReceiver;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
@@ -14,6 +12,7 @@ import androidx.annotation.RequiresApi;
 import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,7 +26,17 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 		super(context);
 	}
 
+	@SuppressLint("SwitchIntDef")
 	public void installSuggestions(ArrayList<WifiNetworkSuggestion> suggestions) throws WifiEapConfiguratorException {
+		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+			// From Android 11, suggestions may be duplicate
+			// but on Android 10, we must remove suggestions first.
+			// On Android 10, we cannot get our previously configured suggestions,
+			// so we have to use the only other option; remove all our installed suggestions.
+
+			removeNetwork();
+		}
+
 		int status = wifiManager.addNetworkSuggestions(suggestions);
 
 		if (status != 0)
@@ -41,6 +50,9 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_APP_DISALLOWED:
 				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.app-disallowed");
 			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE:
+				// On Android 11, this can't happen according to the documentation
+				// On Android 10, this should not happen because we removed all networks earlier
+				Log.e(getClass().getSimpleName(), "ERROR_ADD_DUPLICATE occurred, this should not happen!");
 				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.add-duplicate");
 			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP:
 				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.too-many");
@@ -62,8 +74,29 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 	 */
 	@Override
 	public void removeNetwork(String... ssids) {
-		// TODO implement
-		wifiManager.removeNetworkSuggestions(new ArrayList<WifiNetworkSuggestion>());
+		if (ssids.length > 0 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+			List<WifiNetworkSuggestion> suggestions = wifiManager.getNetworkSuggestions();
+
+			for (WifiNetworkSuggestion suggestion : suggestions) {
+				for (String ssid : ssids) {
+					if (ssid.equals(suggestion.getSsid())) break;
+				}
+
+				suggestions.remove(suggestion);
+			}
+
+			wifiManager.removeNetworkSuggestions(suggestions);
+		} else {
+			removeNetwork();
+		}
+	}
+
+	/**
+	 * Remove all our configured networks
+	 */
+	public void removeNetwork() {
+		// Empty lisit removes all networks
+		wifiManager.removeNetworkSuggestions(Collections.<WifiNetworkSuggestion>emptyList());
 	}
 
 	@Override
