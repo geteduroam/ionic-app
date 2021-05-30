@@ -1,7 +1,7 @@
 # Building Android app
 
 There are 2 options to build the app in Android: one automatic and another manual.
- 
+
 
 ## Automatic APK generation for Android
 

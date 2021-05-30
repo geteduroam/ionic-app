@@ -11,12 +11,11 @@ Use these steps to get it working.
 
 4. Preferences (⌘,) and search for SDK. At the time of writing, it's under **Appearance & Behavior** -> **System Settings** -> **Android SDK**
 
-5. Make sure that a adequate SDK is installed, if not, click Edit behind Android SDK Location and follow the installation wizard
+5. Make sure **Android SDK Command-line Tools** is installed (under **SDK Tools**)
 
 6. Accept licenses
 
-	export JAVA_HOME="/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home"
-	JAVA_HOME="/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home" ~/Library/Android/sdk/tools/bin/sdkmanager --licenses
+		JAVA_HOME="/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home" ~/Library/Android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
 7. Run `make open-android`
 
