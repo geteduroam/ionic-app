@@ -35,22 +35,6 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 
 		switch (status) {
 			case WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS:
-				final IntentFilter intentFilter =
-					new IntentFilter(WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION);
-
-				final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						if (!intent.getAction().equals(
-							WifiManager.ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION)) {
-							return; // TODO this if statement doesn't do anything..?
-						}
-					}
-				};
-
-				context.registerReceiver(broadcastReceiver, intentFilter);
-
-				// TODO return "plugin.wifieapconfigurator.success.network.linked" somewhere
 				break;
 			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL:
 				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.internal");
