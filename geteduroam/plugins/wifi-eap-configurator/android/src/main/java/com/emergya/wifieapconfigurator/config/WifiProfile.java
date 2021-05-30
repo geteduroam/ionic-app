@@ -391,9 +391,12 @@ public class WifiProfile {
 	/**
 	 * Return if the passphrase received through the plugin is correct
 	 *
-	 * @throws WifiEapConfiguratorException An error occurred during passphrase validation (other than wrong passphrase)
+	 * @param clientCertificate The client certificate in a PKCS12 container
+	 * @param passphrase The passphrase
+	 * @return The passphrase can decrypt the client certificate
+	 * @throws WifiEapConfiguratorException An error occurred during passphrase validation, other than wrong passphrase, such as invalid client certificate
 	 */
-	public final boolean validatePassPhrase() throws WifiEapConfiguratorException {
+	public static boolean validatePassPhrase(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
 		if (clientCertificate == null || passphrase == null) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation");
 		}

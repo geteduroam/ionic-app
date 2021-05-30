@@ -133,7 +133,7 @@ public class WifiEapConfigurator extends Plugin {
 		JSObject object = new JSObject();
 
 		try {
-			boolean success = new WifiProfile(call).validatePassPhrase();
+			boolean success = WifiProfile.validatePassPhrase(call.getString("certificate"), call.getString("passPhrase"));
 
 			object.put("success", success);
 			if (success) {
