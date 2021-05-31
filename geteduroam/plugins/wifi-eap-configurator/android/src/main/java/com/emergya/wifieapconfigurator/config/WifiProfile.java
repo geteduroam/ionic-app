@@ -429,7 +429,7 @@ public class WifiProfile {
 		}
 	}
 
-	protected final List<X509Certificate> getRootCaCertificates() throws WifiEapConfiguratorException {
+	protected final List<X509Certificate> getRootCaCertificates() {
 		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificates.size());
 
 		for (X509Certificate c : caCertificates) {
@@ -482,7 +482,6 @@ public class WifiProfile {
 			Log.e(getClass().getSimpleName(), "Not creating Passpoint configuration due to too many CAs in the profile (1 supported, " + getRootCaCertificates().size() + " given)");
 			return null;
 		}
-		// TODO Set server name check somehow
 		cred.setRealm(fqdn);
 
 		switch (enterpriseEAP) {
@@ -553,9 +552,5 @@ public class WifiProfile {
 			result.add(networkRequestBuilder.build());
 		}
 		return result;
-	}
-
-	public String getFqdn() {
-		return fqdn;
 	}
 }
