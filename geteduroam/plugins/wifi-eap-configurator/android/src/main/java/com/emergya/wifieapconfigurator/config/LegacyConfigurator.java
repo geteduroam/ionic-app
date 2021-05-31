@@ -152,6 +152,7 @@ public class LegacyConfigurator extends AbstractConfigurator {
 		} catch (IllegalArgumentException e) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.linked", e);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.not.enabled", e);
 		}
 	}
