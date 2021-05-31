@@ -55,6 +55,7 @@ public class WifiEapConfigurator extends Plugin {
 		JSObject object = new JSObject();
 		JSObject profileData = call.getData();
 		SharedPreferences.Editor editor = getPreferences().edit();
+		int targetSDK = getContext().getApplicationContext().getApplicationInfo().targetSdkVersion;
 
 		try {
 			WifiProfile profile = new WifiProfile(profileData);
@@ -63,7 +64,7 @@ public class WifiEapConfigurator extends Plugin {
 			// But Android blocks legacy SSID configurations from version Q,
 			// and legacy Passpoint configurations from version R;
 			// on and above these versions we have to use WifiNetworkSuggestions.
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && targetSDK >= Build.VERSION_CODES.R) {
 				if (!requestPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 					throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.permission.notGranted");
 				}
@@ -74,7 +75,7 @@ public class WifiEapConfigurator extends Plugin {
 
 				ArrayList<WifiNetworkSuggestion> suggestions = profile.makeSuggestions();
 				configurator.installSuggestions(suggestions);
-			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSDK >= Build.VERSION_CODES.Q) {
 				if (!requestPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
 					throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.permission.notGranted");
 				}
