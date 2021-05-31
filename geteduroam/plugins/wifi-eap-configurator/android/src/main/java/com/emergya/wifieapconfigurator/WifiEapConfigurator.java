@@ -1,7 +1,6 @@
 package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -49,7 +48,7 @@ public class WifiEapConfigurator extends Plugin {
 	 * @param call Capacitor object containing call made in ionic
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.Q)
-	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+	@RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_NETWORK_STATE})
 	@PluginMethod()
 	public void configureAP(PluginCall call) {
 		JSObject object = new JSObject();
@@ -182,7 +181,6 @@ public class WifiEapConfigurator extends Plugin {
 	}
 
 	@PluginMethod
-	@SuppressLint("MissingPermission")
 	public void removeNetwork(PluginCall call) {
 		JSObject object = new JSObject();
 		String ssid = call.getString("ssid");
@@ -219,7 +217,7 @@ public class WifiEapConfigurator extends Plugin {
 	}
 
 	@PluginMethod
-	@SuppressLint("MissingPermission")
+	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 	public void reachableSSID(PluginCall call) {
 		JSObject object = new JSObject();
 		object.put("success", false);
@@ -240,7 +238,7 @@ public class WifiEapConfigurator extends Plugin {
 	}
 
 	@PluginMethod
-	@SuppressLint("MissingPermission")
+	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 	public void isConnectedSSID(PluginCall call) {
 		JSObject object = new JSObject();
 		object.put("success", true);
@@ -341,7 +339,7 @@ public class WifiEapConfigurator extends Plugin {
 
 		if (!requestPermissions.isEmpty()) {
 			// TODO implement onRequestPermissionsResult somewhere
-			ActivityCompat.requestPermissions(getActivity(), requestPermissions.toArray(new String[0]), 123);
+			ActivityCompat.requestPermissions(getActivity(), requestPermissions.toArray(new String[0]), 0);
 
 			return false;
 		}
