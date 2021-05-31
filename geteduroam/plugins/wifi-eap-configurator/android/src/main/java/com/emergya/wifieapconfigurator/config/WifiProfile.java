@@ -271,6 +271,72 @@ public class WifiProfile {
 		return true;
 	}
 
+	private static Map.Entry<PrivateKey, X509Certificate[]> getClientCertificate(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
+		try {
+			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+			char[] passphraseBytes = passphrase == null ? new char[0] : passphrase.toCharArray();
+
+			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
+
+			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+			InputStream in = new BufferedInputStream(b);
+			pkcs12ks.load(in, passphraseBytes);
+
+			Enumeration<String> aliases = pkcs12ks.aliases();
+
+			while (aliases.hasMoreElements()) {
+				String alias = aliases.nextElement();
+				Certificate[] chain = pkcs12ks.getCertificateChain(alias);
+				if (chain != null && chain.length > 0) try {
+					return new AbstractMap.SimpleEntry<>(
+						(PrivateKey) pkcs12ks.getKey(alias, passphraseBytes),
+						Arrays.copyOf(chain, chain.length, X509Certificate[].class)
+					);
+				} catch (ArrayStoreException e) { /* try next entry */ }
+			}
+		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException | IOException e) {
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.invalid - " + e.getMessage(), e);
+		}
+		throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.empty");
+	}
+
+	private static List<X509Certificate> getCaCertificates(String... caCertificates) throws WifiEapConfiguratorException {
+		CertificateFactory certFactory;
+		List<X509Certificate> certificates = new ArrayList<>(caCertificates.length);
+		// building the certificates
+		for (String certString : caCertificates) {
+			byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
+			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+
+			try {
+				certFactory = CertificateFactory.getInstance("X.509");
+				X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(b);
+				boolean[] usage = certificate.getKeyUsage();
+				// https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#getKeyUsage()
+				// 5 is KeyUsage keyCertSign, which indicates the certificate is a CA
+				if (usage != null && usage.length > 5 && usage[5]) {
+					// Find out if this a CA according to KeyUsage
+					certificates.add(certificate);
+				} else {
+					// Find out if this a CA according to Basic Constraints
+					byte[] extension = certificate.getExtensionValue("2.5.29.19");
+					if (extension != null && extension.length > 1 && extension[0] != 0) {
+						certificates.add(certificate);
+					}
+				}
+				// We really shouldn't expect any certificate here to NOT be a CA,
+				// CAT shows a nice red warning when you try to configure this,
+				// but experience shows that sometimes this is not enough of a deterrent.
+				// We may very well block profiles like this, but then it should be done BEFORE
+				// the user enters their username/password, not after.
+			} catch (CertificateException | IllegalArgumentException e) {
+				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.invalid", e);
+			}
+		}
+
+		return certificates;
+	}
+
 	@RequiresApi(api = Build.VERSION_CODES.Q)
 	public ArrayList<WifiNetworkSuggestion> makeSuggestions() throws WifiEapConfiguratorException {
 		ArrayList<WifiNetworkSuggestion> result = makeSSIDSuggestions();
@@ -381,35 +447,6 @@ public class WifiProfile {
 		return enterpriseConfig;
 	}
 
-	private static Map.Entry<PrivateKey, X509Certificate[]> getClientCertificate(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
-		try {
-			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
-			char[] passphraseBytes = passphrase == null ? new char[0] : passphrase.toCharArray();
-
-			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
-
-			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-			InputStream in = new BufferedInputStream(b);
-			pkcs12ks.load(in, passphraseBytes);
-
-			Enumeration<String> aliases = pkcs12ks.aliases();
-
-			while (aliases.hasMoreElements()) {
-				String alias = aliases.nextElement();
-				Certificate[] chain = pkcs12ks.getCertificateChain(alias);
-				if (chain != null && chain.length > 0) try {
-					return new AbstractMap.SimpleEntry<>(
-						(PrivateKey) pkcs12ks.getKey(alias, passphraseBytes),
-						Arrays.copyOf(chain, chain.length, X509Certificate[].class)
-					);
-				} catch (ArrayStoreException e) { /* try next entry */ }
-			}
-		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException | IOException e) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.invalid - " + e.getMessage(), e);
-		}
-		throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.empty");
-	}
-
 	protected final List<X509Certificate> getRootCaCertificates() throws WifiEapConfiguratorException {
 		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificate.size());
 
@@ -420,43 +457,6 @@ public class WifiProfile {
 		}
 
 		return rootCertificates;
-	}
-
-	private static List<X509Certificate> getCaCertificates(String... caCertificates) throws WifiEapConfiguratorException {
-		CertificateFactory certFactory;
-		List<X509Certificate> certificates = new ArrayList<>(caCertificates.length);
-		// building the certificates
-		for (String certString : caCertificates) {
-			byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
-			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-
-			try {
-				certFactory = CertificateFactory.getInstance("X.509");
-				X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(b);
-				boolean[] usage = certificate.getKeyUsage();
-				// https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#getKeyUsage()
-				// 5 is KeyUsage keyCertSign, which indicates the certificate is a CA
-				if (usage != null && usage.length > 5 && usage[5]) {
-					// Find out if this a CA according to KeyUsage
-					certificates.add(certificate);
-				} else {
-					// Find out if this a CA according to Basic Constraints
-					byte[] extension = certificate.getExtensionValue("2.5.29.19");
-					if (extension != null && extension.length > 1 && extension[0] != 0) {
-						certificates.add(certificate);
-					}
-				}
-				// We really shouldn't expect any certificate here to NOT be a CA,
-				// CAT shows a nice red warning when you try to configure this,
-				// but experience shows that sometimes this is not enough of a deterrent.
-				// We may very well block profiles like this, but then it should be done BEFORE
-				// the user enters their username/password, not after.
-			} catch (CertificateException | IllegalArgumentException e) {
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.invalid", e);
-			}
-		}
-
-		return certificates;
 	}
 
 	/**
