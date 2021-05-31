@@ -370,11 +370,7 @@ public class WifiProfile {
 		enterpriseConfig.setCaCertificates(caCertificates.toArray(new X509Certificate[0]));
 
 		assert (serverNames.length != 0); // Checked in WifiProfile constructor
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			enterpriseConfig.setDomainSuffixMatch(String.join(";", serverNames));
-		} else {
-			enterpriseConfig.setDomainSuffixMatch(getLongestSuffix(serverNames));
-		}
+		enterpriseConfig.setDomainSuffixMatch(getServerNamesDomainString());
 
 		// Explicitly reset client certificate, will set later if needed
 		enterpriseConfig.setClientKeyEntry(null, null);
@@ -412,6 +408,27 @@ public class WifiProfile {
 		return enterpriseConfig;
 	}
 
+	/**
+	 * Get the string that Android uses for server name validation.
+	 * <p>
+	 * Server names are treated as suffix, but exact string match is also accepted.
+	 * <p>
+	 * On Android 9, only a single name is supported.
+	 * Thus, for Android 9, we will calculate the longest suffix match.
+	 * <p>
+	 * On Android 10 and onwards, the string can be semicolon-separated,
+	 * which is what we will do for these platforms.
+	 *
+	 * @return The server name
+	 */
+	private String getServerNamesDomainString() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+			return String.join(";", serverNames);
+		} else {
+			return getLongestSuffix(serverNames);
+		}
+	}
+
 	protected final List<X509Certificate> getRootCaCertificates() throws WifiEapConfiguratorException {
 		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificates.size());
 
@@ -435,7 +452,7 @@ public class WifiProfile {
 
 		HomeSp homeSp = new HomeSp();
 		// setFqdn sets the possible names of the EAP server certificate, ;-delimited, this is not the user realm
-		homeSp.setFqdn(String.join(";", serverNames));
+		homeSp.setFqdn(getServerNamesDomainString());
 		homeSp.setFriendlyName(fqdn + " via Passpoint");
 
 		long[] roamingConsortiumOIDs = new long[oids.length];
