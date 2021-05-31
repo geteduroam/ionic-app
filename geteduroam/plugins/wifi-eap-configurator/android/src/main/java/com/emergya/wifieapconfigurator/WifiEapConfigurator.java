@@ -2,6 +2,7 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -12,6 +13,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.PermissionChecker;
+import androidx.preference.PreferenceManager;
 
 import com.emergya.wifieapconfigurator.config.AbstractConfigurator;
 import com.emergya.wifieapconfigurator.config.LegacyConfigurator;
@@ -40,6 +42,9 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 		Manifest.permission.ACCESS_FINE_LOCATION
 	})
 public class WifiEapConfigurator extends Plugin {
+
+	private final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+	private final SharedPreferences.Editor editor = sharedPref.edit();
 
 	/**
 	 * Its the responsable of call to the methods for configure the networks
@@ -89,8 +94,12 @@ public class WifiEapConfigurator extends Plugin {
 					if (!"plugin.wifieapconfigurator.error.passpoint.linked".equals(e.getMessage())) {
 						throw e;
 					}
+
 					Log.w("LegacyConfigurator", "IllegalArgumentException occurred, Passpoint disabled or unsupported on device?");
 				}
+
+				editor.putString("fqdn", profile.getFqdn());
+				editor.apply();
 			} else { // Everything below Q (below Android 10, below API version 29)
 				// We get to use the legacy API for everything. YAY!
 
@@ -114,9 +123,15 @@ public class WifiEapConfigurator extends Plugin {
 					}
 				}
 				for (String ssid : ssids) {
-					legacyConfigurator.configureSSID(ssid, enterpriseConfig);
+					int wifiID = legacyConfigurator.configureSSID(ssid, enterpriseConfig);
+
+					// TODO There can be more than one SSID, but we can only store one
+					editor.putInt("netId", wifiID);
+					editor.apply();
 				}
 				legacyConfigurator.configurePasspoint(passpointConfig);
+				editor.putString("fqdn", profile.getFqdn());
+				editor.apply();
 			}
 
 			object.put("success", true);

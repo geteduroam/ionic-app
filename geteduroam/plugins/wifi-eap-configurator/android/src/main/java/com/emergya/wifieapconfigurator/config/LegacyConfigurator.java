@@ -3,7 +3,6 @@ package com.emergya.wifieapconfigurator.config;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -12,7 +11,6 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
-import androidx.preference.PreferenceManager;
 
 import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
 
@@ -35,8 +33,9 @@ public class LegacyConfigurator extends AbstractConfigurator {
 	 *
 	 * @param ssid             Configure a network with this SSID
 	 * @param enterpriseConfig Authentication configuration
+	 * @return ID of the network description created
 	 */
-	public void configureSSID(String ssid, WifiEnterpriseConfig enterpriseConfig) throws WifiEapConfiguratorException {
+	public int configureSSID(String ssid, WifiEnterpriseConfig enterpriseConfig) throws WifiEapConfiguratorException {
 		assert (ssid != null && !"".equals(ssid));
 
 		WifiConfiguration config = new WifiConfiguration();
@@ -47,28 +46,25 @@ public class LegacyConfigurator extends AbstractConfigurator {
 		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
 		config.enterpriseConfig = enterpriseConfig;
 
-		int wifiIndex;
+		int networkId;
 		try {
-			wifiIndex = wifiManager.addNetwork(config);
+			networkId = wifiManager.addNetwork(config);
 		} catch (java.lang.SecurityException e) {
 			Log.e("error", e.getMessage());
 			e.printStackTrace();
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.security", e);
 		}
-		if (wifiIndex == -1) {
+		if (networkId == -1) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.alreadyAssociated");
 		}
 
 		wifiManager.disconnect();
-		wifiManager.enableNetwork(wifiIndex, true);
+		wifiManager.enableNetwork(networkId, true);
 		wifiManager.reconnect();
 
 		wifiManager.setWifiEnabled(true);
 
-		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-		SharedPreferences.Editor editor = sharedPref.edit();
-		editor.putInt("netId", wifiIndex);
-		editor.apply();
+		return networkId;
 	}
 
 	/**
@@ -153,10 +149,6 @@ public class LegacyConfigurator extends AbstractConfigurator {
 				wifiManager.removePasspointConfiguration(config.getHomeSp().getFqdn());
 			} catch (IllegalArgumentException e) { /* do nothing */ }
 			wifiManager.addOrUpdatePasspointConfiguration(config);
-			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-			SharedPreferences.Editor editor = sharedPref.edit();
-			editor.putString("fqdn", config.getHomeSp().getFqdn());
-			editor.apply();
 		} catch (IllegalArgumentException e) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.linked", e);
 		} catch (Exception e) {
