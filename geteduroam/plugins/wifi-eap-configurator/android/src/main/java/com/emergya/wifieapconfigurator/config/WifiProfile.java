@@ -25,22 +25,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertPath;
-import java.security.cert.CertPathValidator;
-import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -207,27 +201,6 @@ public class WifiProfile {
 			e.printStackTrace();
 		}
 		return fingerprint;
-	}
-
-	/**
-	 * Verify if the CaCertificate its valid for Android looking for in the AndroidCaStore
-	 *
-	 * @param caCert
-	 * @throws CertPathValidatorException         {@code CertPath} does not validate
-	 * @throws InvalidAlgorithmParameterException parameters or the type of the specified {@code CertPath} are inappropriate for this {@code CertPathValidator}
-	 * @throws GeneralSecurityException           Should not happen; unable to get a validator
-	 * @throws IOException                        Should not happen; unable to get a validator
-	 */
-	private static void verifyCaCert(X509Certificate caCert) throws CertPathValidatorException, InvalidAlgorithmParameterException, GeneralSecurityException, IOException {
-		CertificateFactory factory = CertificateFactory.getInstance("X.509");
-		CertPathValidator validator =
-			CertPathValidator.getInstance(CertPathValidator.getDefaultType());
-		CertPath path = factory.generateCertPath(Arrays.asList(caCert));
-		KeyStore ks = KeyStore.getInstance("AndroidCAStore");
-		ks.load(null, null);
-		PKIXParameters params = new PKIXParameters(ks);
-		params.setRevocationEnabled(false);
-		validator.validate(path, params);
 	}
 
 	/**
