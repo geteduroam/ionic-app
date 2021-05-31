@@ -25,16 +25,20 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -197,6 +201,55 @@ public class WifiProfile {
 			e.printStackTrace();
 		}
 		return fingerprint;
+	}
+
+	/**
+	 * Verify if the CaCertificate its valid for Android looking for in the AndroidCaStore
+	 *
+	 * @param caCert
+	 * @throws GeneralSecurityException
+	 * @throws IOException
+	 */
+	private static void verifyCaCert(X509Certificate caCert)
+		throws GeneralSecurityException, IOException {
+		CertificateFactory factory = CertificateFactory.getInstance("X.509");
+		CertPathValidator validator =
+			CertPathValidator.getInstance(CertPathValidator.getDefaultType());
+		CertPath path = factory.generateCertPath(Arrays.asList(caCert));
+		KeyStore ks = KeyStore.getInstance("AndroidCAStore");
+		ks.load(null, null);
+		PKIXParameters params = new PKIXParameters(ks);
+		params.setRevocationEnabled(false);
+		validator.validate(path, params);
+	}
+
+	/**
+	 * Return if the passphrase received through the plugin is correct
+	 *
+	 * @param clientCertificate The client certificate in a PKCS12 container
+	 * @param passphrase        The passphrase
+	 * @return The passphrase can decrypt the client certificate
+	 * @throws WifiEapConfiguratorException An error occurred during passphrase validation, other than wrong passphrase, such as invalid client certificate
+	 */
+	public static boolean validatePassPhrase(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
+		if (clientCertificate == null || passphrase == null) {
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation");
+		}
+
+		try {
+			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
+
+			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+			InputStream in = new BufferedInputStream(b);
+
+			pkcs12ks.load(in, passphrase.toCharArray());
+		} catch (CertificateException e) {
+			return false;
+		} catch (IOException | NoSuchAlgorithmException | KeyStoreException e) {
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation", e);
+		}
+		return true;
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.Q)
@@ -386,35 +439,6 @@ public class WifiProfile {
 		}
 
 		return certificates;
-	}
-
-	/**
-	 * Return if the passphrase received through the plugin is correct
-	 *
-	 * @param clientCertificate The client certificate in a PKCS12 container
-	 * @param passphrase The passphrase
-	 * @return The passphrase can decrypt the client certificate
-	 * @throws WifiEapConfiguratorException An error occurred during passphrase validation, other than wrong passphrase, such as invalid client certificate
-	 */
-	public static boolean validatePassPhrase(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
-		if (clientCertificate == null || passphrase == null) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation");
-		}
-
-		try {
-			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
-
-			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
-			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-			InputStream in = new BufferedInputStream(b);
-
-			pkcs12ks.load(in, passphrase.toCharArray());
-		} catch (CertificateException e) {
-			return false;
-		} catch (IOException | NoSuchAlgorithmException | KeyStoreException e) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation", e);
-		}
-		return true;
 	}
 
 	/**
