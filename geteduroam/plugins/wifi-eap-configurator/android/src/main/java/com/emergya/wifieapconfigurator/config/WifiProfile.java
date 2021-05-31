@@ -80,7 +80,7 @@ public class WifiProfile {
 
 			// Client certificate, optional, but passphrase is required if used
 			this.clientCertificate = object.has("clientCertificate")
-				? getClientCertificate(object.getString("clientCertificate"), object.getString("passphrase"))
+				? getClientCertificate(object.getString("clientCertificate"), object.getString("passPhrase"))
 				: null;
 
 			// Optional fields
