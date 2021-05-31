@@ -23,6 +23,7 @@ check-docker:
 check-js:
 	@npm version >/dev/null
 	@npx --version >/dev/null
+.PHONY: check-js
 
 # Common operations
 clean:
