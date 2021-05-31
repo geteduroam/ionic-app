@@ -88,18 +88,8 @@ public class WifiEapConfigurator extends Plugin {
 				suggestionConfigurator.installSuggestions(suggestions);
 
 				PasspointConfiguration passpointConfig = profile.createPasspointConfig();
-				if (passpointConfig != null) try {
-					legacyConfigurator.configurePasspoint(passpointConfig);
-				} catch (WifiEapConfiguratorException e) {
-					if (!"plugin.wifieapconfigurator.error.passpoint.linked".equals(e.getMessage())) {
-						throw e;
-					}
-
-					Log.w("LegacyConfigurator", "IllegalArgumentException occurred, Passpoint disabled or unsupported on device?");
-				}
-
-				editor.putString("fqdn", profile.getFqdn());
-				editor.apply();
+				if (passpointConfig != null)
+					configurePasspoint(legacyConfigurator, passpointConfig);
 			} else { // Everything below Q (below Android 10, below API version 29)
 				// We get to use the legacy API for everything. YAY!
 
@@ -129,11 +119,8 @@ public class WifiEapConfigurator extends Plugin {
 					editor.putInt("netId", wifiID);
 					editor.apply();
 				}
-				if (passpointConfig != null) {
-					legacyConfigurator.configurePasspoint(passpointConfig);
-					editor.putString("fqdn", profile.getFqdn());
-					editor.apply();
-				}
+				if (passpointConfig != null)
+					configurePasspoint(legacyConfigurator, passpointConfig);
 			}
 
 			object.put("success", true);
@@ -150,6 +137,27 @@ public class WifiEapConfigurator extends Plugin {
 		}
 
 		call.success(object);
+	}
+
+	private void configurePasspoint(LegacyConfigurator legacyConfigurator, PasspointConfiguration passpointConfig) throws WifiEapConfiguratorException {
+		SharedPreferences.Editor editor = getPreferences().edit();
+		String fqdn = passpointConfig.getHomeSp().getFqdn();
+
+		try {
+			legacyConfigurator.configurePasspoint(passpointConfig);
+
+			editor.putString("fqdn", fqdn);
+			editor.apply();
+		} catch (WifiEapConfiguratorException e) {
+			editor.remove("fqdn");
+			editor.apply();
+
+			if (!"plugin.wifieapconfigurator.error.passpoint.linked".equals(e.getMessage())) {
+				throw e;
+			}
+
+			Log.w("LegacyConfigurator", "IllegalArgumentException occurred, Passpoint disabled or unsupported on device?");
+		}
 	}
 
 	@PluginMethod
