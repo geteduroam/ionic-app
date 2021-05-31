@@ -454,13 +454,13 @@ public class WifiProfile {
 	protected final List<X509Certificate> getLeafCaCertificates() throws WifiEapConfiguratorException {
 		List<X509Certificate> leafCertificates = new ArrayList<>(caCertificates.size());
 
-		c1: for (X509Certificate c1 : caCertificates) {
-			boolean isLeaf = true;
-			for(X509Certificate c2 : caCertificates) {
+		c1:
+		for (X509Certificate c1 : caCertificates) {
+			for (X509Certificate c2 : caCertificates) {
 				if (c1 == c2) continue;
 
 				// If c2 has c1 as issuer, c1 is not a leaf
-				if(c1.getSubjectDN().equals(c2.getIssuerDN())) continue c1; // try next c1
+				if (c1.getSubjectDN().equals(c2.getIssuerDN())) continue c1; // try next c1
 			}
 
 			leafCertificates.add(c1);
@@ -501,10 +501,11 @@ public class WifiProfile {
 		Credential cred = new Credential();
 		List<X509Certificate> rootCertificates = getLeafCaCertificates();
 		// TODO Add support for multiple CAs
+		assert (rootCertificates.size() != 0);
 		if (rootCertificates.size() != 1) {
 			Log.e(getClass().getSimpleName(), "Passpoint configuration may not work due to too many CAs in the profile (1 supported, " + rootCertificates.size() + " given)");
 		}
-			cred.setCaCertificate(rootCertificates.get(0));
+		cred.setCaCertificate(rootCertificates.get(0));
 		// TODO Set server name check somehow
 		cred.setRealm(fqdn);
 
