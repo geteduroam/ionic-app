@@ -553,4 +553,7 @@ public class WifiProfile {
 		return result;
 	}
 
+	public String getFqdn() {
+		return fqdn;
+	}
 }
