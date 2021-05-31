@@ -43,9 +43,6 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 	})
 public class WifiEapConfigurator extends Plugin {
 
-	private final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-	private final SharedPreferences.Editor editor = sharedPref.edit();
-
 	/**
 	 * Its the responsable of call to the methods for configure the networks
 	 *
@@ -56,6 +53,7 @@ public class WifiEapConfigurator extends Plugin {
 	@PluginMethod()
 	public void configureAP(PluginCall call) {
 		JSObject object = new JSObject();
+		SharedPreferences.Editor editor = getPreferences().edit();
 
 		try {
 			WifiProfile profile = new WifiProfile(call.getData());
@@ -302,6 +300,17 @@ public class WifiEapConfigurator extends Plugin {
 		JSObject object = new JSObject();
 		object.put("fromNotification", openFromNot);
 		call.success(object);
+	}
+
+	/**
+	 * Get the shared preferences object.
+	 * Call edit() on the result to get the editor.
+	 *
+	 * @return Preferences object
+	 */
+	private SharedPreferences getPreferences() {
+		return PreferenceManager.getDefaultSharedPreferences(getContext());
+
 	}
 
 	/**
