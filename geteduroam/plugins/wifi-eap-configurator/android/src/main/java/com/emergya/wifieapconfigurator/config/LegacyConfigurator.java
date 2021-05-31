@@ -147,7 +147,14 @@ public class LegacyConfigurator extends AbstractConfigurator {
 			try {
 				// Remove any existing networks with the same FQDN
 				wifiManager.removePasspointConfiguration(config.getHomeSp().getFqdn());
-			} catch (IllegalArgumentException e) { /* do nothing */ }
+			} catch (IllegalArgumentException | SecurityException e) {
+				// According to the documentation, IllegalArgumentException can be thrown
+				// But after testing, we see that SecurityException will be thrown
+				// with message "Permission denied".
+
+				// This error makes sense when observed (maybe we can't remove the network),
+				// but it's undocumented that this error can be thrown.
+			}
 			wifiManager.addOrUpdatePasspointConfiguration(config);
 		} catch (IllegalArgumentException e) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.linked", e);
