@@ -53,10 +53,11 @@ public class WifiEapConfigurator extends Plugin {
 	@PluginMethod()
 	public void configureAP(PluginCall call) {
 		JSObject object = new JSObject();
+		JSObject profileData = call.getData();
 		SharedPreferences.Editor editor = getPreferences().edit();
 
 		try {
-			WifiProfile profile = new WifiProfile(call.getData());
+			WifiProfile profile = new WifiProfile(profileData);
 
 			// We prefer the legacy method, because it's more stable.
 			// But Android blocks legacy SSID configurations from version Q,
@@ -85,9 +86,9 @@ public class WifiEapConfigurator extends Plugin {
 				ArrayList<WifiNetworkSuggestion> suggestions = profile.makeSuggestions();
 				suggestionConfigurator.installSuggestions(suggestions);
 
-				PasspointConfiguration passpointConfiguration = profile.createPasspointConfig();
-				try {
-					legacyConfigurator.configurePasspoint(passpointConfiguration);
+				PasspointConfiguration passpointConfig = profile.createPasspointConfig();
+				if (passpointConfig != null) try {
+					legacyConfigurator.configurePasspoint(passpointConfig);
 				} catch (WifiEapConfiguratorException e) {
 					if (!"plugin.wifieapconfigurator.error.passpoint.linked".equals(e.getMessage())) {
 						throw e;
@@ -127,9 +128,11 @@ public class WifiEapConfigurator extends Plugin {
 					editor.putInt("netId", wifiID);
 					editor.apply();
 				}
-				legacyConfigurator.configurePasspoint(passpointConfig);
-				editor.putString("fqdn", profile.getFqdn());
-				editor.apply();
+				if (passpointConfig != null) {
+					legacyConfigurator.configurePasspoint(passpointConfig);
+					editor.putString("fqdn", profile.getFqdn());
+					editor.apply();
+				}
 			}
 
 			object.put("success", true);

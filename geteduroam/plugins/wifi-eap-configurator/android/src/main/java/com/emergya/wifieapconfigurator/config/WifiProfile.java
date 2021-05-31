@@ -72,13 +72,13 @@ public class WifiProfile {
 		try {
 			// Required fields
 			this.ssids = jsonArrayToStringArray(object.getJSONArray("ssid"));
-			this.oids = jsonArrayToStringArray(object.getJSONArray("oid"));
 			this.caCertificate = jsonArrayToStringArray(object.getJSONArray("caCertificate"));
 			this.serverNames = jsonArrayToStringArray(object.getJSONArray("servername"));
 			this.enterpriseEAP = getEapMethod(object.getInt("eap"));
 			this.fqdn = object.getString("id");
 
 			// Optional fields
+			this.oids = object.has("oid") ? jsonArrayToStringArray(object.getJSONArray("oid")) : new String[0];
 			this.clientCertificate = object.has("clientCertificate") ? object.getString("clientCertificate") : null;
 			this.passphrase = object.has("passPhrase") ? object.getString("passPhrase") : null;
 			this.anonymousIdentity = object.has("anonymous") ? object.getString("anonymous") : null;
