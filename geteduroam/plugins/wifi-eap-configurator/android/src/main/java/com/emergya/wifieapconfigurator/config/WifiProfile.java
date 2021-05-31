@@ -55,7 +55,7 @@ public class WifiProfile {
 	private final String[] oids;
 	private final Map.Entry<PrivateKey, X509Certificate[]> clientCertificate;
 	private final String anonymousIdentity;
-	private final List<X509Certificate> caCertificate;
+	private final List<X509Certificate> caCertificates;
 	private final int enterpriseEAP;
 	private final String[] serverNames;
 	private final String username;
@@ -76,7 +76,7 @@ public class WifiProfile {
 			this.serverNames = jsonArrayToStringArray(object.getJSONArray("servername"));
 			this.enterpriseEAP = getEapMethod(object.getInt("eap"));
 			this.fqdn = object.getString("id");
-			this.caCertificate = getCaCertificates(jsonArrayToStringArray(object.getJSONArray("caCertificate")));
+			this.caCertificates = getCaCertificates(jsonArrayToStringArray(object.getJSONArray("caCertificate")));
 
 			// Client certificate, optional, but passphrase is required if used
 			this.clientCertificate = object.has("clientCertificate")
@@ -113,7 +113,7 @@ public class WifiProfile {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.missing");
 		}
 		try {
-			for (X509Certificate caCert : caCertificate) {
+			for (X509Certificate caCert : caCertificates) {
 				verifyCaCert(caCert);
 			}
 		} catch (CertPathValidatorException | InvalidAlgorithmParameterException e) {
@@ -301,6 +301,10 @@ public class WifiProfile {
 	}
 
 	private static List<X509Certificate> getCaCertificates(String... caCertificates) throws WifiEapConfiguratorException {
+		if (caCertificates.length == 0) {
+			throw new IllegalArgumentException("Must provide at least 1 certificate, 0 provided");
+		}
+
 		CertificateFactory certFactory;
 		List<X509Certificate> certificates = new ArrayList<>(caCertificates.length);
 		// building the certificates
@@ -402,7 +406,7 @@ public class WifiProfile {
 
 		enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
 		enterpriseConfig.setEapMethod(enterpriseEAP);
-		enterpriseConfig.setCaCertificates(getCaCertificates().toArray(new X509Certificate[0]));
+		enterpriseConfig.setCaCertificates(caCertificates.toArray(new X509Certificate[0]));
 
 		assert (serverNames.length != 0); // Checked in WifiProfile constructor
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -448,10 +452,11 @@ public class WifiProfile {
 	}
 
 	protected final List<X509Certificate> getRootCaCertificates() throws WifiEapConfiguratorException {
-		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificate.size());
+		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificates.size());
 
-		for (X509Certificate c : getCaCertificates()) {
-			if (c.getSubjectDN().equals(c.getIssuerDN())) {
+		for (X509Certificate c : caCertificates) {
+			System.err.println();
+			if (c.getSubjectDN().toString().equals(c.getIssuerDN().toString())) {
 				rootCertificates.add(c);
 			}
 		}
@@ -487,18 +492,19 @@ public class WifiProfile {
 		homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
 
 		passpointConfig.setHomeSp(homeSp);
+
 		Credential cred = new Credential();
-		cred.setRealm(fqdn);
-		if (getRootCaCertificates().size() == 1) {
-			cred.setCaCertificate(getCaCertificates().get(0));
+		List<X509Certificate> rootCertificates = getRootCaCertificates();
+		// TODO Add support for multiple CAs
+		if (rootCertificates.size() == 1) {
+			// Just use the first CA for Passpoint
+			cred.setCaCertificate(rootCertificates.get(0));
 		} else {
 			Log.e(getClass().getSimpleName(), "Not creating Passpoint configuration due to too many CAs in the profile (1 supported, " + getRootCaCertificates().size() + " given)");
 			return null;
 		}
-		// Just use the first CA for Passpoint
-		// TODO Add support for multiple CAs
-		cred.setCaCertificate(getCaCertificates().get(0));
 		// TODO Set server name check somehow
+		cred.setRealm(fqdn);
 
 		switch (enterpriseEAP) {
 			case WifiEnterpriseConfig.Eap.TLS:
