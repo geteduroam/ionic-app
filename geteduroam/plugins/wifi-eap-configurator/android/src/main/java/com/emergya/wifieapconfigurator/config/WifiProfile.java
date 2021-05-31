@@ -112,18 +112,6 @@ public class WifiProfile {
 		if (this.serverNames.length == 0) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.missing");
 		}
-		try {
-			for (X509Certificate caCert : caCertificates) {
-				verifyCaCert(caCert);
-			}
-		} catch (CertPathValidatorException | InvalidAlgorithmParameterException e) {
-			e.printStackTrace();
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.invalid");
-		} catch (IOException | GeneralSecurityException e) {
-			e.printStackTrace();
-			Log.e(getClass().getSimpleName(), "Error getting CA validator, this should never happen!");
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.internal");
-		}
 	}
 
 	private static String[] jsonArrayToStringArray(JSONArray array) throws JSONException {
