@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -34,6 +35,7 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -51,10 +53,9 @@ public class WifiProfile {
 
 	private final String[] ssids;
 	private final String[] oids;
-	private final String clientCertificate;
-	private final String passphrase;
+	private final Map.Entry<PrivateKey, X509Certificate[]> clientCertificate;
 	private final String anonymousIdentity;
-	private final String[] caCertificate;
+	private final List<X509Certificate> caCertificate;
 	private final int enterpriseEAP;
 	private final String[] serverNames;
 	private final String username;
@@ -72,15 +73,18 @@ public class WifiProfile {
 		try {
 			// Required fields
 			this.ssids = jsonArrayToStringArray(object.getJSONArray("ssid"));
-			this.caCertificate = jsonArrayToStringArray(object.getJSONArray("caCertificate"));
 			this.serverNames = jsonArrayToStringArray(object.getJSONArray("servername"));
 			this.enterpriseEAP = getEapMethod(object.getInt("eap"));
 			this.fqdn = object.getString("id");
+			this.caCertificate = getCaCertificates(jsonArrayToStringArray(object.getJSONArray("caCertificate")));
+
+			// Client certificate, optional, but passphrase is required if used
+			this.clientCertificate = object.has("clientCertificate")
+				? getClientCertificate(object.getString("clientCertificate"), object.getString("passphrase"))
+				: null;
 
 			// Optional fields
 			this.oids = object.has("oid") ? jsonArrayToStringArray(object.getJSONArray("oid")) : new String[0];
-			this.clientCertificate = object.has("clientCertificate") ? object.getString("clientCertificate") : null;
-			this.passphrase = object.has("passPhrase") ? object.getString("passPhrase") : null;
 			this.anonymousIdentity = object.has("anonymous") ? object.getString("anonymous") : null;
 			this.username = object.has("username") ? object.getString("username") : null;
 			this.password = object.has("password") ? object.getString("password") : null;
@@ -107,6 +111,18 @@ public class WifiProfile {
 		}
 		if (this.serverNames.length == 0) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.missing");
+		}
+		try {
+			for (X509Certificate caCert : caCertificate) {
+				verifyCaCert(caCert);
+			}
+		} catch (CertPathValidatorException | InvalidAlgorithmParameterException e) {
+			e.printStackTrace();
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.invalid");
+		} catch (IOException | GeneralSecurityException e) {
+			e.printStackTrace();
+			Log.e(getClass().getSimpleName(), "Error getting CA validator, this should never happen!");
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.internal");
 		}
 	}
 
@@ -209,11 +225,12 @@ public class WifiProfile {
 	 * Verify if the CaCertificate its valid for Android looking for in the AndroidCaStore
 	 *
 	 * @param caCert
-	 * @throws GeneralSecurityException
-	 * @throws IOException
+	 * @throws CertPathValidatorException         {@code CertPath} does not validate
+	 * @throws InvalidAlgorithmParameterException parameters or the type of the specified {@code CertPath} are inappropriate for this {@code CertPathValidator}
+	 * @throws GeneralSecurityException           Should not happen; unable to get a validator
+	 * @throws IOException                        Should not happen; unable to get a validator
 	 */
-	private static void verifyCaCert(X509Certificate caCert)
-		throws GeneralSecurityException, IOException {
+	private static void verifyCaCert(X509Certificate caCert) throws CertPathValidatorException, InvalidAlgorithmParameterException, GeneralSecurityException, IOException {
 		CertificateFactory factory = CertificateFactory.getInstance("X.509");
 		CertPathValidator validator =
 			CertPathValidator.getInstance(CertPathValidator.getDefaultType());
@@ -337,7 +354,6 @@ public class WifiProfile {
 				enterpriseConfig.setPassword("");
 				enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
 
-				Map.Entry<PrivateKey, X509Certificate[]> clientCertificate = getClientCertificate();
 				enterpriseConfig.setClientKeyEntry(clientCertificate.getKey(), clientCertificate.getValue()[0]);
 
 				// For TLS, "identity" is used for outer identity,
@@ -365,16 +381,16 @@ public class WifiProfile {
 		return enterpriseConfig;
 	}
 
-	protected final Map.Entry<PrivateKey, X509Certificate[]> getClientCertificate() throws WifiEapConfiguratorException {
+	private static Map.Entry<PrivateKey, X509Certificate[]> getClientCertificate(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
 		try {
 			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
-			char[] passphrase = this.passphrase == null ? new char[0] : this.passphrase.toCharArray();
+			char[] passphraseBytes = passphrase == null ? new char[0] : passphrase.toCharArray();
 
 			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
 
 			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 			InputStream in = new BufferedInputStream(b);
-			pkcs12ks.load(in, passphrase);
+			pkcs12ks.load(in, passphraseBytes);
 
 			Enumeration<String> aliases = pkcs12ks.aliases();
 
@@ -383,7 +399,7 @@ public class WifiProfile {
 				Certificate[] chain = pkcs12ks.getCertificateChain(alias);
 				if (chain != null && chain.length > 0) try {
 					return new AbstractMap.SimpleEntry<>(
-						(PrivateKey) pkcs12ks.getKey(alias, passphrase),
+						(PrivateKey) pkcs12ks.getKey(alias, passphraseBytes),
 						Arrays.copyOf(chain, chain.length, X509Certificate[].class)
 					);
 				} catch (ArrayStoreException e) { /* try next entry */ }
@@ -395,7 +411,7 @@ public class WifiProfile {
 	}
 
 	protected final List<X509Certificate> getRootCaCertificates() throws WifiEapConfiguratorException {
-		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificate.length);
+		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificate.size());
 
 		for (X509Certificate c : getCaCertificates()) {
 			if (c.getSubjectDN().equals(c.getIssuerDN())) {
@@ -406,11 +422,11 @@ public class WifiProfile {
 		return rootCertificates;
 	}
 
-	protected final List<X509Certificate> getCaCertificates() throws WifiEapConfiguratorException {
+	private static List<X509Certificate> getCaCertificates(String... caCertificates) throws WifiEapConfiguratorException {
 		CertificateFactory certFactory;
-		List<X509Certificate> certificates = new ArrayList<>(caCertificate.length);
+		List<X509Certificate> certificates = new ArrayList<>(caCertificates.length);
 		// building the certificates
-		for (String certString : caCertificate) {
+		for (String certString : caCertificates) {
 			byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
 			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 
@@ -488,7 +504,6 @@ public class WifiProfile {
 			case WifiEnterpriseConfig.Eap.TLS:
 				Credential.CertificateCredential certCred = new Credential.CertificateCredential();
 				certCred.setCertType("x509v3");
-				Map.Entry<PrivateKey, X509Certificate[]> clientCertificate = getClientCertificate();
 				cred.setClientPrivateKey(clientCertificate.getKey());
 				cred.setClientCertificateChain(clientCertificate.getValue());
 				certCred.setCertSha256Fingerprint(getFingerprint(clientCertificate.getValue()[0]));
