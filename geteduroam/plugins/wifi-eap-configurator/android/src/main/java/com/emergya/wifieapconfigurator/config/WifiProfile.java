@@ -84,7 +84,9 @@ public class WifiProfile {
 			this.anonymousIdentity = object.has("anonymous") ? object.getString("anonymous") : null;
 			this.username = object.has("username") ? object.getString("username") : null;
 			this.password = object.has("password") ? object.getString("password") : null;
-			this.enterprisePhase2Auth = getAuthMethod(object.optInt("auth", 0));
+			this.enterprisePhase2Auth = object.has("auth") && !object.isNull("auth")
+				? getAuthMethod(object.optInt("auth", 0))
+				: -1;
 		} catch (JSONException | ArrayStoreException e) {
 			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.json", e);
 		}
