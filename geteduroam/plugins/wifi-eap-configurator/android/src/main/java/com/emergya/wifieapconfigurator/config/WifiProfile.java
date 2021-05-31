@@ -473,7 +473,8 @@ public class WifiProfile {
 		PasspointConfiguration passpointConfig = new PasspointConfiguration();
 
 		HomeSp homeSp = new HomeSp();
-		homeSp.setFqdn(fqdn);
+		// setFqdn sets the possible names of the EAP server certificate, ;-delimited, this is not the user realm
+		homeSp.setFqdn(String.join(";", serverNames));
 		homeSp.setFriendlyName(fqdn + " via Passpoint");
 
 		long[] roamingConsortiumOIDs = new long[oids.length];
