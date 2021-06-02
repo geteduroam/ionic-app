@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Build;
 import android.util.Log;
@@ -12,13 +11,11 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 
-import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
-
 import java.util.List;
 
 /**
- * NetworkManagerP is the responsable of implement the abstract methods of NetworkManager. This class
- * implements the methods to work in all devices with API less and equal than API 28.
+ * The LegacyConfigurator can be used to configure Wi-Fi network profiles when the target API
+ * version is 28 or lower.  It works on Android 11, but only with a low enough target API.
  */
 @RequiresApi(api = Build.VERSION_CODES.O)
 @TargetApi(Build.VERSION_CODES.P)
@@ -31,46 +28,36 @@ public class LegacyConfigurator extends AbstractConfigurator {
 	/**
 	 * Configure a network profile for devices with API 28 or lower.
 	 *
-	 * @param ssid             Configure a network with this SSID
-	 * @param enterpriseConfig Authentication configuration
+	 * @param config The Wi-Fi configuration
 	 * @return ID of the network description created
 	 */
-	public int configureSSID(String ssid, WifiEnterpriseConfig enterpriseConfig) throws WifiEapConfiguratorException {
-		assert (ssid != null && !"".equals(ssid));
+	public int configureNetworkConfiguration(WifiConfiguration config) throws SecurityException, NetworkConfigurationException {
+		// Can throw SecurityException
+		int networkId = wifiManager.addNetwork(config);
 
-		WifiConfiguration config = new WifiConfiguration();
-		config.SSID = "\"" + ssid + "\"";
-		config.priority = 1;
-		config.status = WifiConfiguration.Status.ENABLED;
-		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-		config.enterpriseConfig = enterpriseConfig;
-
-		int networkId;
-		try {
-			networkId = wifiManager.addNetwork(config);
-		} catch (java.lang.SecurityException e) {
-			Log.e("error", e.getMessage());
-			e.printStackTrace();
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.security", e);
-		}
-		if (networkId == -1) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.alreadyAssociated");
-		}
-
-		wifiManager.disconnect();
-		wifiManager.enableNetwork(networkId, true);
-		wifiManager.reconnect();
-
-		wifiManager.setWifiEnabled(true);
+		if (networkId == -1)
+			throw new NetworkConfigurationException("Network " + config.SSID + " was not created. Did it already exist?");
 
 		return networkId;
 	}
 
 	/**
-	 * Remove the network of the SSID sended
+	 * Connect to the network with the given ID, returned by configureNetworkConfiguration
 	 *
-	 * @param ssids SSIDs of the networks to be removed
+	 * @param networkId The network ID to connect to
+	 */
+	public void connectNetwork(int networkId) {
+		wifiManager.disconnect();
+		wifiManager.enableNetwork(networkId, true);
+		wifiManager.reconnect();
+
+		wifiManager.setWifiEnabled(true);
+	}
+
+	/**
+	 * Remove networks with matching SSIDs
+	 *
+	 * @param ssids Remove network matching these SSIDs
 	 */
 	@Override
 	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -87,6 +74,12 @@ public class LegacyConfigurator extends AbstractConfigurator {
 		}
 	}
 
+	/**
+	 * Checks if a network with the given SSID is configured
+	 *
+	 * @param ssid Check if a network with this SSID exists
+	 * @return A network with the given SSID exists
+	 */
 	@Override
 	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 	public boolean isNetworkConfigured(String ssid) {
@@ -101,6 +94,12 @@ public class LegacyConfigurator extends AbstractConfigurator {
 		return false;
 	}
 
+	/**
+	 * Checks if the network with the given SSID can be overridden
+	 *
+	 * @param ssid Check if a network with this SSID can be overridden
+	 * @return The network with the given SSID can be overridden
+	 */
 	@Override
 	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 	public boolean isNetworkOverrideable(String ssid) {
@@ -142,7 +141,7 @@ public class LegacyConfigurator extends AbstractConfigurator {
 	 *
 	 * @param config Passpoint configuration
 	 */
-	public void configurePasspoint(PasspointConfiguration config) throws WifiEapConfiguratorException {
+	public void configurePasspoint(PasspointConfiguration config) throws SecurityException, NetworkInterfaceException {
 		try {
 			try {
 				// Remove any existing networks with the same FQDN
@@ -157,10 +156,12 @@ public class LegacyConfigurator extends AbstractConfigurator {
 			}
 			wifiManager.addOrUpdatePasspointConfiguration(config);
 		} catch (IllegalArgumentException e) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.linked", e);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.not.enabled", e);
+			// Can throw when configuration is wrong or device does not support Passpoint
+			// I'm going to be cocky here, and assume that our code generating the configuration
+			// doesn't contain a bug.  During testing, this was the case,
+			// while we did encounter a few devices without Passpoint support.
+
+			throw new NetworkInterfaceException("Device does not support passpoint", e);
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.emergya.wifieapconfigurator.config;
 
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiNetworkSpecifier;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -13,8 +14,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
-
-import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,16 +36,29 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+/**
+ * Class representing a Wi-Fi profile that can be installed on any Android version
+ *
+ * The class contains all information necessary to configure a Wi-Fi network,
+ * such as EAP types used, username/password or client certificate and EAP types.
+ *
+ * There are different methods for configuring a Wi-Fi network on Android, this class can output
+ * configuration objects for different configuration methods.  Configuration object that can be
+ * created are WifiConfiguration, WifiNetworkSuggestion and NetworkRequest
+ */
 public class WifiProfile {
 
 	private final String[] ssids;
-	private final String[] oids;
+	private final long[] oids;
 	private final Map.Entry<PrivateKey, X509Certificate[]> clientCertificate;
 	private final String anonymousIdentity;
 	private final List<X509Certificate> caCertificates;
@@ -58,56 +70,165 @@ public class WifiProfile {
 	private final String fqdn;
 
 	/**
-	 * Initializes all attributtes that come from ionic
+	 * Parse a JSON object with Wi-Fi configuration settings and store them in this object.
 	 *
-	 * @param object Wi-Fi profile from ionic
-	 * @throws WifiEapConfiguratorException The profile has issues that were detected before attempting a connect
+	 * The following fields are always required:
+	 * * {@code String[] ssid} SSIDs in UTF-8
+	 * * {@code String[] servername} Server names for server certificate validation
+	 * * {@code String[] caCertificate} Certificate chains for server certificate validation
+	 * * {@code int eap} IANA EAP code, {@code 13} = {@code TLS}, {@code 21} = TTLS, {@code 25} = PEAP
+	 * * {@code String id} FQDN for this profile, used for Passpoint home ID matching, often identical to realm
+	 *
+	 * The following fields are required for TLS profiles
+	 * * {@code String clientCertificate} Base64 encoded PKCS12 container
+	 * * {@code String passPhrase} Passphrase to decrypt PKCS12 container
+	 *
+	 * The following fields are required for non-TLS profiles (TTLS or PEAP)
+	 * * {@code String username} Username for authentication, including @realm
+	 * * {@code String password} Password for authentication
+	 * * {@code int auth} CAT identifier for Phase2 auth (see XSD)
+	 *
+	 * The following fields are optional, but must be of the correct type if provided
+	 * * {@code String[] oid} OID hex-encoded strings for Passpoint
+	 * * {@code anonymous} Outer identity
+	 *
+	 * @param config Wi-Fi profile from ionic
+	 * @throws IllegalStateException               Internal error; logic error or OS bug
+	 * @throws EapConfigCAException                Invalid CA certificate/chain provided
+	 * @throws EapConfigClientCertificateException Invalid client certificate provided
+	 * @throws EapConfigValueException             A value is missing or fails a constraint
+	 * @link https://www.iana.org/assignments/eap-numbers/eap-numbers.xhtml#eap-numbers-4
+	 * @link https://github.com/GEANT/CAT/blob/v2.0.3/devices/xml/eap-metadata.xsd
 	 */
-	public WifiProfile(JSONObject object) throws WifiEapConfiguratorException {
+	public WifiProfile(JSONObject config) throws EapConfigCAException, EapConfigClientCertificateException, EapConfigValueException {
 		try {
 			// Required fields
-			this.ssids = jsonArrayToStringArray(object.getJSONArray("ssid"));
-			this.serverNames = jsonArrayToStringArray(object.getJSONArray("servername"));
-			this.enterpriseEAP = getEapMethod(object.getInt("eap"));
-			this.fqdn = object.getString("id");
-			this.caCertificates = getCaCertificates(jsonArrayToStringArray(object.getJSONArray("caCertificate")));
+			ssids = jsonArrayToStringArray(config.getJSONArray("ssid"));
+			serverNames = jsonArrayToStringArray(config.getJSONArray("servername"));
+			enterpriseEAP = getAndroidEAPTypeFromIanaEAPType(config.getInt("eap"));
+			fqdn = config.getString("id");
+			try {
+				caCertificates = Arrays.stream(
+					getCertificates(
+						jsonArrayToStringArray(
+							config.getJSONArray("caCertificate")
+						)
+					)
+				).filter(new Predicate<X509Certificate>() {
+					@Override
+					public boolean test(X509Certificate certificate) {
+						// We really shouldn't expect any certificate here to NOT be a CA,
+						// CAT shows a nice red warning when you try to configure this,
+						// but experience shows that sometimes this is not enough of a deterrent.
+						// We may very well block profiles like this, but then it should be done BEFORE
+						// the user enters their username/password, not after.
 
-			// Client certificate, optional, but passphrase is required if used
-			this.clientCertificate = object.has("clientCertificate")
-				? getClientCertificate(object.getString("clientCertificate"), object.getString("passPhrase"))
-				: null;
+						return isCA(certificate);
+					}
+				}).collect(Collectors.<X509Certificate>toList());
+			} catch (CertificateException e) {
+				throw new EapConfigCAException(e);
+			}
+
+			// Conditional fields
+			if (enterpriseEAP != WifiEnterpriseConfig.Eap.TLS) {
+				username = config.has("username") ? config.getString("username") : null;
+				password = config.has("password") ? config.getString("password") : null;
+				enterprisePhase2Auth = getAndroidPhase2FromCATAuthMethod(config.getInt("auth"));
+
+				clientCertificate = null;
+			} else {
+				try {
+					clientCertificate = getClientCertificate(config.getString("clientCertificate"), config.getString("passPhrase"));
+				} catch (CertificateException e) {
+					throw new EapConfigClientCertificateException("Unable to read client certificate", e);
+				} catch (NoSuchAlgorithmException e) {
+					throw new EapConfigClientCertificateException("Unknown algorithm in PKCS12 store", e);
+				} catch (UnrecoverableKeyException e) {
+					throw new EapConfigClientCertificateException("Unable to read client certificate key", e);
+				}
+
+				username = null;
+				password = null;
+				enterprisePhase2Auth = -1;
+			}
 
 			// Optional fields
-			this.oids = object.has("oid") ? jsonArrayToStringArray(object.getJSONArray("oid")) : new String[0];
-			this.anonymousIdentity = object.has("anonymous") ? object.getString("anonymous") : null;
-			this.username = object.has("username") ? object.getString("username") : null;
-			this.password = object.has("password") ? object.getString("password") : null;
-			this.enterprisePhase2Auth = object.has("auth") && !object.isNull("auth")
-				? getAuthMethod(object.optInt("auth", 0))
-				: -1;
-		} catch (JSONException | ArrayStoreException e) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.json", e);
+			anonymousIdentity = config.has("anonymous") ? config.getString("anonymous") : null;
+			oids = config.has("oid") ? toLongPrimitive(
+				Arrays.stream(
+					jsonArrayToStringArray(
+						config.getJSONArray("oid")
+					)
+				).map(new Function<String, Long>() {
+					@Override
+					public Long apply(String oid) {
+						return oid.startsWith("0x") ? Long.decode(oid) : Long.decode("0x" + oid);
+					}
+				}).toArray(new IntFunction<Long[]>() {
+					@Override
+					public Long[] apply(int size) {
+						return new Long[size];
+					}
+				})) : new long[0];
+		} catch (JSONException e) {
+			throw new EapConfigValueException(e.getMessage(), e);
+		} catch (NumberFormatException e) {
+			throw new EapConfigValueException("OID contains invalid HEX string", e);
 		}
 
-		if (this.ssids.length == 0 && this.oids.length == 0)
-			// TODO also check for empty ssids?
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ssid.missing");
-		if (this.enterpriseEAP < 0)
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.eap.invalid");
-		if (this.enterpriseEAP != WifiEnterpriseConfig.Eap.TLS) {
-			// We need a username/password
-			if (this.username == null)
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.username.missing");
-			if (this.password == null)
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.password.missing");
-			if (this.enterprisePhase2Auth <= 0)
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.auth.invalid");
+		if (ssids.length == 0 && oids.length == 0) {
+			throw new EapConfigValueException("List of SSIDs and OIDs cannot both be empty");
 		}
-		if (this.serverNames.length == 0) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.missing");
+		if (serverNames.length == 0) {
+			throw new EapConfigValueException("Empty list of server names provided");
 		}
 	}
 
+	/**
+	 * Check if the passphrase can decrypt the PKCS12 container
+	 *
+	 * @param clientCertificate Base64 encoded client certificate in a PKCS12 container
+	 * @param passphrase        The passphrase
+	 * @return The passphrase can decrypt the client certificate
+	 * @throws NullPointerException  Any of the parameters was NULL
+	 * @throws IllegalStateException Internal error
+	 */
+	public static boolean validatePassPhrase(String clientCertificate, String passphrase) throws NullPointerException, IllegalStateException {
+		try {
+			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
+
+			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+			InputStream in = new BufferedInputStream(b);
+
+			pkcs12ks.load(in, passphrase.toCharArray());
+		} catch (CertificateException e) {
+			return false;
+		} catch (IOException | NoSuchAlgorithmException | KeyStoreException e) {
+			throw new IllegalStateException("The passphrase could not be tested", e);
+		}
+		return true;
+	}
+
+	/**
+	 * Convert from {@code Long[]} to {@code long[]}
+	 */
+	private static long[] toLongPrimitive(Long... objects) {
+		long[] primitives = new long[objects.length];
+		for (int i = 0; i < objects.length; i++)
+			primitives[i] = objects[i];
+
+		return primitives;
+	}
+
+	/**
+	 * Convert a JSONArray of strings to a native String array
+	 *
+	 * @param array Input array
+	 * @return Output array
+	 * @throws JSONException An entry in the input array contains something different than a String
+	 */
 	private static String[] jsonArrayToStringArray(JSONArray array) throws JSONException {
 		String[] result = new String[array.length()];
 		for (int i = 0; i < array.length(); i++)
@@ -116,12 +237,14 @@ public class WifiProfile {
 	}
 
 	/**
-	 * Returns the type of the EAP
+	 * Converts an IANA EAP type integer to an Android EAP type integer
 	 *
 	 * @param ianaEAPMethod EAP type as used in eap-config
-	 * @return A value from WifiEnterpriseConfig.Eap (TLS,TTLS,PEAP) or -1
+	 * @return A value from WifiEnterpriseConfig.Eap (TLS,TTLS,PEAP)
+	 * @throws EapConfigValueException If there is no mapping from the ianaEAPMethod to an Android EAP type
+	 * @link https://www.iana.org/assignments/eap-numbers/eap-numbers.xhtml#eap-numbers-4
 	 */
-	private static int getEapMethod(int ianaEAPMethod) {
+	private static int getAndroidEAPTypeFromIanaEAPType(int ianaEAPMethod) throws EapConfigValueException {
 		switch (ianaEAPMethod) {
 			case 13:
 				return WifiEnterpriseConfig.Eap.TLS;
@@ -130,18 +253,19 @@ public class WifiProfile {
 			case 25:
 				return WifiEnterpriseConfig.Eap.PEAP;
 			default:
-				return -1;
+				throw new EapConfigValueException("Unknown IANA EAP type " + ianaEAPMethod);
 		}
 	}
 
 	/**
-	 * Returns the type of the auth method
+	 * Converts a eap-config/CAT inner type to an Android Phase2 integer
 	 *
-	 * @param catAuthMethod Auth method as used in eap-config
-	 * @return ENUM from WifiEnterpriseConfig.Phase2 (PAP/MSCHAP/MSCHAPv2) or -1
+	 * @param eapConfigAuthMethod Auth method as used in eap-config
+	 * @return ENUM from WifiEnterpriseConfig.Phase2 (PAP/MSCHAP/MSCHAPv2) or -1 if no match
+	 * @throws EapConfigValueException If there is no mapping from the eapConfigAuthMethod to an Android Phase 2 integer
 	 */
-	private static int getAuthMethod(int catAuthMethod) {
-		switch (catAuthMethod) {
+	private static int getAndroidPhase2FromCATAuthMethod(int eapConfigAuthMethod) throws EapConfigValueException {
+		switch (eapConfigAuthMethod) {
 			case -1:
 				return WifiEnterpriseConfig.Phase2.PAP;
 			case -2:
@@ -149,18 +273,20 @@ public class WifiProfile {
 			case -3:
 			case 26: /* Android cannot do TTLS-EAP-MSCHAPv2, we expect the ionic code to not let it happen, but if it does, try TTLS-MSCHAPv2 instead */
 				// This currently DOES happen because CAT has a bug where it reports TTLS-MSCHAPv2 as TTLS-EAP-MSCHAPv2,
-				// so denying this would prevent profiles from being sideloaded
+				// so denying this would prevent profiles from being side-loaded
 				return WifiEnterpriseConfig.Phase2.MSCHAPV2;
 			/*
 			case _: // TODO Not supported by the eap-config format, so no CAT auth type maps to GTC
 				return WifiEnterpriseConfig.Phase2.GTC;
 			*/
 			default:
-				return -1;
+				throw new EapConfigValueException("Unknown eap-config auth method " + eapConfigAuthMethod);
 		}
 	}
 
 	/**
+	 * Get the longest common suffix domain components from a list of hostnames
+	 *
 	 * @param strings A list of host names
 	 * @return The longest common suffix for all given host names
 	 */
@@ -186,55 +312,37 @@ public class WifiProfile {
 	}
 
 	/**
-	 * Returns fingerprint of the certificate
+	 * Returns fingerprint of a certificate
 	 *
 	 * @param certificate The certificate to inspect
 	 * @return The fingerprint of the certificate
 	 */
 	private static byte[] getFingerprint(X509Certificate certificate) {
-		byte[] fingerprint = null;
 		try {
 			MessageDigest digester = MessageDigest.getInstance("SHA-256");
 			digester.reset();
-			fingerprint = digester.digest(certificate.getEncoded());
-		} catch (NoSuchAlgorithmException | CertificateEncodingException e) {
-			e.printStackTrace();
+			return digester.digest(certificate.getEncoded());
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("Unable to digest SHA-256", e);
+		} catch (CertificateEncodingException e) {
+			throw new IllegalArgumentException("Unable to encode certificate as DER", e);
 		}
-		return fingerprint;
 	}
 
 	/**
-	 * Return if the passphrase received through the plugin is correct
+	 * Extract private key and certificate chain from a PKCS12 store
 	 *
-	 * @param clientCertificate The client certificate in a PKCS12 container
-	 * @param passphrase        The passphrase
-	 * @return The passphrase can decrypt the client certificate
-	 * @throws WifiEapConfiguratorException An error occurred during passphrase validation, other than wrong passphrase, such as invalid client certificate
+	 * @param pkcs12StoreB64 PKCS12 store base64 encoded
+	 * @param passphrase     Passphrase to open the PKCS12 store
+	 * @return Tuple with private key and certificate + chain
+	 * @throws NullPointerException      NULL PKCS12 store provided
+	 * @throws CertificateException      Certificate from the store could not be loaded
+	 * @throws NoSuchAlgorithmException  Algorithm for checking integrity or recovering the private key cannot be found
+	 * @throws UnrecoverableKeyException Key cannot be recovered; typically incorrect passphrase
 	 */
-	public static boolean validatePassPhrase(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
-		if (clientCertificate == null || passphrase == null) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation");
-		}
-
+	private static Map.Entry<PrivateKey, X509Certificate[]> getClientCertificate(String pkcs12StoreB64, String passphrase) throws CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
 		try {
-			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
-
-			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
-			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-			InputStream in = new BufferedInputStream(b);
-
-			pkcs12ks.load(in, passphrase.toCharArray());
-		} catch (CertificateException e) {
-			return false;
-		} catch (IOException | NoSuchAlgorithmException | KeyStoreException e) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passphrase.validation", e);
-		}
-		return true;
-	}
-
-	private static Map.Entry<PrivateKey, X509Certificate[]> getClientCertificate(String clientCertificate, String passphrase) throws WifiEapConfiguratorException {
-		try {
-			byte[] bytes = Base64.decode(clientCertificate, Base64.NO_WRAP);
+			byte[] bytes = Base64.decode(pkcs12StoreB64, Base64.NO_WRAP);
 			char[] passphraseBytes = passphrase == null ? new char[0] : passphrase.toCharArray();
 
 			KeyStore pkcs12ks = KeyStore.getInstance("pkcs12");
@@ -253,116 +361,150 @@ public class WifiProfile {
 						(PrivateKey) pkcs12ks.getKey(alias, passphraseBytes),
 						Arrays.copyOf(chain, chain.length, X509Certificate[].class)
 					);
-				} catch (ArrayStoreException e) { /* try next entry */ }
+				} catch (ArrayStoreException e) {
+					Log.w("WifiProfile", "A certificate in the ClientCertificate chain is not an instance of X509Certificate");
+				}
 			}
-		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException | IOException e) {
-			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.invalid - " + e.getMessage(), e);
+			// KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, CertificateException
+		} catch (KeyStoreException e) {
+			throw new IllegalArgumentException("Unable to read ", e);
+		} catch (IOException e) {
+			if (e.getCause() instanceof UnrecoverableKeyException)
+				throw (UnrecoverableKeyException) e.getCause();
+
+			// This shouldn't happen, the InputStream is already in memory
+			throw new IllegalStateException("Unexpected I/O error reading key data");
 		}
-		throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientCertificate.empty");
+		throw new IllegalArgumentException("Cannot extract a X509Certificate from the certificate store");
 	}
 
-	private static List<X509Certificate> getCaCertificates(String... caCertificates) throws WifiEapConfiguratorException {
-		if (caCertificates.length == 0) {
-			throw new IllegalArgumentException("Must provide at least 1 certificate, 0 provided");
-		}
-
+	/**
+	 * Convert an array of base64 encoded DER certificates to X509Certificate objects
+	 *
+	 * @param caCertificates DER+Base64 encoded X509 certificates
+	 * @return Native X509Certificate objects
+	 * @throws CertificateException Unable to parse a certificate
+	 */
+	private static X509Certificate[] getCertificates(String[] caCertificates) throws CertificateException {
 		CertificateFactory certFactory;
-		List<X509Certificate> certificates = new ArrayList<>(caCertificates.length);
+		X509Certificate[] certificates = new X509Certificate[caCertificates.length];
 		// building the certificates
-		for (String certString : caCertificates) {
-			byte[] bytes = Base64.decode(certString, Base64.NO_WRAP);
+		for (int i = 0; i < caCertificates.length; i++) {
+			byte[] bytes = Base64.decode(caCertificates[i], Base64.NO_WRAP);
 			ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 
-			try {
-				certFactory = CertificateFactory.getInstance("X.509");
-				X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(b);
-				boolean[] usage = certificate.getKeyUsage();
-				// https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#getKeyUsage()
-				// 5 is KeyUsage keyCertSign, which indicates the certificate is a CA
-				if (usage != null && usage.length > 5 && usage[5]) {
-					// Find out if this a CA according to KeyUsage
-					certificates.add(certificate);
-				} else {
-					// Find out if this a CA according to Basic Constraints
-					byte[] extension = certificate.getExtensionValue("2.5.29.19");
-					if (extension != null && extension.length > 1 && extension[0] != 0) {
-						certificates.add(certificate);
-					}
-				}
-				// We really shouldn't expect any certificate here to NOT be a CA,
-				// CAT shows a nice red warning when you try to configure this,
-				// but experience shows that sometimes this is not enough of a deterrent.
-				// We may very well block profiles like this, but then it should be done BEFORE
-				// the user enters their username/password, not after.
-			} catch (CertificateException | IllegalArgumentException e) {
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.invalid", e);
-			}
+			certFactory = CertificateFactory.getInstance("X.509");
+			X509Certificate certificate = (X509Certificate) certFactory.generateCertificate(b);
+			certificates[i] = certificate;
 		}
 
 		return certificates;
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.Q)
-	public ArrayList<WifiNetworkSuggestion> makeSuggestions() throws WifiEapConfiguratorException {
-		ArrayList<WifiNetworkSuggestion> result = makeSSIDSuggestions();
+	/**
+	 * Check that a certificate is marked as a CA
+	 *
+	 * A qualifying certificate has either KeyUsage bit 5 set,
+	 * or has the first byte in OID 2.5.29.19 set to non-zero (not boolean false)
+	 *
+	 * @param certificate The certificate to check
+	 * @return The certificate is a CA certificate
+	 */
+	private static boolean isCA(X509Certificate certificate) {
+		boolean[] usage = certificate.getKeyUsage();
 
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-			WifiNetworkSuggestion.Builder builder = makePasspointSuggestionBuilder();
-			if (builder != null)
-				result.add(builder.build());
+		// https://docs.oracle.com/javase/7/docs/api/java/security/cert/X509Certificate.html#getKeyUsage()
+		// 5 is KeyUsage keyCertSign, which indicates the certificate is a CA
+		if (usage != null && usage.length > 5 && usage[5]) {
+			// This is a CA according to KeyUsage
+			return true;
+		} else {
+			// Find out if this a CA according to Basic Constraints
+			byte[] extension = certificate.getExtensionValue("2.5.29.19");
+			return extension != null && extension.length > 1 && extension[0] != 0;
 		}
-
-		return result;
 	}
 
-	@RequiresApi(api = Build.VERSION_CODES.Q)
-	public ArrayList<WifiNetworkSuggestion> makeSSIDSuggestions() throws WifiEapConfiguratorException {
-		ArrayList<WifiNetworkSuggestion> suggestions = new ArrayList<>();
-
-		WifiEnterpriseConfig enterpriseConfig = createEnterpriseConfig();
-
-		// SSID configuration
-		for (String ssid : ssids) {
-			WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
-				.setSsid(ssid)
-				.setWpa2EnterpriseConfig(enterpriseConfig)
-				.build();
-
-			suggestions.add(suggestion);
-		}
-
-		return suggestions;
+	/**
+	 * Determines whether a certificate is a root certificate
+	 *
+	 * A root certificate is defined by being self-signed (issuer == subject) and being recognised
+	 * as a CA by {@code isCA}.
+	 *
+	 * @param certificate The certificate to test
+	 * @return The certificate is a root certificate
+	 */
+	protected static boolean isRootCertificate(X509Certificate certificate) {
+		return certificate.getSubjectDN().toString().equals(certificate.getIssuerDN().toString()) && isCA(certificate);
 	}
 
+	/**
+	 * Create SSID-based network suggestions for this profile
+	 *
+	 * This will return one suggestion per SSID.  The resulting list is generated on the fly,
+	 * and may be safely modified by the caller.
+	 *
+	 * @return List of network suggestions, one per SSID
+	 * @see this.buildPasspointSuggestion()
+	 * @see this.buildNetworkRequests()
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.Q)
+	public List<WifiNetworkSuggestion> buildSSIDSuggestions() {
+		// Initial capacity = amount of SSIDs + 1, to keep room for a a Passpoint configuration
+		final WifiEnterpriseConfig enterpriseConfig = buildEnterpriseConfig();
+
+		return Arrays.stream(ssids).map(new Function<String, WifiNetworkSuggestion>() {
+			@Override
+			public WifiNetworkSuggestion apply(String ssid) {
+				return new WifiNetworkSuggestion.Builder()
+					.setSsid(ssid)
+					.setWpa2EnterpriseConfig(enterpriseConfig)
+					.build();
+			}
+		}).collect(Collectors.<WifiNetworkSuggestion>toList());
+	}
+
+	/**
+	 * Create Passpoint-based network suggestion for this profile
+	 *
+	 * A Passpoint suggestion can contain multiple OIDs, so the whole profile will always fit
+	 * in a single suggestions.
+	 *
+	 * If there are no OIDs in this profile, this function will return NULL
+	 *
+	 * @return Network suggestion for Passpoint
+	 * @see this.buildSSIDSuggestions()
+	 * @see this.buildNetworkRequests()
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.R)
-	public WifiNetworkSuggestion.Builder makePasspointSuggestionBuilder() throws WifiEapConfiguratorException {
-		PasspointConfiguration passpointConfig = createPasspointConfig();
+	public WifiNetworkSuggestion buildPasspointSuggestion() {
+		PasspointConfiguration passpointConfig = buildPasspointConfig();
 
 		if (passpointConfig != null) {
 			WifiNetworkSuggestion.Builder suggestionBuilder = new WifiNetworkSuggestion.Builder();
 			suggestionBuilder.setPasspointConfig(passpointConfig);
-			return suggestionBuilder;
+			return suggestionBuilder.build();
 		}
 
 		return null;
 	}
 
 	/**
-	 * Returns array of SSIDs
+	 * Get all SSIDs for this profile
 	 *
-	 * @return All SSIDs
+	 * @return SSIDs
 	 */
-	public String[] getSsids() {
-		return this.ssids;
+	public String[] getSSIDs() {
+		return Arrays.copyOf(ssids, ssids.length, String[].class);
 	}
 
 	/**
-	 * Return the configuration of SSID and the configuration of the passpoint to configure it
+	 * Create an WifiEnterpriseConfig object which Android uses internally to configure Wi-Fi networks
 	 *
-	 * @return Enterprise configuration for this profile
+	 * @return Wifi Enterprise configuration for this profile
+	 * @see this.buildPasspointConfig()
 	 */
-	public final WifiEnterpriseConfig createEnterpriseConfig() throws WifiEapConfiguratorException {
-
+	protected final WifiEnterpriseConfig buildEnterpriseConfig() {
 		WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig();
 
 		enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
@@ -402,7 +544,8 @@ public class WifiProfile {
 				break;
 
 			default:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod." + enterpriseEAP);
+				// This should not happen, getAndroidEAPTypeFromIanaEAPType should have complained
+				throw new IllegalArgumentException("Invalid EAP type " + enterpriseEAP);
 		}
 
 		return enterpriseConfig;
@@ -410,12 +553,12 @@ public class WifiProfile {
 
 	/**
 	 * Get the string that Android uses for server name validation.
-	 * <p>
+	 *
 	 * Server names are treated as suffix, but exact string match is also accepted.
-	 * <p>
+	 *
 	 * On Android 9, only a single name is supported.
 	 * Thus, for Android 9, we will calculate the longest suffix match.
-	 * <p>
+	 *
 	 * On Android 10 and onwards, the string can be semicolon-separated,
 	 * which is what we will do for these platforms.
 	 *
@@ -429,57 +572,41 @@ public class WifiProfile {
 		}
 	}
 
-	protected final List<X509Certificate> getRootCaCertificates() {
-		List<X509Certificate> rootCertificates = new ArrayList<>(caCertificates.size());
-
-		for (X509Certificate c : caCertificates) {
-			System.err.println();
-			if (c.getSubjectDN().toString().equals(c.getIssuerDN().toString())) {
-				rootCertificates.add(c);
-			}
-		}
-
-		return rootCertificates;
-	}
-
 	/**
 	 * Create the configuration necessary to configure a passpoint and returns it
 	 *
 	 * @return Passpoint configuration for this profile
+	 * @see this.buildEnterpriseConfig()
 	 */
-	public final PasspointConfiguration createPasspointConfig() throws WifiEapConfiguratorException {
-		PasspointConfiguration passpointConfig = new PasspointConfiguration();
-
-		HomeSp homeSp = new HomeSp();
-		// setFqdn sets the possible names of the EAP server certificate, ;-delimited, this is not the user realm
-		homeSp.setFqdn(getServerNamesDomainString());
-		homeSp.setFriendlyName(fqdn + " via Passpoint");
-
-		long[] roamingConsortiumOIDs = new long[oids.length];
-		int index = 0;
-		for (String roamingConsortiumOIDString : oids) {
-			if (!roamingConsortiumOIDString.startsWith("0x")) {
-				roamingConsortiumOIDString = "0x" + roamingConsortiumOIDString;
-			}
-			roamingConsortiumOIDs[index] = Long.decode(roamingConsortiumOIDString);
-			index++;
-		}
-		if (index == 0) {
+	public final PasspointConfiguration buildPasspointConfig() {
+		if (oids.length == 0) {
 			Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to no OIDs set");
 			return null;
 		}
-		homeSp.setRoamingConsortiumOis(roamingConsortiumOIDs);
+		PasspointConfiguration passpointConfig = new PasspointConfiguration();
+
+		HomeSp homeSp = new HomeSp();
+		// The FQDN in this case is the server names being used to verify the server certificate
+		// Passpoint also has a domain, which is set later with Credential.setRealm(fqdn)
+		homeSp.setFqdn(getServerNamesDomainString());
+		homeSp.setFriendlyName(fqdn + " via Passpoint");
+		homeSp.setRoamingConsortiumOis(oids);
 
 		passpointConfig.setHomeSp(homeSp);
 
 		Credential cred = new Credential();
-		List<X509Certificate> rootCertificates = getRootCaCertificates();
+		List<X509Certificate> rootCertificates = caCertificates.stream().filter(new Predicate<X509Certificate>() {
+			@Override
+			public boolean test(X509Certificate certificate) {
+				return isRootCertificate(certificate);
+			}
+		}).collect(Collectors.<X509Certificate>toList());
 		// TODO Add support for multiple CAs
 		if (rootCertificates.size() == 1) {
 			// Just use the first CA for Passpoint
 			cred.setCaCertificate(rootCertificates.get(0));
 		} else {
-			Log.e(getClass().getSimpleName(), "Not creating Passpoint configuration due to too many CAs in the profile (1 supported, " + getRootCaCertificates().size() + " given)");
+			Log.e(getClass().getSimpleName(), "Not creating Passpoint configuration due to too many CAs in the profile (1 supported, " + rootCertificates + " given)");
 			return null;
 		}
 		cred.setRealm(fqdn);
@@ -509,7 +636,7 @@ public class WifiProfile {
 				us.setUsername(username);
 				us.setPassword(base64);
 				us.setEapType(21); // 21 indicates TTLS (RFC 5281)
-				// Android will always use anonymous@ for Passpoint
+				// Android will always use outer anonymous@ for Passpoint
 				switch (enterprisePhase2Auth) {
 					// Strings from android.net.wifi.hotspot2.pps.Credential.UserCredential.AUTH_METHOD_*
 					// All supported strings are listed in android.net.wifi.hotspot2.pps.Credential.SUPPORTED_AUTH
@@ -523,13 +650,15 @@ public class WifiProfile {
 						us.setNonEapInnerMethod("MS-CHAP");
 						break;
 					default:
-						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.authmethod." + enterprisePhase2Auth);
+						// This should not happen, getAndroidPhase2FromCATAuthMethod should have complained
+						throw new IllegalArgumentException("Invalid Phase2 type " + enterprisePhase2Auth);
 				}
 
 				cred.setUserCredential(us);
 				break;
 			default:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.unknown.eapmethod." + enterpriseEAP);
+				// This should not happen, getAndroidEAPTypeFromIanaEAPType should have complained
+				throw new IllegalArgumentException("Invalid EAP type " + enterpriseEAP);
 		}
 
 		passpointConfig.setCredential(cred);
@@ -537,20 +666,55 @@ public class WifiProfile {
 		return passpointConfig;
 	}
 
+	/**
+	 * Create Network Requests which can be used to configure a network on API 30 and up
+	 *
+	 * The advantage of Network Requests is that they are visible as real networks,
+	 * as opposed to Suggestions, which are only visible when connected.
+	 *
+	 * @return List of network requests
+	 * @see this.buildSSIDSuggestions()
+	 * @see this.buildPasspointSuggestion()
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.Q)
-	public ArrayList<NetworkRequest> createNetworkRequests() throws WifiEapConfiguratorException {
-		WifiEnterpriseConfig enterpriseConfig = createEnterpriseConfig();
-		ArrayList<NetworkRequest> result = new ArrayList<>(ssids.length);
-		for (String ssid : ssids) {
-			WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder();
-			builder.setSsid(ssid);
-			builder.setWpa2EnterpriseConfig(enterpriseConfig);
-			WifiNetworkSpecifier wifiNetworkSpecifier = builder.build();
-			NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-			networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-			networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
-			result.add(networkRequestBuilder.build());
-		}
-		return result;
+	public List<NetworkRequest> buildNetworkRequests() {
+		final WifiEnterpriseConfig enterpriseConfig = buildEnterpriseConfig();
+		final NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+		networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+		return Arrays.stream(ssids).map(new Function<String, NetworkRequest>() {
+			@Override
+			public NetworkRequest apply(String ssid) {
+				WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder();
+				builder.setSsid(ssid);
+				builder.setWpa2EnterpriseConfig(enterpriseConfig);
+				WifiNetworkSpecifier wifiNetworkSpecifier = builder.build();
+				networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
+				return networkRequestBuilder.build();
+			}
+		}).collect(Collectors.<NetworkRequest>toList());
+		// TODO create Passpoint network request
+	}
+
+	/**
+	 * Create a WifiConfiguration object which can be installed on API target 28
+	 *
+	 * @return List of Wi-Fi configurations
+	 */
+	@SuppressWarnings("deprecation")
+	public List<WifiConfiguration> buildWifiConfigurations() {
+		final WifiEnterpriseConfig enterpriseConfig = buildEnterpriseConfig();
+		return Arrays.stream(ssids).map(new Function<String, WifiConfiguration>() {
+			@Override
+			public WifiConfiguration apply(String ssid) {
+				WifiConfiguration config = new WifiConfiguration();
+				config.SSID = "\"" + ssid + "\"";
+				config.priority = 1;
+				config.status = WifiConfiguration.Status.ENABLED;
+				config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+				config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+				config.enterpriseConfig = enterpriseConfig;
+				return config;
+			}
+		}).collect(Collectors.<WifiConfiguration>toList());
 	}
 }

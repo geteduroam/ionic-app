@@ -1,23 +1,17 @@
 package com.emergya.wifieapconfigurator.config;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import com.emergya.wifieapconfigurator.WifiEapConfiguratorException;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * NetworkManagerP is the responsable of implement the abstract methods of NetworkManager. This class
- * implements the methods to work in all devices with API greater and equal than API 29.
+ * An implementation for the configurator that uses Suggestions
  */
 @RequiresApi(api = Build.VERSION_CODES.Q)
 public class SuggestionConfigurator extends AbstractConfigurator {
@@ -26,8 +20,7 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 		super(context);
 	}
 
-	@SuppressLint("SwitchIntDef")
-	public void installSuggestions(ArrayList<WifiNetworkSuggestion> suggestions) throws WifiEapConfiguratorException {
+	public void installSuggestions(List<WifiNetworkSuggestion> suggestions) throws NetworkSuggestionException {
 		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
 			// From Android 11, suggestions may be duplicate
 			// but on Android 10, we must remove suggestions first.
@@ -39,36 +32,15 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 
 		int status = wifiManager.addNetworkSuggestions(suggestions);
 
-		if (status != 0)
+		if (status != 0) {
 			Log.d("addNetworkSuggestions", "status: " + status);
-
-		switch (status) {
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS:
-				break;
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.internal");
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_APP_DISALLOWED:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.app-disallowed");
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_DUPLICATE:
-				// On Android 11, this can't happen according to the documentation
-				// On Android 10, this should not happen because we removed all networks earlier
-				Log.e(getClass().getSimpleName(), "ERROR_ADD_DUPLICATE occurred, this should not happen!");
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.add-duplicate");
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_EXCEEDS_MAX_PER_APP:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.too-many");
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_REMOVE_INVALID:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.remove-invalid");
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_NOT_ALLOWED:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.not-allowed");
-			case WifiManager.STATUS_NETWORK_SUGGESTIONS_ERROR_ADD_INVALID:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.add-invalid");
-			default:
-				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.unknown");
+			throw new NetworkSuggestionException(status);
 		}
+
 	}
 
 	/**
-	 * Remove the network of the SSID sended
+	 * Remove networks with matching SSIDs
 	 *
 	 * @param ssids Remove network matching these SSIDs
 	 */
@@ -95,10 +67,16 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 	 * Remove all our configured networks
 	 */
 	public void removeNetwork() {
-		// Empty lisit removes all networks
+		// Empty list removes all networks
 		wifiManager.removeNetworkSuggestions(Collections.<WifiNetworkSuggestion>emptyList());
 	}
 
+	/**
+	 * Checks if a network with the given SSID is configured
+	 *
+	 * @param ssid Check if a network with this SSID exists
+	 * @return A network with the given SSID exists
+	 */
 	@Override
 	public boolean isNetworkConfigured(String ssid) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -113,6 +91,12 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 		return false;
 	}
 
+	/**
+	 * Checks if the network with the given SSID can be overridden
+	 *
+	 * @param ssid Check if a network with this SSID can be overridden
+	 * @return The network with the given SSID can be overridden
+	 */
 	@Override
 	public boolean isNetworkOverrideable(String ssid) {
 		// We don't know, so go ahead!

@@ -15,9 +15,12 @@ import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 
+/**
+ * A configurator using Network Requests
+ */
 @RequiresApi(api = Build.VERSION_CODES.R)
-public class IntentConfigurator extends SuggestionConfigurator {
-	IntentConfigurator(Context context) {
+public class RequestConfigurator extends SuggestionConfigurator {
+	RequestConfigurator(Context context) {
 		super(context);
 	}
 
@@ -26,6 +29,7 @@ public class IntentConfigurator extends SuggestionConfigurator {
 		intent.putParcelableArrayListExtra(Settings.EXTRA_WIFI_NETWORK_LIST, suggestions);
 		activity.startActivityForResult(intent, 1000);
 
+		// TODO this doesn't do anything..?
 		final Activity myActivity = new Activity() {
 			@Override
 			protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -60,10 +64,9 @@ public class IntentConfigurator extends SuggestionConfigurator {
 	}
 
 	/**
-	 * Remove the network of the SSID sended
+	 * Remove networks with matching SSIDs
 	 *
-	 * @param ssids
-	 * @return
+	 * @param ssids Remove network matching these SSIDs
 	 */
 	@Override
 	public void removeNetwork(String... ssids) {
@@ -71,10 +74,10 @@ public class IntentConfigurator extends SuggestionConfigurator {
 	}
 
 	/**
-	 * Returns if the network with the SSID sended its configured in the device
+	 * Checks if a network with the given SSID is configured
 	 *
-	 * @param ssid
-	 * @return
+	 * @param ssid Check if a network with this SSID exists
+	 * @return A network with the given SSID exists
 	 */
 	@Override
 	public boolean isNetworkConfigured(String ssid) {
@@ -82,10 +85,10 @@ public class IntentConfigurator extends SuggestionConfigurator {
 	}
 
 	/**
-	 * Returns if the network with the SSID can be overridden
+	 * Checks if the network with the given SSID can be overridden
 	 *
-	 * @param ssid
-	 * @return
+	 * @param ssid Check if a network with this SSID can be overridden
+	 * @return The network with the given SSID can be overridden
 	 */
 	@Override
 	public boolean isNetworkOverrideable(String ssid) {

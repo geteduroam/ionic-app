@@ -2,7 +2,7 @@ package com.emergya.wifieapconfigurator;
 
 import android.Manifest;
 import android.content.SharedPreferences;
-import android.net.wifi.WifiEnterpriseConfig;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Build;
@@ -15,7 +15,13 @@ import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
 import com.emergya.wifieapconfigurator.config.AbstractConfigurator;
+import com.emergya.wifieapconfigurator.config.EapConfigCAException;
+import com.emergya.wifieapconfigurator.config.EapConfigClientCertificateException;
+import com.emergya.wifieapconfigurator.config.EapConfigValueException;
 import com.emergya.wifieapconfigurator.config.LegacyConfigurator;
+import com.emergya.wifieapconfigurator.config.NetworkConfigurationException;
+import com.emergya.wifieapconfigurator.config.NetworkInterfaceException;
+import com.emergya.wifieapconfigurator.config.NetworkSuggestionException;
 import com.emergya.wifieapconfigurator.config.SuggestionConfigurator;
 import com.emergya.wifieapconfigurator.config.WifiProfile;
 import com.getcapacitor.JSObject;
@@ -25,14 +31,27 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 /**
- * Its the class responsable of communicate with ionic
+ * Class for communicating between ionic and the Android Wi-Fi API
+ *
+ * This is the only class that can import from the package {@code com.getcapacitor},
+ * and the only class allowed to handle objects from it.  It is responsible for parsing incoming
+ * calls from ionic (although this parsing can be as simple as extracting a JSONObject from it) and
+ * returning a result back.
+ *
+ * All methods marked with {code @PluginMethod} can be called from ionic.  Returned is a JSON object
+ * that will always contain the boolean {code success} and string {code message}, where
+ * {code message} is a lower-case string in the form {@code "plugin.wifieapconfigurator."},
+ * followed by either {@code "success"} or {@code "error"}, followed by one or more keywords
+ * indicating what the result applies to.
  */
 @NativePlugin(
 	permissions = {
@@ -40,96 +59,29 @@ import static androidx.core.content.PermissionChecker.checkSelfPermission;
 		Manifest.permission.CHANGE_WIFI_STATE,
 		Manifest.permission.ACCESS_FINE_LOCATION
 	})
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class WifiEapConfigurator extends Plugin {
 
 	/**
-	 * Its the responsable of call to the methods for configure the networks
+	 * Read the capacitor object and configure the Wi-Fi payloads inside
 	 *
 	 * @param call Capacitor object containing call made in ionic
 	 */
-	@RequiresApi(api = Build.VERSION_CODES.Q)
 	@RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_NETWORK_STATE})
 	@PluginMethod()
 	public void configureAP(PluginCall call) {
 		JSObject object = new JSObject();
-		JSObject profileData = call.getData();
-		SharedPreferences.Editor editor = getPreferences().edit();
-		int targetSDK = getContext().getApplicationContext().getApplicationInfo().targetSdkVersion;
+		object.put("success", false); // set to true if we succeed
 
 		try {
-			WifiProfile profile = new WifiProfile(profileData);
-
-			// We prefer the legacy method, because it's more stable.
-			// But Android blocks legacy SSID configurations from version Q,
-			// and legacy Passpoint configurations from version R;
-			// on and above these versions we have to use WifiNetworkSuggestions.
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && targetSDK >= Build.VERSION_CODES.R) {
-				if (!requestPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
-					throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.permission.notGranted");
-				}
-
-				// Everything must be done with suggestions
-				// TODO We use suggestions directly, should we use intents?
-				SuggestionConfigurator configurator = new SuggestionConfigurator(getContext());
-
-				ArrayList<WifiNetworkSuggestion> suggestions = profile.makeSuggestions();
-				configurator.installSuggestions(suggestions);
-			} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSDK >= Build.VERSION_CODES.Q) {
-				if (!requestPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
-					throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.permission.notGranted");
-				}
-
-				// We have to do SSIDs with suggestions and Passpoint with legacy
-				SuggestionConfigurator suggestionConfigurator = new SuggestionConfigurator(getContext());
-				LegacyConfigurator legacyConfigurator = new LegacyConfigurator(getContext());
-
-				ArrayList<WifiNetworkSuggestion> suggestions = profile.makeSuggestions();
-				suggestionConfigurator.installSuggestions(suggestions);
-
-				PasspointConfiguration passpointConfig = profile.createPasspointConfig();
-				if (passpointConfig != null)
-					configurePasspoint(legacyConfigurator, passpointConfig);
-			} else { // Everything below Q (below Android 10, below API version 29)
-				// We get to use the legacy API for everything. YAY!
-
-				LegacyConfigurator legacyConfigurator = new LegacyConfigurator(getContext());
-				String[] ssids = profile.getSsids();
-
-				WifiEnterpriseConfig enterpriseConfig = profile.createEnterpriseConfig();
-				PasspointConfiguration passpointConfig = profile.createPasspointConfig();
-
-				try {
-					legacyConfigurator.removeNetwork(ssids);
-				} catch (Throwable t) {
-					/* ignore exceptions when removing the network,
-					 * since many Android versions don't let us remove them,
-					 * but allow us to override them
-					 */
-				}
-				for (String ssid : ssids) {
-					if (legacyConfigurator.isNetworkConfigured(ssid) && !legacyConfigurator.isNetworkOverrideable(ssid)) {
-						throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.alreadyAssociated");
-					}
-				}
-				for (String ssid : ssids) {
-					int wifiID = legacyConfigurator.configureSSID(ssid, enterpriseConfig);
-
-					// TODO There can be more than one SSID, but we can only store one
-					editor.putInt("netId", wifiID);
-					editor.apply();
-				}
-				if (passpointConfig != null)
-					configurePasspoint(legacyConfigurator, passpointConfig);
-			}
-
+			configureAP(call.getData());
 			object.put("success", true);
 			object.put("message", "plugin.wifieapconfigurator.success.network.linked");
 		} catch (WifiEapConfiguratorException e) {
-			Log.e("WifiEapConfigurator", e.getMessage());
-			object.put("success", false);
+			Log.e(getClass().getSimpleName(), e.getMessage());
 			object.put("message", e.getMessage());
 
-			// TODO this is how it should be done,
+			// TODO call.error() should be used if anything goes wrong
 			// but the current JS code doesn't handle this well
 			//Throwable cause = e.getCause();
 			//call.error(e.getMessage(), cause instanceof Exception ? (Exception) cause : null);
@@ -138,48 +90,161 @@ public class WifiEapConfigurator extends Plugin {
 		call.success(object);
 	}
 
-	private void configurePasspoint(LegacyConfigurator legacyConfigurator, PasspointConfiguration passpointConfig) throws WifiEapConfiguratorException {
+	/**
+	 * Configure networks using the given JSON data
+	 * TODO: Implement in such a way that we don't need WifiEapConfiguratorException anymore
+	 *
+	 * @param profileData Wi-Fi configuration
+	 * @throws WifiEapConfiguratorException When anything goes wrong; the exception message is given back to Capacitor
+	 * @see WifiProfile#WifiProfile(JSONObject)
+	 */
+	@RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_NETWORK_STATE})
+	protected void configureAP(JSONObject profileData) throws WifiEapConfiguratorException {
 		SharedPreferences.Editor editor = getPreferences().edit();
-		String fqdn = passpointConfig.getHomeSp().getFqdn();
+		int targetSDK = getContext().getApplicationContext().getApplicationInfo().targetSdkVersion;
 
+		WifiProfile profile;
 		try {
-			legacyConfigurator.configurePasspoint(passpointConfig);
+			// Parses certificate material and can throw
+			profile = new WifiProfile(profileData);
+		} catch (EapConfigValueException e) {
+			Log.e(getClass().getSimpleName(), e.getMessage());
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.data.missing", e);
+		} catch (EapConfigCAException e) {
+			Log.e(getClass().getSimpleName(), e.getMessage());
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.ca.invalid", e);
+		} catch (EapConfigClientCertificateException e) {
+			Log.e(getClass().getSimpleName(), e.getMessage());
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.clientcert.invalid", e);
+		}
 
-			editor.putString("fqdn", fqdn);
-			editor.apply();
-		} catch (WifiEapConfiguratorException e) {
-			editor.remove("fqdn");
-			editor.apply();
-
-			if (!"plugin.wifieapconfigurator.error.passpoint.linked".equals(e.getMessage())) {
-				throw e;
+		// We prefer the legacy method, because it's more stable.
+		// But Android blocks legacy SSID configurations from version Q,
+		// and legacy Passpoint configurations from version R;
+		// on and above these versions we have to use WifiNetworkSuggestions.
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && targetSDK >= Build.VERSION_CODES.R) {
+			if (!requestPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
+				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.permission.notGranted");
 			}
 
-			Log.w("LegacyConfigurator", "IllegalArgumentException occurred, Passpoint disabled or unsupported on device?");
+			// Everything must be done with suggestions
+			// TODO We use suggestions directly, should we use intents?
+			SuggestionConfigurator suggestionConfigurator = new SuggestionConfigurator(getContext());
+
+			List<WifiNetworkSuggestion> suggestions = profile.buildSSIDSuggestions();
+			WifiNetworkSuggestion passpointSuggestion = profile.buildPasspointSuggestion();
+			if (passpointSuggestion != null) suggestions.add(passpointSuggestion);
+			installSuggestions(suggestionConfigurator, suggestions);
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSDK >= Build.VERSION_CODES.Q) {
+			if (!requestPermission(Manifest.permission.CHANGE_NETWORK_STATE)) {
+				throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.permission.notGranted");
+			}
+
+			// We have to do SSIDs with suggestions and Passpoint with legacy
+			SuggestionConfigurator suggestionConfigurator = new SuggestionConfigurator(getContext());
+			LegacyConfigurator legacyConfigurator = new LegacyConfigurator(getContext());
+
+			List<WifiNetworkSuggestion> suggestions = profile.buildSSIDSuggestions();
+			installSuggestions(suggestionConfigurator, suggestions);
+
+			PasspointConfiguration passpointConfig = profile.buildPasspointConfig();
+			if (passpointConfig != null) {
+				configurePasspoint(legacyConfigurator, passpointConfig);
+			}
+		} else {
+			// Everything below Q (below Android 10, below API version 29)
+			// We get to use the legacy API for everything. YAY!
+
+			LegacyConfigurator legacyConfigurator = new LegacyConfigurator(getContext());
+			String[] ssids = profile.getSSIDs();
+
+			PasspointConfiguration passpointConfig = profile.buildPasspointConfig();
+
+			try {
+				legacyConfigurator.removeNetwork(ssids);
+			} catch (Throwable t) {
+				/* ignore exceptions when removing the network,
+				 * since many Android versions don't let us remove them,
+				 * but allow us to override them
+				 */
+			}
+			for (String ssid : ssids) {
+				// We removed all SSIDs, but are they gone?
+				// If not, are we at least allowed to override them?
+
+				if (legacyConfigurator.isNetworkConfigured(ssid) && !legacyConfigurator.isNetworkOverrideable(ssid)) {
+					throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.alreadyAssociated");
+				}
+			}
+
+			int firstWifiId = -1;
+			for (WifiConfiguration config : profile.buildWifiConfigurations()) {
+				try {
+					int wifiId = legacyConfigurator.configureNetworkConfiguration(config);
+
+					// TODO There can be more than one SSID, but we can only store one
+					// (we're in a loop, we will only consider the first)
+					if (wifiId != -1 && firstWifiId == -1) {
+						editor.putInt("netId", wifiId);
+						legacyConfigurator.connectNetwork(wifiId);
+						firstWifiId = wifiId;
+					}
+				} catch (SecurityException e) {
+					throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.security", e);
+				} catch (NetworkConfigurationException e) {
+					// We removed networks earlier,
+					// but this is the error that was logged in the old code,
+					// and that worked fine, so we'll keep that for now.
+					// In reality, we don't know the reason the network was refused.
+
+					// TODO Figure out how can we actually get here?
+					// NOTE There are other instances of "alreadyAssociated" being reported,
+					// such as the loop before this one.
+
+					throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.network.alreadyAssociated", e);
+				}
+			}
+			// Now we're out of the SSID loop, store the changes we made in the loop
+			editor.apply();
+
+			if (passpointConfig != null)
+				configurePasspoint(legacyConfigurator, passpointConfig);
 		}
+
 	}
 
+	/**
+	 * Validate the passphrase on a client certificate
+	 *
+	 * Call must contain these variables:
+	 * {@code String certificate} Base64 encoded PKCS12 store
+	 * {@code String passPhrase} Passphrase to test
+	 *
+	 * @see WifiProfile#validatePassPhrase(String, String)
+	 */
 	@PluginMethod
 	public void validatePassPhrase(PluginCall call) {
 		JSObject object = new JSObject();
 
-		try {
-			boolean success = WifiProfile.validatePassPhrase(call.getString("certificate"), call.getString("passPhrase"));
+		boolean success = WifiProfile.validatePassPhrase(call.getString("certificate"), call.getString("passPhrase"));
 
-			object.put("success", success);
-			if (success) {
-				object.put("message", "plugin.wifieapconfigurator.success.passphrase.validation");
-			} else {
-				object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
-			}
-		} catch (WifiEapConfiguratorException e) {
-			object.put("success", false);
+		object.put("success", success);
+		if (success) {
+			object.put("message", "plugin.wifieapconfigurator.success.passphrase.validation");
+		} else {
 			object.put("message", "plugin.wifieapconfigurator.error.passphrase.validation");
 		}
 
 		call.success(object);
 	}
 
+	/**
+	 * Remove an SSID network
+	 *
+	 * Call must contain {@code String ssid}.
+	 *
+	 * @see AbstractConfigurator#removeNetwork(String...)
+	 */
 	@PluginMethod
 	public void removeNetwork(PluginCall call) {
 		JSObject object = new JSObject();
@@ -188,34 +253,58 @@ public class WifiEapConfigurator extends Plugin {
 			object.put("success", false);
 			object.put("message", "plugin.wifieapconfigurator.error.ssid.missing");
 		} else {
-			getManagerForSSID().removeNetwork(call.getString("ssid"));
+			getSSIDConfigurator().removeNetwork(call.getString("ssid"));
 			object.put("success", true);
 			object.put("message", "plugin.wifieapconfigurator.success.network.removed");
 		}
 		call.success(object);
 	}
 
+	/**
+	 * Enable the Wi-Fi interface
+	 *
+	 * Call does not need to provide anything
+	 *
+	 * @see AbstractConfigurator#enableWifi()
+	 */
 	@PluginMethod
 	public void enableWifi(PluginCall call) {
 		JSObject object = new JSObject();
 		object.put("success", false);
 		try {
-			getManagerForSSID().enableWifi();
+			getSSIDConfigurator().enableWifi();
 			object.put("success", true);
 			object.put("message", "plugin.wifieapconfigurator.success.wifi.enabled");
-		} catch (WifiEapConfiguratorException e) {
-			object.put("message", e.getMessage());
+		} catch (NetworkInterfaceException e) {
+			object.put("message", "plugin.wifieapconfigurator.error.wifi.disabled");
 		}
 
 		call.success(object);
 	}
 
+	/**
+	 * Check if an SSID network is associated
+	 *
+	 * Call must contain {@code String ssid}.
+	 *
+	 * TODO: It is unclear whether "associated" or "configured" is meant; clarify!
+	 * Probably "configured" is meant, right?
+	 *
+	 * @see AbstractConfigurator#areAnyNetworksConfigured(String...)
+	 */
 	@PluginMethod
 	public boolean isNetworkAssociated(PluginCall call) throws JSONException {
 		Object[] ssids = call.getArray("ssid").toList().toArray();
-		return getManagerForSSID().areAnyNetworksConfigured(Arrays.copyOf(ssids, ssids.length, String[].class));
+		return getSSIDConfigurator().areAnyNetworksConfigured(Arrays.copyOf(ssids, ssids.length, String[].class));
 	}
 
+	/**
+	 * Determines whether a certain SSID is reachable
+	 *
+	 * Call must contain {@code String ssid}.
+	 *
+	 * @see AbstractConfigurator#reachableSSID(String)
+	 */
 	@PluginMethod
 	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 	public void reachableSSID(PluginCall call) {
@@ -224,19 +313,26 @@ public class WifiEapConfigurator extends Plugin {
 		boolean granted = requestPermission(Manifest.permission.ACCESS_FINE_LOCATION);
 		if (!granted) {
 			object.put("message", "plugin.wifieapconfigurator.error.permission.notGranted");
-		} else try {
-			if (getManagerForSSID().reachableSSID(call.getString("ssid"))) {
+		} else {
+			if (getSSIDConfigurator().reachableSSID(call.getString("ssid"))) {
 				object.put("success", true);
 				object.put("message", "plugin.wifieapconfigurator.success.network.reachable");
 			} else {
 				object.put("message", "plugin.wifieapconfigurator.success.network.missing");
 			}
-		} catch (WifiEapConfiguratorException e) {
-			object.put("message", e.getMessage());
 		}
 		call.success(object);
 	}
 
+	/**
+	 * Determines if the device is connected to an SSID
+	 *
+	 * Call must contain {@code String ssid}.
+	 *
+	 * TODO so this is the actual "associated" test, right? Clarify!
+	 *
+	 * @see AbstractConfigurator#isConnectedSSID(String)
+	 */
 	@PluginMethod
 	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 	public void isConnectedSSID(PluginCall call) {
@@ -246,17 +342,14 @@ public class WifiEapConfigurator extends Plugin {
 		if (!granted) {
 			object.put("success", false);
 			object.put("message", "plugin.wifieapconfigurator.error.permission.notGranted");
-		} else try {
-			if (getManagerForSSID().isConnectedSSID(call.getString("ssid"), getActivity())) {
+		} else {
+			if (getSSIDConfigurator().isConnectedSSID(call.getString("ssid"))) {
 				object.put("isConnected", true);
 				object.put("message", "plugin.wifieapconfigurator.success.network.connected");
 			} else {
 				object.put("isConnected", false);
 				object.put("message", "plugin.wifieapconfigurator.error.network.notConnected");
 			}
-		} catch (WifiEapConfiguratorException e) {
-			object.put("success", false);
-			object.put("message", e.getMessage());
 		}
 		call.success(object);
 	}
@@ -268,8 +361,8 @@ public class WifiEapConfigurator extends Plugin {
 		String message = call.getString("message");
 
 		// TODO this has nothing with SSIDs to do,
-		// classes should be split
-		getManagerForSSID().sendNotification(stringDate, title, message);
+		// TODO so this should use an SSIDConfigurator, or any AbstractConfigurator
+		getSSIDConfigurator().sendNotification(stringDate, title, message);
 
 		// TODO no callback needed?
 	}
@@ -277,8 +370,8 @@ public class WifiEapConfigurator extends Plugin {
 	@PluginMethod()
 	public void writeToSharedPref(PluginCall call) {
 		// TODO this has nothing with SSIDs to do,
-		// classes should be split
-		getManagerForSSID().writeToSharedPref(call.getString("id"));
+		// TODO so this should use an SSIDConfigurator, or any AbstractConfigurator
+		getSSIDConfigurator().writeToSharedPref(call.getString("id"));
 
 		JSObject object = new JSObject();
 		object.put("success", true);
@@ -291,8 +384,8 @@ public class WifiEapConfigurator extends Plugin {
 		JSObject object = new JSObject();
 
 		// TODO this has nothing with SSIDs to do,
-		// classes should be split
-		String id = getManagerForSSID().readFromSharedPref();
+		// TODO so this should use an SSIDConfigurator, or any AbstractConfigurator
+		String id = getSSIDConfigurator().readFromSharedPref();
 		if (id == null || "".equals(id)) {
 			object.put("success", false);
 			object.put("message", "plugin.wifieapconfigurator.error.reading");
@@ -324,7 +417,66 @@ public class WifiEapConfigurator extends Plugin {
 	}
 
 	/**
-	 * Requests permission to the app
+	 * Install network suggestions
+	 *
+	 * This is a helper function that executes {@code SuggestionConfigurator#installSuggestions}
+	 * and wraps any exception into a {@code WifiEapConfiguratorException}
+	 *
+	 * @param suggestionConfigurator The configurator to use
+	 * @param suggestions            The suggestions to install
+	 * @throws WifiEapConfiguratorException Exceptions are wrapped into this
+	 * @see SuggestionConfigurator#installSuggestions(List)
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.Q)
+	private void installSuggestions(SuggestionConfigurator suggestionConfigurator, List<WifiNetworkSuggestion> suggestions) throws WifiEapConfiguratorException {
+		try {
+			suggestionConfigurator.installSuggestions(suggestions);
+		} catch (NetworkSuggestionException e) {
+			Log.e(getClass().getSimpleName(), e.getMessage());
+
+			// Parenthesis for avoiding a NullPointerException when e.getMessage() is NULL
+			// It won't be NULL, but this way we don't crash when it is anyway.
+			throw new WifiEapConfiguratorException(("plugin.wifieapconfigurator.error.network." + e.getMessage()).toLowerCase(), e);
+		}
+	}
+
+	/**
+	 * Install a Passpoint network
+	 *
+	 * This is a helper function that executes {@code LegacyConfigurator#configurePasspoint}
+	 * and stores the FQDN used, and wraps any exception into a {@code WifiEapConfiguratorException}
+	 *
+	 * @param legacyConfigurator The configurator to use
+	 * @param passpointConfig    The passpoint configuration to install
+	 * @throws WifiEapConfiguratorException Exceptions are wrapped into this
+	 * @see LegacyConfigurator#configurePasspoint(PasspointConfiguration)
+	 */
+	private void configurePasspoint(LegacyConfigurator legacyConfigurator, PasspointConfiguration passpointConfig) throws WifiEapConfiguratorException {
+		SharedPreferences.Editor editor = getPreferences().edit();
+		String fqdn = passpointConfig.getHomeSp().getFqdn();
+
+		try {
+			legacyConfigurator.configurePasspoint(passpointConfig);
+
+			editor.putString("fqdn", fqdn);
+			editor.apply();
+		} catch (NetworkInterfaceException e) {
+			editor.remove("fqdn");
+			editor.apply();
+
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.unsupported", e);
+		} catch (SecurityException e) {
+			editor.remove("fqdn");
+			editor.apply();
+
+			Log.w("LegacyConfigurator", "SecurityException occurred, ");
+
+			throw new WifiEapConfiguratorException("plugin.wifieapconfigurator.error.passpoint.security", e);
+		}
+	}
+
+	/**
+	 * Requests the requested permissions from the operating system
 	 *
 	 * @param permissions All permissions to request
 	 * @return Whether all provided permissions are granted
@@ -347,8 +499,15 @@ public class WifiEapConfigurator extends Plugin {
 		return true;
 	}
 
-	private AbstractConfigurator getManagerForSSID() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+	/**
+	 * Get the most appropriate configurator to configure SSIDs on this device
+	 *
+	 * @return A configurator that can configure SSIDs on this device
+	 */
+	private AbstractConfigurator getSSIDConfigurator() {
+		int targetSDK = getContext().getApplicationContext().getApplicationInfo().targetSdkVersion;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSDK >= Build.VERSION_CODES.Q) {
 			return new SuggestionConfigurator(getContext());
 		}
 		return new LegacyConfigurator(getContext());
