@@ -30,6 +30,8 @@ public class LegacyConfigurator extends AbstractConfigurator {
 	 *
 	 * @param config The Wi-Fi configuration
 	 * @return ID of the network description created
+	 * @throws SecurityException             When adding the network was disallowed
+	 * @throws NetworkConfigurationException The network connection was not created
 	 */
 	public int configureNetworkConfiguration(WifiConfiguration config) throws SecurityException, NetworkConfigurationException {
 		// Can throw SecurityException
@@ -58,10 +60,11 @@ public class LegacyConfigurator extends AbstractConfigurator {
 	 * Remove networks with matching SSIDs
 	 *
 	 * @param ssids Remove network matching these SSIDs
+	 * @throws NetworkConfigurationException A network was not removed (does not throw if the network was not configured to begin with)
 	 */
 	@Override
 	@RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-	public void removeNetwork(String... ssids) {
+	public void removeNetwork(String... ssids) throws NetworkConfigurationException {
 		List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
 		for (WifiConfiguration conf : configuredNetworks) {
 			for (String ssid : ssids) {
@@ -70,6 +73,15 @@ public class LegacyConfigurator extends AbstractConfigurator {
 					//wifiManager.saveConfiguration(); // not needed, removeNetwork already commits
 					break;
 				}
+			}
+		}
+
+		for (String ssid : ssids) {
+			// We removed all SSIDs, but are they gone?
+			// If not, are we at least allowed to override them?
+
+			if (isNetworkConfigured(ssid) && !isNetworkOverrideable(ssid)) {
+				throw new NetworkConfigurationException("Unable to remove network with SSID \"" + ssid + "\"");
 			}
 		}
 	}
@@ -140,6 +152,8 @@ public class LegacyConfigurator extends AbstractConfigurator {
 	 * Configures the passpoint in the device if this have available passpoint
 	 *
 	 * @param config Passpoint configuration
+	 * @throws SecurityException         When adding the network was disallowed
+	 * @throws NetworkInterfaceException The network interface does not support Passpoint
 	 */
 	public void configurePasspoint(PasspointConfiguration config) throws SecurityException, NetworkInterfaceException {
 		try {

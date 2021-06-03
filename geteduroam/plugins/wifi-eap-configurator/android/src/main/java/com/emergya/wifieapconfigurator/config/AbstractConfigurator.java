@@ -51,8 +51,9 @@ public abstract class AbstractConfigurator {
 	 * Remove networks with matching SSIDs
 	 *
 	 * @param ssids Remove network matching these SSIDs
+	 * @throws NetworkConfigurationException A network was not removed (does not throw if the network was not configured to begin with)
 	 */
-	public abstract void removeNetwork(String... ssids);
+	public abstract void removeNetwork(String... ssids) throws NetworkConfigurationException;
 
 	/**
 	 * Enable wifi of the device
