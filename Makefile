@@ -31,9 +31,12 @@ clean:
 		geteduroam/node_modules geteduroam/plugins/wifi-eap-configurator/node_modules \
 		geteduroam/.sourcemaps geteduroam/www  \
 		geteduroam/ios/capacitor-cordova-ios-plugins geteduroam/ios/App/public \
+		geteduroam/ios/App/App.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings \
 		geteduroam/ios/App/Pods/Headers geteduroam/ios/App/Pods/Local\\ Podspecs geteduroam/ios/App/Pods/Pods.xcodeproj \
 		geteduroam/ios/App/Pods/Target\\ Support\\ Files geteduroam/ios/App/Pods/Manifest.lock \
-		geteduroam/android/capacitor-cordova-android-plugins geteduroam/android/app/geteduroam/main/assets/public
+		geteduroam/android/capacitor-cordova-android-plugins geteduroam/android/app/geteduroam/main/assets/public \
+		geteduroam/android/app/build geteduroam/android/app/src/main/assets/public/build \
+
 .PHONY: clean
 
 # Targets

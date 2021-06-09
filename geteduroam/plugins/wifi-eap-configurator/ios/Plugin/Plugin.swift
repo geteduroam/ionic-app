@@ -338,6 +338,8 @@ public class WifiEapConfigurator: CAPPlugin {
 				}
 				NSLog("☠️ buildSettings: Failed precondition for EAPPEAP/EAPFAST")
 				break
+			@unknown default:
+				<#fatalError()#>
 			}
 		}
 		return nil

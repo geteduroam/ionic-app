@@ -39,6 +39,7 @@ npm-debug.log*
 /android/capacitor-cordova-android-plugins
 /android/local.properties
 /android/.idea
+/ios/App/App.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 /plugins/wifi-eap-configurator/android/build/
 /plugins/wifi-eap-configurator/ios/Plugin.xcodeproj/project.xcworkspace/
 /plugins/wifi-eap-configurator/ios/Plugin.xcodeproj/xcuserdata/jornane.xcuserdatad/
