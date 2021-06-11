@@ -53,7 +53,7 @@
     "turn-on": "Bitte schalten Sie mobile Daten ein",
     "need-network": "Zum Laden der Liste der Organisationen ist eine Netzwerkverbindung erforderlich. Bitte aktivieren Sie die Netzwerkverbindung und starten Sie die App neu.",
     "duplicate": "Es gibt eine Konfiguration für dieses Wi-Fi-Netzwerk.\nBitte entfernen Sie es im Menü Einstellungen > Wi-Fi-Netzwerke",
-    "mobileconfig": "Ihr Gerät wird über ein Konfigurationsprofil konfiguriert.\nBitte gehen Sie zu Einstellungen > Allgemein > Profil um es zu entfernen",
+    "mobileconfig": "Ihr Gerät wird über ein Konfigurationsprofil konfiguriert.\nBitte entfernen Sie es im Menü Einstellungen > Allgemein > Profil",
     "invalid-eap": "Ungültiges Profil. Wenn der Fehler weiterhin besteht, wenden Sie sich bitte an den Administrator.",
     "invalid-method": "Für das ausgewählte Profil ist keine gültige Authentifizierungsmethode verfügbar",
     "invalid-profile": "Das Wi-Fi-Netzwerk Profil ist falsch",
@@ -70,7 +70,7 @@
     "network-available": "Netzwerk ist verfügbar",
     "configuring": "Die Netzwerkkonfiguration wird heruntergeladen, bitte warten...",
     "title": "Neu konfigurieren geteduroam",
-    "message": "In 5 Tagen läuft das geteduroam WiFi-profil ab, klicken Sie hier, um es neu zu konfigurieren"
+    "message": "In 5 Tagen läuft das geteduroam WiFi-Profil ab, klicken Sie hier, um es neu zu konfigurieren"
   },
   "defaultError": "Unbekannter Fehler"
 }
