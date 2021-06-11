@@ -14,7 +14,7 @@
     "password": "Password",
     "passphrase": "Passphrase",
     "note": "*Note: if the connection fails, please check your password",
-    "help": "Need help ?",
+    "help": "Need help?",
     "support": "Click here for support"
   },
   "placeholder": {
@@ -50,23 +50,23 @@
     "username": "The username must follow the pattern ",
     "domain": "The username must end with ",
     "password": "Password is incorrect",
-    "turn-on": "Please, turn on mobile data",
+    "turn-on": "Please turn on mobile data",
     "need-network": "We need a network connection to load the list of institutions. Please enable networking and restart the application.",
     "duplicate": "This network is already available in the device.\nPlease go to Settings > Wi-Fi Networks and remove it first",
     "mobileconfig": "Your device is configured through a configuration profile.\nPlease go to Settings > General > Profile and remove it",
-    "invalid-eap": "Invalid selected profile, if the error persists, contact with the admin please",
+    "invalid-eap": "Invalid selected profile. If the error persists, please contact your administrator",
     "invalid-method": "No valid authentication method available from the selected profile",
     "invalid-profile": "The selected profile is wrong",
     "invalid-oauth": "You have to authorize the app to be able to configure the WiFi connection",
     "invalid-institution": "This institution is not supported",
     "passphrase": "The Passphrase is incorrect",
-    "terms": "You need accept terms of use"
+    "terms": "You need accept the Terms of Use"
   },
   "text": {
     "configured": "Wi-Fi is now configured",
     "configure": "You are about to install a Wi-Fi network profile.",
     "configure1": "Continue configuring",
-    "reconfigure": "Hi, It seems you have configured this device already.\nDo you want to reconfigure it?",
+    "reconfigure": "Hi, it appears that you have configured this device already.\nDo you want to reconfigure it?",
     "network-available": "External access available",
     "configuring": "Receiving network configuration, please wait",
     "title": "Reconfigure geteduroam",
