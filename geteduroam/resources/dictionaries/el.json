@@ -1,0 +1,76 @@
+{
+  "header": {
+    "config": "eduroam configuration",
+    "profile": "Provide information",
+    "confirmation": "Enjoy using eduroam!",
+    "error": "Error"
+  },
+  "label": {
+    "institution": "Institution",
+    "username": "Username",
+    "accept": "Accept ",
+    "terms": "terms of use",
+    "profile": "Profile",
+    "password": "Password",
+    "passphrase": "Passphrase",
+    "note": "*Note: if the connection fails, please check your password",
+    "help": "Need help?",
+    "support": "Click here for support"
+  },
+  "placeholder": {
+    "institution": "Select an institution...",
+    "profile": "Select a profile...",
+    "example": "username"
+  },
+  "modalSupport": {
+    "title": "Support Options",
+    "message": "Select an option",
+    "web": "Web: ",
+    "email": "Email: ",
+    "phone": "Phone: ",
+    "help": "Support help",
+    "cancel": "Cancel",
+    "terms": "Terms of use"
+  },
+  "button": {
+    "next": "Next",
+    "ok": "ok",
+    "more": "Know more",
+    "email": "Send e-mail",
+    "back": "Back",
+    "done": "Done",
+    "reconfigure": "Reconfigure",
+    "configure" : "Configure",
+    "no-thanks": "No, thanks",
+    "close": "Close",
+    "connect": "Connect to network",
+    "start-over": "Start over"
+  },
+  "error": {
+    "username": "The username must follow the pattern ",
+    "domain": "The username must end with ",
+    "password": "Password is incorrect",
+    "turn-on": "Please turn on mobile data",
+    "need-network": "We need a network connection to load the list of institutions. Please enable networking and restart the application.",
+    "duplicate": "This network is already available in the device.\nPlease go to Settings > Wi-Fi Networks and remove it first",
+    "mobileconfig": "Your device is configured through a configuration profile.\nPlease go to Settings > General > Profile and remove it",
+    "invalid-eap": "Invalid selected profile. If the error persists, please contact your administrator",
+    "invalid-method": "No valid authentication method available from the selected profile",
+    "invalid-profile": "The selected profile is wrong",
+    "invalid-oauth": "You have to authorize the app to be able to configure the WiFi connection",
+    "invalid-institution": "This institution is not supported",
+    "passphrase": "The Passphrase is incorrect",
+    "terms": "You need accept the Terms of Use"
+  },
+  "text": {
+    "configured": "Wi-Fi is now configured",
+    "configure": "You are about to install a Wi-Fi network profile.",
+    "configure1": "Continue configuring",
+    "reconfigure": "Hi, it appears that you have configured this device already.\nDo you want to reconfigure it?",
+    "network-available": "External access available",
+    "configuring": "Receiving network configuration, please wait",
+    "title": "Reconfigure geteduroam",
+    "message": "There are 5 days left for your geteduroam profile to expire, click to reconfigure it"
+  },
+  "defaultError": "Key not found"
+}
