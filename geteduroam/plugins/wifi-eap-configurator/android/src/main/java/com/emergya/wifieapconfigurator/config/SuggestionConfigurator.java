@@ -11,7 +11,21 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * An implementation for the configurator that uses Suggestions
+ * An implementation for the configurator that uses Suggestions.
+ *
+ * Suggestions appear either as a background notification (Android 10) or as a prompt (Android 11).
+ * After the user answers the prompt positively, the device will connect to the network if it is
+ * in range, and no competing user WiFi networks are available.  The networks from the suggestion
+ * do not show up in the WiFi manager, and an attempt from the user to connect to the network
+ * manually might trigger a dialog asking for settings, even though the suggestion is already
+ * installed.
+ *
+ * On Android 10 (but not 11), there might be a cooldown timer that is triggered when the user
+ * answers negatively to the prompt.  The timer reportedly runs for 24 hours, cannot be cancelled
+ * and prevents further prompts from showing up.
+ *
+ * This method is used as a fallback on Android 11, but on Android 10 it is the only supported
+ * means of configuring WiFi, despite the issues.
  */
 @RequiresApi(api = Build.VERSION_CODES.Q)
 public class SuggestionConfigurator extends AbstractConfigurator {

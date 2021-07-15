@@ -2,22 +2,27 @@ package com.emergya.wifieapconfigurator.config;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkRequest;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A configurator using Network Requests
+ * A configurator using intents
+ *
+ * Intents will create the network in the WiFi app just like other WiFi networks.
+ * This is the most natural behaviour for the end user.
+ * If a network is created that already exists, the network is overridden (*)
+ *
+ * It does not appear to be possible to remove networks after they have been created.
+ * This is especially problematic for Passpoint networks;
+ *
+ * (*) on some devices, Passpoint networks are not overridden
  */
 @RequiresApi(api = Build.VERSION_CODES.R)
 public class IntentConfigurator extends SuggestionConfigurator {
@@ -26,6 +31,8 @@ public class IntentConfigurator extends SuggestionConfigurator {
 	}
 
 	public void installSuggestions(List<WifiNetworkSuggestion> suggestions) {
+		// TODO ideally we want to remove old networks, especially Passpoint
+
 		if (!(suggestions instanceof ArrayList)) {
 			suggestions = new ArrayList<>(suggestions);
 		}
@@ -39,23 +46,6 @@ public class IntentConfigurator extends SuggestionConfigurator {
 		context.startActivity(intent);
 
 		// TODO how to get a result?
-	}
-
-	public void installNetworkRequests(NetworkRequest... networkRequests) {
-		for (NetworkRequest networkRequest : networkRequests) {
-			final ConnectivityManager cm = (ConnectivityManager)
-				context.getApplicationContext()
-					.getSystemService(Context.CONNECTIVITY_SERVICE);
-			if (cm != null) {
-				cm.requestNetwork(networkRequest, new ConnectivityManager.NetworkCallback() {
-					@Override
-					public void onAvailable(@NonNull Network network) {
-						super.onAvailable(network);
-						cm.bindProcessToNetwork(network);
-					}
-				});
-			}
-		}
 	}
 
 	/**

@@ -14,8 +14,18 @@ import androidx.annotation.RequiresPermission;
 import java.util.List;
 
 /**
+ * The legacy configurator will create the network in the WiFi app just like other WiFi networks.
+ * This is the most natural behaviour for the end user.
+ *
+ * When creating a network that already exists, it is overridden.
+ *
  * The LegacyConfigurator can be used to configure Wi-Fi network profiles when the target API
- * version is 28 or lower.  It works on Android 11, but only with a low enough target API.
+ * version is 28 or lower.  It works on Android 10,11, but only with a low enough target API.
+ *
+ * Google does not allow a low enough target API on the Google Play Store, making this class
+ * impossible to use on the Play Store for Android devices with Android 10 and up.
+ *
+ * Not tested on Android 12.
  */
 @RequiresApi(api = Build.VERSION_CODES.O)
 @TargetApi(Build.VERSION_CODES.P)
