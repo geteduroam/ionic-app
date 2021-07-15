@@ -21,14 +21,22 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 	}
 
 	public void installSuggestions(List<WifiNetworkSuggestion> suggestions) throws NetworkSuggestionException {
-		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-			// From Android 11, suggestions may be duplicate
-			// but on Android 10, we must remove suggestions first.
-			// On Android 10, we cannot get our previously configured suggestions,
-			// so we have to use the only other option; remove all our installed suggestions.
+		//if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
 
-			removeNetwork();
-		}
+		// From Android 11, suggestions may be duplicate
+		// but on Android 10, we must remove suggestions first.
+		// On Android 10, we cannot get our previously configured suggestions,
+		// so we have to use the only other option; remove all our installed suggestions.
+
+		// On Android 11 we will also remove all networks, because otherwise old suggestions
+		// will keep lingering.
+
+		// TODO If we're ever going to support multiple profiles, we must store which suggestions are connected to the profile,
+		// so that we only remove the suggestions associated with that profile
+
+		removeNetwork();
+
+		//}
 
 		int status = wifiManager.addNetworkSuggestions(suggestions);
 
