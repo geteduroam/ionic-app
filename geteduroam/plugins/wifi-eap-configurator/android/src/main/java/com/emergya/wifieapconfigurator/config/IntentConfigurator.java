@@ -1,6 +1,5 @@
 package com.emergya.wifieapconfigurator.config;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -8,42 +7,38 @@ import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A configurator using Network Requests
  */
 @RequiresApi(api = Build.VERSION_CODES.R)
-public class RequestConfigurator extends SuggestionConfigurator {
-	RequestConfigurator(Context context) {
+public class IntentConfigurator extends SuggestionConfigurator {
+	public IntentConfigurator(Context context) {
 		super(context);
 	}
 
-	public void installSuggestions(ArrayList<WifiNetworkSuggestion> suggestions, Activity activity) {
+	public void installSuggestions(List<WifiNetworkSuggestion> suggestions) {
+		if (!(suggestions instanceof ArrayList)) {
+			suggestions = new ArrayList<>(suggestions);
+		}
+
+		// TODO "null wants to add eduroam" - what is null?
+
+		Bundle bundle = new Bundle();
+		bundle.putParcelableArrayList(Settings.EXTRA_WIFI_NETWORK_LIST, (ArrayList<WifiNetworkSuggestion>) suggestions);
 		Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
-		intent.putParcelableArrayListExtra(Settings.EXTRA_WIFI_NETWORK_LIST, suggestions);
-		activity.startActivityForResult(intent, 1000);
+		intent.putExtras(bundle);
+		context.startActivity(intent);
 
-		// TODO this doesn't do anything..?
-		final Activity myActivity = new Activity() {
-			@Override
-			protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-				super.onActivityResult(requestCode, resultCode, data);
-
-				// check if the request code is same as what is passed  here it is 1
-				if (requestCode == 1000) {
-					// Make sure the request was successful
-					if (resultCode == RESULT_OK) {
-						System.out.println("The user agree the configuration");
-					}
-				}
-			}
-		};
+		// TODO how to get a result?
 	}
 
 	public void installNetworkRequests(NetworkRequest... networkRequests) {
@@ -70,7 +65,10 @@ public class RequestConfigurator extends SuggestionConfigurator {
 	 */
 	@Override
 	public void removeNetwork(String... ssids) {
+		// It's not possible to remove SSIDs that are created through intentions
+		// But let's remove everything to be sure
 
+		removeNetwork();
 	}
 
 	/**

@@ -18,6 +18,7 @@ import com.emergya.wifieapconfigurator.config.AbstractConfigurator;
 import com.emergya.wifieapconfigurator.config.EapConfigCAException;
 import com.emergya.wifieapconfigurator.config.EapConfigClientCertificateException;
 import com.emergya.wifieapconfigurator.config.EapConfigValueException;
+import com.emergya.wifieapconfigurator.config.IntentConfigurator;
 import com.emergya.wifieapconfigurator.config.LegacyConfigurator;
 import com.emergya.wifieapconfigurator.config.NetworkConfigurationException;
 import com.emergya.wifieapconfigurator.config.NetworkInterfaceException;
@@ -154,18 +155,27 @@ public class WifiEapConfigurator extends Plugin {
 		// But Android blocks legacy SSID configurations from version Q,
 		// and legacy Passpoint configurations from version R;
 		// on and above these versions we have to use WifiNetworkSuggestions.
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && targetSDK >= Build.VERSION_CODES.R) {
-			requestPermission(Manifest.permission.CHANGE_NETWORK_STATE);
 
-			// Everything must be done with suggestions
-			// TODO: We're not using the RequestConfigurator here yet, is that something we want?
-			SuggestionConfigurator suggestionConfigurator = new SuggestionConfigurator(getContext());
+		// Suggestion API, required from Android 11 (API 30)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && targetSDK >= Build.VERSION_CODES.R) {
+			//requestPermission(Manifest.permission.CHANGE_NETWORK_STATE);
 
 			List<WifiNetworkSuggestion> suggestions = profile.buildSSIDSuggestions();
 			WifiNetworkSuggestion passpointSuggestion = profile.buildPasspointSuggestion();
 			if (passpointSuggestion != null) suggestions.add(passpointSuggestion);
-			suggestionConfigurator.installSuggestions(suggestions);
-		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSDK >= Build.VERSION_CODES.Q) {
+
+			try {
+				IntentConfigurator intentConfigurator = new IntentConfigurator(getContext());
+				intentConfigurator.installSuggestions(suggestions);
+			} catch (IllegalStateException e) {
+				// A bug in older builds of Android 11 prevents us from using intents
+				// https://issuetracker.google.com/issues/171375137?pli=1#comment14
+				SuggestionConfigurator suggestionConfigurator = new SuggestionConfigurator(getContext());
+				suggestionConfigurator.installSuggestions(suggestions);
+			}
+		} else
+		// Suggestion API for SSID, legacy API for Passpoint, required for Android 10 (API 29)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSDK >= Build.VERSION_CODES.Q) {
 			requestPermission(Manifest.permission.CHANGE_NETWORK_STATE);
 
 			// We have to do SSIDs with suggestions and Passpoint with legacy
@@ -179,7 +189,9 @@ public class WifiEapConfigurator extends Plugin {
 			if (passpointConfig != null) {
 				configurePasspoint(legacyConfigurator, passpointConfig);
 			}
-		} else {
+		} else
+		// Legacy API, allowed for Android <= 9 (API <= 28)
+		{
 			requestPermission(Manifest.permission.ACCESS_FINE_LOCATION);
 
 			// Everything below Q (below Android 10, below API version 29)
