@@ -478,7 +478,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			let getquery: [String: Any] = [
 				kSecClass as String: kSecClassCertificate,
 				kSecAttrLabel as String: certName,
-				kSecReturnRef as String: kCFBooleanTrue
+				kSecReturnPersistentRef as String: kCFBooleanTrue!
 			]
 			var item: CFTypeRef?
 			let status = SecItemCopyMatching(getquery as CFDictionary, &item)
