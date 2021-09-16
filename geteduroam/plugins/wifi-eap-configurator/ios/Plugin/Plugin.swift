@@ -281,12 +281,13 @@ public class WifiEapConfigurator: CAPPlugin {
 
 		// TODO certName should be the CN of the certificate,
 		// but this works as long as we have only one (which we currently do)
-		guard let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: pkcs12, passphrase: passphrase) else {
-			NSLog("☠️ configureAP: addClientCertificate: nil")
+		guard let identity = addClientCertificate(certName: "app.eduroam.geteduroam.client", certificate: pkcs12, passphrase: passphrase) else {
+			NSLog("☠️ configureAP: buildSettingsWithClientCertificate: addClientCertificate: returned nil")
 			return nil
 		}
 		let id = identity
 		guard eapSettings.setIdentity(id) else {
+			NSLog("☠️ configureAP: buildSettingsWithClientCertificate: cannot set identity")
 			return nil
 		}
 
@@ -471,30 +472,24 @@ public class WifiEapConfigurator: CAPPlugin {
 		certificateStrings.forEach { caCertificateString in
 			//NSLog("🦊 configureAP: caCertificateString " + caCertificateString)
 			// building the name for the cert that will be installed
-			let certName: String = "getEduroamCertCA" + String(index);
+			let certName: String = "app.eduroam.geteduroam.ca" + String(index);
 			// adding the certificate
-			guard addCertificate(certName: certName, certificate: caCertificateString) else {
-				NSLog("☠️ configureAP: CA certificate not added");
+			guard let certificate: SecCertificate = addCertificate(certName: certName, certificate: caCertificateString) else {
+				NSLog("☠️ importCACertificates: CA certificate not added");
 				return
 			}
 
-			let getquery: [String: Any] = [
-				kSecClass as String: kSecClassCertificate,
-				kSecAttrLabel as String: certName,
-				kSecReturnPersistentRef as String: kCFBooleanTrue!
-			]
-			var item: CFTypeRef?
-			let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-			guard status == errSecSuccess else {
-				NSLog("☠️ configureAP: CA certificate not saved");
-				return
-			}
-			let savedCert = item as! SecCertificate
-			certificates.append(savedCert);
+			certificates.append(certificate);
 
 			index += 1
 		}
-		//NSLog("🦊 configureAP: All caCertificateStrings handled")
+		
+		if certificates.isEmpty {
+			NSLog("☠️ importCACertificates: No certificates added");
+		} else {
+			//NSLog("🦊 configureAP: All caCertificateStrings handled")
+		}
+		
 		return certificates
 	}
 
@@ -505,29 +500,31 @@ public class WifiEapConfigurator: CAPPlugin {
 	@param certificate Base64 encoded DER encoded X.509 certificate
 	@result Whether importing succeeded
 	*/
-	func addCertificate(certName: String, certificate: String) -> Bool {
+	func addCertificate(certName: String, certificate: String) -> SecCertificate? {
 		let certBase64 = certificate
 
 		guard let data = Data(base64Encoded: certBase64, options: Data.Base64DecodingOptions.ignoreUnknownCharacters) else {
 			NSLog("☠️ Unable to base64 decode certificate data")
-			return false;
+			return nil;
 		}
 		guard let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) else {
 			NSLog("☠️ addCertificate: SecCertificateCreateWithData: false")
-			return false;
+			return nil;
 		}
 
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
 			kSecValueRef as String: certRef,
-			kSecAttrLabel as String: certName
+			kSecAttrLabel as String: certName,
+			kSecReturnPersistentRef as String: kCFBooleanTrue!
 		]
-		let status = SecItemAdd(addquery as CFDictionary, nil)
+		var item: CFTypeRef?
+		let status = SecItemAdd(addquery as CFDictionary, &item)
 		guard status == errSecSuccess || status == errSecDuplicateItem else {
 			NSLog("☠️ addCertificate: SecItemAdd " + String(status));
-			return false;
+			return nil;
 		}
-		return true
+		return (item as! SecCertificate)
 	}
 
 	/**
@@ -568,8 +565,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			if let certificateData = SecCertificateCreateWithData(nil, certData as CFData) {
 				let addquery: [String: Any] = [
 					kSecClass as String: kSecClassCertificate,
-					kSecValueRef as String:  certificateData,
-					kSecAttrLabel as String: "getEduroamCertificate" + "\(index)"
+					kSecValueRef as String: certificateData,
+					kSecAttrLabel as String: certName + ".chain\(index)"
 				]
 
 				let statusUpload = SecItemAdd(addquery as CFDictionary, nil)
