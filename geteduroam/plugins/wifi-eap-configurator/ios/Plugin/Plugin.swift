@@ -539,11 +539,15 @@ public class WifiEapConfigurator: CAPPlugin {
 	@result Whether importing succeeded
 	*/
 	func addClientCertificate(certName: String, certificate: String, passphrase: String) -> SecIdentity? {
+		// First we call SecPKCS12Import to read the P12,
+		// then we call SecItemAdd to add items to the keychain
+		// https://developer.apple.com/forums/thread/31711
+		// https://developer.apple.com/documentation/security/certificate_key_and_trust_services/identities/importing_an_identity
+
 		let options = [ kSecImportExportPassphrase as String: passphrase ]
 		var rawItems: CFArray?
-		let certBase64 = certificate
-		let data = Data(base64Encoded: certBase64)!
-		let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
+		let certificateData = Data(base64Encoded: certificate)!
+		let statusImport = SecPKCS12Import(certificateData as CFData, options as CFDictionary, &rawItems)
 		guard statusImport == errSecSuccess else {
 			NSLog("☠️ addClientCertificate: SecPKCS12Import: " + String(statusImport))
 			return nil
@@ -576,17 +580,51 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 
 		// Get the identity from the imported certificate
-		let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity
-		let addquery: [String: Any] = [
-			kSecValueRef as String: identity,
-			kSecAttrLabel as String: certName
-		]
-		let status = SecItemAdd(addquery as CFDictionary, nil)
-		guard status == errSecSuccess || status == errSecDuplicateItem else {
-			NSLog("☠️ addClientCertificate: SecPKCS12Import: " + String(status))
+		let identity: SecIdentity? = firstItem[kSecImportItemIdentity as String] as! SecIdentity?
+		
+		guard identity != nil else {
+			NSLog("☠️ addClientCertificate: unable to get identity from PKCS12 payload")
 			return nil
 		}
+		
+		let addquery: [String: Any] = [
+			kSecClass as String: kSecClassIdentity, // I got errSecInternal
+			kSecValueRef as String: identity!,
+			kSecAttrLabel as String: certName,
+			kSecReturnPersistentRef as String: kCFBooleanTrue!,
+			kSecAttrAccessGroup as String: "$(Team​Identifier​Prefix)com.apple.networkextensionsharing" // I got errSecMissingEntitlement
+		]
+		let addStatus = SecItemAdd(addquery as CFDictionary, nil)
+		guard addStatus == errSecSuccess || addStatus == errSecDuplicateItem else {
+			// -34018 = errSecMissingEntitlement
+			// -26276 = errSecInternal
+			NSLog("☠️ addClientCertificate: SecItemAdd: " + String(addStatus))
+			return nil
+		}
+
 		return identity
+		
+		// UNUSED CODE BELOW
+		// another method to get an identity, but haven't gotten this to work either
+
+		let getquery: [String: Any] = [
+			//kSecClass as String: kSecClassIdentity,
+			kSecAttrLabel as String: certName,
+			kSecReturnPersistentRef as String: kCFBooleanTrue!
+		]
+		var item: CFTypeRef?
+		let queryStatus = SecItemCopyMatching(getquery as CFDictionary, &item)
+		guard queryStatus == errSecSuccess else {
+			if queryStatus == errSecItemNotFound {
+				NSLog("☠️ addClientCertificate: client certificate not saved")
+			} else {
+				NSLog("☠️ addClientCertificate: unknown error " + String(queryStatus))
+			}
+			return nil
+		}
+		let importedIdentity = item as! SecIdentity
+
+		return importedIdentity;
 	}
 
 	@objc func validatePassPhrase(_ call: CAPPluginCall) {
