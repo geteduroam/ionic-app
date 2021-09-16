@@ -516,12 +516,18 @@ public class WifiEapConfigurator: CAPPlugin {
 			kSecClass as String: kSecClassCertificate,
 			kSecValueRef as String: certRef,
 			kSecAttrLabel as String: certName,
-			kSecReturnPersistentRef as String: kCFBooleanTrue!
+			kSecReturnPersistentRef as String: kCFBooleanTrue!,
+			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
 		]
 		var item: CFTypeRef?
 		let status = SecItemAdd(addquery as CFDictionary, &item)
 		guard status == errSecSuccess || status == errSecDuplicateItem else {
 			NSLog("☠️ addCertificate: SecItemAdd " + String(status));
+			return nil;
+		}
+		
+		guard item != nil else {
+			NSLog("☠️ addCertificate: item is nil")
 			return nil;
 		}
 		return (item as! SecCertificate)
@@ -591,10 +597,10 @@ public class WifiEapConfigurator: CAPPlugin {
 			kSecValueRef as String: identity!,
 			kSecAttrLabel as String: certName,
 			kSecReturnPersistentRef as String: kCFBooleanTrue!,
-			kSecAttrAccessGroup as String: "$(Team​Identifier​Prefix)com.apple.networkextensionsharing" // I got errSecMissingEntitlement
+			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
 		]
-		var identity2: CFTypeRef?
-		let addStatus = SecItemAdd(addquery as CFDictionary, &identity2)
+		var identityRef: CFTypeRef?
+		let addStatus = SecItemAdd(addquery as CFDictionary, &identityRef)
 		guard addStatus == errSecSuccess || addStatus == errSecDuplicateItem else {
 			// -34018 = errSecMissingEntitlement
 			// -26276 = errSecInternal
@@ -602,30 +608,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			return nil
 		}
 
-		return identity // object before inserting in keychain
-		return (identity2 as! SecIdentity) // object after inserting in keychain
-		
-		// UNUSED CODE BELOW
-		// another method to get an identity, but haven't gotten this to work either
-
-		let getquery: [String: Any] = [
-			//kSecClass as String: kSecClassIdentity,
-			kSecAttrLabel as String: certName,
-			kSecReturnPersistentRef as String: kCFBooleanTrue!
-		]
-		var item: CFTypeRef?
-		let queryStatus = SecItemCopyMatching(getquery as CFDictionary, &item)
-		guard queryStatus == errSecSuccess else {
-			if queryStatus == errSecItemNotFound {
-				NSLog("☠️ addClientCertificate: client certificate not saved")
-			} else {
-				NSLog("☠️ addClientCertificate: unknown error " + String(queryStatus))
-			}
-			return nil
-		}
-		let importedIdentity = item as! SecIdentity
-
-		return importedIdentity; // object retrieved from keychain
+		return (identityRef as! SecIdentity)
 	}
 
 	@objc func validatePassPhrase(_ call: CAPPluginCall) {
