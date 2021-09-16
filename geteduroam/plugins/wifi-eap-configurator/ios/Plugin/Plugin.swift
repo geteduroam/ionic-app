@@ -249,7 +249,7 @@ public class WifiEapConfigurator: CAPPlugin {
 
 			if (counter < configurations.count) {
 				let config = configurations[counter]
-				// this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
+				// this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0, where joinOnce was default true
 				// https://developer.apple.com/documentation/networkextension/nehotspotconfiguration/2887518-joinonce
 				config.joinOnce = false
 				// TODO set to validity of client certificate
@@ -374,7 +374,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		eapSettings.ttlsInnerAuthenticationType = innerAuthType ?? NEHotspotEAPSettings.TTLSInnerAuthenticationType.eapttlsInnerAuthenticationMSCHAPv2
 		eapSettings.username = username
 		eapSettings.password = password
-		NSLog("🦊 buildSettingsWithUsernamePassword: eapSettings.ttlsInnerAuthenticationType = " + String(eapSettings.ttlsInnerAuthenticationType.rawValue))
+		//NSLog("🦊 buildSettingsWithUsernamePassword: eapSettings.ttlsInnerAuthenticationType = " + String(eapSettings.ttlsInnerAuthenticationType.rawValue))
 		return eapSettings
 	}
 
@@ -558,7 +558,9 @@ public class WifiEapConfigurator: CAPPlugin {
 			NSLog("😱 addClientCertificate: SecPKCS12Import: more than one result - using only first one")
 		}
 
-		// Get the chain from the imported certificate
+		// Get the chain from the imported certificate and add all certificates,
+		// so the chain is available for importing the client certificate
+		// If we don't do this, we get "failed to find the trust chain for the client certificate" when connecting
 		let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]
 		for (index, cert) in chain.enumerated() {
 			let certData = SecCertificateCopyData(cert) as Data
