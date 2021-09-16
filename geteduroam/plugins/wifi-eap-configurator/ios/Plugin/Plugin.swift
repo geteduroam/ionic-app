@@ -183,7 +183,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			// https://developer.apple.com/documentation/networkextension/nehotspoteapsettings/2866691-outeridentity
 			eapSettings.outerIdentity = outerIdentity
 		}
-		eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
+		//eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
 		eapSettings.isTLSClientCertificateRequired = false
 
 		var configurations: [NEHotspotConfiguration] = []
@@ -516,6 +516,7 @@ public class WifiEapConfigurator: CAPPlugin {
 
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
+			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
 			kSecValueRef as String: certRef,
 			kSecAttrLabel as String: certName
 		]
@@ -559,6 +560,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			if let certificateData = SecCertificateCreateWithData(nil, certData as CFData) {
 				let addquery: [String: Any] = [
 					kSecClass as String: kSecClassCertificate,
+					kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
 					kSecValueRef as String:  certificateData,
 					kSecAttrLabel as String: "getEduroamCertificate" + "\(index)"
 				]
@@ -575,6 +577,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		// Get the identity from the imported certificate
 		let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity
 		let addquery: [String: Any] = [
+			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
 			kSecValueRef as String: identity,
 			kSecAttrLabel as String: certName
 		]
