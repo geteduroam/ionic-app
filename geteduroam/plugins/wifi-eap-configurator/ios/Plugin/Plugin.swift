@@ -183,8 +183,11 @@ public class WifiEapConfigurator: CAPPlugin {
 			// https://developer.apple.com/documentation/networkextension/nehotspoteapsettings/2866691-outeridentity
 			eapSettings.outerIdentity = outerIdentity
 		}
-		eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
-		eapSettings.isTLSClientCertificateRequired = false
+		let importedCertificates = importCACertificates(certificateStrings: caCertificates);
+		guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
+			NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates: returned false")
+			return []
+		}
 
 		var configurations: [NEHotspotConfiguration] = []
 		if oids.count != 0 {
