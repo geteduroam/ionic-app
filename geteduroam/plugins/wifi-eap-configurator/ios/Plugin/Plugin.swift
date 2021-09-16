@@ -593,7 +593,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			kSecReturnPersistentRef as String: kCFBooleanTrue!,
 			kSecAttrAccessGroup as String: "$(Team​Identifier​Prefix)com.apple.networkextensionsharing" // I got errSecMissingEntitlement
 		]
-		let addStatus = SecItemAdd(addquery as CFDictionary, nil)
+		var identity2: CFTypeRef?
+		let addStatus = SecItemAdd(addquery as CFDictionary, &identity2)
 		guard addStatus == errSecSuccess || addStatus == errSecDuplicateItem else {
 			// -34018 = errSecMissingEntitlement
 			// -26276 = errSecInternal
@@ -601,7 +602,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			return nil
 		}
 
-		return identity
+		return identity // object before inserting in keychain
+		return (identity2 as! SecIdentity) // object after inserting in keychain
 		
 		// UNUSED CODE BELOW
 		// another method to get an identity, but haven't gotten this to work either
@@ -623,7 +625,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 		let importedIdentity = item as! SecIdentity
 
-		return importedIdentity;
+		return importedIdentity; // object retrieved from keychain
 	}
 
 	@objc func validatePassPhrase(_ call: CAPPluginCall) {
