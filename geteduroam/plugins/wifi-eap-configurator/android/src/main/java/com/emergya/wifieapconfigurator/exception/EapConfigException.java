@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator.config;
+package com.emergya.wifieapconfigurator.exception;
 
 /**
  * Exception indicating an error in the parsed eap-config profile
@@ -6,10 +6,6 @@ package com.emergya.wifieapconfigurator.config;
  * This can either be due to a problem in the eap-config file, or due to the parser in ionic.
  */
 public class EapConfigException extends Exception {
-	EapConfigException() {
-		super();
-	}
-
 	EapConfigException(String message) {
 		super(message);
 	}

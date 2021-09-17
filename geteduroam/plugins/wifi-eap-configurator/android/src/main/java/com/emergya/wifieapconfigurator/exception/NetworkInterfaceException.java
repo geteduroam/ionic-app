@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator.config;
+package com.emergya.wifieapconfigurator.exception;
 
 /**
  * Exception to indicate an issue with a network interface, such as a configuration, albeit valid,
@@ -6,20 +6,15 @@ package com.emergya.wifieapconfigurator.config;
  * enable the interface.
  */
 public class NetworkInterfaceException extends NetworkException {
-	NetworkInterfaceException() {
-		super();
-	}
-
-	NetworkInterfaceException(String message) {
+	public NetworkInterfaceException(String message) {
 		super(message);
 	}
 
-	NetworkInterfaceException(String message, Throwable cause) {
+	public NetworkInterfaceException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	NetworkInterfaceException(Throwable cause) {
+	public NetworkInterfaceException(Throwable cause) {
 		super(cause);
 	}
-
 }

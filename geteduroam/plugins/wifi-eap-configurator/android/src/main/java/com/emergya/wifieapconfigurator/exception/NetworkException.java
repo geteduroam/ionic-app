@@ -1,13 +1,9 @@
-package com.emergya.wifieapconfigurator.config;
+package com.emergya.wifieapconfigurator.exception;
 
 /**
  * Exception indicating that something went wrong with a network.
  */
 public abstract class NetworkException extends Exception {
-	NetworkException() {
-		super();
-	}
-
 	NetworkException(String message) {
 		super(message);
 	}
@@ -19,5 +15,4 @@ public abstract class NetworkException extends Exception {
 	NetworkException(Throwable cause) {
 		super(cause);
 	}
-
 }

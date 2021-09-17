@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator.config;
+package com.emergya.wifieapconfigurator.exception;
 
 /**
  * Exception to indicate an error with a NetworkConfiguration using API 28
@@ -8,20 +8,15 @@ package com.emergya.wifieapconfigurator.config;
  * higher than API 28, where this specific API is no longer available.
  */
 public class NetworkConfigurationException extends NetworkException {
-	NetworkConfigurationException() {
-		super();
-	}
-
-	NetworkConfigurationException(String message) {
+	public NetworkConfigurationException(String message) {
 		super(message);
 	}
 
-	NetworkConfigurationException(String message, Throwable cause) {
+	public NetworkConfigurationException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	NetworkConfigurationException(Throwable cause) {
+	public NetworkConfigurationException(Throwable cause) {
 		super(cause);
 	}
-
 }

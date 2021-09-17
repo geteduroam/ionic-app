@@ -12,6 +12,8 @@ import android.net.wifi.WifiManager;
 import androidx.annotation.RequiresPermission;
 import androidx.preference.PreferenceManager;
 
+import com.emergya.wifieapconfigurator.exception.NetworkConfigurationException;
+import com.emergya.wifieapconfigurator.exception.NetworkInterfaceException;
 import com.emergya.wifieapconfigurator.notification.StartNotifications;
 import com.emergya.wifieapconfigurator.notification.StartRemoveNetwork;
 

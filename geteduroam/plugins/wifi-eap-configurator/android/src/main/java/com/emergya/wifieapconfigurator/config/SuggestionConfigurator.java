@@ -7,6 +7,8 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.emergya.wifieapconfigurator.exception.NetworkSuggestionException;
+
 import java.util.Collections;
 import java.util.List;
 

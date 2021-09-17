@@ -11,6 +11,9 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 
+import com.emergya.wifieapconfigurator.exception.NetworkConfigurationException;
+import com.emergya.wifieapconfigurator.exception.NetworkInterfaceException;
+
 import java.util.List;
 
 /**

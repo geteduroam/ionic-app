@@ -1,4 +1,4 @@
-package com.emergya.wifieapconfigurator.config;
+package com.emergya.wifieapconfigurator.exception;
 
 import android.net.wifi.WifiManager;
 import android.util.Log;
@@ -15,7 +15,7 @@ public class NetworkSuggestionException extends NetworkException {
 	 * @param status The status as returned by {@code WifiManager#addNetworkSuggestions}
 	 * @see WifiManager#addNetworkSuggestions(List)
 	 */
-	NetworkSuggestionException(int status) {
+	public NetworkSuggestionException(int status) {
 		super(getMessageFromStatus(status));
 	}
 

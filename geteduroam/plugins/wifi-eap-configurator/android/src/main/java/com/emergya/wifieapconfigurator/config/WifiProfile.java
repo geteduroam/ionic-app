@@ -15,6 +15,10 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.emergya.wifieapconfigurator.exception.EapConfigCAException;
+import com.emergya.wifieapconfigurator.exception.EapConfigClientCertificateException;
+import com.emergya.wifieapconfigurator.exception.EapConfigValueException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,7 +59,7 @@ import java.util.stream.Collectors;
  * configuration objects for different configuration methods.  Configuration object that can be
  * created are WifiConfiguration, WifiNetworkSuggestion and NetworkRequest
  */
-public class WifiProfile {
+public final class WifiProfile {
 
 	private final String[] ssids;
 	private final long[] oids;
@@ -127,7 +131,7 @@ public class WifiProfile {
 					}
 				}).collect(Collectors.<X509Certificate>toList());
 			} catch (CertificateException e) {
-				throw new EapConfigCAException(e);
+				throw new EapConfigCAException("Failed to parse certificate from caCertificate JSON dictionary", e);
 			}
 
 			// Conditional fields
@@ -214,7 +218,7 @@ public class WifiProfile {
 	/**
 	 * Convert from {@code Long[]} to {@code long[]}
 	 */
-	private static long[] toLongPrimitive(Long... objects) {
+	private static long[] toLongPrimitive(Long[] objects) {
 		long[] primitives = new long[objects.length];
 		for (int i = 0; i < objects.length; i++)
 			primitives[i] = objects[i];
@@ -578,7 +582,7 @@ public class WifiProfile {
 	 * @return Passpoint configuration for this profile
 	 * @see this.buildEnterpriseConfig()
 	 */
-	public final PasspointConfiguration buildPasspointConfig() {
+	public PasspointConfiguration buildPasspointConfig() {
 		if (oids.length == 0) {
 			Log.i(getClass().getSimpleName(), "Not creating Passpoint configuration due to no OIDs set");
 			return null;

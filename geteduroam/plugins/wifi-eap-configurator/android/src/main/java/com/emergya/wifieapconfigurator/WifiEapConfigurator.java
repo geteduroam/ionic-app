@@ -15,14 +15,14 @@ import androidx.core.content.PermissionChecker;
 import androidx.preference.PreferenceManager;
 
 import com.emergya.wifieapconfigurator.config.AbstractConfigurator;
-import com.emergya.wifieapconfigurator.config.EapConfigCAException;
-import com.emergya.wifieapconfigurator.config.EapConfigClientCertificateException;
-import com.emergya.wifieapconfigurator.config.EapConfigValueException;
+import com.emergya.wifieapconfigurator.exception.EapConfigCAException;
+import com.emergya.wifieapconfigurator.exception.EapConfigClientCertificateException;
+import com.emergya.wifieapconfigurator.exception.EapConfigValueException;
 import com.emergya.wifieapconfigurator.config.IntentConfigurator;
 import com.emergya.wifieapconfigurator.config.LegacyConfigurator;
-import com.emergya.wifieapconfigurator.config.NetworkConfigurationException;
-import com.emergya.wifieapconfigurator.config.NetworkInterfaceException;
-import com.emergya.wifieapconfigurator.config.NetworkSuggestionException;
+import com.emergya.wifieapconfigurator.exception.NetworkConfigurationException;
+import com.emergya.wifieapconfigurator.exception.NetworkInterfaceException;
+import com.emergya.wifieapconfigurator.exception.NetworkSuggestionException;
 import com.emergya.wifieapconfigurator.config.SuggestionConfigurator;
 import com.emergya.wifieapconfigurator.config.WifiProfile;
 import com.getcapacitor.JSObject;
@@ -66,7 +66,7 @@ public class WifiEapConfigurator extends Plugin {
 	/**
 	 * Read the capacitor object and configure the Wi-Fi payloads inside
 	 *
-	 * @param call Capacitor object containing call made in ionic
+	 * @param call Capacitor object containing calsetAltSubjectMatchl made in ionic
 	 */
 	@RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CHANGE_NETWORK_STATE})
 	@PluginMethod()
