@@ -184,10 +184,15 @@ public class WifiEapConfigurator: CAPPlugin {
 			eapSettings.outerIdentity = outerIdentity
 		}
 		let importedCertificates = importCACertificates(certificateStrings: caCertificates);
-		guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
-			NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates: returned false")
-			return []
-		}
+
+        if #available(iOS 15, *) {
+            NSLog("😡 iOS 15 does not accept setTrustedServerCertificates at this time")
+        } else {
+            guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
+                NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates:    returned false")
+                return []
+            }
+        }
 
 		var configurations: [NEHotspotConfiguration] = []
 		if oids.count != 0 {
