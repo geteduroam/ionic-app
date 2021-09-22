@@ -1,4 +1,5 @@
 import { HTTP } from '@ionic-native/http/ngx';
+import { Device } from '@ionic-native/device/ngx';
 import { Injectable } from '@angular/core';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
@@ -25,7 +26,7 @@ export class GeteduroamServices {
 
   constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider,
               private validator: ValidatorProvider, private dictionary: DictionaryServiceProvider,
-              private global: GlobalProvider) {  }
+              private global: GlobalProvider, private device: Device) {  }
 
   /**
    * This discovery method retrieves all institutions and their profiles from a [json]{@link https://discovery.eduroam.app/v1/discovery.json}:
@@ -35,6 +36,8 @@ export class GeteduroamServices {
     const url = 'https://discovery.eduroam.app/v1/discovery.json';
     const params = {};
     const headers = {};
+
+    console.error("Version of OS: ", this.device.version);
 
     try {
         const response = await this.http.get(url, params, headers);
