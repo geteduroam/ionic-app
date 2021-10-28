@@ -185,23 +185,23 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 		let importedCertificates = importCACertificates(certificateStrings: caCertificates);
 
-        // We hope to get rid of this first if again
-        if #available(iOS 15, *) {
-            if #available(iOS 15.2, *) {
-                NSLog("iOS 15.2 suports setTrustdServerCertificates again")
-                guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
-                    NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates:    returned false")
-                    return []
-                }
-            } else {
-                NSLog("😡 iOS 15.0 and 15.1 do not accept setTrustedServerCertificates")
-            }
-        } else {
-            guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
-                NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates:    returned false")
-                return []
-            }
-        }
+		// We hope to get rid of this first if again
+		if #available(iOS 15, *) {
+			if #available(iOS 15.2, *) {
+				NSLog("iOS 15.2 suports setTrustdServerCertificates again")
+				guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
+					NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates: returned false")
+					return []
+				}
+			} else {
+				NSLog("😡 iOS 15.0 and 15.1 do not accept setTrustedServerCertificates")
+			}
+		} else {
+			guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
+				NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates: returned false")
+				return []
+			}
+		}
 
 		var configurations: [NEHotspotConfiguration] = []
 		if oids.count != 0 {
