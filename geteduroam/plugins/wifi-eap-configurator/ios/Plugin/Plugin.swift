@@ -204,12 +204,15 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 
 		var configurations: [NEHotspotConfiguration] = []
-		if oids.count != 0 {
-			let hs20 = NEHotspotHS20Settings(
-				domainName: domain,
-				roamingEnabled: true)
-			hs20.roamingConsortiumOIs = oids;
-			configurations.append(NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings))
+		// iOS 12 doesn't do Passpoint
+		if #available(iOS 13, *) {
+			if oids.count != 0 {
+				let hs20 = NEHotspotHS20Settings(
+					domainName: domain,
+					roamingEnabled: true)
+				hs20.roamingConsortiumOIs = oids;
+				configurations.append(NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings))
+			}
 		}
 		for ssid in ssids {
 			configurations.append(NEHotspotConfiguration(ssid: ssid, eapSettings: eapSettings))
