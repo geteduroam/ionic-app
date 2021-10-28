@@ -183,8 +183,25 @@ public class WifiEapConfigurator: CAPPlugin {
 			// https://developer.apple.com/documentation/networkextension/nehotspoteapsettings/2866691-outeridentity
 			eapSettings.outerIdentity = outerIdentity
 		}
-		eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
-		eapSettings.isTLSClientCertificateRequired = false
+		let importedCertificates = importCACertificates(certificateStrings: caCertificates);
+
+        // We hope to get rid of this first if again
+        if #available(iOS 15, *) {
+            if #available(iOS 15.2, *) {
+                NSLog("iOS 15.2 suports setTrustdServerCertificates again")
+                guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
+                    NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates:    returned false")
+                    return []
+                }
+            } else {
+                NSLog("😡 iOS 15.0 and 15.1 do not accept setTrustedServerCertificates")
+            }
+        } else {
+            guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
+                NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates:    returned false")
+                return []
+            }
+        }
 
 		var configurations: [NEHotspotConfiguration] = []
 		if oids.count != 0 {
@@ -246,7 +263,7 @@ public class WifiEapConfigurator: CAPPlugin {
 
 			if (counter < configurations.count) {
 				let config = configurations[counter]
-				// this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0
+				// this line is needed in iOS 13 because there is a reported bug with iOS 13.0 until 13.1.0, where joinOnce was default true
 				// https://developer.apple.com/documentation/networkextension/nehotspotconfiguration/2887518-joinonce
 				config.joinOnce = false
 				// TODO set to validity of client certificate
@@ -278,12 +295,12 @@ public class WifiEapConfigurator: CAPPlugin {
 
 		// TODO certName should be the CN of the certificate,
 		// but this works as long as we have only one (which we currently do)
-		guard let identity = addClientCertificate(certName: "app.eduroam.geteduroam", certificate: pkcs12, passphrase: passphrase) else {
-			NSLog("☠️ configureAP: addClientCertificate: nil")
+		guard let identity = addClientCertificate(certificate: pkcs12, passphrase: passphrase) else {
+			NSLog("☠️ configureAP: buildSettingsWithClientCertificate: addClientCertificate: returned nil")
 			return nil
 		}
-		let id = identity
-		guard eapSettings.setIdentity(id) else {
+		guard eapSettings.setIdentity(identity) else {
+			NSLog("☠️ configureAP: buildSettingsWithClientCertificate: cannot set identity")
 			return nil
 		}
 
@@ -338,6 +355,9 @@ public class WifiEapConfigurator: CAPPlugin {
 				}
 				NSLog("☠️ buildSettings: Failed precondition for EAPPEAP/EAPFAST")
 				break
+			@unknown default:
+				NSLog("☠️ buildSettings: Unknown EAPType")
+				break
 			}
 		}
 		return nil
@@ -371,7 +391,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		eapSettings.ttlsInnerAuthenticationType = innerAuthType ?? NEHotspotEAPSettings.TTLSInnerAuthenticationType.eapttlsInnerAuthenticationMSCHAPv2
 		eapSettings.username = username
 		eapSettings.password = password
-		NSLog("🦊 buildSettingsWithUsernamePassword: eapSettings.ttlsInnerAuthenticationType = " + String(eapSettings.ttlsInnerAuthenticationType.rawValue))
+		//NSLog("🦊 buildSettingsWithUsernamePassword: eapSettings.ttlsInnerAuthenticationType = " + String(eapSettings.ttlsInnerAuthenticationType.rawValue))
 		return eapSettings
 	}
 
@@ -462,128 +482,162 @@ public class WifiEapConfigurator: CAPPlugin {
 	*/
 	func importCACertificates(certificateStrings: [String]) -> [SecCertificate] {
 		// supporting multiple CAs
-		var index: Int = 0
 		var certificates = [SecCertificate]();
 		//NSLog("🦊 configureAP: Start handling caCertificateStrings")
-		certificateStrings.forEach { caCertificateString in
+		for caCertificateString in certificateStrings {
 			//NSLog("🦊 configureAP: caCertificateString " + caCertificateString)
-			// building the name for the cert that will be installed
-			let certName: String = "getEduroamCertCA" + String(index);
-			// adding the certificate
-			guard addCertificate(certName: certName, certificate: caCertificateString) else {
-				NSLog("☠️ configureAP: CA certificate not added");
-				return
+			guard let certificate: SecCertificate = addCertificate(certificate: caCertificateString) else {
+				NSLog("☠️ importCACertificates: CA certificate not added");
+				continue
 			}
 
-			let getquery: [String: Any] = [
-				kSecClass as String: kSecClassCertificate,
-				kSecAttrLabel as String: certName,
-				kSecReturnRef as String: kCFBooleanTrue
-			]
-			var item: CFTypeRef?
-			let status = SecItemCopyMatching(getquery as CFDictionary, &item)
-			guard status == errSecSuccess else {
-				NSLog("☠️ configureAP: CA certificate not saved");
-				return
-			}
-			let savedCert = item as! SecCertificate
-			certificates.append(savedCert);
-
-			index += 1
+			certificates.append(certificate);
 		}
-		//NSLog("🦊 configureAP: All caCertificateStrings handled")
+		
+		if certificates.isEmpty {
+			NSLog("☠️ importCACertificates: No certificates added");
+		} else {
+			//NSLog("🦊 configureAP: All caCertificateStrings handled")
+		}
+		
 		return certificates
 	}
 
 	/**
 	@function addCertificate
 	@abstract Import Base64 encoded DER to keychain.
-	@param certName Name of the certificate
 	@param certificate Base64 encoded DER encoded X.509 certificate
 	@result Whether importing succeeded
 	*/
-	func addCertificate(certName: String, certificate: String) -> Bool {
-		let certBase64 = certificate
-
-		guard let data = Data(base64Encoded: certBase64, options: Data.Base64DecodingOptions.ignoreUnknownCharacters) else {
+	func addCertificate(certificate: String) -> SecCertificate? {
+		guard let data = Data(base64Encoded: certificate) else {
 			NSLog("☠️ Unable to base64 decode certificate data")
-			return false;
+			return nil;
 		}
-		guard let certRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) else {
+		guard let certificateRef = SecCertificateCreateWithData(kCFAllocatorDefault, data as CFData) else {
 			NSLog("☠️ addCertificate: SecCertificateCreateWithData: false")
-			return false;
+			return nil;
 		}
+
+		var commonNameRef: CFString?
+		var status: OSStatus = SecCertificateCopyCommonName(certificateRef, &commonNameRef)
+		guard status == errSecSuccess else {
+			NSLog("☠️ addClientCertificate: unable to get common name")
+			return nil
+		}
+		let commonName: String = commonNameRef! as String
 
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
-			kSecValueRef as String: certRef,
-			kSecAttrLabel as String: certName
+			kSecValueRef as String: certificateRef,
+			kSecAttrLabel as String: commonName,
+			kSecReturnRef as String: kCFBooleanTrue!,
+			//kSecReturnPersistentRef as String: kCFBooleanTrue!,
+			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
 		]
-		let status = SecItemAdd(addquery as CFDictionary, nil)
+		var item: CFTypeRef?
+		status = SecItemAdd(addquery as CFDictionary, &item)
 		guard status == errSecSuccess || status == errSecDuplicateItem else {
-			NSLog("☠️ addCertificate: SecItemAdd " + String(status));
-			return false;
+			NSLog("☠️ addCertificate: SecItemAdd " + String(status))
+			return nil
 		}
-		return true
+		
+		guard item != nil else {
+			NSLog("☠️ addCertificate: item is nil")
+			return nil;
+		}
+		return (item as! SecCertificate)
 	}
 
 	/**
 	@function addClientCertificate
 	@abstract Import a PKCS12 to the keychain and return a handle to the imported item.
-	@param certName Name of the certificate
 	@param certificate Base64 encoded PKCS12
 	@param passphrase Passphrase needed to decrypt the PKCS12, required as Apple doesn't like password-less PKCS12s
 	@result Whether importing succeeded
 	*/
-	func addClientCertificate(certName: String, certificate: String, passphrase: String) -> SecIdentity? {
+	func addClientCertificate(certificate: String, passphrase: String) -> SecIdentity? {
+		// First we call SecPKCS12Import to read the P12,
+		// then we call SecItemAdd to add items to the keychain
+		// https://developer.apple.com/forums/thread/31711
+		// https://developer.apple.com/documentation/security/certificate_key_and_trust_services/identities/importing_an_identity
+
 		let options = [ kSecImportExportPassphrase as String: passphrase ]
 		var rawItems: CFArray?
-		let certBase64 = certificate
-		let data = Data(base64Encoded: certBase64)!
-		let statusImport = SecPKCS12Import(data as CFData, options as CFDictionary, &rawItems)
+		let certificateData = Data(base64Encoded: certificate)!
+		let statusImport = SecPKCS12Import(certificateData as CFData, options as CFDictionary, &rawItems)
 		guard statusImport == errSecSuccess else {
 			NSLog("☠️ addClientCertificate: SecPKCS12Import: " + String(statusImport))
 			return nil
 		}
-		let items = rawItems! as! Array<Dictionary<String, Any>>
-		let firstItem = items[0]
+		let items = rawItems! as NSArray
+		let item: Dictionary<String,Any> = items.firstObject as! Dictionary<String, Any>
+		let identity: SecIdentity = item[kSecImportItemIdentity as String] as! SecIdentity
+		let chain = item[kSecImportItemCertChain as String] as! [SecCertificate]
 		if (items.count > 1) {
 			NSLog("😱 addClientCertificate: SecPKCS12Import: more than one result - using only first one")
 		}
 
-		// Get the chain from the imported certificate
-		let chain = firstItem[kSecImportItemCertChain as String] as! [SecCertificate]
-		for (index, cert) in chain.enumerated() {
-			let certData = SecCertificateCopyData(cert) as Data
+		// Import the identity to the keychain
+		let addquery: [String: Any] = [
+			//kSecClass as String: kSecClassIdentity, // I got errSecInternal
+			kSecValueRef as String: identity,
+			kSecAttrLabel as String: "Identity",
+			//kSecReturnPersistentRef as String: kCFBooleanTrue!,
+			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
+		]
+		var status: OSStatus = SecItemAdd(addquery as CFDictionary, nil)
+		guard status == errSecSuccess else {
+			// -34018 = errSecMissingEntitlement
+			// -26276 = errSecInternal
+			NSLog("☠️ addClientCertificate: SecItemAdd: %d", status)
+			return nil
+		}
+		
+		// Import the certificate chain for this identity
+		// If we don't do this, we get "failed to find the trust chain for the client certificate" when connecting
+		for certificate in chain {
+			let certificateRef: SecCertificate = certificate as SecCertificate
+			var commonNameRef: CFString?
+			var status: OSStatus = SecCertificateCopyCommonName(certificateRef, &commonNameRef)
+			guard status == errSecSuccess else {
+				NSLog("☠️ addClientCertificate: unable to get common name");
+				continue;
+			}
+			let commonName: String = commonNameRef! as String
 
-			if let certificateData = SecCertificateCreateWithData(nil, certData as CFData) {
-				let addquery: [String: Any] = [
-					kSecClass as String: kSecClassCertificate,
-					kSecValueRef as String:  certificateData,
-					kSecAttrLabel as String: "getEduroamCertificate" + "\(index)"
-				]
+			let addquery: [String: Any] = [
+				kSecClass as String: kSecClassCertificate,
+				kSecValueRef as String: certificate,
+				kSecAttrLabel as String: commonName,
+				kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
+			]
 
-				let statusUpload = SecItemAdd(addquery as CFDictionary, nil)
+			status = SecItemAdd(addquery as CFDictionary, nil)
 
-				guard statusUpload == errSecSuccess || statusUpload == errSecDuplicateItem else {
-					NSLog("☠️ addServerCertificate: SecItemAdd: " + String(statusUpload))
-					return nil
-				}
+			guard status == errSecSuccess || status == errSecDuplicateItem else {
+				NSLog("☠️ addClientCertificate: SecItemAdd: %s: %d", commonName, status)
+				return nil
 			}
 		}
 
-		// Get the identity from the imported certificate
-		let identity = firstItem[kSecImportItemIdentity as String] as! SecIdentity
-		let addquery: [String: Any] = [
-			kSecValueRef as String: identity,
-			kSecAttrLabel as String: certName
+		// Now we will retrieve the identity from the keychain again
+		var newIdentity: SecIdentity
+		let getquery: [String: Any] = [
+			kSecClass as String: kSecClassIdentity,
+			kSecAttrLabel as String: "Identity",
+			kSecReturnRef as String: kCFBooleanTrue!,
+			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
 		]
-		let status = SecItemAdd(addquery as CFDictionary, nil)
-		guard status == errSecSuccess || status == errSecDuplicateItem else {
-			NSLog("☠️ addClientCertificate: SecPKCS12Import: " + String(status))
+		var ref: CFTypeRef?
+		status = SecItemCopyMatching(getquery as CFDictionary, &ref)
+		guard status == errSecSuccess else {
+			NSLog("☠️ addClientCertificate: SecItemCopyMatching: retrieving identity returned %d", status)
 			return nil
 		}
-		return identity
+		newIdentity = ref! as! SecIdentity
+
+		return newIdentity
 	}
 
 	@objc func validatePassPhrase(_ call: CAPPluginCall) {
