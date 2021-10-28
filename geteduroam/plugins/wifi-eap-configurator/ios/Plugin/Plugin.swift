@@ -174,35 +174,47 @@ public class WifiEapConfigurator: CAPPlugin {
 			NSLog("☠️ createNetworkConfigurations: Unable to build a working NEHotspotEAPSettings")
 			return []
 		}
-
-		if serverNames.count > 0 {
-			eapSettings.trustedServerNames = serverNames
-		}
+		
 		if outerIdentity != "" {
 			// only works with EAP-TTLS, EAP-PEAP, and EAP-FAST
 			// https://developer.apple.com/documentation/networkextension/nehotspoteapsettings/2866691-outeridentity
 			eapSettings.outerIdentity = outerIdentity
 		}
-		let importedCertificates = importCACertificates(certificateStrings: caCertificates);
 
-		// We hope to get rid of this first if again
-		if #available(iOS 15, *) {
-			if #available(iOS 15.2, *) {
-				NSLog("iOS 15.2 suports setTrustdServerCertificates again")
-				guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
-					NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates: returned false")
-					return []
+		if !serverNames.isEmpty {
+			eapSettings.trustedServerNames = serverNames
+		}
+		if !caCertificates.isEmpty {
+			var caImportStatus: Bool
+			if #available(iOS 15, *) {
+				// iOS 15.0.* and iOS 15.1.* have a bug where we cannot call setTrustedServerCertificates,
+				// or the profile will be deemed invalid.
+				// Not calling it makes the profile trust the CA bundle from the OS,
+				// so only server name validation is performed.
+				if #available(iOS 15.2, *) {
+					// The bug was fixed in iOS 15.2
+					caImportStatus = eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
+				} else {
+					NSLog("😡 iOS 15.0 and 15.1 do not accept setTrustedServerCertificates - continuing")
+					
+					// On iOS 15.0 and 15.1 we pretend everything went fine while in reality we don't even attempt; it would have crashed later on
+					caImportStatus = true
 				}
 			} else {
-				NSLog("😡 iOS 15.0 and 15.1 do not accept setTrustedServerCertificates")
+				// The bug was not yet present prior to iOS 15, iOS 14 and down
+				caImportStatus = eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
 			}
-		} else {
-			guard eapSettings.setTrustedServerCertificates(importedCertificates) else {
+			guard caImportStatus else {
 				NSLog("☠️ createNetworkConfigurations: setTrustedServerCertificates: returned false")
 				return []
 			}
 		}
-
+		if serverNames.isEmpty && caCertificates.isEmpty {
+			NSLog("😱 No server names and no custom CAs set; there is no way to verify this network - continuing")
+		}
+		
+		eapSettings.isTLSClientCertificateRequired = false
+		
 		var configurations: [NEHotspotConfiguration] = []
 		// iOS 12 doesn't do Passpoint
 		if #available(iOS 13, *) {
