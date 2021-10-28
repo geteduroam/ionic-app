@@ -48,7 +48,11 @@ export class ClientSideCredential extends BaseJson{
         this.anonymousIdentity = this.getSingleProperty(jsonAux, 'OuterIdentity', false);
         this.clientCertificate = this.getSingleProperty(jsonAux, 'ClientCertificate', false);
         this.passphrase = this.getSingleProperty(jsonAux, 'Passphrase', false);
-        this.username = this.getSingleProperty(jsonAux, 'Username', false);
+
+        // XSD states field name is "UserName", but earlier we have accepted "Username"
+        // The Windows application refuses "Username", so from now on we do too.
+        // If you need to support both apps, just put both UserName and Username in your eap-config.
+        this.username = this.getSingleProperty(jsonAux, 'UserName', false);
         this.password = this.getSingleProperty(jsonAux, 'Password', false);
         return returnValue;
     }
