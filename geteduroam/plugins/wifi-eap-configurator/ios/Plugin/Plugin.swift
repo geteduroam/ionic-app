@@ -192,16 +192,17 @@ public class WifiEapConfigurator: CAPPlugin {
 				// Not calling it makes the profile trust the CA bundle from the OS,
 				// so only server name validation is performed.
 				if #available(iOS 15.2, *) {
-					// The bug was fixed in iOS 15.2
+					// The bug was fixed in iOS 15.2, business as usual:
 					caImportStatus = eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
 				} else {
-					NSLog("😡 iOS 15.0 and 15.1 do not accept setTrustedServerCertificates - continuing")
+					NSLog("😡 createNetworkConfigurations: iOS 15.0 and 15.1 do not accept setTrustedServerCertificates - continuing")
 					
 					// On iOS 15.0 and 15.1 we pretend everything went fine while in reality we don't even attempt; it would have crashed later on
 					caImportStatus = true
 				}
 			} else {
-				// The bug was not yet present prior to iOS 15, iOS 14 and down
+				// We are on iOS 14 or older.
+				// The bug was not yet present prior to iOS 15, so business as usual:
 				caImportStatus = eapSettings.setTrustedServerCertificates(importCACertificates(certificateStrings: caCertificates))
 			}
 			guard caImportStatus else {
@@ -209,8 +210,8 @@ public class WifiEapConfigurator: CAPPlugin {
 				return []
 			}
 		}
-		if serverNames.isEmpty && caCertificates.isEmpty {
-			NSLog("😱 No server names and no custom CAs set; there is no way to verify this network")
+		guard !serverNames.isEmpty || !caCertificates.isEmpty else {
+			NSLog("😱 createNetworkConfigurations: No server names and no custom CAs set; there is no way to verify this network")
 			return []
 		}
 		
@@ -538,11 +539,11 @@ public class WifiEapConfigurator: CAPPlugin {
 		var commonNameRef: CFString?
 		var status: OSStatus = SecCertificateCopyCommonName(certificateRef, &commonNameRef)
 		guard status == errSecSuccess else {
-			NSLog("☠️ addClientCertificate: unable to get common name")
+			NSLog("☠️ addCertificate: unable to get common name")
 			return nil
 		}
 		let commonName: String = commonNameRef! as String
-
+		
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
 			kSecValueRef as String: certificateRef,
@@ -559,9 +560,10 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 		
 		guard item != nil else {
-			NSLog("☠️ addCertificate: item is nil")
+			NSLog("☠️ addCertificate: item is nil after insert")
 			return nil;
 		}
+		
 		return (item as! SecCertificate)
 	}
 
