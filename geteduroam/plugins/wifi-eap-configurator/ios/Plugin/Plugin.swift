@@ -210,7 +210,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			}
 		}
 		if serverNames.isEmpty && caCertificates.isEmpty {
-			NSLog("😱 No server names and no custom CAs set; there is no way to verify this network - continuing")
+			NSLog("😱 No server names and no custom CAs set; there is no way to verify this network")
+			return []
 		}
 		
 		eapSettings.isTLSClientCertificateRequired = false
