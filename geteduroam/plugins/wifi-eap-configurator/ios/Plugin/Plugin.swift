@@ -549,8 +549,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			kSecValueRef as String: certificateRef,
 			kSecAttrLabel as String: commonName,
 			kSecReturnRef as String: kCFBooleanTrue!,
-			//kSecReturnPersistentRef as String: kCFBooleanTrue!,
-			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
+			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
+			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
 		]
 		var item: CFTypeRef?
 		status = SecItemAdd(addquery as CFDictionary, &item)
@@ -565,6 +565,25 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 		
 		return (item as! SecCertificate)
+		// Instead of returning here, you can also run the code below
+		// to make sure that the certificate was added to the KeyChain.
+		
+		/*
+		let getquery: [String: Any] = [
+			kSecClass as String: kSecClassCertificate,
+			kSecAttrLabel as String: commonName,
+			kSecReturnRef as String: kCFBooleanTrue!,
+			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
+			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
+		]
+		var ref: CFTypeRef?
+		status = SecItemCopyMatching(getquery as CFDictionary, &ref)
+		guard status == errSecSuccess && ref != nil else {
+			NSLog("☠️ addCertificate: item is nil after retrieval, using in-memory value but this may fail further down the line")
+			return (item as! SecCertificate)
+		}
+		return (ref as! SecCertificate)
+		*/
 	}
 
 	/**
@@ -598,11 +617,12 @@ public class WifiEapConfigurator: CAPPlugin {
 
 		// Import the identity to the keychain
 		let addquery: [String: Any] = [
-			//kSecClass as String: kSecClassIdentity, // I got errSecInternal
+			//kSecClass as String: kSecClassIdentity, // Gives errSecInternal, according to Apple Developer Technical Support we should not specify this for client certs
 			kSecValueRef as String: identity,
-			kSecAttrLabel as String: "Identity",
-			//kSecReturnPersistentRef as String: kCFBooleanTrue!,
-			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
+			kSecAttrLabel as String: "Identity", // No dual-profile support, so this name will always be unique because we will only have one client cert
+			//kSecReturnRef as String: kCFBooleanTrue!, // We're not retrieving the reference at this point, 2nd argument to SecItemAdd is nil
+			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
+			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
 		]
 		var status: OSStatus = SecItemAdd(addquery as CFDictionary, nil)
 		guard status == errSecSuccess else {
@@ -628,7 +648,9 @@ public class WifiEapConfigurator: CAPPlugin {
 				kSecClass as String: kSecClassCertificate,
 				kSecValueRef as String: certificate,
 				kSecAttrLabel as String: commonName,
-				kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
+				//kSecReturnRef as String: kCFBooleanTrue!, // We're not retrieving the reference at this point, 2nd argument to SecItemAdd is nil
+				//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
+				kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // TEAMID.com.apple.networkextensionsharing
 			]
 
 			status = SecItemAdd(addquery as CFDictionary, nil)
@@ -645,7 +667,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			kSecClass as String: kSecClassIdentity,
 			kSecAttrLabel as String: "Identity",
 			kSecReturnRef as String: kCFBooleanTrue!,
-			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing",
+			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
+			kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // TEAMID.com.apple.networkextensionsharing
 		]
 		var ref: CFTypeRef?
 		status = SecItemCopyMatching(getquery as CFDictionary, &ref)
