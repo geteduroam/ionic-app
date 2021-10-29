@@ -23,7 +23,7 @@ If needed, [`install-docker.sh`](contrib/install-docker.sh) will install both.
 
 ### Requirements
 
-* [Node.js](https://nodejs.org/en/)
+* [Node.js 14](NODE14.md)
 * [Android-SDK](https://developer.android.com/studio#downloads)
 
 NOTE: If you're developing on MacOS, check the guide for

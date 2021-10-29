@@ -4,7 +4,7 @@
 ## Requirements
 
 * [XCode](https://developer.apple.com/xcode/)
-* [Node.js](https://nodejs.org/en/)
+* [Node.js 14](NODE14.md)
 * [CocoaPods](https://cocoapods.org)
 
 NOTE: Currently, on M1 Macs, CocoaPods will fail to run due to a missing dependency.

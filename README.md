@@ -18,7 +18,7 @@ You must install these dependencies before running `make`
 
 * [Android-SDK](https://developer.android.com/studio#downloads) (for Android only)
 	* [Installation instructions for MacOS](ANDROID_STUDIO_MAC.md)
-* [Node.js](https://nodejs.org/en/) (for both Android and iOS)
+* [Node.js 14](NODE14.md) (for both Android and iOS)
 * [XCode](https://developer.apple.com/xcode/) (for iOS only)
 * [CocoaPods](https://cocoapods.org) (for iOS only)
 

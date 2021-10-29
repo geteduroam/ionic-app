@@ -55,6 +55,8 @@ geteduroam/www: check-js geteduroam/node_modules
 geteduroam/ios/App/public: check-js geteduroam/www
 	# This also does pod install, not needed to do manually
 	cd geteduroam && npx cap sync ios
+	-@sed -i '' -e 's/sourceTree = "<group>";/sourceTree = "<group>"; usesTabs = 1;/' \
+		geteduroam/ios/App/Pods/Pods.xcodeproj/project.pbxproj
 
 geteduroam/android/app/src/main/assets/public: geteduroam/www
 	cd geteduroam && npx cap sync android
