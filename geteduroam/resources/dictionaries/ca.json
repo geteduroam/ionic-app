@@ -1,0 +1,76 @@
+{
+  "header": {
+    "config": "Configuracó de l'eduroam",
+    "profile": "Proporcioneu la informació",
+    "confirmation": "Gaudiu de l'eduroam!",
+    "error": "S'ha produïut un error"
+  },
+  "label": {
+    "institution": "Institució",
+    "username": "Nom d'usuari",
+    "accept": "Accept ",
+    "terms": "condicions d'ús",
+    "profile": "Perfil",
+    "password": "Contrasenya",
+    "passphrase": "Frase de contrasenya",
+    "note": "*Nota: si la connexió falla, comproveu la contrasenya",
+    "help": "Us cal ajuda?",
+    "support": "Feu clic aquí per a obtenir assistència"
+  },
+  "placeholder": {
+    "institution": "Trieu una institució...",
+    "profile": "Trieu un perfil...",
+    "example": "nomdusuari"
+  },
+  "modalSupport": {
+    "title": "Opcions d'assistència",
+    "message": "Trieu una opció",
+    "web": "Web: ",
+    "email": "Correu electrònic: ",
+    "phone": "Telèfon: ",
+    "help": "Ajuda d'assistència",
+    "cancel": "Cancel·la",
+    "terms": "Condicions d'ús"
+  },
+  "button": {
+    "next": "Endavant",
+    "ok": "D'acord",
+    "more": "Més informacio",
+    "email": "Envia un correu electrònic",
+    "back": "Enrere",
+    "done": "Fet",
+    "reconfigure": "Torna a configurar",
+    "configure" : "Configura",
+    "no-thanks": "No, gràcies",
+    "close": "Tanca",
+    "connect": "Connecta a la xarxa",
+    "start-over": "Torna a començar"
+  },
+  "error": {
+    "username": "El nom d'usuari ha de complir el patró ",
+    "domain": "El nom d'usuari ha d'acabar en ",
+    "password": "La contrasenya no és correcta",
+    "turn-on": "Activeu les dades mòbils",
+    "need-network": "Cal una connexió de xarxa per a carregar el llistat d'institucions. Activeu la xarxa i reinicieu l'aplicació.",
+    "duplicate": "Aquesta xarxa ja és disponible en l'aparell.\nAneu a Configuració > Xarxa i Internet > Wi-Fi i suprimiu-la primer",
+    "mobileconfig": "El vostre aparell s'ha configurat amb un perfil de configuració.\nAneu a Configuració > General > Perfil i suprimiu-lo",
+    "invalid-eap": "El perfil seleccionat no és vàlid. Si l'error persisteix, contacteu amb el vostre administrador",
+    "invalid-method": "No hi ha disponible cap mètode d'autenticació vàlid per al perfil seleccionat",
+    "invalid-profile": "El perfil seleccionat no és correcte",
+    "invalid-oauth": "Cal que autoritzeu l'aplicació perquè pugui configurar la connexió Wi-Fi",
+    "invalid-institution": "No es dona suport a aquesta institució",
+    "passphrase": "La frase de contrasenya no és correcta",
+    "terms": "Cal que accepteu les condicions d'ús"
+  },
+  "text": {
+    "configured": "La Wi-Fi no està configurada",
+    "configure": "Esteu a punt d'instal·lar un perfil de xarxa Wi-Fi.",
+    "configure1": "Continua amb la configuració",
+    "reconfigure": "Hola, sembla que ja teniu configurat aquest aparell.\nVoleu tornar-lo a configurar?",
+    "network-available": "Hi ha disponible accés extern",
+    "configuring": "S'esta rebent la configuració de xarxa, espereu",
+    "title": "Torna a configurar geteduroam",
+    "message": "Queden 5 dies perquè expiri el vostre perfil de geteduroam, feu clic per a tornar-lo a configurar"
+  },
+  "defaultError": "No s'ha trobat la clau"
+}
