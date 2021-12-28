@@ -1,5 +1,6 @@
 package com.emergya.wifieapconfigurator.config;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -26,6 +27,9 @@ import java.util.List;
  */
 @RequiresApi(api = Build.VERSION_CODES.R)
 public class IntentConfigurator extends SuggestionConfigurator {
+
+	public static final int ADD_NETWORKS_REQUEST_CODE = 100;
+
 	public IntentConfigurator(Context context) {
 		super(context);
 	}
@@ -37,15 +41,11 @@ public class IntentConfigurator extends SuggestionConfigurator {
 			suggestions = new ArrayList<>(suggestions);
 		}
 
-		// TODO "null wants to add eduroam" - what is null?
-
 		Bundle bundle = new Bundle();
 		bundle.putParcelableArrayList(Settings.EXTRA_WIFI_NETWORK_LIST, (ArrayList<WifiNetworkSuggestion>) suggestions);
 		Intent intent = new Intent(Settings.ACTION_WIFI_ADD_NETWORKS);
 		intent.putExtras(bundle);
-		context.startActivity(intent);
-
-		// TODO how to get a result?
+		((Activity)context).startActivityForResult(intent, ADD_NETWORKS_REQUEST_CODE);
 	}
 
 	/**
