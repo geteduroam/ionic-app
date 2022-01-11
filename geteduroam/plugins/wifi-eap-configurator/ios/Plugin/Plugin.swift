@@ -554,21 +554,23 @@ public class WifiEapConfigurator: CAPPlugin {
 		]
 		var item: CFTypeRef?
 		status = SecItemAdd(addquery as CFDictionary, &item)
+
+		// TODO: remove this, and always use the "failsafe"?
+		if status == errSecSuccess && item != nil {
+			return (item as! SecCertificate)
+		}
+
 		guard status == errSecSuccess || status == errSecDuplicateItem else {
 			NSLog("☠️ addCertificate: SecItemAdd " + String(status))
 			return nil
 		}
 		
-		guard item != nil else {
-			NSLog("☠️ addCertificate: item is nil after insert")
-			return nil;
-		}
-		
-		return (item as! SecCertificate)
+		// FAILSAFE:
 		// Instead of returning here, you can also run the code below
 		// to make sure that the certificate was added to the KeyChain.
+		// This is needed if errSecDuplicateItem was returned earlier.
+		// TODO: should we use this flow always?
 		
-		/*
 		let getquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
 			kSecAttrLabel as String: commonName,
@@ -576,14 +578,13 @@ public class WifiEapConfigurator: CAPPlugin {
 			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
 			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
 		]
-		var ref: CFTypeRef?
-		status = SecItemCopyMatching(getquery as CFDictionary, &ref)
-		guard status == errSecSuccess && ref != nil else {
-			NSLog("☠️ addCertificate: item is nil after retrieval, using in-memory value but this may fail further down the line")
-			return (item as! SecCertificate)
+		status = SecItemCopyMatching(getquery as CFDictionary, &item)
+		guard status == errSecSuccess && item != nil else {
+			NSLog("☠️ addCertificate: item is nil after insert and retrieve")
+			return nil
 		}
-		return (ref as! SecCertificate)
-		*/
+
+		return (item as! SecCertificate)
 	}
 
 	/**
