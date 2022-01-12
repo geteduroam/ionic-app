@@ -2,8 +2,10 @@ package app.eduroam.geteduroam;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import com.emergya.wifieapconfigurator.WifiEapConfigurator;
+import com.emergya.wifieapconfigurator.config.IntentConfigurator;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 import java.util.ArrayList;
@@ -25,4 +27,14 @@ public class MainActivity extends BridgeActivity {
     String appLinkAction = appLinkIntent.getAction();
     Uri appLinkData = appLinkIntent.getData();
   }
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			if (requestCode == IntentConfigurator.ADD_NETWORKS_REQUEST_CODE) {
+				// TODO handle result
+			}
+		}
+	}
 }
