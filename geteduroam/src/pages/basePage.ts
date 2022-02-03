@@ -129,20 +129,37 @@ export abstract class BasePage {
   }
 
   async termsModal(termsOfUse: any) {
-    let splitTerms = termsOfUse.split(' ');
+    function utf8_to_b64( str ) {
+      return btoa(unescape(encodeURIComponent( str )));
+    }
 
-    let terms = splitTerms.map(res => {
-      if (!!res.match(/\bwww?\S+/gi) ||  !!res.match(/\bhttps?\S+/gi) || res.match(/\bhttp?\S+/gi)) {
-        const link = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
-          !!res.match(/\bhttps?\S+/gi) ? res.match(/\bhttps?\S+/gi)[0] : res.match(/\bhttp?\S+/gi)[0];
+    // Remove BOM
+    termsOfUse = termsOfUse.replace(/^\uFEFF/gm, "").replace(/^\u00BB\u00BF/gm,"");
+    
+    // Unreliable HTML check, we see if we have any < after a whitespace, or start of string
+    let fixLinks = !termsOfUse.match(/(^|\s)<a[\S\t ]*>/); // Do we have any <a …>
+    let fixNewlines = !termsOfUse.match(/(^|\s)<(p|br)[\S\t ]*>/); // Do we have any <br> or <p>
 
-        res =`<a href="${link}">${res}</a>`;
+    if (fixNewlines) {
+      // Replace every double newline with <p> and every single newline with <br>
+      termsOfUse = termsOfUse
+        .replace(/([\t ]*\r?\n){2,}/g, ' <p>')
+        .replace(/([\t ]*\r?\n)/g, ' <br>');
+    }
 
-      }
-      return res
-    });
+    if (fixLinks) {
+      // Split on space (so we can check per word if it is a link)
+      termsOfUse = termsOfUse.split(/\s+/g).map(res => {
+        if (!!res.match(/\bwww?\S+/gi) || !!res.match(/\bhttps?\S+/gi) || res.match(/\bhttp?\S+/gi)) {
+          const link = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
+            !!res.match(/\bhttps?\S+/gi) ? res.match(/\bhttps?\S+/gi)[0] : res.match(/\bhttp?\S+/gi)[0];
 
-    terms = terms.join(' ');
+          res =`<a href="${link}">${res}</a>`;
+
+        }
+        return res
+      }).join(' ');
+    }
 
     const htmlView = `<title>${this.getString('label', 'terms')}</title>
       <meta name="charset" value="utf-8">
@@ -152,8 +169,8 @@ export abstract class BasePage {
         html { font-family: sans-serif; margin-top: 2.4em; }
         a { color: #276fbf; }
       </style>
-      ${terms}`;
-    const pageContentUrl = 'data:text/html;base64,' + btoa(htmlView);
+      ${termsOfUse}`;
+    const pageContentUrl = 'data:text/html;charset=utf-8;base64,' + utf8_to_b64(htmlView);
     const browser = window.cordova.InAppBrowser.open(
       pageContentUrl,
       '_blank',

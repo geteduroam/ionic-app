@@ -69,10 +69,6 @@ export class ClientCertificatePassphrasePage extends BasePage{
    * Check help desk
    */
   helpDesk: boolean = false;
-  /**
-   * Link url of terms of use
-   */
-  termsUrl: string = '';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, protected event: Events,
               public loading: LoadingProvider, public dictionary: DictionaryServiceProvider,
@@ -91,7 +87,7 @@ export class ClientCertificatePassphrasePage extends BasePage{
 
   ionViewDidEnter() {
     this.providerInfo = this.global.getProviderInfo();
-    if (!!this.providerInfo.termsOfUse) this.createTerms();
+    this.termsOfUse = !!this.providerInfo.termsOfUse;
     if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||
         !!this.providerInfo.helpdesk.phone) this.helpDesk = true;
     if (typeof this.global.getAuthenticationMethod().clientSideCredential.passphrase !== 'undefined') {
@@ -143,20 +139,6 @@ export class ClientCertificatePassphrasePage extends BasePage{
     const data = `data:${mimeType};${encoding},${imageData}`;
 
     this.converted_image = this.sanitizer.bypassSecurityTrustResourceUrl(data);
-  }
-
-  protected createTerms() {
-    // Activate checkbox on view
-    this.termsOfUse = true;
-    const terms = this.providerInfo.termsOfUse.toString();
-    try {
-      // Get the web address within the terms of use
-      this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
-          !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
-    } catch (e) {
-      this.termsOfUse = false;
-    }
-
   }
 
 }

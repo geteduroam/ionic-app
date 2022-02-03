@@ -294,7 +294,7 @@ export class ProfilePage extends BasePage{
       this.logo = true;
       this.getLogo();
     }
-    if (!!this.providerInfo.termsOfUse) this.createTerms();
+    this.termsOfUse = !!this.providerInfo.termsOfUse;
     if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||
         !!this.providerInfo.helpdesk.phone) this.helpDesk = true;
     if (this.validMethod.clientSideCredential.username && this.validMethod.clientSideCredential.password) {
@@ -306,23 +306,6 @@ export class ProfilePage extends BasePage{
       this.showForm = true;
     }
     this.showAll = true;
-  }
-
-  /**
-   * Method to activate terms of use on view.
-   */
-  protected createTerms() {
-      // Activate checkbox on view
-      this.termsOfUse = true;
-      const terms = this.providerInfo.termsOfUse.toString();
-      try {
-        // Get the web address within the terms of use
-        this.termsUrl = !!terms.match(/\bwww?\S+/gi) ? 'http://'+terms.match(/\bwww?\S+/gi)[0] :
-          !!terms.match(/\bhttps?\S+/gi) ? terms.match(/\bhttps?\S+/gi)[0] : terms.match(/\bhttp?\S+/gi)[0];
-      } catch (e) {
-        this.termsOfUse = false;
-      }
-
   }
 
   /**
