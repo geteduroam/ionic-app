@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi;
 
 import com.emergya.wifieapconfigurator.exception.NetworkSuggestionException;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,6 +37,9 @@ public class SuggestionConfigurator extends AbstractConfigurator {
 		super(context);
 	}
 
+	public void installSuggestions(WifiNetworkSuggestion... suggestions) throws NetworkSuggestionException {
+		installSuggestions(Arrays.asList(suggestions));
+	}
 	public void installSuggestions(List<WifiNetworkSuggestion> suggestions) throws NetworkSuggestionException {
 		//if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
 
