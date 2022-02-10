@@ -135,31 +135,26 @@ export abstract class BasePage {
 
     // Remove BOM
     termsOfUse = termsOfUse.replace(/^\uFEFF/gm, "").replace(/^\u00BB\u00BF/gm,"");
-    
-    // Unreliable HTML check, we see if we have any < after a whitespace, or start of string
-    let fixLinks = !termsOfUse.match(/(^|\s)<a[\S\t ]*>/); // Do we have any <a …>
-    let fixNewlines = !termsOfUse.match(/(^|\s)<(p|br)[\S\t ]*>/); // Do we have any <br> or <p>
 
-    if (fixNewlines) {
-      // Replace every double newline with <p> and every single newline with <br>
-      termsOfUse = termsOfUse
-        .replace(/([\t ]*\r?\n){2,}/g, ' <p>')
-        .replace(/([\t ]*\r?\n)/g, ' <br>');
-    }
+    // Escape HTML
+    termsOfUse = termsOfUse.replace("<", "&lt;").replace(">", "&rt;").replace("\"", "&quot;");
 
-    if (fixLinks) {
-      // Split on space (so we can check per word if it is a link)
-      termsOfUse = termsOfUse.split(/\s+/g).map(res => {
-        if (!!res.match(/\bwww?\S+/gi) || !!res.match(/\bhttps?\S+/gi) || res.match(/\bhttp?\S+/gi)) {
-          const link = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
-            !!res.match(/\bhttps?\S+/gi) ? res.match(/\bhttps?\S+/gi)[0] : res.match(/\bhttp?\S+/gi)[0];
+    // Replace every double newline with <p> and every single newline with <br>
+    termsOfUse = termsOfUse
+      .replace(/([\t ]*\r?\n){2,}/g, ' <p>')
+      .replace(/([\t ]*\r?\n)/g, ' <br>');
 
-          res =`<a href="${link}">${res}</a>`;
+    // Split on space (so we can check per word if it is a link)
+    termsOfUse = termsOfUse.split(/\s+/g).map(res => {
+      if (!!res.match(/\bwww\.?\S+/gi) || !!res.match(/\bhttps:\/\/?\S+/gi) || res.match(/\bhttp:\/\/?\S+/gi)) {
+        const link = !!res.match(/\bwww?\S+/gi) ? 'http://'+res.match(/\bwww?\S+/gi)[0] :
+          !!res.match(/\bhttps?\S+/gi) ? res.match(/\bhttps?\S+/gi)[0] : res.match(/\bhttp?\S+/gi)[0];
 
-        }
-        return res
-      }).join(' ');
-    }
+        res =`<a href="${link}">${res}</a>`;
+
+      }
+      return res
+    }).join(' ');
 
     const htmlView = `<title>${this.getString('label', 'terms')}</title>
       <meta name="charset" value="utf-8">
