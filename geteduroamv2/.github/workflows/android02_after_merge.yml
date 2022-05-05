@@ -5,6 +5,7 @@
 name: Android 02 - Snapshot & Distribution
 
 on:
+    workflow_dispatch:
     push:
         paths:
             - 'android/**'

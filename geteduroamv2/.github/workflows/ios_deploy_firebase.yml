@@ -6,7 +6,7 @@ on:
             checkout_branch:
                 description: 'Build from branch'
                 required: true
-                default: 'develop'
+                default: 'main'
 
 jobs:
     build-and-distribute:
