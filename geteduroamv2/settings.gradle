@@ -1,0 +1,4 @@
+rootProject.name = 'geteduroamv2'
+
+include 'shared:core'
+include 'android:app'
