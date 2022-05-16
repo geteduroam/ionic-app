@@ -6,9 +6,6 @@
 build/
 android/app/build/
 captures/
-gradle/
-gradlew
-gradlew.bat
 .externalNativeBuild
 .cxx
 xcuserdata/
