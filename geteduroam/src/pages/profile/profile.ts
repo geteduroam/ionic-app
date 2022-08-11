@@ -296,10 +296,12 @@ export class ProfilePage extends BasePage{
     }
     this.termsOfUse = !!this.providerInfo.termsOfUse;
     if (!!this.providerInfo.helpdesk.emailAddress || !!this.providerInfo.helpdesk.webAddress ||
-        !!this.providerInfo.helpdesk.phone) this.helpDesk = true;
-    if (this.validMethod.clientSideCredential.username && this.validMethod.clientSideCredential.password) {
-      this.provide.email = this.validMethod.clientSideCredential.username;
-      this.provide.pass = this.validMethod.clientSideCredential.password;
+        !!this.providerInfo.helpdesk.phone) {
+      this.helpDesk = true;
+    }
+    this.provide.email = this.validMethod.clientSideCredential.username;
+    this.provide.pass = this.validMethod.clientSideCredential.password;
+    if (this.provide.email && this.provide.pass) {
       this.enableButton = true;
     } else {
       this.removeSpinner();
