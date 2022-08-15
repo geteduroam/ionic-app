@@ -301,12 +301,11 @@ export class ProfilePage extends BasePage{
     }
     this.provide.email = this.validMethod.clientSideCredential.username;
     this.provide.pass = this.validMethod.clientSideCredential.password;
-    if (this.provide.email && this.provide.pass) {
-      this.enableButton = true;
-    } else {
-      this.removeSpinner();
+    if (!this.provide.email || !this.provide.pass) {
       this.showForm = true;
     }
+    this.removeSpinner();
+    this.validateForm();
     this.showAll = true;
   }
 
