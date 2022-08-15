@@ -164,43 +164,32 @@ public class WifiEapConfigurator extends Plugin {
 			WifiNetworkSuggestion passpointSuggestion = profile.buildPasspointSuggestion();
 			SuggestionConfigurator suggestionConfigurator = new SuggestionConfigurator(getContext());
 
-			try {
-				IntentConfigurator intentConfigurator = new IntentConfigurator(getContext());
+			IntentConfigurator intentConfigurator = new IntentConfigurator(getContext());
 
-				// We will use Intent for SSID, and Suggestion for Passpoint.
-				// It would've been possible to use Intent for both SSID and Passpoint,
-				// but we can never remove intents for Passpoint.
-				// Android will overwrite existing intents if it considers the new Passpoint configuration similar enough,
-				// but it considers the certificate (among other things) in checking for equality, so "similar" is too high a bar.
-				// For SSIDs it works well, it's considered equal if the SSID matches.
-				// This is why we use intents for SSIDs and suggestions for Passpoint.
+			// We will use Intent for SSID, and Suggestion for Passpoint.
+			// It would've been possible to use Intent for both SSID and Passpoint,
+			// but we can never remove intents for Passpoint.
+			// Android will overwrite existing intents if it considers the new Passpoint configuration similar enough,
+			// but it considers the certificate (among other things) in checking for equality, so "similar" is too high a bar.
+			// For SSIDs it works well, it's considered equal if the SSID matches.
+			// This is why we use intents for SSIDs and suggestions for Passpoint.
 
-				// We don't use suggestions for SSIDs (if we can avoid it) because it would confuse users;
-				// suggestions are prioritized under user-configured (e.g. has ever connected to) networks,
-				// which includes any onboarding guest network, nearby Starbucks and lab-raspberry-pi setup.
-				// Worse, when the user does notice this and explicitly wants to connect to eduroam,
-				// the network appears unconfigured in the Wi-Fi picker.
-				// This would confuse both users and help desks.
+			// We don't use suggestions for SSIDs (if we can avoid it) because it would confuse users;
+			// suggestions are prioritized under user-configured (e.g. has ever connected to) networks,
+			// which includes any onboarding guest network, nearby Starbucks and lab-raspberry-pi setup.
+			// Worse, when the user does notice this and explicitly wants to connect to eduroam,
+			// the network appears unconfigured in the Wi-Fi picker.
+			// This would confuse both users and help desks.
 
-				// This may throw an exception on older Android 11 builds
-				intentConfigurator.installSuggestions(ssidSuggestions);
-				// https://issuetracker.google.com/issues/171375137?pli=1#comment14
+			// This may throw an exception on older Android 11 builds
+			// It will throw an IllegalStateException from some internal,
+			// but it will do so in another thread so we cannot catch it.
+			intentConfigurator.installSuggestions(ssidSuggestions);
+			// https://issuetracker.google.com/issues/171375137?pli=1#comment14
 
-				// If no exception was thrown configuring the SSIDs, configure Passpoint now with suggestions
-				if (passpointSuggestion != null) {
-					suggestionConfigurator.installSuggestions(passpointSuggestion);
-				}
-			} catch (IllegalStateException e) {
-				// A bug in older builds of Android 11 prevents us from using intents
-				// So we must use suggestions for everything
-				// https://issuetracker.google.com/issues/171375137?pli=1#comment14
-
-				if (passpointSuggestion != null) {
-					ssidSuggestions.add(passpointSuggestion);
-				}
-
-				// Install both SSID and Passpoint suggestions
-				suggestionConfigurator.installSuggestions(ssidSuggestions);
+			// If no exception was thrown configuring the SSIDs, configure Passpoint now with suggestions
+			if (passpointSuggestion != null) {
+				suggestionConfigurator.installSuggestions(passpointSuggestion);
 			}
 		} else
 		// Suggestion API for SSID, legacy API for Passpoint, required for Android 10 (API 29)
