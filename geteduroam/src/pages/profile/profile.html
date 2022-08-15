@@ -11,10 +11,9 @@
         <h1 *ngIf="!converted_image">{{providerInfo.displayName}}</h1>
     </div>
 
-    <div *ngIf="showForm" class="content-form" text-center>
+    <form (ngSubmit)="checkForm()">
 
-        <form (ngSubmit)="checkForm()">
-
+        <div *ngIf="showForm" class="content-form" text-center>
             <div  class="content-profile">
                 <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
 
@@ -34,15 +33,15 @@
                        class="input-profile" name="pass" padding-left type="password"/>
                 <p padding-left class="note-msg">{{getString('label', 'note')}}</p>
                 <p *ngIf="errorPass" class="error-msg">{{getString('error', 'password')}}</p>
-    </div>
-
-            <!-- Terms of use -->
-            <div *ngIf="termsOfUse" class="content-terms" ion-row>
-                <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
-                <ion-label no-padding text-left>{{getString('label', 'accept')}}<a class="terms" (click)="termsModal(providerInfo.termsOfUse)">{{getString('label', 'terms')}}</a></ion-label>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <!-- Terms of use -->
+        <div *ngIf="termsOfUse" class="content-terms" ion-row>
+            <ion-checkbox [(ngModel)]="provide.terms" col-1 color="primary" name="terms" no-margin no-padding ></ion-checkbox>
+            <ion-label no-padding text-left>{{getString('label', 'accept')}}<a class="terms" (click)="termsModal(providerInfo.termsOfUse)">{{getString('label', 'terms')}}</a></ion-label>
+        </div>
+    </form>
     <!-- [ngClass]="!focus ? 'footer-form' : 'footer-form-focus'" -->
     <div id="footer" >
         <form (ngSubmit)="checkForm()">
@@ -57,6 +56,3 @@
         </ion-label>
     </div>
 </div>
-
-
-
