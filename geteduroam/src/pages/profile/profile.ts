@@ -305,6 +305,11 @@ export class ProfilePage extends BasePage{
     }
     this.removeSpinner();
     this.validateForm();
+
+    // Hide error messages
+    this.validMail = true;
+    this.validSuffix = true;
+
     this.showAll = true;
   }
 
