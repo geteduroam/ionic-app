@@ -7,8 +7,17 @@
 * [Node.js 14](NODE14.md)
 * [CocoaPods](https://cocoapods.org)
 
-NOTE: Currently, on M1 Macs, CocoaPods will fail to run due to a missing dependency.
-Install using `arch -x86_64 sudo gem install cocoapods ffi`
+### CocoaPods on Apple Silicon
+
+NOTE: Currently, on Apple Silicon Macs, a dependency must be installed with a special flag, or CocoaPods will crash.
+
+	# On Apple Silicon, first run:
+	sudo gem install ffi -- --enable-libffi-alloc
+
+Install using `sudo gem install cocoapods`
+
+If you already installed ffi, just uninstall using `sudo gem uninstall ffi`
+
 
 ## Building
 

@@ -19,8 +19,13 @@ You must install these dependencies before running `make`
 * [Android-SDK](https://developer.android.com/studio#downloads) (for Android only)
 	* [Installation instructions for MacOS](ANDROID_STUDIO_MAC.md)
 * [Node.js 14](NODE14.md) (for both Android and iOS)
+* [Python 2](PYTHON2.md) (needed for building on some platforms, but not on all)
 * [XCode](https://developer.apple.com/xcode/) (for iOS only)
-* [CocoaPods](https://cocoapods.org) (for iOS only)
+	* If you have problems with the CLI, remember to use the correct developer tools  
+	`sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer`
+* [CocoaPods](https://cocoapods.org)
+	* `sudo gem install ffi -- --enable-libffi-alloc` (Apple Silicon)
+	* `sudo gem install cocoapods` (Both Apple Silicon and Intel)
 
 Then start Android Studio or XCode
 
