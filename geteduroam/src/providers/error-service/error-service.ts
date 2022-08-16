@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import {GlobalProvider} from "../global/global";
+import { Network, ConnectionStatus } from '@capacitor/network';
 import {Plugins} from "@capacitor/core";
-import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
-const { WifiEapConfigurator, Network } = Plugins;
+const { WifiEapConfigurator } = Plugins;
 
 @Injectable()
 export class ErrorServiceProvider {
@@ -35,7 +35,7 @@ export class ErrorServiceProvider {
   /**
    * This method check status of connection
    */
-  private async statusConnection():Promise<NetworkStatus> {
+  private async statusConnection():Promise<ConnectionStatus> {
     return await Network.getStatus()
   }
 }

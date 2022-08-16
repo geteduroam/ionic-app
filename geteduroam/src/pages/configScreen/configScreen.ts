@@ -5,16 +5,17 @@ import { ProfilePage } from '../profile/profile';
 import { OauthFlow } from '../oauthFlow/oauthFlow';
 import { LoadingProvider } from '../../providers/loading/loading';
 import { InstitutionSearch } from '../institutionSearch/institutionSearch';
-import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ProfileModel} from "../../shared/models/profile-model";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {ConfigFilePage} from "../configFile/configFile";
+import { Keyboard } from '@capacitor/keyboard';
+import { App } from '@capacitor/app';
 
 declare var Capacitor;
-const { Keyboard, App, WifiEapConfigurator } = Plugins;
+const { WifiEapConfigurator } = Capacitor.Plugins;
 declare var window;
 
 @Component({

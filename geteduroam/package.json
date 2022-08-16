@@ -1,6 +1,6 @@
 {
   "name": "geteduroam",
-  "version": "1.0.23",
+  "version": "1.1.0",
   "author": "Emergya",
   "private": true,
   "scripts": {
@@ -24,11 +24,21 @@
     "@angular/http": "5.2.11",
     "@angular/platform-browser": "5.2.11",
     "@angular/platform-browser-dynamic": "5.2.11",
-    "@byteowls/capacitor-oauth2": "2.1.0",
-    "@capacitor/android": "^2.3.0",
-    "@capacitor/cli": "^2.3.0",
-    "@capacitor/core": "^2.3.0",
-    "@capacitor/ios": "^2.3.0",
+    "@byteowls/capacitor-oauth2": "^3.0.1",
+    "@capacitor/action-sheet": "^1.0.8",
+    "@capacitor/android": "^3.7.0",
+    "@capacitor/app": "^1.1.1",
+    "@capacitor/browser": "^1.0.7",
+    "@capacitor/cli": "^3.7.0",
+    "@capacitor/core": "^3.7.0",
+    "@capacitor/device": "^1.1.2",
+    "@capacitor/filesystem": "^1.1.0",
+    "@capacitor/haptics": "^1.1.4",
+    "@capacitor/ios": "^3.7.0",
+    "@capacitor/keyboard": "^1.2.3",
+    "@capacitor/network": "^1.0.7",
+    "@capacitor/status-bar": "^1.0.8",
+    "@capacitor/toast": "^1.0.8",
     "@ionic-native/android-permissions": "^5.17.1",
     "@ionic-native/core": "~5.17.1",
     "@ionic-native/diagnostic": "^5.17.1",
@@ -42,7 +52,7 @@
     "cordova-android": "~7.1.4",
     "cordova-plugin-advanced-http": "^2.4.1",
     "cordova-plugin-file": "^6.0.2",
-    "cordova-plugin-inappbrowser": "https://github.com/agomezmoron/cordova-plugin-inappbrowser",
+    "cordova-plugin-inappbrowser": "^5.0.0",
     "cordova-plugin-networkinterface": "^2.0.0",
     "cordova-plugin-screen-orientation": "^3.0.2",
     "es6-promise-plugin": "^4.2.2",
@@ -62,7 +72,7 @@
     "angular-tslint-rules": "^1.20.1",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",
-    "typescript": "~3.7.2"
+    "typescript": "~3.8"
   },
   "jest": {
     "moduleFileExtensions": [

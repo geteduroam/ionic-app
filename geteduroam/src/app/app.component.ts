@@ -5,18 +5,18 @@ import { ConfigurationScreen } from '../pages/configScreen/configScreen';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
 import { Transition } from '../providers/transition/Transition';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx';
-import { AppUrlOpen, Plugins,  registerWebPlugin } from '@capacitor/core';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import {ProfileModel} from "../shared/models/profile-model";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
-import {NetworkStatus} from "@capacitor/core/dist/esm/core-plugin-definitions";
 import {ConfigFilePage} from "../pages/configFile/configFile";
 import {GeteduroamServices} from "../providers/geteduroam-services/geteduroam-services";
-import {OAuth2Client} from '@byteowls/capacitor-oauth2';
+import { App, URLOpenListenerEvent } from '@capacitor/app';
+import { Toast } from '@capacitor/toast';
+import { Network, ConnectionStatus } from '@capacitor/network';
+import { Device } from '@capacitor/device';
 
 declare var Capacitor;
-const { Toast, Network, App, Device } = Plugins;
 const { WifiEapConfigurator } = Capacitor.Plugins;
 
 @Component({
@@ -74,9 +74,6 @@ export class GeteduroamApp {
     });
   }
 
-  ngOnInit() {
-    registerWebPlugin(OAuth2Client);
-  }
   /**
    * This method check if network is associated and flow to initialize app
    */
@@ -91,9 +88,9 @@ export class GeteduroamApp {
   }
   async checkExternalOpen() {
     // Listening to open app when open from a file
-    App.addListener('appUrlOpen', async (urlOpen: AppUrlOpen) => {
+    App.addListener('appUrlOpen', async (event: URLOpenListenerEvent) => {
       this.global.setExternalOpen();
-      this.navigate(urlOpen.url);
+      this.navigate(event.url);
     });
   }
   /**
@@ -216,7 +213,7 @@ export class GeteduroamApp {
    * This method throw an event to disabled button when network is disconnected.
    * @param connectionStatus
    */
-  protected connectionEvent(connectionStatus: NetworkStatus){
+  protected connectionEvent(connectionStatus: ConnectionStatus){
     connectionStatus.connected ? this.event.publish('connection', 'connected') :
       this.event.publish('connection', 'disconnected');
   }
@@ -224,7 +221,7 @@ export class GeteduroamApp {
   /**
    * This method check status of connection
    */
-  private async statusConnection(): Promise<NetworkStatus> {
+  private async statusConnection(): Promise<ConnectionStatus> {
     return await Network.getStatus()
   }
 

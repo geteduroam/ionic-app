@@ -30,7 +30,7 @@ clean:
 	rm -rf apk \
 		geteduroam/node_modules geteduroam/plugins/wifi-eap-configurator/node_modules \
 		geteduroam/.sourcemaps geteduroam/www  \
-		geteduroam/ios/capacitor-cordova-ios-plugins geteduroam/ios/App/public \
+		geteduroam/ios/capacitor-cordova-ios-plugins geteduroam/ios/App/App/public geteduroam/ios/App/public \
 		geteduroam/ios/App/App.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings \
 		geteduroam/ios/App/Pods/Headers geteduroam/ios/App/Pods/Local\\ Podspecs geteduroam/ios/App/Pods/Pods.xcodeproj \
 		geteduroam/ios/App/Pods/Target\\ Support\\ Files geteduroam/ios/App/Pods/Manifest.lock \

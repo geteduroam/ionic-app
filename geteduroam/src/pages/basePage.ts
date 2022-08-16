@@ -1,9 +1,11 @@
 import {LoadingProvider} from "../providers/loading/loading";
 import {DictionaryServiceProvider} from "../providers/dictionary-service/dictionary-service-provider.service";
 import {Events} from "ionic-angular";
-import { Plugins, ActionSheetOptionStyle } from '@capacitor/core';
 import {GlobalProvider} from "../providers/global/global";
-const { Toast, Network, Modals, Browser } = Plugins;
+import { Toast } from '@capacitor/toast';
+import { Network } from '@capacitor/network';
+import { ActionSheet, ActionSheetButtonStyle } from '@capacitor/action-sheet';
+import { Browser } from '@capacitor/browser';
 declare var window: any;
 export abstract class BasePage {
 
@@ -103,9 +105,9 @@ export abstract class BasePage {
     if (providerInfo.helpdesk.emailAddress) options.options.push({action: 'email', title: this.dictionary.getTranslation('modalSupport', 'email') + providerInfo.helpdesk.emailAddress});
     if (providerInfo.helpdesk.phone) options.options.push({action: 'phone', title: this.dictionary.getTranslation('modalSupport', 'phone') + providerInfo.helpdesk.phone});
     // Include cancel button
-    options.options.push({title: this.dictionary.getTranslation('modalSupport', 'cancel'), style: ActionSheetOptionStyle.Cancel });
+    options.options.push({title: this.dictionary.getTranslation('modalSupport', 'cancel'), style: ActionSheetButtonStyle.Cancel });
     // Show modal
-    let supportOption = await Modals.showActions(options);
+    let supportOption = await ActionSheet.showActions(options);
     let selectedAction = options.options[supportOption.index].action;
 
     switch(selectedAction) {

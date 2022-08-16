@@ -9,11 +9,11 @@ import {GeteduroamServices} from "../../providers/geteduroam-services/geteduroam
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
-import { Plugins } from '@capacitor/core';
 import {ProvideModel} from "../../shared/models/provide-model";
+import { Keyboard } from '@capacitor/keyboard';
+
 declare var Capacitor;
 const { WifiEapConfigurator } = Capacitor.Plugins;
-const { Keyboard } = Plugins;
 
 /**
  * Generated class for the ClientCertificatePassphrasePage page.

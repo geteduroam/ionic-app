@@ -13,7 +13,6 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { ErrorHandlerProvider } from '../providers/error-handler/error-handler';
 import { LoadingProvider } from '../providers/loading/loading';
 import { NetworkInterface } from '@ionic-native/network-interface/ngx'
-import { StoringProvider } from '../providers/storing/storing';
 import { GlobalProvider } from '../providers/global/global';
 import { ErrorServiceProvider } from "../providers/error-service/error-service";
 import { OauthConfProvider } from '../providers/oauth-conf/oauth-conf';
@@ -45,7 +44,6 @@ import { ReactiveFormsModule } from '@angular/forms';
     ScreenOrientation,
     LoadingProvider,
     NetworkInterface,
-    StoringProvider,
     GlobalProvider,
     OauthConfProvider,
     ErrorServiceProvider

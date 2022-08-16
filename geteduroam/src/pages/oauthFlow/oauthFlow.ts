@@ -10,8 +10,7 @@ import {GlobalProvider} from "../../providers/global/global";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
 import {ErrorHandlerProvider} from "../../providers/error-handler/error-handler";
 import {OauthConfProvider} from "../../providers/oauth-conf/oauth-conf";
-import { Plugins } from '@capacitor/core';
-const { OAuth2Client } = Plugins;
+import { OAuth2Client } from "@byteowls/capacitor-oauth2";
 
 @Component({
   selector: 'page-oauthFlow',
@@ -84,7 +83,7 @@ export class OauthFlow extends BasePage{
    * @param res url to get token
    */
   async handleOAuthResponse(res) {
-    this.profile.token = res['access_token'];
+    this.profile.token = res.access_token_response.access_token;
 
     const validProfile:boolean = await this.getEduroamServices.eapValidation(this.profile);
     const oauthConf: OauthConfProvider = new OauthConfProvider(this.global, this.getEduroamServices, this.loading, this.errorHandler, this.dictionary, this.navCtrl);

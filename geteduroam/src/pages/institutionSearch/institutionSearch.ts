@@ -1,11 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
 import {Events, NavParams, Platform, Searchbar, ViewController} from 'ionic-angular';
-import { Plugins } from '@capacitor/core';
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
-const { Keyboard } = Plugins;
+import { Keyboard } from '@capacitor/keyboard';
 
 @Component({
   selector: 'page-institution-search',

@@ -14,8 +14,7 @@ import { BasePage } from "../basePage";
 import { DictionaryServiceProvider } from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {ConfigurationScreen} from "../configScreen/configScreen";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
-import { Plugins } from '@capacitor/core';
-const { Keyboard } = Plugins;
+import { Keyboard } from '@capacitor/keyboard';
 
 @Component({
   selector: 'page-profile',

@@ -1,14 +1,13 @@
 import { Component, NgZone } from '@angular/core';
 import {Events, NavController, NavParams, Platform, ViewController} from "ionic-angular";
-import {Plugins} from "@capacitor/core";
 import {ValidatorProvider} from "../../providers/validator/validator";
 import {BasePage} from "../basePage";
 import {LoadingProvider} from "../../providers/loading/loading";
 import {DictionaryServiceProvider} from "../../providers/dictionary-service/dictionary-service-provider.service";
 import {GlobalProvider} from "../../providers/global/global";
 import {ErrorServiceProvider} from "../../providers/error-service/error-service";
-const {Browser, Network } = Plugins;
-
+import { Browser } from '@capacitor/browser';
+import { Network } from '@capacitor/network';
 
 @Component({
   selector: 'page-errors',

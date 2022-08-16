@@ -1,8 +1,8 @@
 import { HTTP } from '@ionic-native/http/ngx';
 import { Injectable } from '@angular/core';
+import { Filesystem, Encoding } from '@capacitor/filesystem';
 import xml2js from 'xml2js';
 import {ErrorHandlerProvider} from "../error-handler/error-handler";
-import { StoringProvider } from '../storing/storing';
 import {ProfileModel} from "../../shared/models/profile-model";
 import {ValidatorProvider} from "../validator/validator";
 import {ProviderInfo} from "../../shared/entities/providerInfo";
@@ -23,9 +23,24 @@ const { WifiEapConfigurator } = Capacitor.Plugins;
 export class GeteduroamServices {
   protected id: string;
 
-  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider, private store: StoringProvider,
+  constructor(private http: HTTP, private errorHandler : ErrorHandlerProvider,
               private validator: ValidatorProvider, private dictionary: DictionaryServiceProvider,
               private global: GlobalProvider) {  }
+
+  /**
+   * Method to read file when app is initialized by a eap-config file
+   * @param uri: String
+   */
+  async readExtFile(uri){
+    try {
+      return await Filesystem.readFile({
+        path: uri,
+        encoding: Encoding.UTF8,
+      });
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   /**
    * This discovery method retrieves all institutions and their profiles from a [json]{@link https://discovery.eduroam.app/v1/discovery.json}:
@@ -69,7 +84,7 @@ export class GeteduroamServices {
       response = await this.http.sendRequest(url, {method: 'post', data: {}, headers, serializer: 'urlencoded'});
     } else if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
       // The app is opened from a file
-      response = await this.store.readExtFile(url);
+      response = await this.readExtFile(url);
     } else {
       // Unauthenticated eap-config
       response = await this.http.get(url, params, headers);

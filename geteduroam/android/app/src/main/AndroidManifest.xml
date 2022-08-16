@@ -11,6 +11,7 @@
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
 		<activity
+			android:exported="true"
 			android:name="app.eduroam.geteduroam.MainActivity"
 			android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
 			android:label="@string/title_activity_main"
@@ -71,7 +72,7 @@
 			android:permission="android.permission.BIND_JOB_SERVICE"></service>
 
 		<receiver android:name="com.emergya.wifieapconfigurator.notification.NotificationReceiver" />
-		<receiver android:name="com.emergya.wifieapconfigurator.notification.NotificationsActivator">
+		<receiver android:name="com.emergya.wifieapconfigurator.notification.NotificationsActivator" android:exported="false">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED" />
 			</intent-filter>
