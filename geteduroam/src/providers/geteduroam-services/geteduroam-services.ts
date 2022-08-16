@@ -70,7 +70,6 @@ export class GeteduroamServices {
     } else if ((url.includes('eap-config') || url.includes('document') || url.includes('external') || url.includes('octet-stream')) && !url.includes('https')) {
       // The app is opened from a file
       response = await this.store.readExtFile(url);
-      response.data = atob(response.data);
     } else {
       // Unauthenticated eap-config
       response = await this.http.get(url, params, headers);
