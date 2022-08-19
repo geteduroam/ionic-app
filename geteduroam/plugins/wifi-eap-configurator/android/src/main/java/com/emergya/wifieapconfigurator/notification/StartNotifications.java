@@ -44,7 +44,7 @@ public class StartNotifications extends JobIntentService {
 				Intent i = new Intent(getApplicationContext(), NotificationReceiver.class);
 				i.putExtra("title", title);
 				i.putExtra("message", message);
-				PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, i, 0);
+				PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 0, i, PendingIntent.FLAG_IMMUTABLE);
 
 				mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);
 			}

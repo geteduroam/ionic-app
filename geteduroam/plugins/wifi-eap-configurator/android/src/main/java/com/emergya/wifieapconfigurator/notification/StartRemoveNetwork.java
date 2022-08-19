@@ -38,7 +38,7 @@ public class StartRemoveNetwork extends JobIntentService {
 			i.putExtra("expiration", true);
 			i.putExtra("netId", netId);
 			i.putExtra("fqdn", fqdn);
-			PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 1, i, 0);
+			PendingIntent pi = PendingIntent.getBroadcast(getApplicationContext(), 1, i, PendingIntent.FLAG_IMMUTABLE);
 			mgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + delay, pi);
 		}
 	}
