@@ -81,12 +81,12 @@ export class InstitutionSearch extends BasePage{
    */
   filterInstitutions(){
     if (this.institutionName) {
-      const s = this.institutionName.toLowerCase();
-      const terms = s.split(' ');
+      const s = this.institutionName.trim().toLowerCase();
+      const terms = s.split(' ').filter((name:string) => name.length > 0);
       this.filteredInstitutions = this.instances;
       this.filteredInstitutions = this.filteredInstitutions.filter((item:any) => {
         return item.abbr1 === s || item.abbr2 === s
-          || terms.reduce((found, term) => found || item.terms.includes(term), false)
+          || terms.reduce((found, term) => found && item.terms.includes(term), false)
           || (this.institutionName.length > 2 && item.search.indexOf(s.toLowerCase()) != -1);
       });
       this.filteredInstitutions.sort((a, b) => {
