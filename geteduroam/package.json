@@ -36,7 +36,7 @@
     "@capacitor/haptics": "^1.1.4",
     "@capacitor/ios": "^3.7.0",
     "@capacitor/keyboard": "^1.2.3",
-    "@capacitor/local-notifications": "^4.0.1",
+    "@capacitor/local-notifications": "1.1.0",
     "@capacitor/network": "^1.0.7",
     "@capacitor/status-bar": "^1.0.8",
     "@capacitor/toast": "^1.0.8",

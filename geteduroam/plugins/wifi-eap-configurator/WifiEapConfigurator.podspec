@@ -7,7 +7,7 @@
     s.homepage = 'http://localhost/'
     s.author = 'Christopher Genao'
     s.source = { :git => 'http://localhost/', :tag => s.version.to_s }
-    s.ios.deployment_target  = '11.0'
+    s.ios.deployment_target  = '12.0'
     s.dependency 'Capacitor'
     s.source_files = 'ios/Plugin/**/*.{swift,h,m,c,cc,mm,cpp}'
   end
