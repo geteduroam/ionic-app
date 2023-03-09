@@ -224,7 +224,7 @@ public class WifiEapConfigurator: CAPPlugin {
 				let hs20 = NEHotspotHS20Settings(
 					domainName: domain,
 					roamingEnabled: true)
-				hs20.roamingConsortiumOIs = oids;
+				hs20.roamingConsortiumOIs = oids.map { $0.uppercased() };
 				configurations.append(NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings))
 			}
 		}
