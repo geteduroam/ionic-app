@@ -538,16 +538,23 @@ public class WifiEapConfigurator: CAPPlugin {
 
 		var commonNameRef: CFString?
 		var status: OSStatus = SecCertificateCopyCommonName(certificateRef, &commonNameRef)
-		guard status == errSecSuccess else {
-			NSLog("☠️ addCertificate: unable to get common name")
-			return nil
+		let certificateIdentifier: String
+		if status == errSecSuccess {
+			certificateIdentifier = commonNameRef! as String
+		} else {
+			// Unable to get common name; this happens with the public CA GoDaddy
+
+			// We use this variable as a unique identifier for the certificate,
+			// to be able to query it again later on.
+			// TODO: Find a better way to make a reliable identifier
+			certificateIdentifier = SecCertificateCopySubjectSummary(certificateRef)! as String
+			// Consider SecCertificateCopyNormalizedSubjectSequence(certificateRef)?
 		}
-		let commonName: String = commonNameRef! as String
 		
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
 			kSecValueRef as String: certificateRef,
-			kSecAttrLabel as String: commonName,
+			kSecAttrLabel as String: certificateIdentifier,
 			kSecReturnRef as String: kCFBooleanTrue!,
 			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
 			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
@@ -573,7 +580,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		
 		let getquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
-			kSecAttrLabel as String: commonName,
+			kSecAttrLabel as String: certificateIdentifier,
 			kSecReturnRef as String: kCFBooleanTrue!,
 			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
 			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
