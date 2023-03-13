@@ -224,7 +224,11 @@ public class WifiEapConfigurator: CAPPlugin {
 				let hs20 = NEHotspotHS20Settings(
 					domainName: domain,
 					roamingEnabled: true)
-				hs20.roamingConsortiumOIs = oids;
+				// oids should be 3 or 5 byte HEX strings (so 6 or 10 hexits)
+				// in the API, these are represented by a string that contains hexits.
+				// Hexits are by themselves case-insensitive, but apparently
+				// iOS has trouble when they are lowercased, so we uppercase them.
+				hs20.roamingConsortiumOIs = oids.map { $0.uppercased() };
 				configurations.append(NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings))
 			}
 		}
