@@ -536,24 +536,24 @@ public class WifiEapConfigurator: CAPPlugin {
 			return nil;
 		}
 
-		var commonNameRef: CFString?
-		var status: OSStatus = SecCertificateCopyCommonName(certificateRef, &commonNameRef)
-		guard status == errSecSuccess else {
-			NSLog("☠️ addCertificate: unable to get common name")
+		let rawSubject = SecCertificateCopyNormalizedSubjectSequence(certificateRef)
+		guard rawSubject != nil else {
+			// When does this happen?
+			NSLog("☠️ addCertificate: unable to get certificate subject")
 			return nil
 		}
-		let commonName: String = commonNameRef! as String
+		let certificateIdentifier: String = (rawSubject! as Data).base64EncodedString(options: Data.Base64EncodingOptions())
 		
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
 			kSecValueRef as String: certificateRef,
-			kSecAttrLabel as String: commonName,
+			kSecAttrLabel as String: certificateIdentifier,
 			kSecReturnRef as String: kCFBooleanTrue!,
 			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
 			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
 		]
 		var item: CFTypeRef?
-		status = SecItemAdd(addquery as CFDictionary, &item)
+		var status = SecItemAdd(addquery as CFDictionary, &item)
 
 		// TODO: remove this, and always use the "failsafe"?
 		if status == errSecSuccess && item != nil {
@@ -573,7 +573,7 @@ public class WifiEapConfigurator: CAPPlugin {
 		
 		let getquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
-			kSecAttrLabel as String: commonName,
+			kSecAttrLabel as String: certificateIdentifier,
 			kSecReturnRef as String: kCFBooleanTrue!,
 			//kSecReturnPersistentRef as String: kCFBooleanTrue!, // Persistent refs cause an error (invalid EAP config) when installing the profile
 			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
