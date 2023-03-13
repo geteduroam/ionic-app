@@ -536,20 +536,8 @@ public class WifiEapConfigurator: CAPPlugin {
 			return nil;
 		}
 
-		var commonNameRef: CFString?
-		var status: OSStatus = SecCertificateCopyCommonName(certificateRef, &commonNameRef)
-		let certificateIdentifier: String
-		if status == errSecSuccess {
-			certificateIdentifier = commonNameRef! as String
-		} else {
-			// Unable to get common name; this happens with the public CA GoDaddy
-
-			// We use this variable as a unique identifier for the certificate,
-			// to be able to query it again later on.
-			// TODO: Find a better way to make a reliable identifier
-			certificateIdentifier = SecCertificateCopySubjectSummary(certificateRef)! as String
-			// Consider SecCertificateCopyNormalizedSubjectSequence(certificateRef)?
-		}
+		let rawSubject = SecCertificateCopyNormalizedSubjectSequence(certificateRef)
+		let certificateIdentifier: String = (rawSubject as! Data).base64EncodedString(options: Data.Base64EncodingOptions())
 		
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
@@ -560,7 +548,7 @@ public class WifiEapConfigurator: CAPPlugin {
 			//kSecAttrAccessGroup as String: "ZYJ4TZX4UU.com.apple.networkextensionsharing", // Should be TEAMID.com.apple.networkextensionsharing, but works without?
 		]
 		var item: CFTypeRef?
-		status = SecItemAdd(addquery as CFDictionary, &item)
+		var status = SecItemAdd(addquery as CFDictionary, &item)
 
 		// TODO: remove this, and always use the "failsafe"?
 		if status == errSecSuccess && item != nil {
