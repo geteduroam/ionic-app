@@ -537,7 +537,12 @@ public class WifiEapConfigurator: CAPPlugin {
 		}
 
 		let rawSubject = SecCertificateCopyNormalizedSubjectSequence(certificateRef)
-		let certificateIdentifier: String = (rawSubject as! Data).base64EncodedString(options: Data.Base64EncodingOptions())
+		guard rawSubject != nil else {
+			// When does this happen?
+			NSLog("☠️ addCertificate: unable to get certificate subject")
+			return nil
+		}
+		let certificateIdentifier: String = (rawSubject! as Data).base64EncodedString(options: Data.Base64EncodingOptions())
 		
 		let addquery: [String: Any] = [
 			kSecClass as String: kSecClassCertificate,
