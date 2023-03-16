@@ -227,9 +227,9 @@ export class ProfilePage extends BasePage{
    */
   checkSuffix(email: string) {
     if (!!this.suffixIdentity && this.suffixIdentity !== '' &&  email !== '' && !!this.hintIdentity) {
-      this.validSuffix = email.includes(`@${this.suffixIdentity}`);
+      this.validSuffix = email.endsWith(`@${this.suffixIdentity}`);
     } else if (!!this.suffixIdentity && this.suffixIdentity !== '' && email !== '' && !this.hintIdentity) {
-      this.validSuffix = email.includes(this.suffixIdentity);
+      this.validSuffix = email.endsWith(this.suffixIdentity);
     }
   }
 
