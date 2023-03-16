@@ -298,8 +298,8 @@ export class ProfilePage extends BasePage{
         !!this.providerInfo.helpdesk.phone) {
       this.helpDesk = true;
     }
-    this.provide.email = this.validMethod.clientSideCredential.username;
-    this.provide.pass = this.validMethod.clientSideCredential.password;
+    this.provide.email = this.validMethod.clientSideCredential.username || '';
+    this.provide.pass = this.validMethod.clientSideCredential.password || '';
     if (!this.provide.email || !this.provide.pass) {
       this.showForm = true;
     }
