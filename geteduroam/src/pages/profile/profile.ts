@@ -203,11 +203,10 @@ export class ProfilePage extends BasePage{
    */
   validateForm(): void {
     const validateTerms = !!this.termsOfUse && !!this.provide.terms ? true : !this.termsOfUse;
+    this.enableButton = this.provide.email !== '' && this.provide.pass !== '' && validateTerms;
     if (!!this.suffixIdentity) {
       this.validEmail(this.provide.email);
-      this.enableButton = this.validMail && this.provide.pass !== '' && validateTerms;
-    } else {
-      this.enableButton = this.provide.email !== '' && this.provide.pass !== '' && validateTerms;
+      this.enableButton = this.enableButton && this.validMail;
     }
   }
 
@@ -218,6 +217,8 @@ export class ProfilePage extends BasePage{
   validEmail(email: string) {
     if (!!this.suffixIdentity && email !== '') {
       this.validMail = this.validator.validateEmail(email, this.suffixIdentity);
+    } else {
+      this.validMail = true;
     }
   }
 
@@ -230,6 +231,8 @@ export class ProfilePage extends BasePage{
       this.validSuffix = email.endsWith(`@${this.suffixIdentity}`);
     } else if (!!this.suffixIdentity && this.suffixIdentity !== '' && email !== '' && !this.hintIdentity) {
       this.validSuffix = email.endsWith(this.suffixIdentity);
+    } else {
+      this.validSuffix = true;
     }
   }
 

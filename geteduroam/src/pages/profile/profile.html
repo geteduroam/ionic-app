@@ -17,13 +17,13 @@
             <div  class="content-profile">
                 <ion-label class="label-conf" text-left>{{getString('label', 'username')}}</ion-label>
 
-                <input (blur)="blur()" [(ngModel)]="provide.email" [ngClass]="!validSuffix && !validMail ? 'error-validation' : ''"
+                <input (blur)="blur()" [(ngModel)]="provide.email" [ngClass]="!validSuffix || !validMail ? 'error-validation' : ''"
                        [placeholder]="getPlaceholder()" autocomplete="on" class="input-profile" name="email" padding-left type="email"/>
 
                 <p *ngIf="!validMail" class="error-msg">
                     {{getString('error', 'username')}}{{getPlaceholder()}} </p>
 
-                <p *ngIf="!validSuffix" class="error-msg">
+                <p *ngIf="!validSuffix && validMail" class="error-msg">
                     {{getString('error', 'domain')}}{{suffixIdentity}} </p>
             </div>
 
@@ -46,7 +46,7 @@
     <div id="footer" >
         <form (ngSubmit)="checkForm()">
             <div [ngClass]="!termsOfUse ? 'bottom-button' : ''" class="content-button">
-                <button [disabled]="!enableButton || !!termsOfUse && !provide.terms" class="button-control" ion-button col-11 type="submit">{{getString('button', 'connect')}}</button>
+                <button [disabled]="!enableButton || (!!termsOfUse && !provide.terms) || !provide.email || !provide.pass" class="button-control" ion-button col-11 type="submit">{{getString('button', 'connect')}}</button>
             </div>
         </form>
     </div>
