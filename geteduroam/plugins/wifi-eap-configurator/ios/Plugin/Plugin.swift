@@ -226,9 +226,10 @@ public class WifiEapConfigurator: CAPPlugin {
 					roamingEnabled: true)
 				// oids should be 3 or 5 byte HEX strings (so 6 or 10 hexits)
 				// in the API, these are represented by a string that contains hexits.
-				// Hexits are by themselves case-insensitive, but apparently
-				// iOS has trouble when they are lowercased, so we uppercase them.
-				hs20.roamingConsortiumOIs = oids.map { $0.uppercased() };
+				// Hexits are by themselves case-insensitive, but around iOS 16.3
+				// there was a bug where they had to be uppercase in order to work.
+				// This bug was confirmed fixed in iOS 16.4.1, the status for 16.4.0 is unknown.
+				hs20.roamingConsortiumOIs = oids;
 				configurations.append(NEHotspotConfiguration(hs20Settings: hs20, eapSettings: eapSettings))
 			}
 		}
