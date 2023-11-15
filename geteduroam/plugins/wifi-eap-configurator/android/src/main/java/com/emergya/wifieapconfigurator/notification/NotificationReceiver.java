@@ -8,7 +8,7 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 /**
- * Its the class responsable of the init the service of the notifications
+ * It's the class responsible of init the service of the notifications
  */
 @RequiresApi(api = Build.VERSION_CODES.Q)
 public class NotificationReceiver extends BroadcastReceiver {

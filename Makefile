@@ -65,5 +65,5 @@ geteduroam/android/app/src/main/assets/public: geteduroam/www
 generate-apk: apk
 .PHONY: generate-apk
 compile-plugin: geteduroam/plugins/wifi-eap-configurator/node_modules
-	@echo "\033[1mPlugin compiled. Execute 'npx cap sync android' for android or 'npx cap sync ios' and go to folder /ios/App and excute 'pod install'...\033[0m"
+	@echo "\033[1mPlugin compiled. Execute 'npx cap sync android' for android or 'npx cap sync ios' and go to folder /ios/App and execute 'pod install'...\033[0m"
 .PHONY: compile-plugin

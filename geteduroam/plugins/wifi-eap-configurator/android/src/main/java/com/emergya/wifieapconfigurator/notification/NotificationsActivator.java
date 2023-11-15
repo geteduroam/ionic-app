@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * Its the class responsable of reactive the alarm when the device is rebooted
+ * It's the class responsible of reactivate the alarm when the device is rebooted
  */
 public class NotificationsActivator extends BroadcastReceiver {
 
