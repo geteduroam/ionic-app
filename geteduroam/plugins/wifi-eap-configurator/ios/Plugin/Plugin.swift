@@ -243,7 +243,7 @@ public class WifiEapConfigurator: CAPPlugin {
 	@function applyConfigurations
 	@abstract Write the provided configurations to the OS (most will trigger a user consent each)
 	@param configurations Configuration objects to apply
-	@param callback Function to report back whether configuraiton succeeded
+	@param callback Function to report back whether configuration succeeded
 	*/
 	func applyConfigurations(configurations: [NEHotspotConfiguration], callback: @escaping ([String], Bool) -> Void) {
 		var counter = -1 /* we will call the worker with a constructed "nil" (no)error, which is configuration -1 */

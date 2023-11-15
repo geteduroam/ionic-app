@@ -7,7 +7,7 @@
     
 1. Go to ``/plugins/wifi-eap-configurator`` and make a ``npm install``
 
-2. Go to ``/src`` and make a ``npm install``, just in case you didnt save the wifi-eap-configurator package, make a ``npm install ./plugins/wifi-eap-configurator --save``.
+2. Go to ``/src`` and make a ``npm install``, just in case you didn't save the wifi-eap-configurator package, make a ``npm install ./plugins/wifi-eap-configurator --save``.
 
 3. Make the command ``npm run build``.
 

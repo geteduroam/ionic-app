@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Its the class responsable of create the notification and send it
+ * It's the class responsible of create the notification and send it
  */
 @RequiresApi(api = Build.VERSION_CODES.Q)
 public class ScheduledService extends JobIntentService {

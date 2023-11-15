@@ -14,7 +14,7 @@ import androidx.preference.PreferenceManager;
 import java.util.Date;
 
 /**
- * Its the class responsable of create the alarm to send the notification
+ * It's the class responsible of create the alarm to send the notification
  */
 public class StartNotifications extends JobIntentService {
 
